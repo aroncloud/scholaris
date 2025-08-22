@@ -97,9 +97,11 @@ import Header from "./Header";
 import EnrollmentRequests from "./EnrollmentRequests";
 import CurrentStudents from "./CurrentStudents";
 import GenericModal from "@/components/modal/GenericModal";
-import ModalUser from "@/components/modal/ModalUser";
 import { createUser, getUserList, updateUser } from "@/actions/programsAction";
 import { student_statuses } from "@/constant";
+import { showToast } from "@/lib/utils";
+import { toast } from "sonner"
+import ModalStudent from "@/components/modal/ModalStudent";
 
 
 
@@ -255,35 +257,7 @@ export default function StudentsPage() {
     init();
   }, [])
 
-  const getStatutColor = (statut: string) => {
-    switch (statut) {
-      case "en_attente":
-        return "bg-yellow-100 text-yellow-800";
-      case "approuve":
-      case "actif":
-        return "bg-green-100 text-green-800";
-      case "rejete":
-      case "suspendu":
-        return "bg-red-100 text-red-800";
-      case "diplome":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
-  const getMentionColor = (mention: string) => {
-    switch (mention) {
-      case "Très bien":
-        return "bg-green-100 text-green-800";
-      case "Bien":
-        return "bg-blue-100 text-blue-800";
-      case "Assez bien":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   const graduatedStudents = studentList.filter((student) => {
     return student_statuses[student.status_code as keyof typeof student_statuses] === student_statuses.GRADUATED;
@@ -306,7 +280,13 @@ export default function StudentsPage() {
         await init();
         setIsStudentModalOpen(false);
       } else {
-
+        toast("Erreur lors de la creation de l'etudiant", {
+          description: result.error,
+          action: {
+            label: "Undo",
+            onClick: () => console.log("Undo"),
+          },
+        })
       }
     } else {
       const payload = {
@@ -321,7 +301,14 @@ export default function StudentsPage() {
         setIsStudentModalOpen(false);
         setAction('CREATE');
       } else {
-
+        showToast("error", result.error);
+        toast("Erreur lors de la mise a jour de l'etudiant", {
+          description: result.error,
+          action: {
+            label: "Undo",
+            onClick: () => console.log("Undo"),
+          },
+        })
       }
     }
 
@@ -396,7 +383,7 @@ export default function StudentsPage() {
         
 
         {/* Create IStudent Dialog */}
-        <ModalUser
+        <ModalStudent
           open={isStudentModalOpen}
           onOpenChange={setIsStudentModalOpen}
           formData={sturentFormData}

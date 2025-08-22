@@ -35,13 +35,15 @@ const GenericModal: React.FC<GenericModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={size}>
-        <DialogHeader className="mb-5">
+        <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-
+        </DialogHeader >
+        <div className="w-full mb-5 h-px bg-gray-200" />
         <div>{children}</div>
 
-        <DialogFooter className="mt-5">
+
+        <div className="mt-5 w-full h-px bg-gray-200" />
+        <DialogFooter>
           <Button variant="outline" onClick={onCancel || (() => onOpenChange(false))}>
             {cancelText}
           </Button>

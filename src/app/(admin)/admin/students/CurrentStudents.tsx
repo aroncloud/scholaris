@@ -95,19 +95,18 @@ import {
 import { useRouter } from "next/navigation";
 import { ICreateStudent, IEnrollmentRequest, IListStudent, IStudent } from "@/types/userTypes";
 import Header from "./Header";
-import { getStatutColor } from "@/lib/utils";
 import { getUserList } from "@/actions/programsAction";
 
 
 type MyComponentProps = {
     setSelectedStudent: Dispatch<SetStateAction<IListStudent | null>>;
-    setFormData: Dispatch<React.SetStateAction<Partial<ICreateStudent>>>;
     setIsStudentDialogOpen: Dispatch<SetStateAction<boolean>>;
     setStudentToDelete: Dispatch<SetStateAction<string | null>>;
     setDeleteDialogOpen: Dispatch<SetStateAction<boolean>>;
     setIsRequestDialogOpen: Dispatch<SetStateAction<boolean>>;
     studentList: IListStudent[];
     setAction: Dispatch<SetStateAction<'CREATE' | 'UPDATE'>>;
+    setFormData: Dispatch<React.SetStateAction<Partial<ICreateStudent>>>;
 
 };
 

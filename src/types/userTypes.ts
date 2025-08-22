@@ -76,6 +76,28 @@ export interface IListStudent {
   cirriculum: ICurriculum;
 }
 
+export interface IListUser {
+  user_code: string;
+  user_name: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  status_code: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  created_at: number;
+  updated_at: number;
+  last_login_at: number | null;
+}
+
+export interface ICreateUser {
+  password_plaintext: string,
+  email: string,
+  first_name: string,
+  last_name: string,
+  gender: gender,
+  phone_number: string
+}
+
+
 
 
 

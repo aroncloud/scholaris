@@ -1,3 +1,16 @@
+export type gender = 'FEMALE' | 'MALE';
+export type ACTION = 'CREATE' | 'UPDATE' | 'DELETE';
+
+
+
+
+
+
+
+
+
+
+
 
 export enum relationship_types {
     FATHER,

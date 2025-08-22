@@ -6,7 +6,7 @@ import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
 
 export async function createUser (student: ICreateStudent) {
-    console.log('-->createAsset', student)
+    console.log('-->createStudent', student)
     try {
         const session = await verifySession();
         
@@ -29,7 +29,7 @@ export async function createUser (student: ICreateStudent) {
         data: response.data
         }
     } catch (error: unknown) {
-        console.log('-->createAsset.error', error)
+        console.log('-->createStudent.error', error)
         const errResult = actionErrorHandler(error);
         return errResult;
     }
@@ -84,7 +84,7 @@ export async function getUserList(){
             data: response.data
         }
     } catch (error: unknown) {
-        console.log('-->createAsset.error', error)
+        console.log('-->createStudent.error', error)
         const errResult = actionErrorHandler(error);
         return errResult;
     }

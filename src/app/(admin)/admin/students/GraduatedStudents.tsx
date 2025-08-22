@@ -95,7 +95,7 @@ import {
 import { useRouter } from "next/navigation";
 import { IEnrollmentRequest, IListStudent, IStudent } from "@/types/userTypes";
 import Header from "./Header";
-import { getMentionColor, getStatutColor } from "@/lib/utils";
+import { getMentionColor } from "@/lib/utils";
 import { getUserList } from "@/actions/programsAction";
 
 
