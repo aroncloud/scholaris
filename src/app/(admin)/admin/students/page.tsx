@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/no-unescaped-entities */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -92,46 +92,21 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { IEnrollmentRequest, IStudent, ICreateStudent, IListStudent } from "@/types/userTypes";
+import Header from "./Header";
+import EnrollmentRequests from "./EnrollmentRequests";
+import CurrentStudents from "./CurrentStudents";
+import GenericModal from "@/components/modal/GenericModal";
+import ModalUser from "@/components/modal/ModalUser";
+import { createUser, getUserList, updateUser } from "@/actions/programsAction";
+import { student_statuses } from "@/constant";
 
 
 
-interface Student {
-  id: string;
-  numeroEtudiant: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  telephone?: string;
-  filiere: string;
-  niveau: string;
-  statut: "actif" | "suspendu" | "diplome" | "abandonne" | "transfere";
-  moyenne?: number;
-  absences?: number;
-  retards?: number;
-  promotion?: string;
-  dateInscription: string;
-  dateObtention?: string;
-  mention?: string;
-  moyenneFinale?: number;
-  statutFinancier?: "a_jour" | "en_retard" | "bourseuse" | "exoneree";
-  montantDu?: number;
-}
 
-interface EnrollmentRequest {
-  id: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  filiere: string;
-  niveau: string;
-  datedemande: string;
-  statut: "en_attente" | "approuve" | "rejete";
-  documents: string[];
-  commentaire?: string;
-}
 
-const mockEnrollmentRequests: EnrollmentRequest[] = [
+
+const mockEnrollmentRequests: IEnrollmentRequest[] = [
   {
     id: "1",
     nom: "Martin",
@@ -171,7 +146,7 @@ const mockEnrollmentRequests: EnrollmentRequest[] = [
   },
 ];
 
-const mockCurrentStudents: Student[] = [
+const mockCurrentStudents: IStudent[] = [
   {
     id: "1",
     numeroEtudiant: "ETU2024001",
@@ -225,7 +200,7 @@ const mockCurrentStudents: Student[] = [
   },
 ];
 
-const mockGraduatedStudents: Student[] = [
+const mockGraduatedStudents: IStudent[] = [
   {
     id: "4",
     numeroEtudiant: "ETU2023015",
@@ -258,43 +233,27 @@ const mockGraduatedStudents: Student[] = [
   },
 ];
 
-const statutLabels = {
-  actif: { label: "Actif", color: "bg-green-100 text-green-800" },
-  suspendu: { label: "Suspendu", color: "bg-red-100 text-red-800" },
-  diplome: { label: "Diplômé", color: "bg-blue-100 text-blue-800" },
-  abandonne: { label: "Abandon", color: "bg-gray-100 text-gray-800" },
-  transfere: { label: "Transféré", color: "bg-yellow-100 text-yellow-800" },
-};
 
-const statutFinancierLabels = {
-  a_jour: { label: "À jour", color: "bg-green-100 text-green-800" },
-  en_retard: { label: "En retard", color: "bg-red-100 text-red-800" },
-  bourseuse: { label: "Boursière", color: "bg-blue-100 text-blue-800" },
-  exoneree: { label: "Exonérée", color: "bg-purple-100 text-purple-800" },
-};
+
+
 
 export default function StudentsPage() {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterFiliere, setFilterFiliere] = useState("all");
-  const [filterStatut, setFilterStatut] = useState("all");
   const [enrollmentRequests, setEnrollmentRequests] = useState<
-    EnrollmentRequest[]
+    IEnrollmentRequest[]
   >(mockEnrollmentRequests);
-  const [currentStudents, setCurrentStudents] =
-    useState<Student[]>(mockCurrentStudents);
-  const [graduatedStudents] = useState<Student[]>(mockGraduatedStudents);
-  const [selectedRequest, setSelectedRequest] =
-    useState<EnrollmentRequest | null>(null);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [studentList, setStudentList] = useState<IListStudent[]>([])
+  const [selectedStudent, setSelectedStudent] = useState<IListStudent | null>(null);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
-  const [isStudentDialogOpen, setIsStudentDialogOpen] = useState(false);
-  const [isCreateStudentOpen, setIsCreateStudentOpen] = useState(false);
-  const [requestComment, setRequestComment] = useState("");
-  const [formData, setFormData] = useState<Partial<Student>>({});
+  const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
+  const [sturentFormData, setStudentFormData] = useState<Partial<ICreateStudent>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
+  const [action, setAction] = useState<'CREATE' | 'UPDATE'>('CREATE')
 
+  useEffect(() => {
+    init();
+  }, [])
 
   const getStatutColor = (statut: string) => {
     switch (statut) {
@@ -326,196 +285,71 @@ export default function StudentsPage() {
     }
   };
 
-  const handleApproveRequest = (requestId: string) => {
-    setEnrollmentRequests((requests) =>
-      requests.map((req) =>
-        req.id === requestId ? { ...req, statut: "approuve" as const } : req,
-      ),
-    );
-    // toast({
-    //   title: "Demande approuvée",
-    //   description: "La demande d'inscription a été approuvée avec succès.",
-    // });
-  };
+  const graduatedStudents = studentList.filter((student) => {
+    return student_statuses[student.status_code as keyof typeof student_statuses] === student_statuses.GRADUATED;
+  });
 
-  const handleRejectRequest = (requestId: string, comment: string) => {
-    setEnrollmentRequests((requests) =>
-      requests.map((req) =>
-        req.id === requestId
-          ? { ...req, statut: "rejete" as const, commentaire: comment }
-          : req,
-      ),
-    );
-    // toast({
-    //   title: "Demande rejetée",
-    //   description: "La demande d'inscription a été rejetée.",
-    //   variant: "destructive",
-    // });
-    setIsRequestDialogOpen(false);
-    setRequestComment("");
-  };
+  const currentStudents = studentList.filter((student) => {
+    return student_statuses[student.status_code as keyof typeof student_statuses] != student_statuses.GRADUATED;
+  });
+  
 
-  const handleViewStudentDetails = (studentId: string) => {
-    router.push(`/student-details/${studentId}`);
-  };
+  const handleSaveStudentInfo = async () => {
+    if(action === "CREATE"){
+      const payload = {
+        ...sturentFormData,
+      } as ICreateStudent
 
-  const handleChangeStudentStatus = (studentId: string, newStatus: string) => {
-    setCurrentStudents((students) =>
-      students.map((student) =>
-        student.id === studentId
-          ? { ...student, statut: newStatus as any }
-          : student,
-      ),
-    );
-    // toast({
-    //   title: "Statut modifié",
-    //   description: `Le statut de l'étudiant a été changé en "${statutLabels[newStatus as keyof typeof statutLabels].label}".`,
-    // });
-  };
+      const result = await createUser(payload)
+      console.log('result-->', result);
+      if(result.code == 'success'){
+        await init();
+        setIsStudentModalOpen(false);
+      } else {
 
-  const handleDeleteStudent = (studentId: string) => {
-    setCurrentStudents((students) =>
-      students.filter((s) => s.id !== studentId),
-    );
-    // toast({
-    //   title: "Étudiant supprimé",
-    //   description: "L'étudiant a été supprimé définitivement.",
-    //   variant: "destructive",
-    // });
-  };
+      }
+    } else {
+      const payload = {
+        ...sturentFormData,
+      } as ICreateStudent
 
-  const handleDownloadBulletin = (student: Student) => {
-    
-  };
+      const result = await updateUser(payload)
+      console.log('result-->', result);
+      if(result.code == 'success'){
+        
+        await init();
+        setIsStudentModalOpen(false);
+        setAction('CREATE');
+      } else {
 
-  const handleCreateStudent = () => {
-    const newStudent: Student = {
-      id: Date.now().toString(),
-      numeroEtudiant: `ETU${new Date().getFullYear()}${String(Date.now()).slice(-3)}`,
-      dateInscription: new Date().toISOString().split("T")[0],
-      statut: "actif",
-      ...formData,
-    } as Student;
+      }
+    }
 
-    setCurrentStudents([...currentStudents, newStudent]);
+    // setCurrentStudents([...currentStudents, newStudent]);
     // toast({
     //   title: "Étudiant créé",
     //   description: "Le nouvel étudiant a été créé avec succès.",
     // });
-    setIsCreateStudentOpen(false);
-    setFormData({});
+    // setIsStudentModalOpen(false);
+    // setStudentFormData({});
   };
 
-  const filteredCurrentStudents = currentStudents.filter((student) => {
-    const matchesSearch =
-      student.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.numeroEtudiant.toLowerCase().includes(searchTerm.toLowerCase());
+  const init = async () => {
+    const result = await getUserList();
+    if(result.code == 'success') {
+        setStudentList(result.data.body);
+    } 
+    console.log('getUserList.result', result)
+  }
 
-    const matchesFiliere =
-      filterFiliere === "all" ||
-      student.filiere.toLowerCase() === filterFiliere;
-    const matchesStatut =
-      filterStatut === "all" || student.statut === filterStatut;
-
-    return matchesSearch && matchesFiliere && matchesStatut;
-  });
 
   return (
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-medium tracking-tight">
-              Gestion des Étudiants
-            </h2>
-            <p className="text-muted-foreground font-normal">
-              Gestion des inscriptions, étudiants actuels et diplômés
-            </p>
-          </div>
-
-          <div className="flex space-x-2">
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Exporter
-            </Button>
-            <Button variant="outline">
-              <Upload className="h-4 w-4 mr-2" />
-              Importer
-            </Button>
-            <Button onClick={() => setIsCreateStudentOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nouvel étudiant
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Demandes en attente
-              </CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {
-                  enrollmentRequests.filter((r) => r.statut === "en_attente")
-                    .length
-                }
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Inscriptions à traiter
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Étudiants actifs
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {currentStudents.filter((s) => s.statut === "actif").length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Actuellement inscrits
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Diplômés</CardTitle>
-              <GraduationCap className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {graduatedStudents.length}
-              </div>
-              <p className="text-xs text-muted-foreground">Cette année</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Moyenne générale
-              </CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">13.8</div>
-              <p className="text-xs text-muted-foreground">
-                Tous étudiants confondus
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
+        <Header
+          enrollmentRequests={enrollmentRequests}
+          setIsCreateStudentOpen={setIsStudentModalOpen}
+        />
 
         {/* Main Content */}
         <Tabs defaultValue="inscriptions" className="space-y-4">
@@ -524,7 +358,7 @@ export default function StudentsPage() {
               Demandes d'inscription ({enrollmentRequests.length})
             </TabsTrigger>
             <TabsTrigger value="etudiants">
-              Étudiants actuels ({currentStudents.length})
+              Étudiants actuels ({studentList.length})
             </TabsTrigger>
             <TabsTrigger value="diplomes">
               Diplômés ({graduatedStudents.length})
@@ -532,734 +366,45 @@ export default function StudentsPage() {
           </TabsList>
 
           {/* Enrollment Requests Tab */}
-          <TabsContent value="inscriptions" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Demandes d'inscription</CardTitle>
-                <CardDescription>
-                  Traitement des nouvelles demandes d'inscription
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center mb-4">
-                  <div className="relative w-64">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Rechercher..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-8"
-                    />
-                  </div>
-                  <div className="flex space-x-2">
-                    <Select
-                      value={filterStatut}
-                      onValueChange={setFilterStatut}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Filtrer par statut" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tous les statuts</SelectItem>
-                        <SelectItem value="en_attente">En attente</SelectItem>
-                        <SelectItem value="approuve">Approuvé</SelectItem>
-                        <SelectItem value="rejete">Rejeté</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Candidat</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Formation</TableHead>
-                      <TableHead>Date demande</TableHead>
-                      <TableHead>Documents</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {enrollmentRequests.map((request) => (
-                      <TableRow key={request.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {request.prenom} {request.nom}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex items-center text-sm">
-                              <Mail className="h-3 w-3 mr-1" />
-                              {request.email}
-                            </div>
-                            <div className="flex items-center text-sm">
-                              <Phone className="h-3 w-3 mr-1" />
-                              {request.telephone}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{request.filiere}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {request.niveau}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(request.datedemande).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {request.documents.map((doc, index) => (
-                              <Badge
-                                key={index}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {doc}
-                              </Badge>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getStatutColor(request.statut)}>
-                            {request.statut === "en_attente"
-                              ? "En attente"
-                              : request.statut === "approuve"
-                                ? "Approuvé"
-                                : "Rejeté"}
-                          </Badge>
-                          {request.commentaire && (
-                            <div className="text-xs text-red-600 mt-1">
-                              {request.commentaire}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>
-                                <Eye className="mr-2 h-4 w-4" />
-                                Voir détails
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <FileText className="mr-2 h-4 w-4" />
-                                Documents
-                              </DropdownMenuItem>
-                              {request.statut === "en_attente" && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    className="text-green-600"
-                                    onClick={() =>
-                                      handleApproveRequest(request.id)
-                                    }
-                                  >
-                                    <CheckCircle className="mr-2 h-4 w-4" />
-                                    Approuver
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-red-600"
-                                    onClick={() => {
-                                      setSelectedRequest(request);
-                                      setIsRequestDialogOpen(true);
-                                    }}
-                                  >
-                                    <AlertTriangle className="mr-2 h-4 w-4" />
-                                    Rejeter
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {/* <EnrollmentRequests
+            enrollmentRequests={enrollmentRequests}
+            filterStatut={filterStatut}
+            handleApproveRequest={handleApproveRequest}
+            searchTerm={searchTerm}
+            setFilterStatut={setFilterStatut}
+            setIsRequestDialogOpen={setIsRequestDialogOpen}
+            setSearchTerm={setSearchTerm}
+            setSelectedRequest={setSelectedRequest}
+          /> */}
 
           {/* Current Students Tab */}
-          <TabsContent value="etudiants" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Étudiants actuels</CardTitle>
-                <CardDescription>
-                  Liste des étudiants actuellement inscrits
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center mb-4">
-                  <div className="relative w-64">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Rechercher..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-8"
-                    />
-                  </div>
-                  <div className="flex space-x-2">
-                    <Select
-                      value={filterFiliere}
-                      onValueChange={setFilterFiliere}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Filtrer par filière" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Toutes les filières</SelectItem>
-                        <SelectItem value="médecine">Médecine</SelectItem>
-                        <SelectItem value="pharmacie">Pharmacie</SelectItem>
-                        <SelectItem value="dentaire">Dentaire</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select
-                      value={filterStatut}
-                      onValueChange={setFilterStatut}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Filtrer par statut" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tous les statuts</SelectItem>
-                        <SelectItem value="actif">Actif</SelectItem>
-                        <SelectItem value="suspendu">Suspendu</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Étudiant</TableHead>
-                      <TableHead>Formation</TableHead>
-                      <TableHead>Moyenne</TableHead>
-                      <TableHead>Absences</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Financier</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCurrentStudents.map((student) => (
-                      <TableRow key={student.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {student.prenom} {student.nom}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {student.numeroEtudiant}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {student.email}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{student.filiere}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {student.niveau}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {student.moyenne && (
-                            <Badge
-                              variant={
-                                student.moyenne >= 10
-                                  ? "default"
-                                  : "destructive"
-                              }
-                            >
-                              {student.moyenne}/20
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="text-sm">
-                              {student.absences || 0} absences
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {student.retards || 0} retards
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={statutLabels[student.statut].color}>
-                            {statutLabels[student.statut].label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {student.statutFinancier && (
-                            <div className="space-y-1">
-                              <Badge
-                                className={
-                                  statutFinancierLabels[student.statutFinancier]
-                                    .color
-                                }
-                              >
-                                {
-                                  statutFinancierLabels[student.statutFinancier]
-                                    .label
-                                }
-                              </Badge>
-                              {student.montantDu && student.montantDu > 0 && (
-                                <div className="text-xs text-red-600">
-                                  Dû: {student.montantDu}€
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleViewStudentDetails(student.id)
-                                }
-                              >
-                                <Eye className="mr-2 h-4 w-4" />
-                                Voir dossier complet
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedStudent(student);
-                                  setFormData(student);
-                                  setIsStudentDialogOpen(true);
-                                }}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Modifier
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleDownloadBulletin(student)}
-                              >
-                                <FileText className="mr-2 h-4 w-4" />
-                                Télécharger bulletin
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem>
-                                <Mail className="mr-2 h-4 w-4" />
-                                Envoyer notification
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <MessageSquare className="mr-2 h-4 w-4" />
-                                Contacter
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              {student.statut === "actif" ? (
-                                <DropdownMenuItem
-                                  className="text-red-600"
-                                  onClick={() =>
-                                    handleChangeStudentStatus(
-                                      student.id,
-                                      "suspendu",
-                                    )
-                                  }
-                                >
-                                  <Lock className="mr-2 h-4 w-4" />
-                                  Suspendre
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem
-                                  className="text-green-600"
-                                  onClick={() =>
-                                    handleChangeStudentStatus(
-                                      student.id,
-                                      "actif",
-                                    )
-                                  }
-                                >
-                                  <Unlock className="mr-2 h-4 w-4" />
-                                  Réactiver
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setStudentToDelete(student.id);
-                                  setDeleteDialogOpen(true);
-                                }}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Supprimer
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <CurrentStudents
+            setAction={setAction}
+            setDeleteDialogOpen={setDeleteDialogOpen}
+            setIsStudentDialogOpen={setIsStudentModalOpen}
+            setSelectedStudent={setSelectedStudent}
+            setFormData={setStudentFormData}
+            setStudentToDelete={setStudentToDelete}
+            setIsRequestDialogOpen={setIsRequestDialogOpen}
+            studentList={currentStudents}
+          />
 
           {/* Graduated Students Tab */}
-          <TabsContent value="diplomes" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Étudiants diplômés</CardTitle>
-                <CardDescription>
-                  Archive des anciens étudiants diplômés
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Diplômé</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Formation</TableHead>
-                      <TableHead>Date obtention</TableHead>
-                      <TableHead>Moyenne finale</TableHead>
-                      <TableHead>Mention</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {graduatedStudents.map((graduate) => (
-                      <TableRow key={graduate.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {graduate.prenom} {graduate.nom}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {graduate.numeroEtudiant}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{graduate.email}</TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {graduate.filiere}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Promotion {graduate.promotion}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {graduate.dateObtention &&
-                            new Date(
-                              graduate.dateObtention,
-                            ).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="default">
-                            {graduate.moyenneFinale}/20
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            className={getMentionColor(graduate.mention || "")}
-                          >
-                            {graduate.mention}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleViewStudentDetails(graduate.id)
-                                }
-                              >
-                                <Eye className="mr-2 h-4 w-4" />
-                                Voir dossier
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Download className="mr-2 h-4 w-4" />
-                                Télécharger diplôme
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleDownloadBulletin(graduate)}
-                              >
-                                <FileText className="mr-2 h-4 w-4" />
-                                Relevé de notes
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem>
-                                <Mail className="mr-2 h-4 w-4" />
-                                Contacter
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          
         </Tabs>
 
         
 
-        {/* Create Student Dialog */}
-        <Dialog
-          open={isCreateStudentOpen}
-          onOpenChange={setIsCreateStudentOpen}
-        >
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Créer un nouvel étudiant</DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="prenom">Prénom</Label>
-                <Input
-                  id="prenom"
-                  value={formData.prenom || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, prenom: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nom">Nom</Label>
-                <Input
-                  id="nom"
-                  value={formData.nom || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nom: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="telephone">Téléphone</Label>
-                <Input
-                  id="telephone"
-                  value={formData.telephone || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, telephone: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="filiere">Filière</Label>
-                <Select
-                  value={formData.filiere}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, filiere: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une filière" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Médecine">Médecine</SelectItem>
-                    <SelectItem value="Pharmacie">Pharmacie</SelectItem>
-                    <SelectItem value="Dentaire">Dentaire</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="niveau">Niveau</Label>
-                <Select
-                  value={formData.niveau}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, niveau: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un niveau" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Année 1">Année 1</SelectItem>
-                    <SelectItem value="Année 2">Année 2</SelectItem>
-                    <SelectItem value="Année 3">Année 3</SelectItem>
-                    <SelectItem value="Année 4">Année 4</SelectItem>
-                    <SelectItem value="Année 5">Année 5</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsCreateStudentOpen(false);
-                  setFormData({});
-                }}
-              >
-                Annuler
-              </Button>
-              <Button onClick={handleCreateStudent}>Créer l'étudiant</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Create IStudent Dialog */}
+        <ModalUser
+          open={isStudentModalOpen}
+          onOpenChange={setIsStudentModalOpen}
+          formData={sturentFormData}
+          setFormData={setStudentFormData}
+          onConfirm={handleSaveStudentInfo}
+          action={action}
+        />
 
-        {/* Edit Student Dialog */}
-        <Dialog
-          open={isStudentDialogOpen}
-          onOpenChange={setIsStudentDialogOpen}
-        >
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Modifier l'étudiant</DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-prenom">Prénom</Label>
-                <Input
-                  id="edit-prenom"
-                  value={formData.prenom || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, prenom: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-nom">Nom</Label>
-                <Input
-                  id="edit-nom"
-                  value={formData.nom || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nom: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-email">Email</Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={formData.email || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-telephone">Téléphone</Label>
-                <Input
-                  id="edit-telephone"
-                  value={formData.telephone || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, telephone: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-filiere">Filière</Label>
-                <Select
-                  value={formData.filiere}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, filiere: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une filière" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Médecine">Médecine</SelectItem>
-                    <SelectItem value="Pharmacie">Pharmacie</SelectItem>
-                    <SelectItem value="Dentaire">Dentaire</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-niveau">Niveau</Label>
-                <Select
-                  value={formData.niveau}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, niveau: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un niveau" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Année 1">Année 1</SelectItem>
-                    <SelectItem value="Année 2">Année 2</SelectItem>
-                    <SelectItem value="Année 3">Année 3</SelectItem>
-                    <SelectItem value="Année 4">Année 4</SelectItem>
-                    <SelectItem value="Année 5">Année 5</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsStudentDialogOpen(false);
-                  setSelectedStudent(null);
-                  setFormData({});
-                }}
-              >
-                Annuler
-              </Button>
-              <Button
-                onClick={() => {
-                  if (selectedStudent) {
-                    setCurrentStudents((students) =>
-                      students.map((s) =>
-                        s.id === selectedStudent.id ? { ...s, ...formData } : s,
-                      ),
-                    );
-                    // toast({
-                    //   title: "Étudiant modifié",
-                    //   description:
-                    //     "Les informations ont été mises à jour avec succès.",
-                    // });
-                    setIsStudentDialogOpen(false);
-                    setSelectedStudent(null);
-                    setFormData({});
-                  }
-                }}
-              >
-                Modifier
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -1283,7 +428,7 @@ export default function StudentsPage() {
               <AlertDialogAction
                 onClick={() => {
                   if (studentToDelete) {
-                    handleDeleteStudent(studentToDelete);
+                    // handleDeleteStudent(studentToDelete);
                   }
                   setDeleteDialogOpen(false);
                   setStudentToDelete(null);

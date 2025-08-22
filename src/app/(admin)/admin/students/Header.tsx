@@ -1,0 +1,121 @@
+'use client'
+
+import { Dispatch, SetStateAction } from "react";
+import { v4 as uuidv4 } from 'uuid';
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  GraduationCap,
+  Users,
+  Download,
+  Upload,
+  Plus,
+  Award,
+  Clock,
+} from "lucide-react";
+import { IEnrollmentRequest } from "@/types/userTypes";
+
+
+type MyComponentProps = {
+  setIsCreateStudentOpen: Dispatch<SetStateAction<boolean>>;
+  enrollmentRequests: IEnrollmentRequest[];
+};
+
+
+const Header = ({ setIsCreateStudentOpen }: MyComponentProps) => {
+    const StatsCardList = [
+        {
+            title: 'Demandes en attente',
+            value: 1,
+            description: 'Inscriptions à traiter',
+            Icon: <Clock className="h-6 w-6 text-muted-foreground" />,
+        },
+        {
+            title: 'Étudiants actifs',
+            value: 2,
+            description: 'Actuellement inscrits',
+            Icon: <Users className="h-6 w-6 text-muted-foreground" />,
+        },
+        {
+            title: 'Diplômés',
+            value: 2,
+            description: 'Cette année',
+            Icon: <GraduationCap className="h-6 w-6 text-muted-foreground" />,
+        },
+        {
+            title: 'Moyenne générale',
+            value: 13.8,
+            description: 'Tous étudiants confondus',
+            Icon: <Award className="h-6 w-6 text-muted-foreground" />,
+        },
+    ]
+  return (
+    <>
+        
+        {/* Header */}
+        <div className="flex justify-between items-center">
+            <div>
+                <h2 className="text-3xl font-medium tracking-tight">
+                    Gestion des Étudiants
+                </h2>
+                <p className="text-muted-foreground">
+                    Gestion des inscriptions, étudiants actuels et diplômés
+                </p>
+            </div>
+
+            <div className="flex space-x-2">
+                <Button variant="outline" className="text-sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Exporter
+                </Button>
+                <Button variant="outline" className="text-sm">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Importer
+                </Button>
+                <Button onClick={() => setIsCreateStudentOpen(true)} variant="info" className="text-sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nouvel étudiant
+                </Button>
+            </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-4">
+            {
+                StatsCardList.map(card => (
+                    <Card key={uuidv4()}>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-lg font-medium">
+                            {card.title}
+                        </CardTitle>
+                        {
+                            card.Icon
+                        }
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-xl font-bold">
+                                {/* {
+                                enrollmentRequests.filter((r) => r.statut === "en_attente")
+                                    .length
+                                } */}
+                                {card.value}
+                            </div>
+                            <p className="text-muted-foreground">
+                                {card.description}
+                            </p>
+                        </CardContent>
+                    </Card>
+                ))
+           }
+        </div>
+    </>
+  )
+}
+
+export default Header

@@ -1,11 +1,11 @@
-import { Outfit } from 'next/font/google';
+import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
 
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import ToastProvider from '@/components/custom-ui/alert/ToastProvider';
 
-const outfit = Outfit({
+const SpaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
 });
 
@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} dark:bg-gray-900`}>
+      <body className={`${SpaceGrotesk.className} dark:bg-gray-900`}>
         <ThemeProvider>
           <ToastProvider>
             <SidebarProvider>{children}</SidebarProvider>

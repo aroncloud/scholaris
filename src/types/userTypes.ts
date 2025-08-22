@@ -2,6 +2,109 @@ export interface ILoginForm {
   username: string,
   password: string,
 }
+
+export interface IEnrollmentRequest {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  filiere: string;
+  niveau: string;
+  datedemande: string;
+  statut: "en_attente" | "approuve" | "rejete";
+  documents: string[];
+  commentaire?: string;
+}
+
+export interface IStudent {
+  id: string;
+  numeroEtudiant: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone?: string;
+  filiere: string;
+  niveau: string;
+  statut: "actif" | "suspendu" | "diplome" | "abandonne" | "transfere";
+  moyenne?: number;
+  absences?: number;
+  retards?: number;
+  promotion?: string;
+  dateInscription: string;
+  dateObtention?: string;
+  mention?: string;
+  moyenneFinale?: number;
+  statutFinancier?: "a_jour" | "en_retard" | "bourseuse" | "exoneree";
+  montantDu?: number;
+}
+
+export interface ICreateStudent {
+  "password_plaintext": string,
+  "email": string,
+  "first_name": string,
+  "last_name": string,
+  "gender": gender,
+  "phone_number": string,
+  "curriculum_code": string,
+  "student_number": string,
+  "education_level_code": string
+}
+
+export type gender = 'FEMALE' | 'MALE';
+
+export interface ICurriculum {
+  curriculum_code: string;
+  curriculum_name: string;
+  study_level: string;
+  program_code: string;
+  program_name: string;
+}
+
+export interface IListStudent {
+  user_code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: number; // timestamp
+  updated_at: number; // timestamp
+  last_login_at: number | null; // peut être null
+  phone_number: string;
+  student_number: string;
+  curriculum_code: string;
+  status_code: string;
+  cirriculum: ICurriculum;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export type CreateUserType = {
     "firstname": string;
     "lastname": string;

@@ -75,3 +75,33 @@ export const showToast = (
       return toast(content, optionsToApply);
   }
 };
+
+export const getStatutColor = (statut: string) => {
+  switch (statut.toUpperCase()) {
+    case "PENDING":
+      return "bg-yellow-100 text-yellow-800";
+    case "APPROVED":
+    case "ACTIVE":
+      return "bg-green-100 text-green-800";
+    case "REJECTED":
+    case "SUSPENDED":
+      return "bg-red-100 text-red-800";
+    case "GRADUATED":
+      return "bg-blue-100 text-blue-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+
+export const getMentionColor = (mention: string) => {
+  switch (mention.toUpperCase()) {
+    case "EXCELLENT":
+      return "bg-green-100 text-green-800";
+    case "GOOD":
+      return "bg-blue-100 text-blue-800";
+    case "FAIR":
+      return "bg-yellow-100 text-yellow-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
