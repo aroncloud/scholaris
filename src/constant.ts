@@ -1,5 +1,5 @@
 export type gender = 'FEMALE' | 'MALE';
-export type ACTION = 'CREATE' | 'UPDATE' | 'DELETE';
+export type ACTION = 'CREATE' | 'UPDATE' | 'DELETE' | 'DESACTIVATE' | 'ACTIVATE';
 
 
 

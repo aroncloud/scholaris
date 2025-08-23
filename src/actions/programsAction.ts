@@ -4,6 +4,7 @@ import { verifySession } from "@/lib/session";
 import { ICreateStudent } from "@/types/userTypes";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
+import { ICreateProgram } from "@/types/programTypes";
 
 export async function createUser (student: ICreateStudent) {
     console.log('-->createStudent', student)
@@ -72,6 +73,63 @@ export async function getUserList(){
         
 
         const response = await axios.get(`${process.env.AIM_WORKER_ENDPOINT}/api/users/profiles/students`,{
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log('-->result', response);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->createStudent.error', error)
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+
+
+
+export async function createProgram(programInfo: ICreateProgram){
+    console.log('-->createProgram', programInfo)
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.post(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/programs`, {
+        ...programInfo
+        },{
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        });
+        console.log('-->result', response);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->createProgram.error', error)
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+export async function getProgramList(){
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.get(`${process.env.AIM_WORKER_ENDPOINT}/api/programs`,{
             headers: {
               Authorization: `Bearer ${token}`,
             },
