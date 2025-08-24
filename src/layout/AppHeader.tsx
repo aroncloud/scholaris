@@ -41,7 +41,7 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 flex w-full bg-blue-600 border-blue-500 dark:border-blue-700 dark:bg-blue-800 lg:border-b z-10">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-blue-600 border-b border-blue-500 dark:border-blue-700 dark:bg-blue-800">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-blue-500 dark:border-blue-700 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
           <button
@@ -82,7 +82,18 @@ const AppHeader: React.FC = () => {
             )}
             {/* Cross Icon */}
           </button>
-
+          {/* Logo */}
+          
+          <Link href="/">
+            <div className="ml-3 flex flex-col gap-2 text-white">
+                <h1 className="text-xl md:text-4xl font-bold tracking-tight">
+                  ISS<span className="text-amber-300">TDM</span>
+                </h1>
+                <span className="text-xs -mt-1 tracking-wider uppercase hidden md:inline-block">
+                  MEIGANGA • {new Date().getFullYear()}
+                </span>
+              </div>
+          </Link>
           <Link href="/" className="lg:hidden">
             <Image
               width={154}

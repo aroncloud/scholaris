@@ -183,60 +183,66 @@ export default function UsersPage() {
   const [isCancelUserDialogOpen, setIsCancelUserDialogOpen] = useState(false);
   const [action, setAction] = useState<ACTION>('CREATE');
   const [userList, setUserList] = useState<IListUser[]>([]);
-  const [userFormData, setUserFormData] = useState<Partial<ICreateUser>>({});
+  const [userFormData, setUserFormData] = useState<ICreateUser | null>(null);
   const [selectedUser, setSelectedUser] = useState<IListUser | null>(null);
 
   useEffect(() => {
       init();
   }, [])
 
+  useEffect(() => {
+      console.log('action', action)
+  }, [action])
+
   
   const handleSaveUserInfo = async () => {
-    if(action === "CREATE"){
-      const payload = {
-        ...userFormData,
-      } as ICreateUser
+    console.log(action)
+    // if(action === "CREATE"){
+    //   const payload = {
+    //     ...userFormData,
+    //   } as ICreateUser
 
-      const result = await createUser(payload)
-      console.log('result-->', result);
-      if(result.code == 'success'){
-        await init();
-        setIsEditDialogOpen(false);
-      } else {
-        toast("Erreur lors de la creation de l'etudiant", {
-          description: result.error,
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
-        })
-      }
-    } else {
-      const payload = {
-        ...userFormData,
-      } as ICreateUser
+    //   const result = await createUser(payload)
+    //   console.log('result-->', result);
+    //   if(result.code == 'success'){
+    //     await init();
+    //     setIsEditDialogOpen(false);
+    //   } else {
+    //     toast("Erreur lors de la creation de l'etudiant", {
+    //       description: result.error,
+    //       action: {
+    //         label: "Undo",
+    //         onClick: () => console.log("Undo"),
+    //       },
+    //     })
+    //   }
+    // } else {
+    //   const payload = {
+    //     ...userFormData,
+    //   } as ICreateUser
 
-      const result = await updateUser(payload)
-      console.log('result-->', result);
-      if(result.code == 'success'){
+    //   const result = await updateUser(payload)
+    //   console.log('result-->', result);
+    //   if(result.code == 'success'){
         
-        await init();
-        setIsEditDialogOpen(false);
-      } else {
-        toast("Erreur lors de la mise a jour de l'etudiant", {
-          description: result.error,
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
-        })
-      }
-    }
+    //     await init();
+    //     setIsEditDialogOpen(false);
+    //   } else {
+    //     toast("Erreur lors de la mise a jour de l'etudiant", {
+    //       description: result.error,
+    //       action: {
+    //         label: "Undo",
+    //         onClick: () => console.log("Undo"),
+    //       },
+    //     })
+    //   }
+    // }
   };
 
   const handleDeleteUser = async () => {
-    if(selectedUser){
-      const result = await deleteUser(selectedUser.user_code);
+    console.log('DELATION', selectedUser)
+    if(userFormData && userFormData.user_code){
+      const result = await deleteUser(userFormData.user_code);
       if(result.code == 'success'){
         await init();
         setIsEditDialogOpen(false);
@@ -260,8 +266,9 @@ export default function UsersPage() {
   }
 
   const handleDesactivate = async () => {
-    if(selectedUser){
-      const result = await deactivateUser(selectedUser.user_code);
+    console.log('DESACTIVATION', selectedUser)
+    if(userFormData && userFormData.user_code){
+      const result = await deactivateUser(userFormData.user_code);
       if(result.code == 'success'){
         await init();
         setIsEditDialogOpen(false);
@@ -281,6 +288,17 @@ export default function UsersPage() {
           },
         })
       }
+    }
+  }
+
+  const handleCancelUser = async () => {
+    console.log('action', action)
+    if(action == "ACTIVATE"){
+
+    } else if (action == "DESACTIVATE") {
+      await handleDesactivate()
+    } else if (action == "DELETE") {
+      await handleDeleteUser()
     }
   }
 
@@ -326,7 +344,7 @@ export default function UsersPage() {
             <Button
               variant="info"
               onClick={() => {setIsEditDialogOpen(true); setAction('CREATE')}}
-              className="text-sm w-full sm:w-fit flex-1 sm:flex-none"
+              className="w-full sm:w-fit flex-1 sm:flex-none"
             >
               <UserPlus className="h-4 w-4 mr-2" />
               Nouvel utilisateur
@@ -400,8 +418,8 @@ export default function UsersPage() {
         <ModaleDesactivateDeleteUser 
           isOpen={isCancelUserDialogOpen}
           onClose={()=> {setIsCancelUserDialogOpen(false); setSelectedUser(null)}}
-          onDeactivate={handleDesactivate}
-          onDelete={handleDeleteUser}
+          handleAction={handleCancelUser}
+          action={action}
         />
       </div>
   );

@@ -75,7 +75,7 @@ type MyComponentProps = {
     userList: IListUser[];
     userRoleList: {lable: string, value: string}[];
     setAction: Dispatch<SetStateAction<ACTION>>;
-    setUserFormData: Dispatch<React.SetStateAction<Partial<ICreateUser>>>;
+    setUserFormData: Dispatch<React.SetStateAction<ICreateUser | null>>;
     setSelectedUser: Dispatch<SetStateAction<IListUser | null>>;
     setIsEditDialogOpen: Dispatch<SetStateAction<boolean>>;
     setIsCancelUserDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -228,6 +228,8 @@ const UserSection = ({userList, userRoleList, setAction, setUserFormData, setSel
                                                 last_name: user.last_name,
                                                 password_plaintext: '',
                                                 phone_number: '',
+                                                user_code: user.user_code,
+
                                             }
                                         );
                                         setIsEditDialogOpen(true);
@@ -241,7 +243,22 @@ const UserSection = ({userList, userRoleList, setAction, setUserFormData, setSel
                                     Gérer les rôles
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={()=>{setIsCancelUserDialogOpen(true)}}>
+                                    <DropdownMenuItem onClick={()=>{
+                                        setIsCancelUserDialogOpen(true)
+                                        setUserFormData(
+                                            {
+                                                email: user.email,
+                                                first_name: user.first_name,
+                                                gender: 'MALE',
+                                                last_name: user.last_name,
+                                                password_plaintext: '',
+                                                phone_number: '',
+                                                user_code: user.user_code,
+
+                                            }
+                                        );
+                                        setAction("DESACTIVATE")
+                                    }}>
                                         {user.status_code === "ACTIVE" ? (
                                             <>
                                                 <UserX className="mr-2 h-4 w-4" />
@@ -255,9 +272,29 @@ const UserSection = ({userList, userRoleList, setAction, setUserFormData, setSel
                                         )}
                                     </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-red-600">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Supprimer
+                                <DropdownMenuItem className="text-red-600"
+                                    onClick={
+                                        ()=>{
+                                            setUserFormData(
+                                                {
+                                                    email: user.email,
+                                                    first_name: user.first_name,
+                                                    gender: 'MALE',
+                                                    last_name: user.last_name,
+                                                    password_plaintext: '',
+                                                    phone_number: '',
+                                                    user_code: user.user_code,
+
+                                                }
+                                            );
+                                            console.log('DELETE')
+                                            setAction("DELETE")
+                                            setIsCancelUserDialogOpen(true)
+                                        }
+                                    }
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Supprimer
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                             </DropdownMenu>

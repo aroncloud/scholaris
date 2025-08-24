@@ -1,51 +1,47 @@
+"use client";
+
 import React from "react";
+import GenericModal from "../GenericModal";
+import { ACTION } from "@/constant";
 
 interface ModaleProps {
   isOpen: boolean;
   onClose: () => void;
-  onDeactivate: () => void;
-  onDelete: () => void;
+  handleAction: () => void;
+  action: ACTION
 }
 
 const ModaleDesactivateDeleteUser: React.FC<ModaleProps> = ({
   isOpen,
   onClose,
-  onDeactivate,
-  onDelete,
+  handleAction,
+  action
 }) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Confirm Action</h2>
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to deactivate or delete this user? This action
-          cannot be undone.
+    <GenericModal
+      open={isOpen}
+      onOpenChange={onClose}
+      title="Confirmer l'action"
+      onCancel={onClose}
+      confirmText={action === 'DELETE' ? 'Supprimer' : action === 'DESACTIVATE' ? 'Désactiver' : action === 'ACTIVATE' ? 'Activer' : 'Action Inconnue'}
+      onConfirm={handleAction}
+    >
+      <div className="space-y-4">
+        <p className="text-gray-600">
+          {
+            (action == "ACTIVATE" || action =="DESACTIVATE" || action =="DELETE") ?
+            <>
+              Êtes-vous sûr de vouloir <strong>{action === 'DELETE' ? 'supprimer' : 'désactiver'}</strong> cet utilisateur ?
+              {action == 'DELETE' && 'Cette action est irréversible.'}
+            </>
+            :
+            <>
+              Désolé, action inconne.
+            </>
+          }
         </p>
-
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onDeactivate}
-            className="px-4 py-2 rounded-xl bg-yellow-500 text-white hover:bg-yellow-600"
-          >
-            Deactivate
-          </button>
-          <button
-            onClick={onDelete}
-            className="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700"
-          >
-            Delete
-          </button>
-        </div>
       </div>
-    </div>
+    </GenericModal>
   );
 };
 

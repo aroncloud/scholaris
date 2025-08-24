@@ -89,6 +89,7 @@ export interface IListUser {
 }
 
 export interface ICreateUser {
+  user_code?: string;
   password_plaintext: string,
   email: string,
   first_name: string,
