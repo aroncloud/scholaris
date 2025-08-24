@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, CheckCircle, FileText, User, MapPin, Phone, GraduationCap, Camera } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle, FileText, User, MapPin, Phone, GraduationCap, Loader2 } from "lucide-react";
+
 
 import { useAdmissionForm } from "@/hooks/useAdmissionForm";
 import {
@@ -11,12 +12,17 @@ import {
   OriginInfoForm,
   AdditionalInfoForm,
   AcademicInfoForm,
-  DocumentsForm,
   ConfirmationSummary
 } from "@/components/website/admissions/FormSections";
 import { useRouter } from "next/navigation";
 import LandingHeader from "@/components/website/LandingHeader";
 import LandingFooter from "@/components/website/LandingFooter";
+import { searchStudentByMatricule } from "@/actions/requestSubmissionActions";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ISeachMatricule } from "@/types/requestSubmissionTypes";
+import { getConfig } from "@/actions/utilitiesActions";
+import { IConfig } from "@/types/utilitiesTypes";
 
 
 const STEPS = [
@@ -50,13 +56,6 @@ const STEPS = [
   },
   {
     id: 5,
-    title: "Documents",
-    description: "Documents à joindre",
-    icon: Camera,
-    component: DocumentsForm,
-  },
-  {
-    id: 6,
     title: "Confirmation",
     description: "Vérification et envoi",
     icon: FileText,
@@ -67,10 +66,14 @@ const STEPS = [
 const AdmissionRequest: React.FC = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
-  const [matricule, setMatricule] = useState<string>('');
+  const [matriculeInput, setMatriculeInput] = useState<string>('');
+  const [matricule, setMatricule] = useState<ISeachMatricule | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [configs, setConfigs] = useState<IConfig | null>(null);
+
 
   useEffect(() => {
-    console.log('AdmissionRequest component mounted');
+    init();
   }, []);
 
   const {
@@ -82,6 +85,23 @@ const AdmissionRequest: React.FC = () => {
     validateCurrentStep,
     handleSubmit,
   } = useAdmissionForm();
+
+  const handleSeachMatricule = async () => {
+    try {
+      setLoading(true);
+      const result = await searchStudentByMatricule(matriculeInput);
+      if (result.code === 'success' && result.data) {
+        setMatricule(result.data.body);
+        handleInputChange('nom', result.data.body.last_name || '');
+        handleInputChange('prenom', result.data.body.first_name || '');
+        handleInputChange('dateNaissance', result.data.body.date_of_birth ? new Date(result.data.body.date_of_birth).toISOString().split('T')[0] : '');
+        handleInputChange('lieuNaissance', result.data.body.place_of_birth || '');
+        handleInputChange('email', result.data.body.email || '');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   
   const nextStep = () => {
@@ -96,6 +116,14 @@ const AdmissionRequest: React.FC = () => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  const init = async () => {
+    const result = await getConfig();
+    if(result.code === 'success' && result.data) {
+      setConfigs(result.data);
+      console.log('Config loaded:', result.data);
+    }
+  }
 
   const currentStepData = STEPS.find((step) => step.id === currentStep);
   const progress = (currentStep / STEPS.length) * 100;
@@ -114,7 +142,7 @@ const AdmissionRequest: React.FC = () => {
                   <span className="text-xs text-gray-500">LOGO</span>
                 </div>
                 <div className="text-center">
-                  <h2 className="text-sm font-bold text-[#3b2c6a] mb-1">
+                  <h2 className=" font-bold text-[#3b2c6a] mb-1">
                     ÉCOLE PRIVÉE DE FORMATION DES PROFESSIONNELS DE LA SANTÉ
                   </h2>
                   <p className="text-xs text-gray-600">MEIGANGA - CAMEROUN</p>
@@ -128,104 +156,133 @@ const AdmissionRequest: React.FC = () => {
               </h1>
             </div>
           </div>
+            {
+              matricule === null
+              ?
+              <>
+                <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-200 mb-52 mt-20">
+                  <div className="mb-4 space-y-4">
+                    <Label htmlFor="nom" className="text-base">
+                      Entrez votre numéro de matricule pour rechercher votre dossier:  
+                    </Label>
+                    <Input id="matricule" value={matriculeInput}
+                      onChange={(e) => setMatriculeInput(e.target.value)}
+                      placeholder="Numéro de matricule"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleSeachMatricule}
+                    disabled={matriculeInput.trim() === '' || loading}
+                    className="bg-[#ff9900] hover:bg-[#e68a00] text-white flex items-center gap-2"
+                  >
+                    {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {loading ? "Recherche en cours..." : "Rechercher"}
+                  </Button>
 
-            {/* Indicateur de progression des étapes */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-[#3b2c6a]">
-                  Étape {currentStep} sur {STEPS.length}
-                </h2>
-                <span className="text-sm text-gray-500">
-                  {Math.round(progress)}% complété
-                </span>
-              </div>
-              <Progress value={progress} className="mb-6" />
-              <div className="flex justify-between items-center mb-6">
-                {STEPS.map((step) => {
-                  const Icon = step.icon;
-                  const isActive = step.id === currentStep;
-                  const isCompleted = step.id < currentStep;
+                </div>
+              </>
+              :
+              <>
+                {/* Indicateur de progression des étapes */}
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold text-[#3b2c6a]">
+                      Étape {currentStep} sur {STEPS.length}
+                    </h2>
+                    <span className=" text-gray-500">
+                      {Math.round(progress)}% complété
+                    </span>
+                  </div>
+                  <Progress value={progress} className="mb-6" />
+                  <div className="flex justify-between items-center mb-6">
+                    {STEPS.map((step) => {
+                      const Icon = step.icon;
+                      const isActive = step.id === currentStep;
+                      const isCompleted = step.id < currentStep;
 
-                  return (
-                    <div
-                      key={step.id}
-                      className={`flex flex-col items-center text-center ${
-                        isActive
-                          ? "text-[#ff9900]"
-                          : isCompleted
-                          ? "text-green-600"
-                          : "text-gray-400"
-                      }`}
+                      return (
+                        <div
+                          key={step.id}
+                          className={`flex flex-col items-center text-center ${
+                            isActive
+                              ? "text-[#ff9900]"
+                              : isCompleted
+                              ? "text-green-600"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                              isActive
+                                ? "bg-[#ff9900] text-white"
+                                : isCompleted
+                                ? "bg-green-600 text-white"
+                                : "bg-gray-200"
+                            }`}
+                          >
+                            {isCompleted ? (
+                              <CheckCircle className="h-5 w-5" />
+                            ) : (
+                              <Icon className="h-5 w-5" />
+                            )}
+                          </div>
+                          <span className="text-xs font-medium hidden md:block max-w-20">
+                            {step.title}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Rendu du composant de l'étape actuelle */}
+                {CurrentStepComponent && (
+                  <FormSection
+                    title={currentStepData.title}
+                    description={currentStepData.description}
+                    icon={currentStepData.icon}
+                  >
+                    <CurrentStepComponent
+                      formData={formData}
+                      errors={errors}
+                      handleInputChange={handleInputChange}
+                      handleFileChange={handleFileChange}
+                      configs={configs}
+                    />
+                  </FormSection>
+                )}
+
+                {/* Boutons de navigation */}
+                <div className="flex justify-between mt-8">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={currentStep === 1 ? () => router.push("/") : prevStep}
+                    className="flex items-center gap-2"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    {currentStep === 1 ? "Retour à l'accueil" : "Précédent"}
+                  </Button>
+                  {currentStep < STEPS.length ? (
+                    <Button
+                      onClick={nextStep}
+                      className="bg-[#ff9900] hover:bg-[#e68a00] text-white flex items-center gap-2"
                     >
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                          isActive
-                            ? "bg-[#ff9900] text-white"
-                            : isCompleted
-                            ? "bg-green-600 text-white"
-                            : "bg-gray-200"
-                        }`}
-                      >
-                        {isCompleted ? (
-                          <CheckCircle className="h-5 w-5" />
-                        ) : (
-                          <Icon className="h-5 w-5" />
-                        )}
-                      </div>
-                      <span className="text-xs font-medium hidden md:block max-w-20">
-                        {step.title}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Rendu du composant de l'étape actuelle */}
-            {CurrentStepComponent && (
-              <FormSection
-                title={currentStepData.title}
-                description={currentStepData.description}
-                icon={currentStepData.icon}
-              >
-                <CurrentStepComponent
-                  formData={formData}
-                  errors={errors}
-                  handleInputChange={handleInputChange}
-                  handleFileChange={handleFileChange}
-                />
-              </FormSection>
-            )}
-
-            {/* Boutons de navigation */}
-            <div className="flex justify-between mt-8">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={currentStep === 1 ? () => router.push("/") : prevStep}
-                className="flex items-center gap-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                {currentStep === 1 ? "Retour à l'accueil" : "Précédent"}
-              </Button>
-              {currentStep < STEPS.length ? (
-                <Button
-                  onClick={nextStep}
-                  className="bg-[#ff9900] hover:bg-[#e68a00] text-white flex items-center gap-2"
-                >
-                  Suivant
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="bg-[#ff9900] hover:bg-[#e68a00] text-white"
-                >
-                  {isSubmitting ? "Envoi en cours..." : "Soumettre ma demande"}
-                </Button>
-              )}
-            </div>
+                      Suivant
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="bg-[#ff9900] hover:bg-[#e68a00] text-white"
+                    >
+                      {isSubmitting ? "Envoi en cours..." : "Soumettre ma demande"}
+                    </Button>
+                  )}
+                </div>
+              </>
+            }
         </div>
       </main>
       <LandingFooter />
