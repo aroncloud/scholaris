@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/no-unescaped-entities */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -89,6 +89,11 @@ import {
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
+import FilieresTab from "./components/FilieresTab";
+import { IFactorizedProgram, ICurriculumDetail, IProgramList } from "@/types/programTypes";
+import { getCurriculumList, getProgramList, getSemesterList } from "@/actions/programsAction";
+import MaquettesTab from "./components/MaquettesTab";
+import CalendrierTab from "./components/CalendrierTab";
 
 interface Module {
   id: string;
@@ -285,7 +290,8 @@ const statutLabels = {
 export default function ProgramsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatut, setFilterStatut] = useState("all");
-  const [filieres, setFilieres] = useState<Filiere[]>(mockFilieres);
+  const [program, setProgram] = useState<IFactorizedProgram[]>([]);
+  const [curriculumList, setCurriculumList] = useState<ICurriculumDetail[]>([]);
   const [selectedFiliere, setSelectedFiliere] = useState<Filiere | null>(null);
   const [selectedMaquette, setSelectedMaquette] = useState<Maquette | null>(
     null,
@@ -346,341 +352,41 @@ export default function ProgramsPage() {
   >(null);
 
 
-  const toggleExpanded = (id: string) => {
-    const newExpanded = new Set(expandedItems);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
+  useEffect(() => {
+    init()
+  }, [])
+
+
+  const init = async () => {
+    const curriculumResult = await getCurriculumList();
+    console.log('-->curriculumResult', curriculumResult);
+    if(curriculumResult.code == 'success'){
+      setProgram(factorizeByProgram(curriculumResult.data.body))
+      setCurriculumList(curriculumResult.data.body)
     }
-    setExpandedItems(newExpanded);
-  };
+  }
 
-  const handleCreateFiliere = () => {
-    const newFiliere: Filiere = {
-      id: Date.now().toString(),
-      maquettes: [],
-      ...formData,
-    } as Filiere;
+  function factorizeByProgram(data: any[]): IFactorizedProgram[] {
+    const grouped: { [key: string]: IFactorizedProgram } = {};
 
-    setFilieres([...filieres, newFiliere]);
-    // toast({
-    //   title: "Filière créée",
-    //   description: "La nouvelle filière a été créée avec succès.",
-    // });
-    setIsCreateFiliereOpen(false);
-    setFormData({});
-  };
+    data.forEach(item => {
+      const { program, training_sequences, ...curriculumInfo } = item;
+      if (!grouped[item.program_code]) {
+        grouped[item.program_code] = {
+          program: program,
+          curriculums: []
+        };
+      }
 
-  const handleDeleteFiliere = (filiereId: string) => {
-    setFilieres((filieres) => filieres.filter((f) => f.id !== filiereId));
-    // toast({
-    //   title: "Filière supprimée",
-    //   description: "La filière a été supprimée définitivement.",
-    //   variant: "destructive",
-    // });
-  };
+      grouped[item.program_code].curriculums.push({
+        ...curriculumInfo,
+        training_sequences
+      });
+    });
 
-  // Handlers for maquettes actions
-  const handleAddMaquette = () => {
-    if (!selectedFiliereForActions) return;
-
-    const newMaquette: Maquette = {
-      id: Date.now().toString(),
-      nom: formData.nom || "",
-      version: formData.version || "1.0",
-      description: formData.description || "",
-      dateCreation: new Date().toISOString().split("T")[0],
-      sequences: [],
-      statut: "brouillon",
-      totalCredits: 0,
-    };
-
-    setFilieres((prev) =>
-      prev.map((f) =>
-        f.id === selectedFiliereForActions
-          ? { ...f, maquettes: [...f.maquettes, newMaquette] }
-          : f,
-      ),
-    );
-
-    // toast({
-    //   title: "Maquette créée",
-    //   description: "La nouvelle maquette a été créée avec succès.",
-    // });
-
-    setIsAddMaquetteOpen(false);
-    setFormData({});
-    setSelectedFiliereForActions(null);
-  };
-
-  const handleAddSequence = () => {
-    if (!selectedFiliereForActions || !selectedMaquetteForActions) return;
-
-    const newSequence: Sequence = {
-      id: Date.now().toString(),
-      nom: formData.nom || "",
-      description: formData.description || "",
-      duree: formData.duree || 6,
-      domaines: [],
-      statut: "actif",
-    };
-
-    setFilieres((prev) =>
-      prev.map((f) =>
-        f.id === selectedFiliereForActions
-          ? {
-              ...f,
-              maquettes: f.maquettes.map((m) =>
-                m.id === selectedMaquetteForActions
-                  ? { ...m, sequences: [...m.sequences, newSequence] }
-                  : m,
-              ),
-            }
-          : f,
-      ),
-    );
-
-    // toast({
-    //   title: "Séquence créée",
-    //   description: "La nouvelle séquence a été créée avec succès.",
-    // });
-
-    setIsAddSequenceOpen(false);
-    setFormData({});
-    setSelectedFiliereForActions(null);
-    setSelectedMaquetteForActions(null);
-  };
-
-  const handleAddDomaine = () => {
-    if (
-      !selectedFiliereForActions ||
-      !selectedMaquetteForActions ||
-      !selectedSequenceForActions
-    )
-      return;
-
-    const newDomaine: Domaine = {
-      id: Date.now().toString(),
-      nom: formData.nom || "",
-      description: formData.description || "",
-      ues: [],
-      statut: "actif",
-    };
-
-    setFilieres((prev) =>
-      prev.map((f) =>
-        f.id === selectedFiliereForActions
-          ? {
-              ...f,
-              maquettes: f.maquettes.map((m) =>
-                m.id === selectedMaquetteForActions
-                  ? {
-                      ...m,
-                      sequences: m.sequences.map((s) =>
-                        s.id === selectedSequenceForActions
-                          ? { ...s, domaines: [...s.domaines, newDomaine] }
-                          : s,
-                      ),
-                    }
-                  : m,
-              ),
-            }
-          : f,
-      ),
-    );
-
-    // toast({
-    //   title: "Domaine créé",
-    //   description: "Le nouveau domaine a été créé avec succès.",
-    // });
-
-    setIsAddDomaineOpen(false);
-    setFormData({});
-    setSelectedFiliereForActions(null);
-    setSelectedMaquetteForActions(null);
-    setSelectedSequenceForActions(null);
-  };
-
-  const handleAddUE = () => {
-    if (
-      !selectedFiliereForActions ||
-      !selectedMaquetteForActions ||
-      !selectedSequenceForActions ||
-      !selectedDomaineForActions
-    )
-      return;
-
-    const newUE: UE = {
-      id: Date.now().toString(),
-      code: formData.code || "",
-      nom: formData.nom || "",
-      description: formData.description || "",
-      credits: formData.credits || 0,
-      modules: [],
-      statut: "actif",
-    };
-
-    setFilieres((prev) =>
-      prev.map((f) =>
-        f.id === selectedFiliereForActions
-          ? {
-              ...f,
-              maquettes: f.maquettes.map((m) =>
-                m.id === selectedMaquetteForActions
-                  ? {
-                      ...m,
-                      sequences: m.sequences.map((s) =>
-                        s.id === selectedSequenceForActions
-                          ? {
-                              ...s,
-                              domaines: s.domaines.map((d) =>
-                                d.id === selectedDomaineForActions
-                                  ? { ...d, ues: [...d.ues, newUE] }
-                                  : d,
-                              ),
-                            }
-                          : s,
-                      ),
-                    }
-                  : m,
-              ),
-            }
-          : f,
-      ),
-    );
-
-    // toast({
-    //   title: "UE créée",
-    //   description: "La nouvelle UE a été créée avec succès.",
-    // });
-
-    setIsAddUEOpen(false);
-    setFormData({});
-    setSelectedFiliereForActions(null);
-    setSelectedMaquetteForActions(null);
-    setSelectedSequenceForActions(null);
-    setSelectedDomaineForActions(null);
-  };
-
-  const handleAddModule = () => {
-    if (
-      !selectedFiliereForActions ||
-      !selectedMaquetteForActions ||
-      !selectedSequenceForActions ||
-      !selectedDomaineForActions ||
-      !selectedUEForEdit
-    )
-      return;
-
-    const newModule: Module = {
-      id: Date.now().toString(),
-      code: formData.code || "",
-      nom: formData.nom || "",
-      description: formData.description || "",
-      credits: formData.credits || 0,
-      heures: formData.heures || 0,
-      enseignant: formData.enseignant || "",
-      statut: "actif",
-      semestre: formData.semestre || 1,
-      evaluation: formData.evaluation || "",
-      prerequis: formData.prerequis || [],
-    };
-
-    setFilieres((prev) =>
-      prev.map((f) =>
-        f.id === selectedFiliereForActions
-          ? {
-              ...f,
-              maquettes: f.maquettes.map((m) =>
-                m.id === selectedMaquetteForActions
-                  ? {
-                      ...m,
-                      sequences: m.sequences.map((s) =>
-                        s.id === selectedSequenceForActions
-                          ? {
-                              ...s,
-                              domaines: s.domaines.map((d) =>
-                                d.id === selectedDomaineForActions
-                                  ? {
-                                      ...d,
-                                      ues: d.ues.map((ue) =>
-                                        ue.id === selectedUEForEdit?.id
-                                          ? {
-                                              ...ue,
-                                              modules: [
-                                                ...ue.modules,
-                                                newModule,
-                                              ],
-                                            }
-                                          : ue,
-                                      ),
-                                    }
-                                  : d,
-                              ),
-                            }
-                          : s,
-                      ),
-                    }
-                  : m,
-              ),
-            }
-          : f,
-      ),
-    );
-
-    // toast({
-    //   title: "Module créé",
-    //   description: "Le nouveau module a été créé avec succès.",
-    // });
-
-    setIsAddModuleOpen(false);
-    setFormData({});
-    setSelectedFiliereForActions(null);
-    setSelectedMaquetteForActions(null);
-    setSelectedSequenceForActions(null);
-    setSelectedDomaineForActions(null);
-    setSelectedUEForEdit(null);
-  };
-
-  const handleChangeStatus = (type: string, id: string, newStatus: string) => {
-    if (type === "filiere") {
-      setFilieres((filieres) =>
-        filieres.map((f) =>
-          f.id === id ? { ...f, statut: newStatus as any } : f,
-        ),
-      );
-    }
-    // toast({
-    //   title: "Statut modifié",
-    //   description: `Le statut a été changé en "${statutLabels[newStatus as keyof typeof statutLabels].label}".`,
-    // });
-  };
-
-  const calculateTotalCredits = (maquette: Maquette): number => {
-    return maquette.sequences.reduce(
-      (total, sequence) =>
-        total +
-        sequence.domaines.reduce(
-          (seqTotal, domaine) =>
-            seqTotal +
-            domaine.ues.reduce((domTotal, ue) => domTotal + ue.credits, 0),
-          0,
-        ),
-      0,
-    );
-  };
-
-  const filteredFilieres = filieres.filter((filiere) => {
-    const matchesSearch =
-      filiere.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      filiere.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatut =
-      filterStatut === "all" || filiere.statut === filterStatut;
-
-    return matchesSearch && matchesStatut;
-  });
+    return Object.values(grouped);
+  }
+  
 
   return (
       <div className="space-y-6">
@@ -713,7 +419,7 @@ export default function ProgramsPage() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-4">
-          <Card>
+          {/* <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Filières actives
@@ -722,7 +428,7 @@ export default function ProgramsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {filieres.filter((f) => f.statut === "actif").length}
+                {program.filter((f) => f.statut === "actif").length}
               </div>
               <p className="text-xs text-muted-foreground">
                 Programmes proposés
@@ -738,7 +444,7 @@ export default function ProgramsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {filieres.reduce(
+                {program.reduce(
                   (total, f) =>
                     total +
                     f.maquettes.filter((m) => m.statut === "actif").length,
@@ -759,7 +465,7 @@ export default function ProgramsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {filieres.reduce(
+                {program.reduce(
                   (total, f) =>
                     total +
                     f.maquettes.reduce(
@@ -798,836 +504,40 @@ export default function ProgramsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {filieres.reduce((total, f) => total + f.capaciteAccueil, 0)}
+                {program.reduce((total, f) => total + f.capaciteAccueil, 0)}
               </div>
               <p className="text-xs text-muted-foreground">Étudiants maximum</p>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="filieres" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="filieres">
-              Filières ({filieres.length})
+        <Tabs defaultValue="program" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="program">
+              Filières ({program.length})
             </TabsTrigger>
             <TabsTrigger value="maquettes">Maquettes pédagogiques</TabsTrigger>
-            <TabsTrigger value="modules">Modules d'enseignement</TabsTrigger>
             <TabsTrigger value="calendrier">Calendrier académique</TabsTrigger>
           </TabsList>
 
           {/* Filieres Tab */}
-          
+          <FilieresTab
+            program={program}
+          />
 
           {/* Maquettes Tab */}
-          <TabsContent value="maquettes" className="space-y-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Maquettes de formation</h3>
-              <Button
-                className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => {
-                  setSelectedFiliereForActions("1"); // Default to first filiere for demo
-                  setIsAddMaquetteOpen(true);
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter une maquette
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Licence 3 Informatique */}
-              <Card className="border-l-4 border-l-blue-500">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg text-blue-900">
-                        Licence 3 Informatique (INFO-L3)
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-4 mt-1">
-                        <span>Filière: Informatique</span>
-                        <span>|</span>
-                        <span>Année académique: 2023-2024</span>
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-green-100 text-green-800">
-                        Active
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-blue-600 border-blue-600"
-                        onClick={() => {
-                          setSelectedFiliereForActions("1");
-                          setSelectedMaquetteForActions("1");
-                          setIsAddSequenceOpen(true);
-                        }}
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Ajouter une séquence
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          // Set edit data for maquette
-                          setSelectedMaquetteForEdit({
-                            id: "1",
-                            nom: "Licence 3 Informatique (INFO-L3)",
-                            version: "2023.1",
-                            description:
-                              "Maquette pour la licence 3 informatique",
-                            dateCreation: "2023-06-01",
-                            sequences: [],
-                            statut: "actif",
-                            totalCredits: 180,
-                          });
-                          setFormData({
-                            nom: "Licence 3 Informatique (INFO-L3)",
-                            version: "2023.1",
-                            description:
-                              "Maquette pour la licence 3 informatique",
-                          });
-                          setIsEditMaquetteOpen(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedMaquetteForEdit({
-                            id: "1",
-                            nom: "Licence 3 Informatique (INFO-L3)",
-                            version: "2023.1",
-                            description:
-                              "Maquette pour la licence 3 informatique",
-                            dateCreation: "2023-06-01",
-                            sequences: [],
-                            statut: "actif",
-                            totalCredits: 180,
-                          });
-                          setDeleteMaquetteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {/* Semestre 5 */}
-                  <div className="space-y-4">
-                    <Collapsible>
-                      <div className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
-                        <CollapsibleTrigger
-                          onClick={() => toggleExpanded("semestre-5")}
-                          className="flex items-center space-x-2 flex-1"
-                        >
-                          {expandedItems.has("semestre-5") ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                          <Calendar className="h-4 w-4 text-purple-600" />
-                          <span className="font-medium">
-                            Semestre 5 (2023-09-01 - 2024-01-31)
-                          </span>
-                        </CollapsibleTrigger>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-blue-600 border-blue-600"
-                            onClick={() => {
-                              setSelectedFiliereForActions("1");
-                              setSelectedMaquetteForActions("1");
-                              setSelectedSequenceForActions("semestre-5");
-                              setIsAddDomaineOpen(true);
-                            }}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Ajouter un domaine
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedSequenceForEdit({
-                                id: "semestre-5",
-                                nom: "Semestre 5",
-                                description:
-                                  "Semestre 5 de la licence 3 informatique",
-                                duree: 6,
-                                domaines: [],
-                                statut: "actif",
-                              });
-                              setFormData({
-                                nom: "Semestre 5",
-                                description:
-                                  "Semestre 5 de la licence 3 informatique",
-                                duree: 6,
-                              });
-                              setIsEditSequenceOpen(true);
-                            }}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedSequenceForEdit({
-                                id: "semestre-5",
-                                nom: "Semestre 5",
-                                description:
-                                  "Semestre 5 de la licence 3 informatique",
-                                duree: 6,
-                                domaines: [],
-                                statut: "actif",
-                              });
-                              setDeleteSequenceDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <CollapsibleContent className="mt-4 ml-6">
-                        {/* Programmation Domain */}
-                        <div className="space-y-4">
-                          <Collapsible>
-                            <div className="flex items-center justify-between w-full p-3 bg-blue-50 rounded-lg hover:bg-blue-100">
-                              <CollapsibleTrigger
-                                onClick={() => toggleExpanded("programmation")}
-                                className="flex items-center space-x-2 flex-1"
-                              >
-                                {expandedItems.has("programmation") ? (
-                                  <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4" />
-                                )}
-                                <Target className="h-4 w-4 text-orange-600" />
-                                <span className="font-medium">
-                                  Programmation
-                                </span>
-                              </CollapsibleTrigger>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-blue-600 border-blue-600"
-                                  onClick={() => {
-                                    setSelectedFiliereForActions("1");
-                                    setSelectedMaquetteForActions("1");
-                                    setSelectedSequenceForActions("semestre-5");
-                                    setSelectedDomaineForActions(
-                                      "programmation",
-                                    );
-                                    setIsAddUEOpen(true);
-                                  }}
-                                >
-                                  <Plus className="h-4 w-4 mr-1" />
-                                  Ajouter un module
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedDomaineForEdit({
-                                      id: "programmation",
-                                      nom: "Programmation",
-                                      description: "Domaine de programmation",
-                                      ues: [],
-                                      statut: "actif",
-                                    });
-                                    setFormData({
-                                      nom: "Programmation",
-                                      description: "Domaine de programmation",
-                                    });
-                                    setIsEditDomaineOpen(true);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedDomaineForEdit({
-                                      id: "programmation",
-                                      nom: "Programmation",
-                                      description: "Domaine de programmation",
-                                      ues: [],
-                                      statut: "actif",
-                                    });
-                                    setDeleteDomaineDialogOpen(true);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            <CollapsibleContent className="mt-4 ml-6">
-                              {/* Programmation Java UE */}
-                              <div className="space-y-4">
-                                <Collapsible>
-                                  <div className="flex items-center justify-between w-full p-2 border rounded-lg hover:bg-gray-50">
-                                    <CollapsibleTrigger
-                                      onClick={() =>
-                                        toggleExpanded("prog-java")
-                                      }
-                                      className="flex items-center space-x-2 flex-1"
-                                    >
-                                      {expandedItems.has("prog-java") ? (
-                                        <ChevronDown className="h-4 w-4" />
-                                      ) : (
-                                        <ChevronRight className="h-4 w-4" />
-                                      )}
-                                      <BookOpen className="h-4 w-4 text-blue-600" />
-                                      <span className="font-medium">
-                                        Programmation Java (PROG-JAVA) -
-                                        Coefficient: 3
-                                      </span>
-                                    </CollapsibleTrigger>
-                                    <div className="flex items-center gap-2">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="text-blue-600 border-blue-600"
-                                        onClick={() => {
-                                          setSelectedFiliereForActions("1");
-                                          setSelectedMaquetteForActions("1");
-                                          setSelectedSequenceForActions(
-                                            "semestre-5",
-                                          );
-                                          setSelectedDomaineForActions(
-                                            "programmation",
-                                          );
-                                          setSelectedUEForEdit({
-                                            id: "prog-java",
-                                            code: "PROG-JAVA",
-                                            nom: "Programmation Java",
-                                            description:
-                                              "Programmation orientée objet en Java",
-                                            credits: 3,
-                                            modules: [],
-                                            statut: "actif",
-                                          });
-                                          setIsAddModuleOpen(true);
-                                        }}
-                                      >
-                                        <Plus className="h-4 w-4 mr-1" />
-                                        Ajouter une UE
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                          setSelectedUEForEdit({
-                                            id: "prog-java",
-                                            code: "PROG-JAVA",
-                                            nom: "Programmation Java",
-                                            description:
-                                              "Programmation orientée objet en Java",
-                                            credits: 3,
-                                            modules: [],
-                                            statut: "actif",
-                                          });
-                                          setFormData({
-                                            code: "PROG-JAVA",
-                                            nom: "Programmation Java",
-                                            description:
-                                              "Programmation orientée objet en Java",
-                                            credits: 3,
-                                          });
-                                          setIsEditUEOpen(true);
-                                        }}
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                          setSelectedUEForEdit({
-                                            id: "prog-java",
-                                            code: "PROG-JAVA",
-                                            nom: "Programmation Java",
-                                            description:
-                                              "Programmation orientée objet en Java",
-                                            credits: 3,
-                                            modules: [],
-                                            statut: "actif",
-                                          });
-                                          setDeleteUEDialogOpen(true);
-                                        }}
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                  <CollapsibleContent className="mt-4">
-                                    <Table>
-                                      <TableHeader>
-                                        <TableRow className="bg-gray-50">
-                                          <TableHead className="font-semibold">
-                                            CODE
-                                          </TableHead>
-                                          <TableHead className="font-semibold">
-                                            NOM
-                                          </TableHead>
-                                          <TableHead className="font-semibold">
-                                            TYPE
-                                          </TableHead>
-                                          <TableHead className="font-semibold">
-                                            HEURES
-                                          </TableHead>
-                                          <TableHead className="font-semibold">
-                                            ACTIONS
-                                          </TableHead>
-                                        </TableRow>
-                                      </TableHeader>
-                                      <TableBody>
-                                        <TableRow>
-                                          <TableCell className="font-mono">
-                                            JAVA-CM
-                                          </TableCell>
-                                          <TableCell>
-                                            Cours Magistral Java
-                                          </TableCell>
-                                          <TableCell>CM</TableCell>
-                                          <TableCell>20</TableCell>
-                                          <TableCell>
-                                            <div className="flex items-center gap-1">
-                                              <Button variant="ghost" size="sm">
-                                                <Edit className="h-4 w-4" />
-                                              </Button>
-                                              <Button variant="ghost" size="sm">
-                                                <Trash2 className="h-4 w-4" />
-                                              </Button>
-                                            </div>
-                                          </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                          <TableCell className="font-mono">
-                                            JAVA-TP
-                                          </TableCell>
-                                          <TableCell>
-                                            Travaux Pratiques Java
-                                          </TableCell>
-                                          <TableCell>TP</TableCell>
-                                          <TableCell>30</TableCell>
-                                          <TableCell>
-                                            <div className="flex items-center gap-1">
-                                              <Button variant="ghost" size="sm">
-                                                <Edit className="h-4 w-4" />
-                                              </Button>
-                                              <Button variant="ghost" size="sm">
-                                                <Trash2 className="h-4 w-4" />
-                                              </Button>
-                                            </div>
-                                          </TableCell>
-                                        </TableRow>
-                                      </TableBody>
-                                    </Table>
-                                  </CollapsibleContent>
-                                </Collapsible>
-
-                                {/* Développement Web UE */}
-                                <Collapsible>
-                                  <div className="flex items-center justify-between w-full p-2 border rounded-lg hover:bg-gray-50">
-                                    <CollapsibleTrigger
-                                      onClick={() => toggleExpanded("prog-web")}
-                                      className="flex items-center space-x-2 flex-1"
-                                    >
-                                      {expandedItems.has("prog-web") ? (
-                                        <ChevronDown className="h-4 w-4" />
-                                      ) : (
-                                        <ChevronRight className="h-4 w-4" />
-                                      )}
-                                      <BookOpen className="h-4 w-4 text-blue-600" />
-                                      <span className="font-medium">
-                                        Développement Web (PROG-WEB) -
-                                        Coefficient: 2
-                                      </span>
-                                    </CollapsibleTrigger>
-                                    <div className="flex items-center gap-2">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="text-blue-600 border-blue-600"
-                                        onClick={() => {
-                                          setSelectedFiliereForActions("1");
-                                          setSelectedMaquetteForActions("1");
-                                          setSelectedSequenceForActions(
-                                            "semestre-5",
-                                          );
-                                          setSelectedDomaineForActions(
-                                            "programmation",
-                                          );
-                                          setSelectedUEForEdit({
-                                            id: "prog-web",
-                                            code: "PROG-WEB",
-                                            nom: "Développement Web",
-                                            description:
-                                              "Développement d'applications web",
-                                            credits: 2,
-                                            modules: [],
-                                            statut: "actif",
-                                          });
-                                          setIsAddModuleOpen(true);
-                                        }}
-                                      >
-                                        <Plus className="h-4 w-4 mr-1" />
-                                        Ajouter une UE
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                          setSelectedUEForEdit({
-                                            id: "prog-web",
-                                            code: "PROG-WEB",
-                                            nom: "Développement Web",
-                                            description:
-                                              "Développement d'applications web",
-                                            credits: 2,
-                                            modules: [],
-                                            statut: "actif",
-                                          });
-                                          setFormData({
-                                            code: "PROG-WEB",
-                                            nom: "Développement Web",
-                                            description:
-                                              "Développement d'applications web",
-                                            credits: 2,
-                                          });
-                                          setIsEditUEOpen(true);
-                                        }}
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                          setSelectedUEForEdit({
-                                            id: "prog-web",
-                                            code: "PROG-WEB",
-                                            nom: "Développement Web",
-                                            description:
-                                              "Développement d'applications web",
-                                            credits: 2,
-                                            modules: [],
-                                            statut: "actif",
-                                          });
-                                          setDeleteUEDialogOpen(true);
-                                        }}
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                  <CollapsibleContent className="mt-4">
-                                    <Table>
-                                      <TableHeader>
-                                        <TableRow className="bg-gray-50">
-                                          <TableHead className="font-semibold">
-                                            CODE
-                                          </TableHead>
-                                          <TableHead className="font-semibold">
-                                            NOM
-                                          </TableHead>
-                                          <TableHead className="font-semibold">
-                                            TYPE
-                                          </TableHead>
-                                          <TableHead className="font-semibold">
-                                            HEURES
-                                          </TableHead>
-                                          <TableHead className="font-semibold">
-                                            ACTIONS
-                                          </TableHead>
-                                        </TableRow>
-                                      </TableHeader>
-                                      <TableBody>
-                                        <TableRow>
-                                          <TableCell className="font-mono">
-                                            WEB-CM
-                                          </TableCell>
-                                          <TableCell>
-                                            Cours Magistral Web
-                                          </TableCell>
-                                          <TableCell>CM</TableCell>
-                                          <TableCell>15</TableCell>
-                                          <TableCell>
-                                            <div className="flex items-center gap-1">
-                                              <Button variant="ghost" size="sm">
-                                                <Edit className="h-4 w-4" />
-                                              </Button>
-                                              <Button variant="ghost" size="sm">
-                                                <Trash2 className="h-4 w-4" />
-                                              </Button>
-                                            </div>
-                                          </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                          <TableCell className="font-mono">
-                                            WEB-TP
-                                          </TableCell>
-                                          <TableCell>
-                                            Travaux Pratiques Web
-                                          </TableCell>
-                                          <TableCell>TP</TableCell>
-                                          <TableCell>25</TableCell>
-                                          <TableCell>
-                                            <div className="flex items-center gap-1">
-                                              <Button variant="ghost" size="sm">
-                                                <Edit className="h-4 w-4" />
-                                              </Button>
-                                              <Button variant="ghost" size="sm">
-                                                <Trash2 className="h-4 w-4" />
-                                              </Button>
-                                            </div>
-                                          </TableCell>
-                                        </TableRow>
-                                      </TableBody>
-                                    </Table>
-                                  </CollapsibleContent>
-                                </Collapsible>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-
-                          {/* Bases de données Domain */}
-                          <Collapsible>
-                            <div className="flex items-center justify-between w-full p-3 bg-blue-50 rounded-lg hover:bg-blue-100">
-                              <CollapsibleTrigger
-                                onClick={() => toggleExpanded("bases-donnees")}
-                                className="flex items-center space-x-2 flex-1"
-                              >
-                                {expandedItems.has("bases-donnees") ? (
-                                  <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4" />
-                                )}
-                                <Target className="h-4 w-4 text-orange-600" />
-                                <span className="font-medium">
-                                  Bases de données
-                                </span>
-                              </CollapsibleTrigger>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-blue-600 border-blue-600"
-                                  onClick={() => {
-                                    setSelectedFiliereForActions("1");
-                                    setSelectedMaquetteForActions("1");
-                                    setSelectedSequenceForActions("semestre-5");
-                                    setSelectedDomaineForActions(
-                                      "bases-donnees",
-                                    );
-                                    setIsAddUEOpen(true);
-                                  }}
-                                >
-                                  <Plus className="h-4 w-4 mr-1" />
-                                  Ajouter un module
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedDomaineForEdit({
-                                      id: "bases-donnees",
-                                      nom: "Bases de données",
-                                      description:
-                                        "Gestion et conception de bases de données",
-                                      ues: [],
-                                      statut: "actif",
-                                    });
-                                    setFormData({
-                                      nom: "Bases de données",
-                                      description:
-                                        "Gestion et conception de bases de données",
-                                    });
-                                    setIsEditDomaineOpen(true);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedDomaineForEdit({
-                                      id: "bases-donnees",
-                                      nom: "Bases de données",
-                                      description:
-                                        "Gestion et conception de bases de données",
-                                      ues: [],
-                                      statut: "actif",
-                                    });
-                                    setDeleteDomaineDialogOpen(true);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            <CollapsibleContent className="mt-4 ml-6">
-                              <div className="text-center py-4 text-gray-500">
-                                <FileText className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                                <p className="text-sm">Aucun module défini</p>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+          <MaquettesTab curriculumList={curriculumList} />
 
           {/* Modules Tab */}
-          <TabsContent value="modules" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Modules d'enseignement</CardTitle>
-                <CardDescription>
-                  Détail des unités d'enseignement et modules
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {filieres.map((filiere) =>
-                    filiere.maquettes.map((maquette) =>
-                      maquette.sequences.map((sequence) =>
-                        sequence.domaines.map((domaine) =>
-                          domaine.ues.map((ue) => (
-                            <div key={ue.id} className="border rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center space-x-2">
-                                  <BookOpen className="h-5 w-5 text-blue-600" />
-                                  <span className="font-semibold">
-                                    {ue.nom}
-                                  </span>
-                                  <Badge variant="outline">{ue.code}</Badge>
-                                  <Badge className="bg-blue-100 text-blue-800">
-                                    {ue.credits} crédits
-                                  </Badge>
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {filiere.nom} → {sequence.nom} → {domaine.nom}
-                                </div>
-                              </div>
-                              <div className="grid gap-2">
-                                {ue.modules.map((module) => (
-                                  <div
-                                    key={module.id}
-                                    className="flex items-center justify-between p-3 bg-gray-50 rounded"
-                                  >
-                                    <div className="flex-1">
-                                      <div className="flex items-center space-x-2 mb-1">
-                                        <span className="font-medium">
-                                          {module.nom}
-                                        </span>
-                                        <Badge
-                                          variant="outline"
-                                          className="text-xs"
-                                        >
-                                          {module.code}
-                                        </Badge>
-                                        <Badge
-                                          className={
-                                            statutLabels[module.statut].color
-                                          }
-                                        >
-                                          {statutLabels[module.statut].label}
-                                        </Badge>
-                                      </div>
-                                      <div className="text-sm text-muted-foreground mb-2">
-                                        {module.description}
-                                      </div>
-                                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                                        <span>{module.credits} crédits</span>
-                                        <span>{module.heures}h</span>
-                                        <span>S{module.semestre}</span>
-                                        <span>{module.enseignant}</span>
-                                        <span>{module.evaluation}</span>
-                                      </div>
-                                      {module.prerequis &&
-                                        module.prerequis.length > 0 && (
-                                          <div className="mt-2">
-                                            <span className="text-xs text-red-600">
-                                              Prérequis:{" "}
-                                              {module.prerequis.join(", ")}
-                                            </span>
-                                          </div>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                          setSelectedModule(module);
-                                          setFormData(module);
-                                          setIsModuleDialogOpen(true);
-                                        }}
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                      <Button variant="ghost" size="sm">
-                                        <Eye className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )),
-                        ),
-                      ),
-                    ),
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          
 
           {/* Calendrier Tab */}
-          <TabsContent value="calendrier" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Calendrier académique</CardTitle>
-                <CardDescription>
-                  Planning des périodes d'enseignement et d'évaluation
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                  <p>
-                    Fonctionnalité de calendrier académique en cours de
-                    développement
-                  </p>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Configurer le calendrier
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <CalendrierTab />
         </Tabs>
 
         {/* Create Filiere Dialog */}
-        <Dialog
+        {/* <Dialog
           open={isCreateFiliereOpen}
           onOpenChange={setIsCreateFiliereOpen}
         >
@@ -1727,10 +637,10 @@ export default function ProgramsPage() {
               <Button onClick={handleCreateFiliere}>Créer la filière</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Edit Filiere Dialog */}
-        <Dialog
+        {/* <Dialog
           open={isFiliereDialogOpen}
           onOpenChange={setIsFiliereDialogOpen}
         >
@@ -1813,8 +723,8 @@ export default function ProgramsPage() {
               <Button
                 onClick={() => {
                   if (selectedFiliere) {
-                    setFilieres((filieres) =>
-                      filieres.map((f) =>
+                    setProgram((program) =>
+                      program.map((f) =>
                         f.id === selectedFiliere.id ? { ...f, ...formData } : f,
                       ),
                     );
@@ -1833,10 +743,10 @@ export default function ProgramsPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Edit Module Dialog */}
-        <Dialog open={isModuleDialogOpen} onOpenChange={setIsModuleDialogOpen}>
+        {/* <Dialog open={isModuleDialogOpen} onOpenChange={setIsModuleDialogOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Modifier le module</DialogTitle>
@@ -1964,10 +874,10 @@ export default function ProgramsPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Delete Confirmation Dialog */}
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        {/* <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Êtes-vous s��r ?</AlertDialogTitle>
@@ -1999,10 +909,10 @@ export default function ProgramsPage() {
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialog>
+        </AlertDialog> */}
 
         {/* Add Maquette Dialog */}
-        <Dialog open={isAddMaquetteOpen} onOpenChange={setIsAddMaquetteOpen}>
+        {/* <Dialog open={isAddMaquetteOpen} onOpenChange={setIsAddMaquetteOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Ajouter une nouvelle maquette</DialogTitle>
@@ -2059,10 +969,10 @@ export default function ProgramsPage() {
               <Button onClick={handleAddMaquette}>Créer la maquette</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Add Sequence Dialog */}
-        <Dialog open={isAddSequenceOpen} onOpenChange={setIsAddSequenceOpen}>
+        {/* <Dialog open={isAddSequenceOpen} onOpenChange={setIsAddSequenceOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Ajouter une nouvelle séquence</DialogTitle>
@@ -2121,10 +1031,10 @@ export default function ProgramsPage() {
               <Button onClick={handleAddSequence}>Créer la séquence</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Add Domaine Dialog */}
-        <Dialog open={isAddDomaineOpen} onOpenChange={setIsAddDomaineOpen}>
+        {/* <Dialog open={isAddDomaineOpen} onOpenChange={setIsAddDomaineOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Ajouter un nouveau domaine</DialogTitle>
@@ -2172,10 +1082,10 @@ export default function ProgramsPage() {
               <Button onClick={handleAddDomaine}>Créer le domaine</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Add UE Dialog */}
-        <Dialog open={isAddUEOpen} onOpenChange={setIsAddUEOpen}>
+        {/* <Dialog open={isAddUEOpen} onOpenChange={setIsAddUEOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Ajouter une nouvelle UE</DialogTitle>
@@ -2250,10 +1160,10 @@ export default function ProgramsPage() {
               <Button onClick={handleAddUE}>Créer l'UE</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Add Module Dialog */}
-        <Dialog open={isAddModuleOpen} onOpenChange={setIsAddModuleOpen}>
+        {/* <Dialog open={isAddModuleOpen} onOpenChange={setIsAddModuleOpen}>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>Ajouter un nouveau module</DialogTitle>
@@ -2380,10 +1290,10 @@ export default function ProgramsPage() {
               <Button onClick={handleAddModule}>Créer le module</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Edit Maquette Dialog */}
-        <Dialog open={isEditMaquetteOpen} onOpenChange={setIsEditMaquetteOpen}>
+        {/* <Dialog open={isEditMaquetteOpen} onOpenChange={setIsEditMaquetteOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Modifier la maquette</DialogTitle>
@@ -2446,10 +1356,10 @@ export default function ProgramsPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Edit Sequence Dialog */}
-        <Dialog open={isEditSequenceOpen} onOpenChange={setIsEditSequenceOpen}>
+        {/* <Dialog open={isEditSequenceOpen} onOpenChange={setIsEditSequenceOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Modifier la séquence</DialogTitle>
@@ -2513,10 +1423,10 @@ export default function ProgramsPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Edit Domaine Dialog */}
-        <Dialog open={isEditDomaineOpen} onOpenChange={setIsEditDomaineOpen}>
+        {/* <Dialog open={isEditDomaineOpen} onOpenChange={setIsEditDomaineOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Modifier le domaine</DialogTitle>
@@ -2569,10 +1479,10 @@ export default function ProgramsPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Edit UE Dialog */}
-        <Dialog open={isEditUEOpen} onOpenChange={setIsEditUEOpen}>
+        {/* <Dialog open={isEditUEOpen} onOpenChange={setIsEditUEOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Modifier l'UE</DialogTitle>
@@ -2649,10 +1559,10 @@ export default function ProgramsPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Delete Maquette Dialog */}
-        <AlertDialog
+        {/* <AlertDialog
           open={deleteMaquetteDialogOpen}
           onOpenChange={setDeleteMaquetteDialogOpen}
         >
@@ -2689,10 +1599,10 @@ export default function ProgramsPage() {
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialog>
+        </AlertDialog> */}
 
         {/* Delete Sequence Dialog */}
-        <AlertDialog
+        {/* <AlertDialog
           open={deleteSequenceDialogOpen}
           onOpenChange={setDeleteSequenceDialogOpen}
         >
@@ -2729,10 +1639,10 @@ export default function ProgramsPage() {
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialog>
+        </AlertDialog> */}
 
         {/* Delete Domaine Dialog */}
-        <AlertDialog
+        {/* <AlertDialog
           open={deleteDomaineDialogOpen}
           onOpenChange={setDeleteDomaineDialogOpen}
         >
@@ -2769,10 +1679,10 @@ export default function ProgramsPage() {
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialog>
+        </AlertDialog> */}
 
         {/* Delete UE Dialog */}
-        <AlertDialog
+        {/* <AlertDialog
           open={deleteUEDialogOpen}
           onOpenChange={setDeleteUEDialogOpen}
         >
@@ -2809,7 +1719,7 @@ export default function ProgramsPage() {
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialog>
+        </AlertDialog> */}
       </div>
   );
 }
