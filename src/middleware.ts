@@ -9,7 +9,7 @@ const routeRoles: Record<string, string[]> = {
   'ADMIN': ['/admin', '/settings', '/profile', '/images'],
 };
 
-const publicRoutes = ['/signin', '/signup', '/unauthorized'];
+const publicRoutes = ['/signin', '/signup', '/unauthorized', '/admission-request'];
 
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -56,14 +56,10 @@ export default async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Matcher simple mais efficace :
-     * - Inclut toutes les routes qui ne commencent pas par api, _next, ou fichiers statiques
+     * Pattern recommandé par Next.js pour exclure les routes internes et fichiers statiques
+     * Exclut: api, _next/static, _next/image, favicon.ico et tous les fichiers avec extension
      */
-    '/admin/:path*',
-    '/student/:path*', 
-    '/support/:path*',
-    '/settings/:path*',
-    '/profile/:path*',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|images).*)',
   ],
 }
 
