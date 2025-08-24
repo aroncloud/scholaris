@@ -51,6 +51,16 @@ export interface ICreateStudent {
   "education_level_code": string
 }
 
+export interface IInitiateStudentApplication {
+  curriculum_code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  student_number: string;
+  gender: gender;
+}
+
 export type gender = 'FEMALE' | 'MALE';
 
 export interface ICurriculum {

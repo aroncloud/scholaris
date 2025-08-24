@@ -98,10 +98,12 @@ import EnrollmentRequests from "./EnrollmentRequests";
 import CurrentStudents from "./CurrentStudents";
 import GenericModal from "@/components/modal/GenericModal";
 import { createUser, getUserList, updateUser } from "@/actions/programsAction";
+import { getStudentApplication, getStudentApplicationList } from "@/actions/studentAction";
 import { student_statuses } from "@/constant";
 import { showToast } from "@/lib/utils";
 import { toast } from "sonner"
 import ModalStudent from "@/components/modal/ModalStudent";
+import CreateEnrollmentDialog from "@/components/modal/CreateEnrollmentDialog";
 
 
 
@@ -243,18 +245,23 @@ export default function StudentsPage() {
   const router = useRouter();
   const [enrollmentRequests, setEnrollmentRequests] = useState<
     IEnrollmentRequest[]
-  >(mockEnrollmentRequests);
+  >([]);
   const [studentList, setStudentList] = useState<IListStudent[]>([])
   const [selectedStudent, setSelectedStudent] = useState<IListStudent | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<IEnrollmentRequest | null>(null);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [sturentFormData, setStudentFormData] = useState<Partial<ICreateStudent>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
   const [action, setAction] = useState<'CREATE' | 'UPDATE'>('CREATE')
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatut, setFilterStatut] = useState("all");
+  const [isCreateEnrollmentOpen, setIsCreateEnrollmentOpen] = useState(false);
 
   useEffect(() => {
     init();
+    loadEnrollmentRequests();
   }, [])
 
 
@@ -329,6 +336,87 @@ export default function StudentsPage() {
     console.log('getUserList.result', result)
   }
 
+  const transformApplicationData = (apiData: any[]): IEnrollmentRequest[] => {
+    return apiData.map((app: any) => ({
+      id: app.application_code,
+      nom: app.last_name,
+      prenom: app.first_name,
+      email: app.email,
+      telephone: app.phone_number,
+      filiere: app.cirriculum?.curriculum_name || 'N/A',
+      niveau: app.cirriculum?.study_level || 'N/A',
+      datedemande: app.submitted_at || new Date().toISOString().split('T')[0],
+      statut: app.application_status_code === 'DRAFT' ? 'en_attente' : 
+             app.application_status_code === 'APPROVED' ? 'approuve' : 
+             app.application_status_code === 'REJECTED' ? 'rejete' : 'en_attente',
+      documents: ['Documents non disponibles'], 
+      commentaire: app.rejection_reason || undefined
+    }));
+  };
+
+  const loadEnrollmentRequests = async () => {
+    try {
+      const result = await getStudentApplicationList();
+      if(result.code === 'success') {
+        const transformedData = transformApplicationData(result.data.body || []);
+        setEnrollmentRequests(transformedData);
+      } else {
+        console.error('Error loading enrollment requests:', result.error);
+        toast("Erreur", {
+          description: "Impossible de charger les demandes d'inscription.",
+        });
+      }
+    } catch (error) {
+      console.error('Error loading enrollment requests:', error);
+      toast("Erreur", {
+        description: "Une erreur s'est produite lors du chargement des demandes.",
+      });
+    }
+  }
+
+  const handleViewApplicationDetails = async (applicationCode: string) => {
+    try {
+      const result = await getStudentApplication(applicationCode);
+      if (result.code === 'success') {
+        console.log('Application details:', result.data);
+        // Ici vous pouvez ouvrir un modal avec les détails ou naviguer vers une page dédiée
+        toast("Détails chargés", {
+          description: "Les détails de la demande ont été récupérés avec succès.",
+        });
+      } else {
+        toast("Erreur", {
+          description: "Impossible de récupérer les détails de la demande.",
+        });
+      }
+    } catch (error) {
+      console.error('Error loading application details:', error);
+      toast("Erreur", {
+        description: "Une erreur s'est produite lors du chargement des détails.",
+      });
+    }
+  }
+
+  const handleApproveRequest = (requestId: string) => {
+    setEnrollmentRequests((requests) =>
+      requests.map((req) =>
+        req.id === requestId ? { ...req, statut: "approuve" as const } : req,
+      ),
+    );
+    toast("Demande approuvée", {
+      description: "La demande d'inscription a été approuvée avec succès.",
+    });
+  };
+
+  const handleCreateEnrollment = () => {
+    setIsCreateEnrollmentOpen(true);
+  };
+
+  const handleEnrollmentSuccess = () => {
+    // Refresh enrollment requests or student list if needed
+    init();
+    loadEnrollmentRequests();
+  };
+
 
   return (
       <div className="space-y-6">
@@ -353,7 +441,7 @@ export default function StudentsPage() {
           </TabsList>
 
           {/* Enrollment Requests Tab */}
-          {/* <EnrollmentRequests
+          <EnrollmentRequests
             enrollmentRequests={enrollmentRequests}
             filterStatut={filterStatut}
             handleApproveRequest={handleApproveRequest}
@@ -362,7 +450,8 @@ export default function StudentsPage() {
             setIsRequestDialogOpen={setIsRequestDialogOpen}
             setSearchTerm={setSearchTerm}
             setSelectedRequest={setSelectedRequest}
-          /> */}
+            onCreateEnrollment={handleCreateEnrollment}
+          />
 
           {/* Current Students Tab */}
           <CurrentStudents
@@ -428,6 +517,12 @@ export default function StudentsPage() {
           </AlertDialogContent>
         </AlertDialog>
 
+        {/* Create Enrollment Dialog */}
+        <CreateEnrollmentDialog
+          open={isCreateEnrollmentOpen}
+          onOpenChange={setIsCreateEnrollmentOpen}
+          onSuccess={handleEnrollmentSuccess}
+        />
 
       </div>
   );

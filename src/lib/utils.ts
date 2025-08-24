@@ -87,10 +87,12 @@ export const getStatusColor = (status: string): string => {
     case "PENDING":
     case "PENDING_APPROVAL":
     case "EN ATTENTE":
+    case "EN_ATTENTE":
       return "bg-yellow-100 text-yellow-600 dark:bg-gray-700/20 dark:text-yellow-400";
 
     // Actif ou approuvé
     case "APPROVED":
+    case "APPROUVE":
     case "RENTED":
     case "ACTIVE":
     case "PAID":
@@ -105,6 +107,7 @@ export const getStatusColor = (status: string): string => {
     case "CANCELED":
     case "CANCEL":
     case "REJECTED":
+    case "REJETE":
     case "UNPAID":
     case "INACTIVE":
     case "INACTIF":
