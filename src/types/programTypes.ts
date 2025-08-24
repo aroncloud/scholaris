@@ -59,14 +59,6 @@ export interface ICreateDomain {
   internal_code: string;
 }
 
-export interface IDomainPerCurriculum {
-  domain_code: string;
-  curriculum_code: string;
-  sequence_code: string | null;
-  domain_name: string;
-  description: string | null;
-  internal_code: string;
-}
 
 // ------------------- Module -------------------
 export interface ICreateModule {
@@ -141,6 +133,16 @@ export interface ICurriculumDetail {
   training_sequences: ITrainingSequence[];
   domains: IDomainPerCurriculum[];
 }
+
+export interface IDomainPerCurriculum {
+  domain_code: string;
+  curriculum_code: string;
+  sequence_code: string | null;
+  domain_name: string;
+  description: string | null;
+  internal_code: string;
+}
+
 
 export interface IFactorizedProgram {
   program: IProgram;

@@ -111,13 +111,13 @@ const LandingPage: React.FC = () => {
                 style={{ animationDelay: '0.3s' }}
               >
                 <h2
-                  className="heading-font text-lg font-bold mb-2 opacity-0 animate-fadeIn"
+                  className="heading-font text-lg font-black mb-2 opacity-0 animate-fadeIn"
                   style={{ animationDelay: '0.5s' }}
                 >
                   École Privée de Formation des Professionnels de Santé de Meiganga
                 </h2>
                 <h1
-                  className="heading-font text-3xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight opacity-0 animate-fadeIn"
+                  className="heading-font text-3xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight opacity-0 animate-fadeIn"
                   style={{ animationDelay: '0.7s' }}
                 >
                   Votre avenir dans le secteur de la santé commence ici

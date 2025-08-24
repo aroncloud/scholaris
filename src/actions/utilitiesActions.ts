@@ -50,3 +50,24 @@ export async function getConfig() {
     return actionErrorHandler(error);
   }
 }
+
+export async function getCurriculumListSite(){
+    try {
+      const response = await axios.get(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/curriculums`,{
+          headers: {
+            "X-API-Key": process.env.PUBLIC_API_KEY,
+          },
+      });
+      console.log('-->result', response.data);
+      
+      return {
+          code: 'success',
+          error: null,
+          data: response.data
+      }
+    } catch (error: unknown) {
+        console.log('-->createCurriculum.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}

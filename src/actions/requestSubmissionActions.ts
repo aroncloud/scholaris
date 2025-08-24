@@ -1,6 +1,7 @@
 'use server'
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
+import { CreateApplicantRequest } from "@/types/requestSubmissionTypes";
 
 export async function searchStudentByMatricule(matricule: string) {
     try {
@@ -23,6 +24,32 @@ export async function searchStudentByMatricule(matricule: string) {
         };
     } catch (error: unknown) {
         console.log("-->requestSubmissionActions.searchStudentByMatricule.error");
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+
+export async function submitAdmissionRequest(formData: CreateApplicantRequest, applicationCode: string) {
+    try {
+        const response = await axios.put(
+            `${process.env.APPLICATION_WORKER_ENDPOINT}/api/public/student-applications/${applicationCode}/complete`,
+            formData,
+            {
+                headers: {
+                    "X-API-Key": process.env.PUBLIC_API_KEY,
+                },
+            }
+        );
+
+        console.log('-->submitAdmissionRequest result', response);
+
+        return {
+            code: "success",
+            error: null,
+            data: response.data,
+        };
+    } catch (error: unknown) {
+        console.log("-->requestSubmissionActions.submitAdmissionRequest.error");
         const errResult = actionErrorHandler(error);
         return errResult;
     }

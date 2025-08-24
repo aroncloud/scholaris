@@ -1,71 +1,71 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { decrypt } from './lib/session'
-import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server';
+import { decrypt } from './lib/session';
+import { cookies } from 'next/headers';
 
-// Routes autorisées par rôle
+// Définir les routes et leurs autorisations par rôle
 const routeRoles: Record<string, string[]> = {
-  'STUDENT': ['/student', '/settings', '/profile', '/images'],
-  'TEACHER': ['/support', '/settings', '/profile', '/images'],
-  'ADMIN': ['/admin', '/settings', '/profile', '/images'],
+  STUDENT: ['/student', '/settings', '/profile', '/images'],
+  TEACHER: ['/support', '/settings', '/profile', '/images'],
+  ADMIN: ['/admin', '/settings', '/profile', '/images'],
 };
 
-// Fusionner toutes les routes qui nécessitent une vérification de rôle
-const protectedRoutes = Object.values(routeRoles).flat();
+// Routes qui sont explicitement publiques et ne nécessitent aucune vérification
+const publicRoutes = [
+  '/signin',
+  '/about',
+  '/actualites',
+  '/admission-request',
+  '/admissions',
+  '/contacts',
+  '/faq',
+  '/formations',
+  '/recrutement',
+  '/not-found',
+  '/unauthorized'
+];
 
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  console.log('🌐 Middleware path:', path);
 
-  // Vérifier si la route actuelle fait partie des routes protégées
-  const isProtected = protectedRoutes.some(protectedPath => path.startsWith(protectedPath));
-  console.log('🔒 Is protected route:', isProtected);
-
-  // Si la route n'est pas protégée, la laisser passer
-  if (!isProtected) {
+  // 1. Vérifier si la route est publique
+  const isPublicRoute = publicRoutes.includes(path);
+  if (isPublicRoute) {
     return NextResponse.next();
   }
 
+  // 2. Traiter les routes protégées
   try {
-    // Lire et décrypter le cookie
+    // Lire le cookie de session et le décrypter
     const cookie = (await cookies()).get('session')?.value;
     const session = await decrypt(cookie);
 
-    // Pas de session, rediriger vers login
+    // Si pas de session, rediriger vers la page de connexion
     if (!session) {
       return NextResponse.redirect(new URL('/signin', req.nextUrl));
     }
 
-    // Vérification des autorisations
-    const userRole = session.profile || '';
+    // Récupérer le rôle de l'utilisateur et les routes associées
+    const userRole = session.profile as string;
     const userRoutes = routeRoles[userRole] || [];
 
-    // Vérifier l'autorisation
+    // Vérifier l'autorisation de l'utilisateur pour le chemin actuel
     const isAuthorized = userRoutes.some(route => path.startsWith(route));
 
+    // Si l'utilisateur n'est pas autorisé, le rediriger
     if (!isAuthorized) {
       return NextResponse.redirect(new URL('/unauthorized', req.nextUrl));
     }
 
+    // Autoriser l'accès à la route
     return NextResponse.next();
-
   } catch (error) {
+    // En cas d'erreur (cookie invalide, etc.), rediriger vers la connexion
     console.error('💥 Middleware error:', error);
     return NextResponse.redirect(new URL('/signin', req.nextUrl));
   }
 }
 
+// Configuration pour le middleware : exclure les fichiers statiques et API
 export const config = {
-  matcher: [
-    /*
-     * Pattern recommandé par Next.js pour exclure les routes internes et fichiers statiques
-     * Exclut: api, _next/static, _next/image, favicon.ico et tous les fichiers avec extension
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
-  ],
-}
-
-// Pour debug : exporter une fonction de test
-export function testMiddleware() {
-  console.log('Middleware file loaded successfully');
-  return true;
-}
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+};
