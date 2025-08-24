@@ -32,7 +32,11 @@ export interface FormData {
     photo4x4: File | null;
     attestationConcours: File | null;
   };
-  accepteConditions: boolean;
+  accepteConditions: string;
+  curriculum: string;
+  email: string;
+  cni_issue_date: string;
+  phone_number: string;
 }
 
 
@@ -91,4 +95,40 @@ export interface ISeachMatricule {
   };
   relatives: unknown[]; // si tu veux, on peut créer une interface pour les relatives
   documents: unknown[]; // pareil ici
+}
+
+
+
+
+
+export interface Relative {
+  last_name: string;
+  first_name: string;
+  phone_number: string;
+  occupation: string;
+  relationship_type: "FATHER" | "MOTHER" | "SPOUSE" | string; // Ajoute d'autres types si besoin
+  address?: string;
+  email?: string;
+}
+
+export interface Document {
+  type_code: string;
+  title: string;
+  content_url: string;
+}
+
+export interface CreateApplicantRequest {
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;  // format YYYY-MM-DD
+  place_of_birth: string;
+  village: string;
+  email: string;
+  phone_number: string;
+  education_level_code: string;
+  cni_number: string;
+  cni_issue_date: string;  // format YYYY-MM-DD
+  cni_issue_location: string;
+  relatives: Relative[];
+  documents: Document[];
 }

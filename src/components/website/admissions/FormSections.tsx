@@ -24,6 +24,7 @@ import { FileUploadProps, FormData } from "@/types/requestSubmissionTypes";
 import { IConfig, ICountryMap } from "@/types/utilitiesTypes";
 import { regroupLocation } from "@/lib/utils";
 import { maritalStatus } from "@/constant";
+import { IFactorizedProgram } from "@/types/programTypes";
 
 interface FormSectionProps {
   title: string;
@@ -103,6 +104,8 @@ interface StepFormProps {
   formData: FormData;
   errors: FormErrors;
   configs: IConfig | null;
+  applicationCode: string;
+  programList: IFactorizedProgram[];
   handleInputChange: (field: string, value: string) => void;
   handleFileChange: (
     documentType: keyof FormData["documents"],
@@ -110,14 +113,6 @@ interface StepFormProps {
   ) => void;
 }
 
-
-const formations = [
-  { id: "aide-soignant", nom: "Aide-Soignant(e)" },
-  { id: "infirmier-ide", nom: "Infirmier(ère) Diplômé(e) d'État" },
-  { id: "agent-sante-communautaire", nom: "Agent de Santé Communautaire" },
-  { id: "sage-femme", nom: "Sage-Femme" },
-  { id: "technicien-labo", nom: "Technicien de Laboratoire" },
-];
 
 export const PersonalInfoForm: React.FC<StepFormProps> = ({
   formData,
@@ -145,6 +140,18 @@ export const PersonalInfoForm: React.FC<StepFormProps> = ({
         <Label htmlFor="lieuNaissance">Lieu de naissance <span className="text-red-500">*</span></Label>
         <Input id="lieuNaissance" value={formData.lieuNaissance} onChange={(e) => handleInputChange("lieuNaissance", e.target.value)} placeholder="Lieu de naissance" className={errors.lieuNaissance ? "border-red-500" : ""} />
         {errors.lieuNaissance && <p className="text-sm text-red-600">{errors.lieuNaissance}</p>}
+      </div>
+
+      
+      <div className="space-y-2">
+        <Label htmlFor="cni_issue_date">Date de delivrance de la CNI <span className="text-red-500">*</span></Label>
+        <Input id="cni_issue_date" type="date" value={formData.cni_issue_date} onChange={(e) => handleInputChange("cni_issue_date", e.target.value)} className={errors.cni_issue_date ? "border-red-500" : ""} />
+        {errors.cni_issue_date && <p className="text-sm text-red-600">{errors.cni_issue_date}</p>}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
+        <Input id="email" value={formData.email} onChange={(e) => handleInputChange("email", e.target.value)} placeholder="Email" className={errors.email ? "border-red-500" : ""} />
+        {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
       </div>
     </div>
     {/* Section parents */}
@@ -177,7 +184,8 @@ export const PersonalInfoForm: React.FC<StepFormProps> = ({
 export const OriginInfoForm: React.FC<StepFormProps> = ({
   formData,
   handleInputChange,
-  configs
+  configs,
+  errors,
 }) => {
   // On regroupe les données en structure hiérarchique
   const countryMap: ICountryMap = useMemo(() => {
@@ -224,7 +232,7 @@ export const OriginInfoForm: React.FC<StepFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Région */}
         <div className="space-y-2">
-          <Label htmlFor="region">Région</Label>
+          <Label htmlFor="region">Région <span className="text-red-500">*</span></Label>
           <Select
             value={formData.region}
             onValueChange={(value) => handleInputChange("region", value)}
@@ -240,11 +248,12 @@ export const OriginInfoForm: React.FC<StepFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+          {errors.region && <p className="text-sm text-red-600">{errors.region}</p>}
         </div>
 
         {/* Département */}
         <div className="space-y-2">
-          <Label htmlFor="departement">Département</Label>
+          <Label htmlFor="departement">Département <span className="text-red-500">*</span></Label>
           <Select
             value={formData.departement}
             onValueChange={(value) => handleInputChange("departement", value)}
@@ -261,13 +270,14 @@ export const OriginInfoForm: React.FC<StepFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+          {errors.departement && <p className="text-sm text-red-600">{errors.departement}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Arrondissement */}
         <div className="space-y-2">
-          <Label htmlFor="arrondissement">Arrondissement</Label>
+          <Label htmlFor="arrondissement">Arrondissement <span className="text-red-500">*</span></Label>
           <Select
             value={formData.arrondissement}
             onValueChange={(value) => handleInputChange("arrondissement", value)}
@@ -284,17 +294,19 @@ export const OriginInfoForm: React.FC<StepFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+          {errors.arrondissement && <p className="text-sm text-red-600">{errors.arrondissement}</p>}
         </div>
 
         {/* Village */}
         <div className="space-y-2">
-          <Label htmlFor="village">Village</Label>
+          <Label htmlFor="village">Village <span className="text-red-500">*</span></Label>
           <Input
             id="village"
             value={formData.village}
             onChange={(e) => handleInputChange("village", e.target.value)}
             placeholder="Village"
           />
+          {errors.village && <p className="text-sm text-red-600">{errors.village}</p>}
         </div>
       </div>
     </div>
@@ -304,14 +316,15 @@ export const OriginInfoForm: React.FC<StepFormProps> = ({
 export const AdditionalInfoForm: React.FC<StepFormProps> = ({
   formData,
   handleInputChange,
-  configs
+  configs,
+  errors
 }) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Ethnie */}
         <div className="space-y-2">
-          <Label htmlFor="ethnie">Ethnie</Label>
+          <Label htmlFor="ethnie">Ethnie <span className="text-red-500">*</span></Label>
           <Select
             value={formData.ethnie}
             onValueChange={(value) => handleInputChange("ethnie", value)}
@@ -327,6 +340,7 @@ export const AdditionalInfoForm: React.FC<StepFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+          {errors.ethnie && <p className="text-sm text-red-600">{errors.ethnie}</p>}
         </div>
 
         {/* Situation matrimoniale */}
@@ -381,43 +395,107 @@ export const AcademicInfoForm: React.FC<StepFormProps> = ({
   formData,
   errors,
   handleInputChange,
-}) => (
-  <div className="space-y-6">
-    <div className="space-y-2">
-      <Label htmlFor="formation">
-        Formation Souhaitée <span className="text-red-500">*</span>
-      </Label>
-      <Select
-        value={formData.formation}
-        onValueChange={(value) => handleInputChange("formation", value)}
-      >
-        <SelectTrigger className={errors.formation ? "border-red-500 w-1/2" : "w-1/2"}>
-          <SelectValue placeholder="Choisissez votre formation" />
-        </SelectTrigger>
-        <SelectContent>
-          {formations.map((formation) => (
-            <SelectItem key={formation.id} value={formation.id}>
-              {formation.nom}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {errors.formation && (
-        <p className="text-sm text-red-600">{errors.formation}</p>
-      )}
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="space-y-2">
-        <Label htmlFor="niveauEtude">Niveau d'étude</Label>
-        <Input id="niveauEtude" value={formData.niveauEtude} onChange={(e) => handleInputChange("niveauEtude", e.target.value)} placeholder="Niveau d'étude" />
+  programList
+}) => {
+  const [selectedProgram, setSelectedProgram] = useState<string>("")
+
+  // Récupérer les curriculums pour le programme choisi
+  const selectedCurriculums =
+    programList.find(p => p.program.program_code === selectedProgram)?.curriculums || []
+
+  return (
+    <div className="space-y-6">
+      {/* Sélection du programme */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="formation">
+            Formation Souhaitée <span className="text-red-500">*</span>
+          </Label>
+          <Select
+            value={formData.formation}
+            onValueChange={(value) => {
+              handleInputChange("formation", value)
+              setSelectedProgram(value) // stocke le programme sélectionné
+              handleInputChange("curriculum", "") // reset curriculum
+            }}
+          >
+            <SelectTrigger className={`w-full ${errors.formation ? "border-red-500" : ""}`}>
+              <SelectValue placeholder="Choisissez votre formation" />
+            </SelectTrigger>
+            <SelectContent className="w-full">
+              {programList.map(item => (
+                <SelectItem
+                  key={item.program.program_code}
+                  value={item.program.program_code}
+                >
+                  {item.program.program_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.formation && <p className="text-sm text-red-600">{errors.formation}</p>}
+        </div>
+
+        
+        <div className="space-y-2">
+          <Label htmlFor="curriculum">Curriculum <span className="text-red-500">*</span></Label>
+          <Select
+            value={formData.curriculum}
+            onValueChange={(value) => handleInputChange("curriculum", value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Choisissez un curriculum" />
+            </SelectTrigger>
+            <SelectContent className="w-full">
+              {selectedCurriculums.map(curriculum => (
+                <SelectItem
+                  key={curriculum.curriculum_code}
+                  value={curriculum.curriculum_code}
+                >
+                  {curriculum.curriculum_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.curriculum && <p className="text-sm text-red-600">{errors.curriculum}</p>}
+        </div>
+
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="etablissementOrigine">Établissement d'origine</Label>
-        <Input id="etablissementOrigine" value={formData.etablissementOrigine} onChange={(e) => handleInputChange("etablissementOrigine", e.target.value)} placeholder="Établissement d'origine" />
+
+      {/* Autres champs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="education_level_code">Niveau d&apos;éducation <span className="text-red-500">*</span></Label>
+          <Select
+            value={formData.niveauEtude}
+            onValueChange={(e) => handleInputChange("niveauEtude", e)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Diplome d'éntre" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="BACCALAUREAT">Baccalauréat</SelectItem>
+              <SelectItem value="LICENCE">Licence</SelectItem>
+              <SelectItem value="MASTER">Master</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.niveauEtude && <p className="text-sm text-red-600">{errors.niveauEtude}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="etablissementOrigine">Établissement d'origine <span className="text-red-500">*</span></Label>
+          <Input
+            id="etablissementOrigine"
+            value={formData.etablissementOrigine}
+            onChange={(e) => handleInputChange("etablissementOrigine", e.target.value)}
+            placeholder="Établissement d'origine"
+          />
+          {errors.etablissementOrigine && <p className="text-sm text-red-600">{errors.etablissementOrigine
+            }</p>}
+        </div>
       </div>
     </div>
-  </div>
-);
+  )
+}
 
 export const DocumentsForm: React.FC<StepFormProps> = ({
   formData,
@@ -429,7 +507,6 @@ export const DocumentsForm: React.FC<StepFormProps> = ({
       <FileUpload
         label="Photo d'identité (Recto)"
         documentType="photoIdentiteRecto"
-        required
         file={formData.documents.photoIdentiteRecto}
         onFileChange={handleFileChange}
         error={errors.photoIdentiteRecto}
@@ -438,7 +515,6 @@ export const DocumentsForm: React.FC<StepFormProps> = ({
       <FileUpload
         label="Photo d'identité (Verso)"
         documentType="photoIdentiteVerso"
-        required
         file={formData.documents.photoIdentiteVerso}
         onFileChange={handleFileChange}
         error={errors.photoIdentiteVerso}
@@ -447,7 +523,6 @@ export const DocumentsForm: React.FC<StepFormProps> = ({
       <FileUpload
         label="Photo 4x4"
         documentType="photo4x4"
-        required
         file={formData.documents.photo4x4}
         onFileChange={handleFileChange}
         error={errors.photo4x4}
@@ -489,73 +564,79 @@ export const ConfirmationSummary: React.FC<StepFormProps> = ({
   formData,
   errors,
   handleInputChange,
-}) => (
-  <div className="space-y-6">
-    <div className="bg-gray-50 p-6 rounded-lg">
-      <h3 className="text-lg font-semibold mb-4 text-[#3b2c6a]">
-        Récapitulatif de votre demande
-      </h3>
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-4">
-          <div><span className="font-medium">Nom:</span> {formData.nom}</div>
-          <div><span className="font-medium">Prénom:</span> {formData.prenom}</div>
-          <div><span className="font-medium">Date de naissance:</span> {formData.dateNaissance}</div>
-          <div><span className="font-medium">Formation souhaitée:</span> {formations.find((f) => f.id === formData.formation)?.nom || formData.formation}</div>
-        </div>
-      </div>
-    </div>
+  programList
+}) => {
 
-    <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-      <h3 className="text-lg font-semibold mb-4 text-blue-800 flex items-center gap-2">
-        <FileText className="h-5 w-5" />
-        Documents qui seront générés
-      </h3>
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 p-3 bg-white rounded border">
-          <FileText className="h-5 w-5 text-[#ff9900]" />
-          <div>
-            <p className="font-medium">Fiche de Renseignements Officielle</p>
-            <p className="text-sm text-gray-600">Document officiel avec toutes vos informations</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 p-3 bg-white rounded border">
-          <CheckCircle className="h-5 w-5 text-green-600" />
-          <div>
-            <p className="font-medium">Confirmation d'Inscription</p>
-            <p className="text-sm text-gray-600">Accusé de réception de votre demande</p>
+  return (
+    <div className="space-y-6">
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4 text-[#3b2c6a]">
+          Récapitulatif de votre demande
+        </h3>
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-4">
+            <div><span className="font-medium">Nom:</span> {formData.nom}</div>
+            <div><span className="font-medium">Prénom:</span> {formData.prenom}</div>
+            <div><span className="font-medium">Date de naissance:</span> {formData.dateNaissance}</div>
+            <div>
+              <span className="font-medium">Formation souhaitée:</span> {programList.find(item => item.program.program_code === formData.formation)?.program.program_name || 'N/A'}
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div className="flex items-start space-x-2">
-      <Checkbox
-        id="accepteConditions"
-        checked={formData.accepteConditions}
-        onCheckedChange={(checked) => handleInputChange("accepteConditions", checked ? "true" : "false")}
-      />
-      <div className="grid gap-1.5 leading-none">
-        <label
-          htmlFor="accepteConditions"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          J'accepte les conditions d'admission <span className="text-red-500">*</span>
-        </label>
-        <p className="text-xs text-muted-foreground">
-          En cochant cette case, je confirme que toutes les informations fournies sont exactes et j'accepte les conditions d'admission de l'EPFPS.
-        </p>
+      <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+        <h3 className="text-lg font-semibold mb-4 text-blue-800 flex items-center gap-2">
+          <FileText className="h-5 w-5" />
+          Documents qui seront générés
+        </h3>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-3 bg-white rounded border">
+            <FileText className="h-5 w-5 text-[#ff9900]" />
+            <div>
+              <p className="font-medium">Fiche de Renseignements Officielle</p>
+              <p className="text-sm text-gray-600">Document officiel avec toutes vos informations</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-3 bg-white rounded border">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <div>
+              <p className="font-medium">Confirmation d'Inscription</p>
+              <p className="text-sm text-gray-600">Accusé de réception de votre demande</p>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    {errors.accepteConditions && (
-      <p className="text-sm text-red-600">{errors.accepteConditions}</p>
-    )}
 
-    {Object.keys(errors).length > 0 && (
-      <Alert>
-        <AlertDescription>
-          Veuillez corriger les erreurs avant de soumettre votre demande.
-        </AlertDescription>
-      </Alert>
-    )}
-  </div>
-);
+      <div className="flex items-start space-x-2">
+        <Checkbox
+          id="accepteConditions"
+          checked={formData.accepteConditions === "true"}
+          onCheckedChange={(checked) => handleInputChange("accepteConditions", checked ? "true" : "false")}
+        />
+        <div className="grid gap-1.5 leading-none">
+          <label
+            htmlFor="accepteConditions"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            J'accepte les conditions d'admission <span className="text-red-500">*</span>
+          </label>
+          <p className="text-xs text-muted-foreground">
+            En cochant cette case, je confirme que toutes les informations fournies sont exactes et j'accepte les conditions d'admission de l'EPFPS.
+          </p>
+        </div>
+      </div>
+      {errors.accepteConditions && (
+        <p className="text-sm text-red-600">{errors.accepteConditions}</p>
+      )}
+
+      {Object.keys(errors).length > 0 && (
+        <Alert>
+          <AlertDescription>
+            Veuillez corriger les erreurs avant de soumettre votre demande.
+          </AlertDescription>
+        </Alert>
+      )}
+    </div>
+  )
+};

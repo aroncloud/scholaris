@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,17 +13,16 @@ import {
   OriginInfoForm,
   AdditionalInfoForm,
   AcademicInfoForm,
-  ConfirmationSummary
+  ConfirmationSummary,
+  DocumentsForm
 } from "@/components/website/admissions/FormSections";
-import { useRouter } from "next/navigation";
-import LandingHeader from "@/components/website/LandingHeader";
-import LandingFooter from "@/components/website/LandingFooter";
 import { searchStudentByMatricule } from "@/actions/requestSubmissionActions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ISeachMatricule } from "@/types/requestSubmissionTypes";
-import { getConfig } from "@/actions/utilitiesActions";
+import { getConfig, getCurriculumListSite } from "@/actions/utilitiesActions";
 import { IConfig } from "@/types/utilitiesTypes";
+import { IFactorizedProgram } from "@/types/programTypes";
 
 
 const STEPS = [
@@ -56,6 +56,13 @@ const STEPS = [
   },
   {
     id: 5,
+    title: "Documents",
+    description: "Documents requis",
+    icon: FileText,
+    component: DocumentsForm,
+  },
+  {
+    id: 6,
     title: "Confirmation",
     description: "Vérification et envoi",
     icon: FileText,
@@ -64,12 +71,12 @@ const STEPS = [
 ];
 
 const AdmissionRequest: React.FC = () => {
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [matriculeInput, setMatriculeInput] = useState<string>('');
   const [matricule, setMatricule] = useState<ISeachMatricule | null>(null);
   const [loading, setLoading] = useState(false);
   const [configs, setConfigs] = useState<IConfig | null>(null);
+  const [program, setProgram] = useState<IFactorizedProgram[]>([]);
 
 
   useEffect(() => {
@@ -90,6 +97,7 @@ const AdmissionRequest: React.FC = () => {
     try {
       setLoading(true);
       const result = await searchStudentByMatricule(matriculeInput);
+      console.log('result', result)
       if (result.code === 'success' && result.data) {
         setMatricule(result.data.body);
         handleInputChange('nom', result.data.body.last_name || '');
@@ -112,6 +120,13 @@ const AdmissionRequest: React.FC = () => {
 
   
   const prevStep = () => {
+    if(currentStep === 1) {
+      console.log('Search matricule reset');
+      setMatricule(null);
+      setCurrentStep(1);
+    }
+
+
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -123,6 +138,33 @@ const AdmissionRequest: React.FC = () => {
       setConfigs(result.data);
       console.log('Config loaded:', result.data);
     }
+    const curriculumResult = await getCurriculumListSite();
+      console.log('-->curriculumResult', curriculumResult);
+      console.log('-->factorizeByProgram.curriculumResult', factorizeByProgram(curriculumResult.data.body));
+      if(curriculumResult.code == 'success'){
+        setProgram(factorizeByProgram(curriculumResult.data.body))
+      }
+  }
+
+  function factorizeByProgram(data: any[]): IFactorizedProgram[] {
+    const grouped: { [key: string]: IFactorizedProgram } = {};
+
+    data.forEach(item => {
+      const { program, training_sequences, ...curriculumInfo } = item;
+      if (!grouped[item.program_code]) {
+        grouped[item.program_code] = {
+          program: program,
+          curriculums: []
+        };
+      }
+
+      grouped[item.program_code].curriculums.push({
+        ...curriculumInfo,
+        training_sequences
+      });
+    });
+
+    return Object.values(grouped);
   }
 
   const currentStepData = STEPS.find((step) => step.id === currentStep);
@@ -131,8 +173,7 @@ const AdmissionRequest: React.FC = () => {
 
   return (
     <div className="landing-page">
-      <LandingHeader />
-      <main className="py-20">
+      <main >
         <div className="container mx-auto px-4 max-w-4xl">
           {/* En-tête du formulaire */}
           <div className="text-center mb-8">
@@ -248,6 +289,8 @@ const AdmissionRequest: React.FC = () => {
                       handleInputChange={handleInputChange}
                       handleFileChange={handleFileChange}
                       configs={configs}
+                      programList={program}
+                      applicationCode={matriculeInput}
                     />
                   </FormSection>
                 )}
@@ -257,11 +300,11 @@ const AdmissionRequest: React.FC = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={currentStep === 1 ? () => router.push("/") : prevStep}
+                    onClick={prevStep}
                     className="flex items-center gap-2"
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    {currentStep === 1 ? "Retour à l'accueil" : "Précédent"}
+                    {currentStep === 1 ? "Retour" : "Précédent"}
                   </Button>
                   {currentStep < STEPS.length ? (
                     <Button
@@ -273,19 +316,25 @@ const AdmissionRequest: React.FC = () => {
                     </Button>
                   ) : (
                     <Button
-                      onClick={handleSubmit}
+                      onClick={async () => {
+                        const success = await handleSubmit(matriculeInput);
+                        if (success) {
+                          alert("Votre demande a été soumise avec succès !");
+                          setMatricule(null); 
+                          setCurrentStep(1); 
+                        }
+                      }}
                       disabled={isSubmitting}
                       className="bg-[#ff9900] hover:bg-[#e68a00] text-white"
                     >
                       {isSubmitting ? "Envoi en cours..." : "Soumettre ma demande"}
-                    </Button>
+                  </Button>
                   )}
                 </div>
               </>
             }
         </div>
       </main>
-      <LandingFooter />
     </div>
   );
 };
