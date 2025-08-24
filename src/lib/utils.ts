@@ -108,6 +108,7 @@ export const getStatusColor = (status: string): string => {
     case "UNPAID":
     case "INACTIVE":
     case "INACTIF":
+    case "SUSPENDED":
       return "bg-red-100 text-red-600 dark:bg-gray-700/20 dark:text-red-400";
 
     // Fallback

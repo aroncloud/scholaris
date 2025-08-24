@@ -17,8 +17,8 @@ import { ACTION } from "@/constant";
 interface ModalUserProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  formData: Partial<ICreateUser>;
-  setFormData: Dispatch<SetStateAction<Partial<ICreateUser>>>;
+  formData: ICreateUser | null;
+  setFormData: Dispatch<SetStateAction<ICreateUser | null>>;
   onConfirm: () => void;
   action: ACTION;
 }
@@ -38,7 +38,7 @@ const ModalUser: React.FC<ModalUserProps> = ({
       title={action === "CREATE" ? "Créer un nouvel utilisateur" : "Modifier un utilisateur"}
       onCancel={() => {
         onOpenChange(false);
-        setFormData({});
+        setFormData(null);
       }}
       onConfirm={onConfirm}
       confirmText={action === "CREATE" ? "Créer l'utilisateur" : "Mettre à jour"}
@@ -49,8 +49,8 @@ const ModalUser: React.FC<ModalUserProps> = ({
           <Label htmlFor="first_name">Prénom</Label>
           <Input
             id="first_name"
-            value={formData.first_name || ""}
-            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+            value={formData && formData.first_name || ""}
+            onChange={(e) => {if(formData) setFormData({ ...formData, first_name: e.target.value })}}
           />
         </div>
 
@@ -59,8 +59,8 @@ const ModalUser: React.FC<ModalUserProps> = ({
           <Label htmlFor="last_name">Nom</Label>
           <Input
             id="last_name"
-            value={formData.last_name || ""}
-            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+            value={formData && formData.last_name || ""}
+            onChange={(e) => {if(formData) setFormData({ ...formData, last_name: e.target.value })}}
           />
         </div>
 
@@ -70,8 +70,8 @@ const ModalUser: React.FC<ModalUserProps> = ({
           <Input
             id="email"
             type="email"
-            value={formData.email || ""}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            value={formData && formData.email || ""}
+            onChange={(e) => {if(formData) setFormData({ ...formData, email: e.target.value })}}
           />
         </div>
 
@@ -81,8 +81,8 @@ const ModalUser: React.FC<ModalUserProps> = ({
             <Label htmlFor="phone_number">Téléphone</Label>
             <Input
                 id="phone_number"
-                value={formData.phone_number || ""}
-                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                value={formData && formData.phone_number || ""}
+                onChange={(e) => {if(formData) setFormData({ ...formData, phone_number: e.target.value })}}
             />
             </div>
         )}
@@ -94,8 +94,8 @@ const ModalUser: React.FC<ModalUserProps> = ({
             <Input
               id="password_plaintext"
               type="password"
-              value={formData.password_plaintext || ""}
-              onChange={(e) => setFormData({ ...formData, password_plaintext: e.target.value })}
+              value={formData && formData.password_plaintext || ""}
+              onChange={(e) => {if(formData) setFormData({ ...formData, password_plaintext: e.target.value })}}
             />
           </div>
         )}
@@ -104,8 +104,8 @@ const ModalUser: React.FC<ModalUserProps> = ({
         <div className="space-y-2">
           <Label htmlFor="gender">Genre</Label>
           <Select
-            value={formData.gender}
-            onValueChange={(value) => setFormData({ ...formData, gender: value as gender })}
+            value={formData ? formData.gender : 'MALE'}
+            onValueChange={(value) => {if(formData) setFormData({ ...formData, gender: value as gender })}}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner un genre" />
