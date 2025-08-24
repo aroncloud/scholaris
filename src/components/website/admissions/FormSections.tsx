@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -21,6 +21,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FileText, CheckCircle, Upload, User} from "lucide-react";
 import { FormErrors } from "@/hooks/useAdmissionForm";
 import { FileUploadProps, FormData } from "@/types/requestSubmissionTypes";
+import { IConfig, ICountryMap } from "@/types/utilitiesTypes";
+import { regroupLocation } from "@/lib/utils";
+import { maritalStatus } from "@/constant";
 
 interface FormSectionProps {
   title: string;
@@ -99,6 +102,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 interface StepFormProps {
   formData: FormData;
   errors: FormErrors;
+  configs: IConfig | null;
   handleInputChange: (field: string, value: string) => void;
   handleFileChange: (
     documentType: keyof FormData["documents"],
@@ -106,19 +110,6 @@ interface StepFormProps {
   ) => void;
 }
 
-// Données constantes pour les listes déroulantes
-const regions = [
-  "Adamaoua",
-  "Centre",
-  "Est",
-  "Extrême-Nord",
-  "Littoral",
-  "Nord",
-  "Nord-Ouest",
-  "Ouest",
-  "Sud",
-  "Sud-Ouest",
-];
 
 const formations = [
   { id: "aide-soignant", nom: "Aide-Soignant(e)" },
@@ -186,79 +177,205 @@ export const PersonalInfoForm: React.FC<StepFormProps> = ({
 export const OriginInfoForm: React.FC<StepFormProps> = ({
   formData,
   handleInputChange,
-}) => (
-  <div className="space-y-6">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="space-y-2">
-        <Label htmlFor="region">Région</Label>
-        <Select value={formData.region} onValueChange={(value) => handleInputChange("region", value)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Sélectionnez la région" />
-          </SelectTrigger>
-          <SelectContent>
-            {regions.map((region) => (
-              <SelectItem key={region} value={region}>{region}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+  configs
+}) => {
+  // On regroupe les données en structure hiérarchique
+  const countryMap: ICountryMap = useMemo(() => {
+    if (!configs) {
+      return { regions: [] };
+    }
+    return regroupLocation({
+      arrondissements: configs.arrondissements,
+      departments: configs.departments,
+      regions: configs.regions
+    });
+  }, [configs]);
+
+  const [departments, setDepartments] = useState<{ code: string; name: string }[]>([]);
+  const [arrondissements, setArrondissements] = useState<{ code: string; name: string }[]>([]);
+
+  // Mettre à jour les départements quand la région change
+  useEffect(() => {
+    const region = countryMap.regions.find(r => r.region_code === formData.region);
+    if (region) {
+      setDepartments(region.departments.map(d => ({ code: d.department_code, name: d.department_name })));
+    } else {
+      setDepartments([]);
+    }
+    setArrondissements([]);
+    handleInputChange("departement", "");
+    handleInputChange("arrondissement", "");
+  }, [formData.region, countryMap]);
+
+  // Mettre à jour les arrondissements quand le département change
+  useEffect(() => {
+    const region = countryMap.regions.find(r => r.region_code === formData.region);
+    const dept = region?.departments.find(d => d.department_code === formData.departement);
+    if (dept) {
+      setArrondissements(dept.arrondissements.map(a => ({ code: a.arrondissement_code, name: a.arrondissement_name })));
+    } else {
+      setArrondissements([]);
+    }
+    handleInputChange("arrondissement", "");
+  }, [formData.departement, formData.region, countryMap]);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Région */}
+        <div className="space-y-2">
+          <Label htmlFor="region">Région</Label>
+          <Select
+            value={formData.region}
+            onValueChange={(value) => handleInputChange("region", value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Sélectionnez la région" />
+            </SelectTrigger>
+            <SelectContent>
+              {countryMap.regions.map(region => (
+                <SelectItem key={region.region_code} value={region.region_code}>
+                  {region.region_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Département */}
+        <div className="space-y-2">
+          <Label htmlFor="departement">Département</Label>
+          <Select
+            value={formData.departement}
+            onValueChange={(value) => handleInputChange("departement", value)}
+            disabled={!departments.length}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Sélectionnez le département" />
+            </SelectTrigger>
+            <SelectContent>
+              {departments.map(dept => (
+                <SelectItem key={dept.code} value={dept.code}>
+                  {dept.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="arrondissement">Arrondissement</Label>
-        <Input id="arrondissement" value={formData.arrondissement} onChange={(e) => handleInputChange("arrondissement", e.target.value)} placeholder="Arrondissement" />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Arrondissement */}
+        <div className="space-y-2">
+          <Label htmlFor="arrondissement">Arrondissement</Label>
+          <Select
+            value={formData.arrondissement}
+            onValueChange={(value) => handleInputChange("arrondissement", value)}
+            disabled={!arrondissements.length}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Sélectionnez l'arrondissement" />
+            </SelectTrigger>
+            <SelectContent>
+              {arrondissements.map(arr => (
+                <SelectItem key={arr.code} value={arr.code}>
+                  {arr.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Village */}
+        <div className="space-y-2">
+          <Label htmlFor="village">Village</Label>
+          <Input
+            id="village"
+            value={formData.village}
+            onChange={(e) => handleInputChange("village", e.target.value)}
+            placeholder="Village"
+          />
+        </div>
       </div>
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="space-y-2">
-        <Label htmlFor="departement">Département</Label>
-        <Input id="departement" value={formData.departement} onChange={(e) => handleInputChange("departement", e.target.value)} placeholder="Département" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="village">Village</Label>
-        <Input id="village" value={formData.village} onChange={(e) => handleInputChange("village", e.target.value)} placeholder="Village" />
-      </div>
-    </div>
-  </div>
-);
+  );
+};
 
 export const AdditionalInfoForm: React.FC<StepFormProps> = ({
   formData,
   handleInputChange,
-}) => (
-  <div className="space-y-6">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="space-y-2">
-        <Label htmlFor="ethnie">Ethnie</Label>
-        <Input id="ethnie" value={formData.ethnie} onChange={(e) => handleInputChange("ethnie", e.target.value)} placeholder="Ethnie" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="situationMatrimoniale">Situation matrimoniale</Label>
-        <Select value={formData.situationMatrimoniale} onValueChange={(value) => handleInputChange("situationMatrimoniale", value)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Sélectionnez" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="célibataire">Célibataire</SelectItem>
-            <SelectItem value="marié(e)">Marié(e)</SelectItem>
-            <SelectItem value="divorcé(e)">Divorcé(e)</SelectItem>
-            <SelectItem value="veuf(ve)">Veuf(ve)</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-    {formData.situationMatrimoniale === "marié(e)" && (
+  configs
+}) => {
+  return (
+    <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Ethnie */}
         <div className="space-y-2">
-          <Label htmlFor="nomEpoux">Nom de l'époux(se)</Label>
-          <Input id="nomEpoux" value={formData.nomEpoux} onChange={(e) => handleInputChange("nomEpoux", e.target.value)} placeholder="Nom de l'époux(se)" />
+          <Label htmlFor="ethnie">Ethnie</Label>
+          <Select
+            value={formData.ethnie}
+            onValueChange={(value) => handleInputChange("ethnie", value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Sélectionnez l'ethnie" />
+            </SelectTrigger>
+            <SelectContent>
+              {configs && configs.ethnicities.map((eth) => (
+                <SelectItem key={eth.ethnicity_code} value={eth.ethnicity_code}>
+                  {eth.ethnicity_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+
+        {/* Situation matrimoniale */}
         <div className="space-y-2">
-          <Label htmlFor="contactEpoux">Contact de l'époux(se)</Label>
-          <Input id="contactEpoux" type="tel" value={formData.contactEpoux} onChange={(e) => handleInputChange("contactEpoux", e.target.value)} placeholder="Contact de l'époux(se)" />
+          <div className="space-y-2"> 
+              <Label htmlFor="situationMatrimoniale">Situation matrimoniale</Label>
+              <Select value={formData.situationMatrimoniale} onValueChange={(value) => handleInputChange("situationMatrimoniale", value)}>
+                  <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionnez" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {maritalStatus.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+              </Select> 
+          </div>
         </div>
       </div>
-    )}
-  </div>
-);
+
+      {/* Si marié(e), afficher les champs époux(se) */}
+      {formData.situationMatrimoniale === "MARRIED" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="nomEpoux">Nom de l'époux(se)</Label>
+            <Input
+              id="nomEpoux"
+              value={formData.nomEpoux}
+              onChange={(e) => handleInputChange("nomEpoux", e.target.value)}
+              placeholder="Nom de l'époux(se)"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contactEpoux">Contact de l'époux(se)</Label>
+            <Input
+              id="contactEpoux"
+              type="tel"
+              value={formData.contactEpoux}
+              onChange={(e) => handleInputChange("contactEpoux", e.target.value)}
+              placeholder="Contact de l'époux(se)"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const AcademicInfoForm: React.FC<StepFormProps> = ({
   formData,
@@ -274,7 +391,7 @@ export const AcademicInfoForm: React.FC<StepFormProps> = ({
         value={formData.formation}
         onValueChange={(value) => handleInputChange("formation", value)}
       >
-        <SelectTrigger className={errors.formation ? "border-red-500" : ""}>
+        <SelectTrigger className={errors.formation ? "border-red-500 w-1/2" : "w-1/2"}>
           <SelectValue placeholder="Choisissez votre formation" />
         </SelectTrigger>
         <SelectContent>
@@ -298,10 +415,6 @@ export const AcademicInfoForm: React.FC<StepFormProps> = ({
         <Label htmlFor="etablissementOrigine">Établissement d'origine</Label>
         <Input id="etablissementOrigine" value={formData.etablissementOrigine} onChange={(e) => handleInputChange("etablissementOrigine", e.target.value)} placeholder="Établissement d'origine" />
       </div>
-    </div>
-    <div className="space-y-2">
-      <Label htmlFor="matriculeConcours">Matricule du concours d'entrée</Label>
-      <Input id="matriculeConcours" value={formData.matriculeConcours} onChange={(e) => handleInputChange("matriculeConcours", e.target.value)} placeholder="Matricule du concours" />
     </div>
   </div>
 );

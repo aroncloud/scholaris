@@ -1,6 +1,11 @@
 export type gender = 'FEMALE' | 'MALE';
 export type ACTION = 'CREATE' | 'UPDATE' | 'DELETE' | 'DESACTIVATE' | 'ACTIVATE';
-
+export const maritalStatus = [
+  { label: "Célibataire", value: "SINGLE" },
+  { label: "Marié(e)", value: "MARRIED" },
+  { label: "Divorcé(e)", value: "DIVORCED" },
+  { label: "Veuf(ve)", value: "WIDOWED" },
+];
 
 
 

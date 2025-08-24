@@ -20,7 +20,7 @@ export function actionErrorHandler(error: unknown) {
       };
     }
     const err = error as AxiosError;
-    console.log('-->createAsset.error', err.response)
+    console.log(err.response)
     return {
       code: typeof error === 'object' && error !== null && 'code' in error ? err.code ?? "unknown" : "unknown",
       error: typeof error === 'object' && error !== null && 'response' in error && err.response?.data?.message

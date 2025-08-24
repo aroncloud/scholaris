@@ -1,4 +1,5 @@
 import { defaultToastOptions, ToastType } from "@/types/uiTypes";
+import { IArrondissement, IArrondissementMap, ICountryMap, IDepartement, IDepartmentMap, IRegion, IRegionMap } from "@/types/utilitiesTypes";
 import { clsx, type ClassValue } from "clsx"
 import { Id, toast, ToastContent, ToastOptions } from "react-toastify";
 import { twMerge } from "tailwind-merge"
@@ -139,9 +140,6 @@ export const getRoleColor = (role: string): string => {
   }
 };
 
-
-
-
 export const getMentionColor = (mention: string) => {
   switch (mention.toUpperCase()) {
     case "EXCELLENT":
@@ -154,3 +152,48 @@ export const getMentionColor = (mention: string) => {
       return "bg-gray-100 text-gray-800";
   }
 };
+
+export function regroupLocation(params: {
+  arrondissements: IArrondissement[];
+  departments: IDepartement[];
+  regions: IRegion[];
+}): ICountryMap {
+  const { arrondissements, departments, regions } = params;
+
+  const regionNameByCode = new Map<string, string>(
+    regions.map(r => [r.region_code, r.region_name])
+  );
+
+  const arrByDept = new Map<string, IArrondissementMap[]>();
+  for (const arr of arrondissements) {
+    const list = arrByDept.get(arr.department_code) ?? [];
+    list.push({
+      arrondissement_code: arr.arrondissement_code,
+      arrondissement_name: arr.arrondissement_name,
+    });
+    arrByDept.set(arr.department_code, list);
+  }
+
+  const deptByRegion = new Map<string, IDepartmentMap[]>();
+  for (const dept of departments) {
+    const deptEntry: IDepartmentMap = {
+      department_code: dept.department_code,
+      department_name: dept.department_name,
+      arrondissements: arrByDept.get(dept.department_code) ?? [],
+    };
+    const list = deptByRegion.get(dept.region_code) ?? [];
+    list.push(deptEntry);
+    deptByRegion.set(dept.region_code, list);
+  }
+
+  const regionsOut: IRegionMap[] = [];
+  for (const [region_code, deptList] of deptByRegion.entries()) {
+    regionsOut.push({
+      region_code,
+      region_name: regionNameByCode.get(region_code) ?? region_code,
+      departments: deptList,
+    });
+  }
+
+  return { regions: regionsOut };
+}
