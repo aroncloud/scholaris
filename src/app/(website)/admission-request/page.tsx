@@ -79,9 +79,24 @@ const AdmissionRequest: React.FC = () => {
   const [program, setProgram] = useState<IFactorizedProgram[]>([]);
 
 
+
+  const init = React.useCallback(async () => {
+    const result = await getConfig();
+    if(result.code === 'success' && result.data) {
+      setConfigs(result.data);
+      console.log('Config loaded:', result.data);
+    }
+    const curriculumResult = await getCurriculumListSite();
+      console.log('-->curriculumResult', curriculumResult);
+      console.log('-->factorizeByProgram.curriculumResult', factorizeByProgram(curriculumResult.data.body));
+      if(curriculumResult.code == 'success'){
+        setProgram(factorizeByProgram(curriculumResult.data.body))
+      }
+  }, []);
+
   useEffect(() => {
     init();
-  }, []);
+  }, [init]);
 
   const {
     formData,
@@ -131,20 +146,6 @@ const AdmissionRequest: React.FC = () => {
       setCurrentStep(currentStep - 1);
     }
   };
-
-  const init = async () => {
-    const result = await getConfig();
-    if(result.code === 'success' && result.data) {
-      setConfigs(result.data);
-      console.log('Config loaded:', result.data);
-    }
-    const curriculumResult = await getCurriculumListSite();
-      console.log('-->curriculumResult', curriculumResult);
-      console.log('-->factorizeByProgram.curriculumResult', factorizeByProgram(curriculumResult.data.body));
-      if(curriculumResult.code == 'success'){
-        setProgram(factorizeByProgram(curriculumResult.data.body))
-      }
-  }
 
   function factorizeByProgram(data: any[]): IFactorizedProgram[] {
     const grouped: { [key: string]: IFactorizedProgram } = {};

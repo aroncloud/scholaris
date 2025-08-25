@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // store/userStore.ts
 
 import { create } from 'zustand';

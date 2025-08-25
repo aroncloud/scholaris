@@ -69,12 +69,12 @@ export function CreateTeacherDialog({
         <DialogHeader>
           <DialogTitle>Créer un nouvel enseignant</DialogTitle>
           <DialogDescription>
-            Remplissez les informations de l'enseignant
+            Remplissez les informations de l&apos;enseignant
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="user_name">Nom d'utilisateur *</Label>
+            <Label htmlFor="user_name">Nom d&apos;utilisateur *</Label>
             <Input
               id="user_name"
               value={formData.user_name || ""}
@@ -178,7 +178,7 @@ export function CreateTeacherDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="hiring_date">Date d'embauche *</Label>
+            <Label htmlFor="hiring_date">Date d&apos;embauche *</Label>
             <Input
               id="hiring_date"
               type="date"
@@ -220,7 +220,7 @@ export function CreateTeacherDialog({
             Annuler
           </Button>
           <Button onClick={handleSave}>
-            Créer l'enseignant
+            Créer l&apos;enseignant
           </Button>
         </DialogFooter>
       </DialogContent>

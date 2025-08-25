@@ -1,7 +1,6 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import Button from "@/components/custom-ui/button/Button";
-import { BoxIcon } from "@/icons";
+import { Button } from "@/components/ui/button";
 import { Metadata } from "next";
 import React from "react";
 
@@ -19,10 +18,10 @@ export default function Buttons() {
         {/* Primary Button */}
         <ComponentCard title="Primary Button">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="primary">
+            <Button size="sm" variant="info">
               Button Text
             </Button>
-            <Button size="md" variant="primary">
+            <Button size="sm" variant="info">
               Button Text
             </Button>
           </div>
@@ -30,10 +29,10 @@ export default function Buttons() {
         {/* Primary Button with Start Icon */}
         <ComponentCard title="Primary Button with Left Icon">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="primary" startIcon={<BoxIcon />}>
+            <Button size="sm" variant="info">
               Button Text
             </Button>
-            <Button size="md" variant="primary" startIcon={<BoxIcon />}>
+            <Button size="sm" variant="info">
               Button Text
             </Button>
           </div>
@@ -41,10 +40,10 @@ export default function Buttons() {
         {/* Primary Button with Start Icon */}
         <ComponentCard title="Primary Button with Right Icon">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="primary" endIcon={<BoxIcon />}>
+            <Button size="sm" variant="info">
               Button Text
             </Button>
-            <Button size="md" variant="primary" endIcon={<BoxIcon />}>
+            <Button size="sm" variant="info">
               Button Text
             </Button>
           </div>
@@ -56,7 +55,7 @@ export default function Buttons() {
             <Button size="sm" variant="outline">
               Button Text
             </Button>
-            <Button size="md" variant="outline">
+            <Button size="sm" variant="outline">
               Button Text
             </Button>
           </div>
@@ -64,10 +63,10 @@ export default function Buttons() {
         {/* Outline Button with Start Icon */}
         <ComponentCard title="Outline Button with Left Icon">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="outline" startIcon={<BoxIcon />}>
+            <Button size="sm" variant="outline">
               Button Text
             </Button>
-            <Button size="md" variant="outline" startIcon={<BoxIcon />}>
+            <Button size="sm" variant="outline">
               Button Text
             </Button>
           </div>
@@ -75,10 +74,10 @@ export default function Buttons() {
         {/* Outline Button with Start Icon */}
         <ComponentCard title="Outline Button with Right Icon">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="outline" endIcon={<BoxIcon />}>
+            <Button size="sm" variant="outline">
               Button Text
             </Button>
-            <Button size="md" variant="outline" endIcon={<BoxIcon />}>
+            <Button size="sm" variant="outline">
               Button Text
             </Button>
           </div>

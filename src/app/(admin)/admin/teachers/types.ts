@@ -136,7 +136,7 @@ export function transformAPIResponseToTeacher(apiResponse: TeacherAPIResponse): 
     statut: apiResponse.status_code === "ACTIVE" ? "actif" : apiResponse.status_code === "SUSPENDED" ? "suspendu" : "archive",
     typeContrat: apiResponse.type_code === "PERMANENT" ? "CDI" : apiResponse.type_code === "TEMPORARY" ? "CDD" : "Vacataire",
     typeCode: apiResponse.type_code,
-    dateEmbauche: apiResponse.hiring_date,
+    // dateEmbauche: apiResponse.hiring_date,
     salaire: apiResponse.salary,
     qualification: apiResponse.qualifications || "",
     experience: 0,

@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/no-unescaped-entities */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -352,14 +352,9 @@ export default function ProgramsPage() {
   const [selectedDomaineForActions, setSelectedDomaineForActions] = useState<
     string | null
   >(null);
+// ... other imports
 
-
-  useEffect(() => {
-    init()
-  }, [])
-
-
-  const init = async () => {
+const init = useCallback(async () => {
     setIsLoading(true);
     const curriculumResult = await getCurriculumList();
     if (curriculumResult.code === 'success') {
@@ -367,7 +362,14 @@ export default function ProgramsPage() {
       setCurriculumList(curriculumResult.data.body);
     }
     setIsLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    init()
+  }, [init])
+
+
+  
 
 
   function factorizeByProgram(data: any[]): IFactorizedProgram[] {

@@ -49,7 +49,6 @@ export function UpdateTeacherDialog({
         phone_number: teacher.telephone || "",
         teacher_number: teacher.matricule,
         specialty: teacher.specialite,
-        hiring_date: teacher.dateEmbauche,
         salary: teacher.salaire || 0,
         qualifications: teacher.qualification || "",
       });
@@ -91,14 +90,14 @@ export function UpdateTeacherDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Modifier l'enseignant</DialogTitle>
+          <DialogTitle>Modifier l&apos;enseignant</DialogTitle>
           <DialogDescription>
-            Modifiez les informations de l'enseignant
+            Modifiez les informations de l&apos;enseignant
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="user_name">Nom d'utilisateur *</Label>
+            <Label htmlFor="user_name">Nom d&apos;utilisateur *</Label>
             <Input
               id="user_name"
               value={formData.user_name || ""}
@@ -198,7 +197,7 @@ export function UpdateTeacherDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="hiring_date">Date d'embauche *</Label>
+            <Label htmlFor="hiring_date">Date d&apos;embauche *</Label>
             <Input
               id="hiring_date"
               type="date"

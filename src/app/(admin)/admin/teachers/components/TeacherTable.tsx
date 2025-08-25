@@ -94,9 +94,10 @@ export function TeacherTable({
               )}
             </TableCell>
             <TableCell>
-              <div className="text-sm">
+              {/* <div className="text-sm">
                 {new Date(teacher.dateEmbauche).toLocaleDateString("fr-FR")}
-              </div>
+              </div> */}
+              -
             </TableCell>
             <TableCell>
               <Badge className={statutLabels[teacher.statut].color}>

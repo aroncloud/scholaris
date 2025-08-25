@@ -58,8 +58,9 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
         } else {
           toast.error("Erreur lors du chargement des curriculums");
         }
-      } catch (error) {
+      } catch (error: unknown) {
         toast.error("Erreur lors du chargement des curriculums");
+        console.log(error);
       } finally {
         setLoadingCurriculums(false);
       }
@@ -109,6 +110,7 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
       }
     } catch (error) {
       toast.error("Une erreur inattendue s'est produite");
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -118,9 +120,9 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Nouvelle demande d'inscription</DialogTitle>
+          <DialogTitle>Nouvelle demande d&apos;inscription</DialogTitle>
           <DialogDescription>
-            Créer une nouvelle demande d'inscription étudiant
+            Créer une nouvelle demande d&apos;inscription étudiant
           </DialogDescription>
         </DialogHeader>
         

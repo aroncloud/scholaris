@@ -74,7 +74,7 @@ const FilieresTab = ({ program }: MyComponentProps) => {
     //   return matchesSearch && matchesStatus;
     return matchesSearch;
     });
-  }, [program, searchTerm, filterStatut]);
+  }, [program, searchTerm]);
 
   return (
     <TabsContent value="program" className="space-y-4">

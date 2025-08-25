@@ -124,9 +124,9 @@ export function TeacherDialog({
                 <Label className="text-sm font-medium text-muted-foreground">
                   Date d&apos;embauche
                 </Label>
-                <p className="text-sm">
+                {/* <p className="text-sm">
                   {new Date(teacher.dateEmbauche).toLocaleDateString("fr-FR")}
-                </p>
+                </p> */}
               </div>
               <div>
                 <Label className="text-sm font-medium text-muted-foreground">

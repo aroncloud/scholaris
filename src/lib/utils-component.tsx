@@ -1,4 +1,3 @@
-import { AssetTypeCode } from "@/types/Property";
 import { CheckCircle, Clock, ExternalLink, XCircle } from "lucide-react"
 import {
   DollarSign,
@@ -9,20 +8,20 @@ import {
   Banknote,
 } from 'lucide-react';
 
-interface Props {
-  code:
-    | 'DOLLAR'
-    | 'EURO'
-    | 'INR'
-    | 'GBP'
-    | 'RUB'
-    | 'JPY'
-    | 'CHF'
-    | 'FCFA'
-    | string; // pour capturer les cas inconnus
-  size?: number;
-  color?: string;
-}
+// interface Props {
+//   code:
+//     | 'DOLLAR'
+//     | 'EURO'
+//     | 'INR'
+//     | 'GBP'
+//     | 'RUB'
+//     | 'JPY'
+//     | 'CHF'
+//     | 'FCFA'
+//     | string; // pour capturer les cas inconnus
+//   size?: number;
+//   color?: string;
+// }
 
 export const getStatusBadge = (status: string) => {
   const baseClass =

@@ -213,7 +213,7 @@ export const OriginInfoForm: React.FC<StepFormProps> = ({
     setArrondissements([]);
     handleInputChange("departement", "");
     handleInputChange("arrondissement", "");
-  }, [formData.region, countryMap]);
+  }, [formData.region, countryMap, handleInputChange]);
 
   // Mettre à jour les arrondissements quand le département change
   useEffect(() => {
@@ -225,7 +225,7 @@ export const OriginInfoForm: React.FC<StepFormProps> = ({
       setArrondissements([]);
     }
     handleInputChange("arrondissement", "");
-  }, [formData.departement, formData.region, countryMap]);
+  }, [formData.departement, formData.region, countryMap, handleInputChange]);
 
   return (
     <div className="space-y-6">
