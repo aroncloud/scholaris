@@ -10,7 +10,7 @@ export default function Layout({
     return (
         <div>
             <LandingHeader />
-            <div className={`dark:bg-boxdark-2 dark:text-bodydark min-h-screen bg-blue-sky mt-28`}>
+            <div className={`dark:bg-boxdark-2 dark:text-bodydark min-h-screen bg-blue-sky mt-28 mb-20`}>
                 {children}
             </div>
             <LandingFooter />

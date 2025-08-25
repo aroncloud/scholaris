@@ -94,6 +94,7 @@ import { IFactorizedProgram, ICurriculumDetail, IProgramList } from "@/types/pro
 import { getCurriculumList, getProgramList, getSemesterList } from "@/actions/programsAction";
 import MaquettesTab from "./components/MaquettesTab";
 import CalendrierTab from "./components/CalendrierTab";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Module {
   id: string;
@@ -292,6 +293,7 @@ export default function ProgramsPage() {
   const [filterStatut, setFilterStatut] = useState("all");
   const [program, setProgram] = useState<IFactorizedProgram[]>([]);
   const [curriculumList, setCurriculumList] = useState<ICurriculumDetail[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedFiliere, setSelectedFiliere] = useState<Filiere | null>(null);
   const [selectedMaquette, setSelectedMaquette] = useState<Maquette | null>(
     null,
@@ -358,13 +360,15 @@ export default function ProgramsPage() {
 
 
   const init = async () => {
+    setIsLoading(true);
     const curriculumResult = await getCurriculumList();
-    console.log('-->curriculumResult', curriculumResult);
-    if(curriculumResult.code == 'success'){
-      setProgram(factorizeByProgram(curriculumResult.data.body))
-      setCurriculumList(curriculumResult.data.body)
+    if (curriculumResult.code === 'success') {
+      setProgram(factorizeByProgram(curriculumResult.data.body));
+      setCurriculumList(curriculumResult.data.body);
     }
-  }
+    setIsLoading(false);
+  };
+
 
   function factorizeByProgram(data: any[]): IFactorizedProgram[] {
     const grouped: { [key: string]: IFactorizedProgram } = {};
@@ -522,18 +526,20 @@ export default function ProgramsPage() {
           </TabsList>
 
           {/* Filieres Tab */}
-          <FilieresTab
-            program={program}
-          />
+          {isLoading ? (
+            <FilieresTabSkeleton />
+          ) : (
+            <FilieresTab program={program} />
+          )}
 
           {/* Maquettes Tab */}
-          <MaquettesTab curriculumList={curriculumList} />
+          {!isLoading && <MaquettesTab curriculumList={curriculumList} />}
 
           {/* Modules Tab */}
           
 
           {/* Calendrier Tab */}
-          <CalendrierTab />
+          {!isLoading && <CalendrierTab />}
         </Tabs>
 
         {/* Create Filiere Dialog */}
@@ -1723,3 +1729,59 @@ export default function ProgramsPage() {
       </div>
   );
 }
+
+
+const FilieresTabSkeleton = () => {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Filières d&apos;études</CardTitle>
+        <CardDescription>Gestion des programmes de formation</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {/* Barre de recherche et filtre */}
+        <div className="flex justify-between items-center mb-4">
+          <Skeleton className="h-10 w-64 rounded-md" />
+          <Skeleton className="h-10 w-48 rounded-md" />
+        </div>
+
+        {/* Table structure */}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Filière</TableHead>
+              <TableHead>Durée</TableHead>
+              <TableHead>Maquettes</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-3 w-60" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-28 rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+};

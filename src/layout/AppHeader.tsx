@@ -84,31 +84,26 @@ const AppHeader: React.FC = () => {
           </button>
           {/* Logo */}
           
-          <Link href="/">
+          <Link href="/" className="flex items-center">
+            
+            <div className="bg-white rounded-2xl p-1.5">
+              <Image 
+                src='/images/logo/logoEPFPS.png'
+                alt="Logo EPFPS"
+                className="h-12 w-auto"
+                height={200}
+                width={200}
+              />
+
+            </div>
             <div className="ml-3 flex flex-col gap-2 text-white">
-                <h1 className="text-xl md:text-4xl font-bold tracking-tight">
-                  ISS<span className="text-amber-300">TDM</span>
-                </h1>
-                <span className="text-xs -mt-1 tracking-wider uppercase hidden md:inline-block">
-                  MEIGANGA • {new Date().getFullYear()}
-                </span>
-              </div>
-          </Link>
-          <Link href="/" className="lg:hidden">
-            <Image
-              width={154}
-              height={32}
-              className="brightness-0 invert" // Rend le logo blanc pour contraster avec le fond bleu
-              src="./images/logo/logo.svg"
-              alt="Logo"
-            />
-            <Image
-              width={154}
-              height={32}
-              className="hidden dark:block brightness-0 invert"
-              src="./images/logo/logo-dark.svg"
-              alt="Logo"
-            />
+              <h1 className="text-xl md:text-4xl font-bold tracking-tight">
+                EPF<span className="text-amber-300">PS</span>
+              </h1>
+              <span className="text-xs -mt-1 tracking-wider uppercase hidden md:inline-block">
+                MEIGANGA • {new Date().getFullYear()}
+              </span>
+            </div>
           </Link>
 
           <button

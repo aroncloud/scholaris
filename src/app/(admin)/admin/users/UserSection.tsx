@@ -65,18 +65,18 @@ import {
 } from "lucide-react";
 import { getUserList } from "@/actions/userAction";
 import { toast } from "sonner";
-import { ICreateUser, IListUser } from "@/types/userTypes";
+import { ICreateUser, IUserList } from "@/types/userTypes";
 import { getRoleColor, getStatusColor } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 import { ACTION } from "@/constant";
 
 type MyComponentProps = {
-    userList: IListUser[];
+    userList: IUserList[];
     userRoleList: {lable: string, value: string}[];
     setAction: Dispatch<SetStateAction<ACTION>>;
     setUserFormData: Dispatch<React.SetStateAction<ICreateUser | null>>;
-    setSelectedUser: Dispatch<SetStateAction<IListUser | null>>;
+    setSelectedUser: Dispatch<SetStateAction<IUserList | null>>;
     setIsEditDialogOpen: Dispatch<SetStateAction<boolean>>;
     setIsCancelUserDialogOpen: Dispatch<SetStateAction<boolean>>;
 
@@ -86,7 +86,7 @@ const UserSection = ({userList, userRoleList, setAction, setUserFormData, setSel
     const [searchTerm, setSearchTerm] = useState("");
     const [filterFiliere, setFilterFiliere] = useState("all");
     const [filterStatut, setFilterStatut] = useState("all");
-    const [currentUserList, setCurrentUserList] = useState<IListUser[]>([]);
+    const [currentUserList, setCurrentUserList] = useState<IUserList[]>([]);
     const [selectedRole, setSelectedRole] = useState('All');
 
 
@@ -160,7 +160,7 @@ const UserSection = ({userList, userRoleList, setAction, setUserFormData, setSel
                     </TableHeader>
                     <TableBody>
                     {userList.map((user) => (
-                        <TableRow key={user.user_code}>
+                        <TableRow key={uuidv4()}>
                         <TableCell>
                             <div className="flex items-center space-x-3">
                             <Avatar>
@@ -176,25 +176,29 @@ const UserSection = ({userList, userRoleList, setAction, setUserFormData, setSel
                                 <div className="text-sm text-muted-foreground">
                                 {user.email}
                                 </div>
-                                <div className="text-xs text-muted-foreground">
-                                {/* {user.profile} */}
+                                {/* <div className="text-xs text-muted-foreground">
+                                {user.profile}
                                 Service Scolarité
-                                </div>
+                                </div> */}
                             </div>
                             </div>
                         </TableCell>
                         <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                            {userRoleList.map((role) => (
-                                <Badge
-                                    key={uuidv4()}
-                                    variant="secondary"
-                                    className={getRoleColor(role.value)}
-                                >
-                                    {role.lable}
-                                </Badge>
-                            ))}
-                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {user.profiles.length > 0 ? (
+                                    user.profiles.map((role) => (
+                                    <Badge
+                                        key={uuidv4()}
+                                        variant="secondary"
+                                        className={getRoleColor(role.role_title)}
+                                    >
+                                        {role.role_title}
+                                    </Badge>
+                                    ))
+                                ) : (
+                                    <div className="text-center">-</div>
+                                )}
+                                </div>
                         </TableCell>
                         <TableCell>
                             <Badge

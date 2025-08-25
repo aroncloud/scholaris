@@ -1,9 +1,7 @@
 import GridShape from "@/components/common/GridShape";
-import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
 
 import { ThemeProvider } from "@/context/ThemeContext";
 import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 
 export default function AuthLayout({
@@ -21,22 +19,23 @@ export default function AuthLayout({
               {/* <!-- ===== Common Grid Shape Start ===== --> */}
               <GridShape />
               <div className="flex flex-col items-center max-w-xs">
-                <Link href="/" className="block mb-4">
-                  <Image
-                    width={231}
-                    height={48}
-                    src="./images/logo/auth-logo.svg"
-                    alt="Logo"
+                <div className="bg-white rounded-2xl p-3 mr-4 shadow-lg mb-5">
+                  <Image 
+                    src='/images/logo/logoEPFPS.png'
+                    alt="Logo EPFPS"
+                    className="h-40 w-auto"
+                    height={1000}
+                    width={1000}
                   />
-                </Link>
-                <p className="text-center text-gray-400 dark:text-white/60">
-                  Free and Open-Source Tailwind CSS Admin Dashboard Template
+                </div>
+                <p className="text-center text-gray-300 dark:text-white/60">
+                  École Privée de Formation des Professionnels de Santé de Meiganga
                 </p>
               </div>
             </div>
           </div>
           <div className="fixed bottom-6 right-6 z-50 hidden sm:block">
-            <ThemeTogglerTwo />
+            {/* <ThemeTogglerTwo /> */}
           </div>
         </div>
       </ThemeProvider>
