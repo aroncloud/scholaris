@@ -94,7 +94,7 @@ import {
 import { useRouter } from "next/navigation";
 import { IEnrollmentRequest, IStudent } from "@/types/userTypes";
 import Header from "./Header";
-import { getStatutColor } from "@/lib/utils";
+import { getStatusColor, formatDateToText } from "@/lib/utils";
 
 
 type MyComponentProps = {
@@ -103,14 +103,14 @@ type MyComponentProps = {
   setSelectedRequest: Dispatch<SetStateAction<IEnrollmentRequest | null>>;
   filterStatut: string;
   handleApproveRequest: (id: string) => void;
-
   enrollmentRequests: IEnrollmentRequest[];
   setIsRequestDialogOpen: Dispatch<SetStateAction<boolean>>;
   searchTerm: string;
+  onCreateEnrollment?: () => void;
 };
 
 
-const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enrollmentRequests, filterStatut, setFilterStatut, searchTerm, setSearchTerm, handleApproveRequest }: MyComponentProps) => {
+const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enrollmentRequests, filterStatut, setFilterStatut, searchTerm, setSearchTerm, handleApproveRequest, onCreateEnrollment }: MyComponentProps) => {
   return (
     <TabsContent value="inscriptions" className="space-y-4">
       <Card>
@@ -146,6 +146,13 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
                   <SelectItem value="rejete">Rejeté</SelectItem>
                 </SelectContent>
               </Select>
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={onCreateEnrollment}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nouvelle demande
+              </Button>
             </div>
           </div>
 
@@ -192,7 +199,7 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
                     </div>
                   </TableCell>
                   <TableCell>
-                    {new Date(request.datedemande).toLocaleDateString()}
+                    {formatDateToText(request.datedemande)}
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
@@ -208,7 +215,7 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className={getStatutColor(request.statut)}>
+                    <Badge className={getStatusColor(request.statut)}>
                       {request.statut === "en_attente"
                         ? "En attente"
                         : request.statut === "approuve"
