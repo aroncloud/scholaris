@@ -32,7 +32,7 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
           />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm ">Victor FOTSO</span>
+        <span className="block mr-1 font-medium text-theme-sm ">MARIAMA HASNALI</span>
 
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
@@ -61,10 +61,10 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            VICTOR Fotso
+            MARIAMA HASNALI
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            fovict@yopmail.com
+            mali@yopmail.com
           </span>
         </div>
 
