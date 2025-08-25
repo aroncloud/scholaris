@@ -55,7 +55,7 @@ export async function getCurriculumListSite(){
     try {
       const response = await axios.get(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/curriculums`,{
           headers: {
-            "X-API-Key": process.env.PUBLIC_API_KEY,
+            "X-API-Key": process.env.X_API,
           },
       });
       console.log('-->result', response.data);
