@@ -46,7 +46,7 @@ export async function getUserList(){
         const token = session.accessToken;
         
 
-        const response = await axios.get(`${process.env.AIM_WORKER_ENDPOINT}/api/users`,{
+        const response = await axios.get(`${process.env.AIM_WORKER_ENDPOINT}/api/users/profiles?limit=10&offset=0`,{
             headers: {
               Authorization: `Bearer ${token}`,
             },

@@ -14,6 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -65,7 +67,7 @@ import {
 } from "lucide-react";
 import { createUser, deactivateUser, deleteUser, getUserList, updateUser } from "@/actions/userAction";
 import { toast } from "sonner";
-import { ICreateUser, IListUser } from "@/types/userTypes";
+import { ICreateUser, IUserList } from "@/types/userTypes";
 import { getStatusColor } from "@/lib/utils";
 import UserSection from "./UserSection";
 import { ACTION } from "@/constant";
@@ -182,10 +184,10 @@ export default function UsersPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCancelUserDialogOpen, setIsCancelUserDialogOpen] = useState(false);
   const [action, setAction] = useState<ACTION>('CREATE');
-  const [userList, setUserList] = useState<IListUser[]>([]);
+  const [userList, setUserList] = useState<IUserList[]>([]);
   const [userFormData, setUserFormData] = useState<ICreateUser | null>(null);
-  const [selectedUser, setSelectedUser] = useState<IListUser | null>(null);
-
+  const [selectedUser, setSelectedUser] = useState<IUserList | null>(null);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
       init();
   }, [])
@@ -304,20 +306,19 @@ export default function UsersPage() {
 
 
   const init = async () => {
-      const result = await getUserList();
-    if(result.code == 'success') {
-        setUserList(result.data.body);
+    setLoading(true);
+    const result = await getUserList();
+    
+    if (result.code === 'success') {
+      setUserList(result.data.body);
     } else {
-        toast("Recuperation des donnes utilisateurs", {
-          description: result.error,
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
-        })
-      }
-    console.log('getUserList.result', result)
-  }
+      toast("Erreur de récupération des utilisateurs", {
+        description: result.error,
+      });
+    }
+
+    setLoading(false);
+  };
 
   return (
       <div className="space-y-6">
@@ -359,16 +360,20 @@ export default function UsersPage() {
             <TabsTrigger value="roles">Rôles et permissions</TabsTrigger>
           </TabsList>
 
-          <UserSection
-            userList={userList}
-            userRoleList={userRoleList}
-            setAction={setAction}
-            setUserFormData={setUserFormData}
-            setIsCancelUserDialogOpen={setIsCancelUserDialogOpen}
-            setIsEditDialogOpen={setIsEditDialogOpen}
-            setSelectedUser={setSelectedUser}
+          {loading ? (
+            <UserTableSkeleton />
+          ) : (
+            <UserSection
+              userList={userList}
+              userRoleList={userRoleList}
+              setAction={setAction}
+              setUserFormData={setUserFormData}
+              setIsCancelUserDialogOpen={setIsCancelUserDialogOpen}
+              setIsEditDialogOpen={setIsEditDialogOpen}
+              setSelectedUser={setSelectedUser}
+            />
+          )}
 
-          />
 
           <TabsContent value="roles" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -424,3 +429,61 @@ export default function UsersPage() {
       </div>
   );
 }
+
+
+const UserTableSkeleton = () => {
+  const rows = new Array(5).fill(null);
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Utilisateur</TableHead>
+          <TableHead>Rôles</TableHead>
+          <TableHead>Statut</TableHead>
+          <TableHead>Dernière connexion</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map((_, i) => (
+          <TableRow key={i}>
+            {/* Colonne Utilisateur */}
+            <TableCell>
+              <div className="flex items-center space-x-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[120px]" />
+                  <Skeleton className="h-3 w-[180px]" />
+                </div>
+              </div>
+            </TableCell>
+
+            {/* Colonne Rôles */}
+            <TableCell>
+              <div className="flex gap-2">
+                <Skeleton className="h-5 w-16 rounded" />
+                <Skeleton className="h-5 w-20 rounded" />
+              </div>
+            </TableCell>
+
+            {/* Colonne Statut */}
+            <TableCell>
+              <Skeleton className="h-5 w-20 rounded" />
+            </TableCell>
+
+            {/* Colonne Dernière connexion */}
+            <TableCell>
+              <Skeleton className="h-4 w-24" />
+            </TableCell>
+
+            {/* Colonne Actions */}
+            <TableCell>
+              <Skeleton className="h-8 w-8 rounded" />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+};

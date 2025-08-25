@@ -86,16 +86,26 @@ export interface IListStudent {
   cirriculum: ICurriculum;
 }
 
-export interface IListUser {
+export interface IUserProfile {
+  profile_code: string;
+  role_code: string;
+  role_title: string;
+}
+
+export interface IUserList {
   user_code: string;
-  user_name: string;
-  email: string;
   first_name: string;
   last_name: string;
-  status_code: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  email: string;
   created_at: number;
   updated_at: number;
   last_login_at: number | null;
+  status_code: string;
+  profiles: {
+      "profile_code": string,
+      "role_code": string,
+      "role_title": string
+  }[];
 }
 
 export interface ICreateUser {
