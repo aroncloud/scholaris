@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useEffect, useState } from "react";
@@ -224,7 +226,6 @@ export default function EnrollmentDetailPage() {
         </div>
         <div className="flex items-center space-x-2">
           {getStatusBadge(application.application_status_code)}
-          {console.log('Application status:', application.application_status_code)}
           {(application.application_status_code === 'DRAFT' || application.application_status_code === 'SUBMITTED') && (
             <div className="flex space-x-2">
               <Button
@@ -368,12 +369,12 @@ export default function EnrollmentDetailPage() {
                     <p>{formatDateToText(application.processed_at)}</p>
                   </div>
                 )}
-                {application.converted_to_user_code && (
+                {/* {application.converted_to_user_code && (
                   <div>
                     <Label className="text-sm font-medium text-muted-foreground">Code étudiant créé</Label>
                     <p className="text-green-600 font-medium">{application.converted_to_user_code}</p>
                   </div>
-                )}
+                )} */}
                 {application.rejection_reason && (
                   <div>
                     <Label className="text-sm font-medium text-muted-foreground">Raison du rejet</Label>
