@@ -372,8 +372,7 @@ export default function StudentsPage() {
       statut: app.application_status_code === 'DRAFT' ? 'en_attente' : 
              app.application_status_code === 'SUBMITTED' ? 'en_attente' :
              app.application_status_code === 'APPROVED' ? 'approuve' : 
-             app.application_status_code === 'REJECTED' ? 'rejete' : 
-             app.application_status_code === 'CONVERTED' ? 'converti' : 'en_attente',
+             app.application_status_code === 'REJECTED' ? 'rejete' : 'en_attente',
       documents: ['Documents non disponibles'], 
       commentaire: app.rejection_reason || undefined
     }));
