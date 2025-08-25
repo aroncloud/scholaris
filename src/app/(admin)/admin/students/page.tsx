@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/no-unescaped-entities */
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -259,10 +259,33 @@ export default function StudentsPage() {
   const [filterStatut, setFilterStatut] = useState("all");
   const [isCreateEnrollmentOpen, setIsCreateEnrollmentOpen] = useState(false);
 
+
+  
+
+  const loadEnrollmentRequests = useCallback(async () => {
+    try {
+      const result = await getStudentApplicationList();
+      if(result.code === 'success') {
+        const transformedData = transformApplicationData(result.data.body || []);
+        setEnrollmentRequests(transformedData);
+      } else {
+        console.error('Error loading enrollment requests:', result.error);
+        toast("Erreur", {
+          description: "Impossible de charger les demandes d'inscription.",
+        });
+      }
+    } catch (error) {
+      console.error('Error loading enrollment requests:', error);
+      toast("Erreur", {
+        description: "Une erreur s'est produite lors du chargement des demandes.",
+      });
+    }
+  }, []);
+  
   useEffect(() => {
     init();
     loadEnrollmentRequests();
-  }, [])
+  }, [loadEnrollmentRequests])
 
 
 
@@ -353,26 +376,6 @@ export default function StudentsPage() {
       commentaire: app.rejection_reason || undefined
     }));
   };
-
-  const loadEnrollmentRequests = async () => {
-    try {
-      const result = await getStudentApplicationList();
-      if(result.code === 'success') {
-        const transformedData = transformApplicationData(result.data.body || []);
-        setEnrollmentRequests(transformedData);
-      } else {
-        console.error('Error loading enrollment requests:', result.error);
-        toast("Erreur", {
-          description: "Impossible de charger les demandes d'inscription.",
-        });
-      }
-    } catch (error) {
-      console.error('Error loading enrollment requests:', error);
-      toast("Erreur", {
-        description: "Une erreur s'est produite lors du chargement des demandes.",
-      });
-    }
-  }
 
   const handleViewApplicationDetails = async (applicationCode: string) => {
     try {
