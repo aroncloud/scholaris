@@ -17,7 +17,7 @@ const navItems: NavItem[] = [
   {
     icon: <LayoutDashboard className="w-5 h-5" />, // Dashboard icon
     name: "Dashboard",
-    path: "/"
+    path: "/admin"
   },
   {
     icon: <Users className="w-5 h-5" />, // Utilisateurs
