@@ -103,6 +103,11 @@ export const getStatusColor = (status: string): string => {
     case "AVAILABLE":
       return "bg-blue-100 text-blue-600 dark:bg-gray-700/20 dark:text-blue-400";
 
+    // Converti
+    case "CONVERTI":
+    case "CONVERTED":
+      return "bg-blue-100 text-blue-600 dark:bg-gray-700/20 dark:text-blue-400";
+
     // Annulé, rejeté, inactif
     case "CANCELED":
     case "CANCEL":
