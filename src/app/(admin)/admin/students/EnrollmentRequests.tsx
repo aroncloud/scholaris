@@ -110,6 +110,8 @@ type MyComponentProps = {
 
 
 const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enrollmentRequests, filterStatut, setFilterStatut, searchTerm, setSearchTerm, handleApproveRequest, onCreateEnrollment }: MyComponentProps) => {
+  const router = useRouter();
+  
   return (
     <TabsContent value="inscriptions" className="space-y-4">
       <Card>
@@ -143,6 +145,7 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
                   <SelectItem value="en_attente">En attente</SelectItem>
                   <SelectItem value="approuve">Approuvé</SelectItem>
                   <SelectItem value="rejete">Rejeté</SelectItem>
+                  <SelectItem value="converti">Converti</SelectItem>
                 </SelectContent>
               </Select>
               <Button 
@@ -219,7 +222,11 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
                         ? "En attente"
                         : request.statut === "approuve"
                           ? "Approuvé"
-                          : "Rejeté"}
+                          : request.statut === "rejete"
+                            ? "Rejeté"
+                            : request.statut === "converti"
+                              ? "Converti"
+                              : "En attente"}
                     </Badge>
                     {request.commentaire && (
                       <div className="text-xs text-red-600 mt-1">
@@ -236,7 +243,9 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => router.push(`/admin/students/enrollment/${request.id}`)}
+                        >
                           <Eye className="mr-2 h-4 w-4" />
                           Voir détails
                         </DropdownMenuItem>
