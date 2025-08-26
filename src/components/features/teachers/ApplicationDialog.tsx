@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Application } from "../types";
+import { Application } from "../../../app/(admin)/admin/teachers/types";
 
 interface ApplicationDialogProps {
   open: boolean;

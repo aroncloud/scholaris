@@ -25,7 +25,7 @@ import {
   AlertTriangle,
   UserPlus,
 } from "lucide-react";
-import { Application, statutApplicationLabels } from "../types";
+import { Application, statutApplicationLabels } from "../../../app/(admin)/admin/teachers/types";
 
 interface ApplicationTableProps {
   applications: Application[];

@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Teacher, UpdateTeacherRequest } from "../types";
+import { Teacher, UpdateTeacherRequest } from "../../../app/(admin)/admin/teachers/types";
 
 interface UpdateTeacherDialogProps {
   open: boolean;
