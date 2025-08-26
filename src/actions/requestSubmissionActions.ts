@@ -5,7 +5,6 @@ import { CreateApplicantRequest } from "@/types/requestSubmissionTypes";
 
 export async function searchStudentByMatricule(matricule: string) {
     try {
-        console.log('endPoint', `${process.env.APPLICATION_WORKER_ENDPOINT}/api/public/student-applications/${matricule}`)
         const response = await axios.get(
             `${process.env.APPLICATION_WORKER_ENDPOINT}/api/public/student-applications/${matricule}`,
             {
@@ -15,7 +14,7 @@ export async function searchStudentByMatricule(matricule: string) {
             }
         );
 
-        console.log('-->getTeachers result', response);
+        // console.log('-->getTeachers result', response);
 
         return {
             code: "success",
@@ -41,7 +40,7 @@ export async function submitAdmissionRequest(formData: CreateApplicantRequest, a
             }
         );
 
-        console.log('-->submitAdmissionRequest result', response);
+        // console.log('-->submitAdmissionRequest result', response);
 
         return {
             code: "success",

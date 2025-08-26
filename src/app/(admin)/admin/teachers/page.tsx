@@ -31,15 +31,17 @@ import {
   Eye,
 } from "lucide-react";
 
-import { TeacherStatsCards } from "./components/TeacherStatsCards";
-import { TeacherTable } from "./components/TeacherTable";
-import { ApplicationTable } from "./components/ApplicationTable";
-import { TeacherDialog } from "./components/TeacherDialog";
-import { CreateTeacherDialog } from "./components/CreateTeacherDialog";
-import { UpdateTeacherDialog } from "./components/UpdateTeacherDialog";
-import { ApplicationDialog, DeleteConfirmationDialog } from "./components/ApplicationDialog";
+import { TeacherStatsCards } from "../../../../components/features/teachers/TeacherStatsCards";
+import { TeacherTable } from "../../../../components/features/teachers/TeacherTable";
+import { ApplicationTable } from "../../../../components/features/teachers/ApplicationTable";
+import { TeacherDialog } from "../../../../components/features/teachers/TeacherDialog";
+import { CreateTeacherDialog } from "../../../../components/features/teachers/CreateTeacherDialog";
+import { UpdateTeacherDialog } from "../../../../components/features/teachers/UpdateTeacherDialog";
+import { ApplicationDialog, DeleteConfirmationDialog } from "../../../../components/features/teachers/ApplicationDialog";
 import { Teacher, Application, CreateTeacherRequest, UpdateTeacherRequest, TeacherAPIResponse, statutLabels, statutApplicationLabels, typeContratLabels, transformAPIResponseToTeacher } from "./types";
 import { createTeacher, updateTeacher, getTeachers } from "@/actions/teacherActions";
+import { useTeacherData } from "../../../../hooks/feature/teachers/useTeacherData";
+import TeacherTab from "@/components/features/teachers/TeacherTab";
 
 const mockTeachers: Teacher[] = [
   {
@@ -153,192 +155,59 @@ const mockApplications: Application[] = [
 
 
 export default function TeachersPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterDepartement, setFilterDepartement] = useState("all");
-  const [filterStatut, setFilterStatut] = useState("all");
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [applications, setApplications] =
-    useState<Application[]>(mockApplications);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isCreateTeacherOpen, setIsCreateTeacherOpen] = useState(false);
+const [applications, setApplications] = useState<Application[]>(mockApplications);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [selectedApplication, setSelectedApplication] =
-    useState<Application | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isTeacherDialogOpen, setIsTeacherDialogOpen] = useState(false);
   const [isApplicationDialogOpen, setIsApplicationDialogOpen] = useState(false);
-  const [isCreateTeacherOpen, setIsCreateTeacherOpen] = useState(false);
   const [isUpdateTeacherOpen, setIsUpdateTeacherOpen] = useState(false);
   const [isViewTeacherOpen, setIsViewTeacherOpen] = useState(false);
   const [applicationComment, setApplicationComment] = useState("");
   const [formData, setFormData] = useState<Partial<Teacher>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [teacherToDelete, setTeacherToDelete] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  
 
-  useEffect(() => {
-    loadTeachers();
-  }, []);
+  const {error, loading, refetch, teachers} = useTeacherData();
 
-  const loadTeachers = async () => {
-    try {
-      setLoading(true);
-      const result = await getTeachers();
-      
-      console.log('API Response:', result);
-      
-      if (result.code === 'success' && result.data && result.data.body && Array.isArray(result.data.body)) {
-        const transformedTeachers = result.data.body.map((apiTeacher: TeacherAPIResponse) => 
-          transformAPIResponseToTeacher(apiTeacher)
-        );
-        console.log('Transformed teachers:', transformedTeachers);
-        setTeachers(transformedTeachers);
-      } else {
-        console.error('Error loading teachers:', result);
-        setTeachers(mockTeachers);
-      }
-    } catch (error) {
-      console.error('Error loading teachers:', error);
-      setTeachers(mockTeachers);
-    } finally {
-      setLoading(false);
-    }
-  };
 
 
   const handleApproveApplication = (applicationId: string) => {
-    setApplications((apps) =>
-      apps.map((app) =>
-        app.id === applicationId ? { ...app, statut: "accepte" as const } : app,
-      ),
-    );
-    // toast({
-    //   title: "Candidature acceptée",
-    //   description: "La candidature a été acceptée avec succès.",
-    // });
+    
   };
 
   const handleRejectApplication = (applicationId: string, comment: string) => {
-    setApplications((apps) =>
-      apps.map((app) =>
-        app.id === applicationId
-          ? { ...app, statut: "refuse" as const, commentaire: comment }
-          : app,
-      ),
-    );
-    // toast({
-    //   title: "Candidature refusée",
-    //   description: "La candidature a été refusée.",
-    //   variant: "destructive",
-    // });
-    setIsApplicationDialogOpen(false);
-    setApplicationComment("");
+    
   };
 
-  const handleChangeTeacherStatus = (teacherId: string, newStatus: string) => {
-    setTeachers((teachers) =>
-      teachers.map((teacher) =>
-        teacher.id === teacherId
-          ? { ...teacher, statut: newStatus as any }
-          : teacher,
-      ),
-    );
-    // toast({
-    //   title: "Statut modifié",
-    //   description: `Le statut de l'enseignant a été changé en "${statutLabels[newStatus as keyof typeof statutLabels].label}".`,
-    // });
-  };
+
 
   const handleDeleteTeacher = (teacherId: string) => {
-    setTeachers((teachers) => teachers.filter((t) => t.id !== teacherId));
-    // toast({
-    //   title: "Enseignant supprimé",
-    //   description: "L'enseignant a été supprimé définitivement.",
-    //   variant: "destructive",
-    // });
+    
   };
 
   const handleCreateTeacher = async (teacherData: CreateTeacherRequest) => {
-    try {
-      const result = await createTeacher(teacherData);
+    const result = await createTeacher(teacherData);
       
-      if (result.code === 'success') {
-        await loadTeachers();
-        
-        setIsCreateTeacherOpen(false);
-        
-        // toast({
-        //   title: "Enseignant créé",
-        //   description: "Le nouvel enseignant a été créé avec succès.",
-        // });
-        console.log('Teacher created successfully');
-      } else {
-        // toast({
-        //   title: "Erreur",
-        //   description: result.error || "Une erreur est survenue lors de la création.",
-        //   variant: "destructive",
-        // });
-        console.error('Error creating teacher:', result.error);
-        alert(`Erreur lors de la création: ${result.error || "Une erreur est survenue"}`);
-      }
-    } catch (error) {
-      console.error('Error creating teacher:', error);
-      alert("Une erreur est survenue lors de la création.");
-      // toast({
-      //   title: "Erreur",
-      //   description: "Une erreur est survenue lors de la création.",
-      //   variant: "destructive",
-      // });
+    if (result.code === 'success') {
+      refetch();
+    } else {
+      alert(`Erreur lors de la création: ${result.error}`);
     }
   };
 
   const handleUpdateTeacher = async (teacherData: UpdateTeacherRequest) => {
-    try {
-      const result = await updateTeacher(teacherData);
+    const result = await updateTeacher(teacherData);
       
       if (result.code === 'success') {
-        await loadTeachers();
-        
-        setIsUpdateTeacherOpen(false);
-        setSelectedTeacher(null);
-        
-        // toast({
-        //   title: "Enseignant modifié",
-        //   description: "Les informations ont été mises à jour avec succès.",
-        // });
-        console.log('Teacher updated successfully');
+        refetch();
       } else {
-        // toast({
-        //   title: "Erreur",
-        //   description: result.error || "Une erreur est survenue lors de la mise à jour.",
-        //   variant: "destructive",
-        // });
-        console.error('Error updating teacher:', result.error);
         alert(`Erreur lors de la mise à jour: ${result.error || "Une erreur est survenue"}`);
       }
-    } catch (error) {
-      console.error('Error updating teacher:', error);
-      alert("Une erreur est survenue lors de la mise à jour.");
-      // toast({
-      //   title: "Erreur",
-      //   description: "Une erreur est survenue lors de la mise à jour.",
-      //   variant: "destructive",
-      // });
-    }
   };
-
-  const filteredTeachers = teachers.filter((teacher) => {
-    const matchesSearch =
-      teacher.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.matricule.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.specialite.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesDepartement =
-      filterDepartement === "all" || teacher.departement === filterDepartement;
-    const matchesStatut =
-      filterStatut === "all" || teacher.statut === filterStatut;
-
-    return matchesSearch && matchesDepartement && matchesStatut;
-  });
 
   return (
       <div className="space-y-6">
@@ -381,86 +250,18 @@ export default function TeachersPage() {
             <TabsTrigger value="candidatures">
               Candidatures ({applications.length})
             </TabsTrigger>
-            <TabsTrigger value="evaluations">Évaluations</TabsTrigger>
           </TabsList>
 
           {/* Teachers Tab */}
-          <TabsContent value="enseignants" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Personnel enseignant</CardTitle>
-                <CardDescription>Gestion du corps professoral</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center mb-4">
-                  <div className="relative w-64">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Rechercher..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-8"
-                    />
-                  </div>
-                  <div className="flex space-x-2">
-                    <Select
-                      value={filterDepartement}
-                      onValueChange={setFilterDepartement}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Filtrer par département" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">
-                          Tous les départements
-                        </SelectItem>
-                        <SelectItem value="Sciences Médicales">
-                          Sciences Médicales
-                        </SelectItem>
-                        <SelectItem value="Sciences Biologiques">
-                          Sciences Biologiques
-                        </SelectItem>
-                        <SelectItem value="Sciences Chimiques">
-                          Sciences Chimiques
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select
-                      value={filterStatut}
-                      onValueChange={setFilterStatut}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Filtrer par statut" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tous les statuts</SelectItem>
-                        <SelectItem value="actif">Actif</SelectItem>
-                        <SelectItem value="suspendu">Suspendu</SelectItem>
-                        <SelectItem value="conge">En congé</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <TeacherTable
-                  teachers={filteredTeachers}
-                  onViewTeacher={(teacher) => {
-                    setSelectedTeacher(teacher);
-                    setIsViewTeacherOpen(true);
-                  }}
-                  onEditTeacher={(teacher) => {
-                    setSelectedTeacher(teacher);
-                    setIsUpdateTeacherOpen(true);
-                  }}
-                  onDeleteTeacher={(teacherId) => {
-                    setTeacherToDelete(teacherId);
-                    setDeleteDialogOpen(true);
-                  }}
-                  onChangeStatus={handleChangeTeacherStatus}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <TeacherTab 
+            teachers={teachers}
+            setIsCreateTeacherOpen={setIsCreateTeacherOpen}
+            isCreateTeacherOpen={isCreateTeacherOpen}
+            isExportModalOpen={isExportModalOpen}
+            setIExportModalOpen={setIsExportModalOpen}
+            isImportModalOpen={isImportModalOpen}
+            setIsImportModalOpen={setIsImportModalOpen}
+          />
 
           {/* Applications Tab */}
           <TabsContent value="candidatures" className="space-y-4">
@@ -495,7 +296,7 @@ export default function TeachersPage() {
                       experience: application.experience,
                       matieres: [],
                     };
-                    setTeachers([...teachers, newTeacher]);
+                    // setTeachers([...teachers, newTeacher]);
                   }}
                   onChangeToInterview={(applicationId) => {
                     setApplications((apps) =>
@@ -510,77 +311,6 @@ export default function TeachersPage() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* Evaluations Tab */}
-          <TabsContent value="evaluations" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Évaluations des enseignants</CardTitle>
-                <CardDescription>
-                  Suivi des performances et évaluations étudiants
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {teachers
-                    .filter((t) => t.evaluation)
-                    .map((teacher) => (
-                      <div
-                        key={teacher.id}
-                        className="flex items-center justify-between p-4 border rounded-lg"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div>
-                            <div className="font-medium">
-                              {teacher.prenom} {teacher.nom}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {teacher.specialite}
-                            </div>
-                            <div className="flex items-center space-x-2 mt-1">
-                              {teacher.matieres.map((matiere, index) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {matiere}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="text-center">
-                            <div className="flex items-center space-x-1">
-                              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                              <span className="font-bold text-lg">
-                                {teacher.evaluation}/5
-                              </span>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Note étudiants
-                            </div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-bold text-lg">
-                              {teacher.heuresEnseignement}h
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Heures/an
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4 mr-2" />
-                            Détails
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
 
         {/* Application Dialog */}
@@ -591,40 +321,6 @@ export default function TeachersPage() {
           onReject={handleRejectApplication}
         />
 
-        {/* Create Teacher Dialog */}
-        <CreateTeacherDialog
-          open={isCreateTeacherOpen}
-          onOpenChange={setIsCreateTeacherOpen}
-          onSave={handleCreateTeacher}
-        />
-
-        {/* Update Teacher Dialog */}
-        <UpdateTeacherDialog
-          open={isUpdateTeacherOpen}
-          onOpenChange={setIsUpdateTeacherOpen}
-          teacher={selectedTeacher}
-          onSave={handleUpdateTeacher}
-        />
-
-        {/* Edit Teacher Dialog */}
-        <TeacherDialog
-          open={isTeacherDialogOpen}
-          onOpenChange={setIsTeacherDialogOpen}
-          teacher={selectedTeacher}
-          isEditing={true}
-          onSave={(updatedData) => {
-            if (selectedTeacher) {
-              setTeachers((teachers) =>
-                teachers.map((t) =>
-                  t.id === selectedTeacher.id ? { ...t, ...updatedData } : t,
-                ),
-              );
-              setIsTeacherDialogOpen(false);
-              setSelectedTeacher(null);
-              setFormData({});
-            }
-          }}
-        />
 
         {/* View Teacher Details Dialog */}
         <TeacherDialog

@@ -1,4 +1,5 @@
 import { Space_Grotesk } from 'next/font/google';
+import { Toaster } from "@/components/ui/sonner"
 import './globals.css';
 
 import { SidebarProvider } from '@/context/SidebarContext';
@@ -22,6 +23,7 @@ export default function RootLayout({
             <SidebarProvider>{children}</SidebarProvider>
           </ToastProvider>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

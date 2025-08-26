@@ -29,7 +29,7 @@ import {
   Unlock,
   UserX,
 } from "lucide-react";
-import { Teacher, statutLabels, typeCodeLabels } from "../types";
+import { Teacher, statutLabels, typeCodeLabels } from "../../../app/(admin)/admin/teachers/types";
 
 interface TeacherTableProps {
   teachers: Teacher[];

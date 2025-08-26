@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Briefcase, BookOpen, Star } from "lucide-react";
-import { Teacher, Application } from "../types";
+import { Teacher, Application } from "../../../app/(admin)/admin/teachers/types";
 
 interface TeacherStatsCardsProps {
   teachers: Teacher[];

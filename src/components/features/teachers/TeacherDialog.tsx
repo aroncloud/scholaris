@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Teacher, CreateTeacherRequest, statutLabels, typeContratLabels } from "../types";
+import { Teacher, CreateTeacherRequest, statutLabels, typeContratLabels } from "../../../app/(admin)/admin/teachers/types";
 
 interface TeacherDialogProps {
   open: boolean;
