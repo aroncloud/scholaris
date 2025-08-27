@@ -14,7 +14,7 @@ export interface ICurriculum {
   curriculum_name: string;   // Nom du curriculum (ex: Programme Annuel - Analyses Medicales)
 }
 
-export interface IProgramList {
+export interface ICreateProgramList {
   program_code: string;      // Code du programme (ex: ATMS_AM)
   program_name: string;      // Nom du programme (ex: Agents Techniques Medico-Sanitaires)
   internal_code: string;     // Code interne pour la gestion (ex: ATMS_AM_01)
@@ -106,7 +106,7 @@ export interface IUEPerModuleList {
 
 
 
-export interface IProgram {
+export interface ICreateProgram {
   program_code: string;
   program_name: string;
   internal_code: string;
@@ -145,7 +145,7 @@ export interface IDomainPerCurriculum {
 
 
 export interface IFactorizedProgram {
-  program: IProgram;
+  program: ICreateProgram;
   curriculums: ICurriculumDetail[];
 }
 
@@ -156,6 +156,14 @@ export interface ICurriculumDetail {
   curriculum_name: string;
   created_at: string; // ou Date si tu veux convertir en objet Date
   status_code: string;
-  program: IProgram;
+  program: ICreateProgram;
   training_sequences: ITrainingSequence[];
+}
+
+export interface ICreateCurriculum {
+  "curriculum_code": string,
+  "program_code": string,
+  "study_level": string,
+  "curriculum_name": string,
+  "status_code": string
 }
