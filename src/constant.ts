@@ -1,3 +1,5 @@
+import { ApplicationStatus } from "./types/teacherTypes";
+
 export type gender = 'FEMALE' | 'MALE';
 export type ACTION = 'CREATE' | 'UPDATE' | 'DELETE' | 'DESACTIVATE' | 'ACTIVATE';
 export const maritalStatus = [
@@ -8,7 +10,13 @@ export const maritalStatus = [
 ];
 
 
-
+export const APPLICATION_STATUS = [
+  { value: ApplicationStatus.PENDING, label: "En attente" },
+  { value: ApplicationStatus.INTERVIEW, label: "Entretien" },
+  { value: ApplicationStatus.ACCEPTED, label: "Accepté" },
+  { value: ApplicationStatus.REJECTED, label: "Refusé" },
+  { value: ApplicationStatus.ALL, label: "Tout" }
+];
 
 
 

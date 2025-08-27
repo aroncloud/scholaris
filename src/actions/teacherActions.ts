@@ -3,7 +3,7 @@
 import { verifySession } from "@/lib/session";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { CreateTeacherRequest, UpdateTeacherRequest } from "@/app/(admin)/admin/teachers/types";
+import { CreateTeacherRequest, UpdateTeacherRequest } from "@/types/teacherTypes";
 
 export async function getTeachers(){
     try {

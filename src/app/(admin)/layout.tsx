@@ -4,7 +4,8 @@ import { useSidebar } from "@/context/SidebarContext";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
-import React from "react";
+import { useFactorizedProgramStore } from "@/store/programStore";
+import React, { useEffect } from "react";
 
 export default function AdminLayout({
   children,
@@ -12,6 +13,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+  const {fetchPrograms} = useFactorizedProgramStore();
 
   // On calcule la marge du contenu en fonction de la sidebar
   const mainContentMargin = isMobileOpen
@@ -19,6 +21,10 @@ export default function AdminLayout({
     : isExpanded || isHovered
     ? "lg:ml-[290px]"
     : "lg:ml-[90px]";
+
+  useEffect(() => {
+    fetchPrograms();
+  }, [fetchPrograms]);
 
   return (
     <div className="min-h-screen xl:flex">

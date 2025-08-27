@@ -122,6 +122,35 @@ export async function createProgram(programInfo: ICreateProgram){
         return errResult;
     }
 }
+export async function updateProgram(programInfo: ICreateProgram){
+    console.log('-->updateProgram', programInfo)
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/programs`, {
+        ...programInfo
+        },{
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        });
+        console.log('-->result', response.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->createProgram.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
 export async function getProgramList(){
     try {
         const session = await verifySession();
@@ -174,6 +203,35 @@ export async function createCurriculum(curriculumInfo: ICreateCurriculum){
         }
     } catch (error: unknown) {
         console.log('-->createCurriculum.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+export async function updateCurriculum(curriculumInfo: ICreateCurriculum){
+    console.log('-->updateCurriculum', curriculumInfo)
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/curriculums`, {
+        ...curriculumInfo
+        },{
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        });
+        console.log('-->result', response.data.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->updateCurriculum.error')
         const errResult = actionErrorHandler(error);
         return errResult;
     }
@@ -235,6 +293,35 @@ export async function createSemester(semesterInfo: ICreateSemester){
         return errResult;
     }
 }
+export async function updateSemester(semesterInfo: ICreateSemester){
+    console.log('-->updateSemester', semesterInfo)
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/sequences`, {
+        ...semesterInfo
+        },{
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        });
+        console.log('-->result', response.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->updateSemester.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
 export async function getSemesterList(idCurriculum: string){
     try {
         const session = await verifySession();
@@ -288,6 +375,35 @@ export async function createDomain(domainInfo: ICreateDomain){
         }
     } catch (error: unknown) {
         console.log('-->createDomain.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+export async function updateDomain(domainInfo: ICreateDomain){
+    console.log('-->updateDomain', domainInfo)
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/domains`, {
+        ...domainInfo
+        },{
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        });
+        console.log('-->result', response.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->updateDomain.error')
         const errResult = actionErrorHandler(error);
         return errResult;
     }
@@ -350,6 +466,35 @@ export async function createModule(programInfo: ICreateModule){
         return errResult;
     }
 }
+export async function updateModule(programInfo: ICreateModule){
+    console.log('-->updateModule', programInfo)
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/modules`, {
+        ...programInfo
+        },{
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        });
+        console.log('-->result', response.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->updateModule.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
 export async function getModuleListPerDomain(idDomain: string){
     try {
         const session = await verifySession();
@@ -403,6 +548,35 @@ export async function createUE(programInfo: ICreateUE){
         }
     } catch (error: unknown) {
         console.log('-->createUE.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+export async function updateUE(programInfo: ICreateUE){
+    console.log('-->updateUE', programInfo)
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units`, {
+        ...programInfo
+        },{
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        });
+        console.log('-->result', response.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->updateUE.error')
         const errResult = actionErrorHandler(error);
         return errResult;
     }
