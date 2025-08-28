@@ -130,7 +130,7 @@ export async function updateProgram(programInfo: ICreateProgram){
         const token = session.accessToken;
         
 
-        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/programs`, {
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/programs/${programInfo.program_code}`, {
         ...programInfo
         },{
         headers: {
@@ -207,7 +207,7 @@ export async function createCurriculum(curriculumInfo: ICreateCurriculum){
         return errResult;
     }
 }
-export async function updateCurriculum(curriculumInfo: ICreateCurriculum){
+export async function updateCurriculum(curriculumInfo: ICreateCurriculum, curriculum_code: string){
     console.log('-->updateCurriculum', curriculumInfo)
     try {
         const session = await verifySession();
@@ -215,7 +215,7 @@ export async function updateCurriculum(curriculumInfo: ICreateCurriculum){
         const token = session.accessToken;
         
 
-        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/curriculums`, {
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/curriculums/${curriculum_code}`, {
         ...curriculumInfo
         },{
         headers: {
@@ -301,7 +301,7 @@ export async function updateSemester(semesterInfo: ICreateSemester){
         const token = session.accessToken;
         
 
-        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/sequences`, {
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/sequences${semesterInfo.sequence_code}`, {
         ...semesterInfo
         },{
         headers: {
@@ -387,7 +387,7 @@ export async function updateDomain(domainInfo: ICreateDomain){
         const token = session.accessToken;
         
 
-        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/domains`, {
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/domains/${domainInfo.domain_code}`, {
         ...domainInfo
         },{
         headers: {
@@ -437,8 +437,8 @@ export async function getDomainListPerCurriculum(idCurriculum: string){
 
 
 // Sous matiere
-export async function createModule(programInfo: ICreateModule){
-    console.log('-->createProgram', programInfo)
+export async function createModule(moduleInfo: ICreateModule){
+    console.log('-->createProgram', moduleInfo)
     try {
         const session = await verifySession();
         
@@ -446,7 +446,7 @@ export async function createModule(programInfo: ICreateModule){
         
 
         const response = await axios.post(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/modules`, {
-        ...programInfo
+        ...moduleInfo
         },{
         headers: {
             Authorization: `Bearer ${token}`,
@@ -466,16 +466,16 @@ export async function createModule(programInfo: ICreateModule){
         return errResult;
     }
 }
-export async function updateModule(programInfo: ICreateModule){
-    console.log('-->updateModule', programInfo)
+export async function updateModule(moduleInfo: ICreateModule){
+    console.log('-->updateModule', moduleInfo)
     try {
         const session = await verifySession();
         
         const token = session.accessToken;
         
 
-        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/modules`, {
-        ...programInfo
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/modules/${moduleInfo.module_code}`, {
+        ...moduleInfo
         },{
         headers: {
             Authorization: `Bearer ${token}`,
@@ -523,8 +523,8 @@ export async function getModuleListPerDomain(idDomain: string){
 
 
 
-export async function createUE(programInfo: ICreateUE){
-    console.log('-->createUE', programInfo)
+export async function createUE(UEInfo: ICreateUE){
+    console.log('-->createUE', UEInfo)
     try {
         const session = await verifySession();
         
@@ -532,7 +532,7 @@ export async function createUE(programInfo: ICreateUE){
         
 
         const response = await axios.post(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units`, {
-        ...programInfo
+        ...UEInfo
         },{
         headers: {
             Authorization: `Bearer ${token}`,
@@ -552,16 +552,16 @@ export async function createUE(programInfo: ICreateUE){
         return errResult;
     }
 }
-export async function updateUE(programInfo: ICreateUE){
-    console.log('-->updateUE', programInfo)
+export async function updateUE(UEInfo: ICreateUE){
+    console.log('-->updateUE', UEInfo)
     try {
         const session = await verifySession();
         
         const token = session.accessToken;
         
 
-        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units`, {
-        ...programInfo
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units/${UEInfo.course_unit_code}`, {
+        ...UEInfo
         },{
         headers: {
             Authorization: `Bearer ${token}`,
