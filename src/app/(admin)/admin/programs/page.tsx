@@ -235,7 +235,7 @@ export default function ProgramsPage() {
           )}
 
           {/* Maquettes Tab */}
-          {!loading && <MaquettesTab curriculumList={curriculumList} />}
+          {!loading && <MaquettesTab curriculumList={curriculumList} refresh={refresh} />}
 
           {/* Modules Tab */}
           
