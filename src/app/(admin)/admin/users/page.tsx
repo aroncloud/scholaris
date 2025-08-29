@@ -66,10 +66,11 @@ import { createUser, deactivateUser, deleteUser, getUserList, updateUser } from 
 import { toast } from "sonner";
 import { ICreateUser, IUserList } from "@/types/userTypes";
 import { getStatusColor } from "@/lib/utils";
-import UserSection from "./UserSection";
+import UserSection from "../../../../components/features/users/UserSection";
 import { ACTION } from "@/constant";
 import ModalUser from "@/components/modal/users/ModalUser";
 import ModaleDesactivateDeleteUser from "@/components/modal/users/ModaleDesactivateDeleteUser";
+import RoleAndPermission from "@/components/features/users/RoleAndPermission";
 
 const users = [
   {
@@ -373,38 +374,7 @@ export default function UsersPage() {
 
 
           <TabsContent value="roles" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {roles.map((role) => (
-                <Card key={role.name}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{role.name}</span>
-                      <Badge variant="secondary">
-                        {role.users} utilisateurs
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription>{role.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Permissions :</h4>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        {role.permissions.map((permission) => (
-                          <li key={permission} className="flex items-center">
-                            <div className="h-1.5 w-1.5 bg-primary rounded-full mr-2" />
-                            {permission}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <Button variant="outline" className="w-full mt-4">
-                      <Shield className="h-4 w-4 mr-2" />
-                      Gérer les permissions
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <RoleAndPermission roles={roles} />
           </TabsContent>
         </Tabs>
 
