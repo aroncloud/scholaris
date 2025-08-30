@@ -231,6 +231,7 @@ const UserSection = ({
                                 password_plaintext: "",
                                 phone_number: "",
                                 user_code: user.user_code,
+                                profiles: [], 
                               });
                               setIsEditDialogOpen(true);
                             }}
@@ -255,6 +256,7 @@ const UserSection = ({
                                 password_plaintext: "",
                                 phone_number: "",
                                 user_code: user.user_code,
+                                profiles: [], 
                               });
                               setAction(user.status_code === "ACTIVE" ? "DESACTIVATE" : "ACTIVATE");
                             }}
@@ -279,6 +281,7 @@ const UserSection = ({
                                 password_plaintext: "",
                                 phone_number: "",
                                 user_code: user.user_code,
+                                profiles: [], 
                               });
                               setAction("DELETE");
                               setIsCancelUserDialogOpen(true);
