@@ -109,14 +109,37 @@ export interface IUserList {
 }
 
 export interface ICreateUser {
-  user_code?: string;
-  password_plaintext: string,
-  email: string,
-  first_name: string,
-  last_name: string,
-  gender: gender,
-  phone_number: string
+  user_code?: string; 
+  password_plaintext?: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  gender: gender;
+  phone_number: string;
+
+  staff_number?: string;
+  job_title?: string;
+  department?: string;
+  hiring_date?: string;
+  salary?: number;
+
+  profiles: string[]; 
 }
+
+
+
+// export interface ICreateUser {
+//   user_code?: string;
+//   password_plaintext: string,
+//   email: string,
+//   first_name: string,
+//   last_name: string,
+//   gender: gender,
+//   phone_number: string
+
+// }
+
+
 
 
 

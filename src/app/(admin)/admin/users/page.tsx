@@ -197,46 +197,46 @@ export default function UsersPage() {
   
   const handleSaveUserInfo = async () => {
     console.log(action)
-    // if(action === "CREATE"){
-    //   const payload = {
-    //     ...userFormData,
-    //   } as ICreateUser
+    if(action === "CREATE"){
+      const payload = {
+        ...userFormData,
+      } as ICreateUser
 
-    //   const result = await createUser(payload)
-    //   console.log('result-->', result);
-    //   if(result.code == 'success'){
-    //     await init();
-    //     setIsEditDialogOpen(false);
-    //   } else {
-    //     toast("Erreur lors de la creation de l'etudiant", {
-    //       description: result.error,
-    //       action: {
-    //         label: "Undo",
-    //         onClick: () => console.log("Undo"),
-    //       },
-    //     })
-    //   }
-    // } else {
-    //   const payload = {
-    //     ...userFormData,
-    //   } as ICreateUser
+      const result = await createUser(payload)
+      console.log('result-->', result);
+      if(result.code == 'success'){
+        await init();
+        setIsEditDialogOpen(false);
+      } else {
+        toast("Erreur lors de la creation de l'etudiant", {
+          description: result.error,
+          action: {
+            label: "Undo",
+            onClick: () => console.log("Undo"),
+          },
+        })
+      }
+    } else {
+      const payload = {
+        ...userFormData,
+      } as ICreateUser
 
-    //   const result = await updateUser(payload)
-    //   console.log('result-->', result);
-    //   if(result.code == 'success'){
+      const result = await updateUser(payload)
+      console.log('result-->', result);
+      if(result.code == 'success'){
         
-    //     await init();
-    //     setIsEditDialogOpen(false);
-    //   } else {
-    //     toast("Erreur lors de la mise a jour de l'etudiant", {
-    //       description: result.error,
-    //       action: {
-    //         label: "Undo",
-    //         onClick: () => console.log("Undo"),
-    //       },
-    //     })
-    //   }
-    // }
+        await init();
+        setIsEditDialogOpen(false);
+      } else {
+        toast("Erreur lors de la mise a jour de l'etudiant", {
+          description: result.error,
+          action: {
+            label: "Undo",
+            onClick: () => console.log("Undo"),
+          },
+        })
+      }
+    }
   };
 
   const handleDeleteUser = async () => {
@@ -378,14 +378,18 @@ export default function UsersPage() {
           </TabsContent>
         </Tabs>
 
-        <ModalUser
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          formData={userFormData}
-          setFormData={setUserFormData}
-          onConfirm={handleSaveUserInfo}
-          action={action}
-        />
+        {(action === "CREATE" || action === "UPDATE") && (
+          <ModalUser
+            isOpen={isEditDialogOpen}
+            onClose={() => setIsEditDialogOpen(false)}
+            initialData={userFormData} // rename formData → initialData
+            onSubmit={handleSaveUserInfo} // rename onConfirm → onSubmit
+            action={action}
+          />
+        )}
+
+
+
 
         <ModaleDesactivateDeleteUser 
           isOpen={isCancelUserDialogOpen}

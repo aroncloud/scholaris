@@ -16,10 +16,11 @@ interface GenericModalProps {
   children: React.ReactNode;
   onCancel?: () => void;
   onConfirm?: () => void;
-  confirmText?: string;
+  confirmText?: React.ReactNode; // <-- allow JSX
   cancelText?: string;
   size?: string; // ex: "max-w-2xl"
 }
+
 
 const GenericModal: React.FC<GenericModalProps> = ({
   open,
