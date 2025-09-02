@@ -50,22 +50,42 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  'aria-describedby': ariaDescribedBy,
+  'aria-label': ariaLabel,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  const descriptionId = React.useId();
+  const hasDescription = React.Children.toArray(children).some(
+    (child: any) => child?.type === DialogPrimitive.Description
+  );
+  
+  // Always render a description if none exists in children
+  const descriptionElement = !hasDescription ? (
+    <DialogPrimitive.Description id={descriptionId} className="sr-only">
+      {ariaLabel || 'Dialog'}
+    </DialogPrimitive.Description>
+  ) : null;
+
+  const contentProps = {
+    ...props,
+    'aria-describedby': ariaDescribedBy || (hasDescription ? descriptionId : undefined),
+    'aria-label': ariaLabel
+  };
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-        aria-describedby='dialog'
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
           className
         )}
-        {...props}
+        {...contentProps}
       >
+        {!ariaDescribedBy && descriptionElement}
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close
