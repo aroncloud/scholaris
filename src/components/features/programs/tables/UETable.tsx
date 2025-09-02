@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { IUEPerModuleList } from "@/types/programTypes"; // adapte le chemin si besoin
+import React, { useState } from "react";
+import { ICreateUE, IUEPerModuleList } from "@/types/programTypes"; // adapte le chemin si besoin
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,15 +15,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
 import { getStatusColor } from "@/lib/utils";
+import { DialogUpdateUE } from "../Modal/DialogUpdateUE";
+import { showToast } from "@/components/ui/showToast";
+import { updateUE } from "@/actions/programsAction";
 
 type UETableProps = {
   ues: IUEPerModuleList[];
-  onEdit: (ue: IUEPerModuleList) => void;
-  onDelete: (ue: IUEPerModuleList) => void;
   compact?: boolean; // optionnel: lignes plus serrées
+  refresh: () => void;
 };
 
-const UETable: React.FC<UETableProps> = ({ ues, onEdit, onDelete, compact = true }) => {
+const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
+  const [selectedUE, setSelectedUE] = useState<ICreateUE | null>(null);
+  const [isUpdateUEDialogOpen, setIsUpdateUEDialogOpen] = useState(false);
   if (!ues || ues.length === 0) {
     return (
       <div className="text-sm text-muted-foreground p-3 border rounded-md">
@@ -31,6 +35,34 @@ const UETable: React.FC<UETableProps> = ({ ues, onEdit, onDelete, compact = true
       </div>
     );
   }
+
+  
+  
+  const handleUpdateUE = async (ue: ICreateUE) => {
+    const result = await updateUE(ue);
+    console.log("Update UE result:", result);
+
+    if (result.code === 'success') {
+      setIsUpdateUEDialogOpen(false);
+      showToast({
+        variant: "success-solid",
+        message: 'UE mise à jour avec succès',
+        description: `${ue.course_unit_name} a été modifiée.`,
+        position: 'top-center',
+      });
+      refresh();
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Impossible de mettre à jour l'UE",
+        description:result.error ?? "Une erreur est survenue, essayez encore ou veuillez contacter l'administrateur",
+        position: 'top-center',
+      });
+      return false;
+    }
+
+    return true;
+  };
 
   return (
     <div className="rounded-md border mb-2">
@@ -97,12 +129,15 @@ const UETable: React.FC<UETableProps> = ({ ues, onEdit, onDelete, compact = true
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => onEdit(ue)}>
+                    <DropdownMenuItem onClick={() => {
+                      setSelectedUE(ue);
+                      setIsUpdateUEDialogOpen(true);
+                    }}>
                       <Edit className="mr-2 h-4 w-4" />
                       Modifier
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600" onClick={() => onDelete(ue)}>
+                    <DropdownMenuItem className="text-red-600" onClick={() => {}}>
                       <Trash2 className="mr-2 h-4 w-4" />
                       Supprimer
                     </DropdownMenuItem>
@@ -113,6 +148,15 @@ const UETable: React.FC<UETableProps> = ({ ues, onEdit, onDelete, compact = true
           ))}
         </TableBody>
       </Table>
+
+
+      {(selectedUE && isUpdateUEDialogOpen) && <DialogUpdateUE
+        ueData={selectedUE}
+        onOpenChange={setIsUpdateUEDialogOpen}
+        open={isUpdateUEDialogOpen}
+        moduleCode={selectedUE.module_code}
+        onSave={handleUpdateUE}
+      />}
     </div>
   );
 };
