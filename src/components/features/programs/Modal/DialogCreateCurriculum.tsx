@@ -150,19 +150,6 @@ export function DialogCreateCurriculum({
             />
             {errors.curriculum_name && <p className="text-red-600 text-sm">{errors.curriculum_name}</p>}
           </div>
-
-          {/* Code statut */}
-          <div className="space-y-1">
-            <Label htmlFor="status_code">Code statut <span className="text-red-600">*</span></Label>
-            <Input
-              id="status_code"
-              value={formData.status_code || ""}
-              onChange={(e) => handleFieldChange("status_code", e.target.value)}
-              disabled={isSubmitting}
-              className={errors.status_code ? "border-red-500" : ""}
-            />
-            {errors.status_code && <p className="text-red-600 text-sm">{errors.status_code}</p>}
-          </div>
         </div>
 
         <DialogFooter>

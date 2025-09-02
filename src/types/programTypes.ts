@@ -55,8 +55,10 @@ export interface ISemesterList {
 export interface ICreateDomain {
   domain_code: string;
   curriculum_code: string;
+  sequence_code: string,
   domain_name: string;
   internal_code: string;
+  description: string | null;
 }
 
 
@@ -68,6 +70,7 @@ export interface ICreateModule {
   module_name: string;
   internal_code: string;
   coefficient: number;
+  description: string | null;
 }
 
 export interface IModulePerDomain {
@@ -115,25 +118,33 @@ export interface ICreateProgram {
   description: string;
 }
 
-export interface ITrainingSequence {
+export interface ICreateSemester {
   curriculum_code: string;
   sequence_code: string;
   sequence_name: string;
   sequence_number: string;
   description: string | null;
+  "status_code": string;
 }
+
+
+export interface IFactorizedProgram {
+  program: ICreateProgram;
+  curriculums: ICurriculumDetail[];
+}
+
 
 export interface ICurriculumDetail {
   curriculum_code: string;
   program_code: string;
   study_level: string;
   curriculum_name: string;
-  created_at: string;
+  created_at: string; // ou Date si tu veux convertir en objet Date
   status_code: string;
-  training_sequences: ITrainingSequence[];
+  program: ICreateProgram;
+  training_sequences: ICreateSemester[];
   domains: IDomainPerCurriculum[];
 }
-
 export interface IDomainPerCurriculum {
   domain_code: string;
   curriculum_code: string;
@@ -144,21 +155,6 @@ export interface IDomainPerCurriculum {
 }
 
 
-export interface IFactorizedProgram {
-  program: ICreateProgram;
-  curriculums: ICurriculumDetail[];
-}
-
-export interface ICurriculumDetail {
-  curriculum_code: string;
-  program_code: string;
-  study_level: string;
-  curriculum_name: string;
-  created_at: string; // ou Date si tu veux convertir en objet Date
-  status_code: string;
-  program: ICreateProgram;
-  training_sequences: ITrainingSequence[];
-}
 
 export interface ICreateCurriculum {
   "curriculum_code": string,
