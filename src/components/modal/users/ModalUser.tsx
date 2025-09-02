@@ -3,18 +3,19 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { ICreateUser } from "@/types/userTypes";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner"; // toast import
+import { toast } from "sonner";
 import GenericModal from "../GenericModal";
 
 interface ModalUserProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: ICreateUser | null;
-  onSubmit: (user: ICreateUser) => Promise<void>;
   action: "CREATE" | "UPDATE";
+  roles: { label: string; value: string }[];
+  onSave: (formData?: ICreateUser) => Promise<number | boolean | { code: string; [key: string]: any } | undefined>;
 }
 
-export default function ModalUser({ isOpen, onClose, initialData, onSubmit, action }: ModalUserProps) {
+export default function ModalUser({ isOpen, onClose, initialData, action, onSave }: ModalUserProps) {
   const emptyForm: ICreateUser = {
     user_code: "",
     password_plaintext: "",
@@ -28,14 +29,13 @@ export default function ModalUser({ isOpen, onClose, initialData, onSubmit, acti
     department: "",
     hiring_date: "",
     salary: 0,
-    profiles: [],
+    profiles: []
   };
 
   const [formData, setFormData] = useState<ICreateUser>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  // Reset form whenever modal opens
   useEffect(() => {
     if (isOpen) {
       setFormData(initialData || emptyForm);
@@ -45,7 +45,10 @@ export default function ModalUser({ isOpen, onClose, initialData, onSubmit, acti
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'salary' ? Number(value) : value
+    }));
 
     if (errors[name]) {
       setErrors(prev => {
@@ -56,317 +59,394 @@ export default function ModalUser({ isOpen, onClose, initialData, onSubmit, acti
     }
   };
 
-  const validate = () => {
+  const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!formData.first_name) newErrors.first_name = "Prénom requis";
-    if (!formData.last_name) newErrors.last_name = "Nom requis";
-    if (!formData.email) newErrors.email = "Email requis";
-    if (!formData.password_plaintext) newErrors.password_plaintext = "Mot de passe requis";
-    else if (formData.password_plaintext.length < 8)
-      newErrors.password_plaintext = "Le mot de passe doit contenir au moins 8 caractères";
-    if (!formData.phone_number) newErrors.phone_number = "Téléphone requis";
-    return newErrors;
+    
+    if (!formData.first_name) newErrors.first_name = "Le prénom est requis";
+    if (!formData.last_name) newErrors.last_name = "Le nom est requis";
+    if (!formData.email) newErrors.email = "L'email est requis";
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email invalide";
+    
+    if (typeof formData.salary !== 'number' || formData.salary <= 0) {
+      newErrors.salary = "Le salaire doit être un nombre strictement supérieur à 0";
+    }
+    
+    if (formData.phone_number && !/^\+?[0-9\s-]{6,}$/.test(formData.phone_number)) {
+      newErrors.phone_number = "Numéro de téléphone invalide";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e?: FormEvent) => {
-    e?.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+  const handleSave = async (e?: React.FormEvent | React.MouseEvent<HTMLButtonElement>) => {
+    if (e && 'preventDefault' in e) {
+      e.preventDefault();
+    }
+    
+    setLoading(true);
+    setErrors({});
+
+    if (!validateForm()) {
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
-
+    const submissionData = {
+      ...formData,
+      // Remove profiles as they're not needed in the backend
+    };
+    
+    console.log('Submitting user data:', JSON.stringify(submissionData, null, 2));
+    
     try {
-      await onSubmit(formData);
-      toast.success(
-        action === "CREATE" ? "Utilisateur créé avec succès !" : "Utilisateur mis à jour !",
-        { style: { background: "#3b82f6", color: "#ffffff" }, position: "top-center" } // top toast
-      );
-      onClose();
+      console.log('Calling onSave with data:', JSON.stringify(submissionData, null, 2));
+      const result = await onSave(submissionData);
+      
+      // Helper to check if the result indicates success
+      const checkSuccess = (res: any): boolean => {
+        console.log('Checking success for result:', res);
+        
+        // Handle numeric response (1 means success)
+        if (res === 1) return true;
+        
+        // Handle object response
+        if (res && typeof res === 'object') {
+          // Check for success in various response formats
+          if (res.code === 'success' || res.status === 1 || res.status === 'success') {
+            return true;
+          }
+          
+          // Check for error status
+          if (res.code === 'error' || (typeof res.status === 'number' && res.status >= 400)) {
+            // Log the error for debugging
+            console.error('Error response:', res);
+            
+            // Show error message to user if available
+            const errorMessage = res.message || res.error || 'Une erreur est survenue';
+            toast.error(errorMessage, {
+              duration: 5000,
+              position: 'top-center',
+              style: { background: '#EF4444', color: 'white' }
+            });
+            
+            return false;
+          }
+          
+          // If we have data but no explicit error, assume success
+          if (res.data) return true;
+        }
+        
+        // Default to failure if we can't determine success
+        console.warn('Could not determine success status from response:', res);
+        return false;
+      };
+      
+      const isSuccess = checkSuccess(result);
+      console.log('Is operation successful?', isSuccess);
+      
+      if (isSuccess) {
+        // Show success message
+        toast.success(
+          action === 'CREATE' 
+            ? 'Utilisateur créé avec succès' 
+            : 'Utilisateur mis à jour avec succès',
+          {
+            duration: 5000,
+            position: 'top-center',
+            style: { background: '#10B981', color: 'white' }
+          }
+        );
+        
+        // Close the modal and reset the form
+        onClose();
+        
+        // Reset the form if this is a create operation
+        if (action === 'CREATE') {
+          // Add any form reset logic here if needed
+        }
+      } else if (result !== undefined) {
+        // Handle error response from onSave
+        console.warn('User save operation failed:', result);
+        
+        // Extract error message based on result type
+        let errorMessage = action === 'CREATE' 
+          ? "Échec de la création de l'utilisateur" 
+          : "Échec de la mise à jour de l'utilisateur";
+        
+        if (typeof result === 'object' && result !== null) {
+          // Handle object response
+          const response = result as Record<string, any>;
+          errorMessage = response.message || 
+                        response.data?.message || 
+                        response.error ||
+                        errorMessage;
+        } else if (typeof result === 'string') {
+          // Handle string response
+          errorMessage = result;
+        } else if (result === 0) {
+          errorMessage = "L'opération a échoué. Veuillez vérifier les données et réessayer.";
+        }
+        
+        toast.error(errorMessage, {
+          duration: 5000,
+          position: 'top-center',
+          style: { background: '#EF4444', color: 'white' }
+        });
+      }
     } catch (error) {
-      toast.error("Une erreur est survenue lors de la sauvegarde.", {
-        style: { background: "#3b82f6", color: "#ffffff" },
-        position: "top-center",
-      });
+      console.error('Error in handleSave:', error);
+      toast.error(
+        action === 'CREATE'
+          ? "Une erreur est survenue lors de la création de l'utilisateur"
+          : "Une erreur est survenue lors de la mise à jour de l'utilisateur",
+        {
+          duration: 5000,
+          position: 'top-center',
+          style: { background: '#EF4444', color: 'white' }
+        }
+      );
     } finally {
       setLoading(false);
     }
   };
+  
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await handleSave(e);
+  };
+  
+  const handleButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const form = document.getElementById('user-form') as HTMLFormElement;
+    if (form) {
+      form.requestSubmit();
+    } else {
+      await handleSave();
+    }
+  };
+
+  if (!isOpen) return null;
 
   return (
     <GenericModal
       open={isOpen}
-      onOpenChange={onClose}
-      title={action === "CREATE" ? "Créer un nouvel utilisateur" : "Modifier l'utilisateur"}
-      cancelText="Annuler"
-      confirmText={
-        loading ? (
-          <span className="flex items-center gap-2">
-            <Loader2 className="animate-spin h-4 w-4" />
-            {action === "CREATE" ? "Création..." : "Sauvegarde..."}
-          </span>
-        ) : action === "CREATE" ? "Créer l’utilisateur" : "Sauvegarder"
+      onOpenChange={(open) => !open && onClose()}
+      title={action === "CREATE" ? "Nouvel utilisateur" : "Modifier l'utilisateur"}
+      description={
+        action === "CREATE"
+          ? "Remplissez les champs ci-dessous pour créer un nouvel utilisateur."
+          : "Modifiez les informations de l'utilisateur ci-dessous."
       }
-      onConfirm={handleSubmit}
       onCancel={onClose}
-      size="max-w-xl"
+      onConfirm={handleButtonClick}
+      confirmText={loading ? <Loader2 className="h-4 w-4 animate-spin" /> : action === "CREATE" ? "Créer" : "Mettre à jour"}
     >
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3">
-        {/* Prénom */}
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium text-gray-700">
-            Prénom <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="first_name"
-            value={formData.first_name}
-            onChange={handleChange}
-            className={`border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
-              errors.first_name ? "border-red-500" : "border-gray-300"
-            }`}
-            disabled={loading}
-          />
-          {errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>}
-        </div>
+      <form id="user-form" onSubmit={handleFormSubmit} className="space-y-4" noValidate>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Prénom */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Prénom <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="first_name"
+              value={formData.first_name}
+              onChange={handleChange}
+              className={`w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
+                errors.first_name ? "border-red-500" : "border-gray-300"
+              }`}
+              disabled={loading}
+              required
+            />
+            {errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>}
+          </div>
 
-        {/* Nom */}
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium text-gray-700">
-            Nom <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-            className={`border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
-              errors.last_name ? "border-red-500" : "border-gray-300"
-            }`}
-            disabled={loading}
-          />
-          {errors.last_name && <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>}
-        </div>
+          {/* Nom */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Nom <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="last_name"
+              value={formData.last_name}
+              onChange={handleChange}
+              className={`w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
+                errors.last_name ? "border-red-500" : "border-gray-300"
+              }`}
+              disabled={loading}
+              required
+            />
+            {errors.last_name && <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>}
+          </div>
 
-        {/* Email */}
-        <div className="flex flex-col col-span-2">
-          <label className="mb-1 font-medium text-gray-700">
-            Email <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={`border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            }`}
-            disabled={loading}
-          />
-          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-        </div>
+          {/* Email */}
+          <div className="space-y-1 col-span-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Email <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              }`}
+              disabled={loading}
+              required
+            />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+          </div>
 
-        {/* Téléphone */}
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium text-gray-700">
-            Téléphone <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="phone_number"
-            value={formData.phone_number}
-            onChange={handleChange}
-            className={`border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
-              errors.phone_number ? "border-red-500" : "border-gray-300"
-            }`}
-            disabled={loading}
-          />
-          {errors.phone_number && <p className="text-red-500 text-sm mt-1">{errors.phone_number}</p>}
-        </div>
+          {/* Téléphone */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Téléphone
+            </label>
+            <input
+              type="tel"
+              name="phone_number"
+              value={formData.phone_number}
+              onChange={handleChange}
+              placeholder="+XX XXX XXX XXX"
+              className={`w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
+                errors.phone_number ? "border-red-500" : "border-gray-300"
+              }`}
+              disabled={loading}
+            />
+            {errors.phone_number && <p className="text-red-500 text-sm mt-1">{errors.phone_number}</p>}
+          </div>
 
-        {/* Mot de passe */}
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium text-gray-700">
-            Mot de passe <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="password"
-            name="password_plaintext"
-            value={formData.password_plaintext}
-            onChange={handleChange}
-            className={`border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
-              errors.password_plaintext ? "border-red-500" : "border-gray-300"
-            }`}
-            disabled={loading}
-          />
-          {errors.password_plaintext && (
-            <p className="text-red-500 text-sm mt-1">{errors.password_plaintext}</p>
+          {/* Numéro de staff */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Numéro de staff
+            </label>
+            <input
+              type="text"
+              name="staff_number"
+              value={formData.staff_number}
+              onChange={handleChange}
+              className="w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 border-gray-300"
+              disabled={loading}
+            />
+          </div>
+
+          {/* Poste */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Poste
+            </label>
+            <input
+              type="text"
+              name="job_title"
+              value={formData.job_title}
+              onChange={handleChange}
+              className="w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 border-gray-300"
+              disabled={loading}
+            />
+          </div>
+
+          {/* Département */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Département
+            </label>
+            <input
+              type="text"
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              className="w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 border-gray-300"
+              disabled={loading}
+            />
+          </div>
+
+          {/* Date d'embauche */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Date d'embauche
+            </label>
+            <input
+              type="date"
+              name="hiring_date"
+              value={formData.hiring_date}
+              onChange={handleChange}
+              className="w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 border-gray-300"
+              disabled={loading}
+            />
+          </div>
+
+          {/* Salaire */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Salaire (FCFA) <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                name="salary"
+                min="1"
+                step="1000"
+                value={formData.salary}
+                onChange={handleChange}
+                className={`w-full border rounded p-1.5 pr-10 focus:ring-2 focus:ring-blue-400 ${
+                  errors.salary ? "border-red-500" : "border-gray-300"
+                }`}
+                disabled={loading}
+                required
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500 text-sm">FCFA</span>
+              </div>
+            </div>
+            {errors.salary && <p className="text-red-500 text-sm mt-1">{errors.salary}</p>}
+          </div>
+
+          {/* Genre */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Genre
+            </label>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 border-gray-300"
+              disabled={loading}
+            >
+              <option value="MALE">Masculin</option>
+              <option value="FEMALE">Féminin</option>
+            </select>
+          </div>
+
+          {/* Mot de passe (only for new users) */}
+          {action === "CREATE" && (
+            <div className="space-y-1 col-span-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Mot de passe <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                name="password_plaintext"
+                value={formData.password_plaintext}
+                onChange={handleChange}
+                className={`w-full border rounded p-1.5 focus:ring-2 focus:ring-blue-400 ${
+                  errors.password_plaintext ? "border-red-500" : "border-gray-300"
+                }`}
+                disabled={loading}
+                required
+              />
+              {errors.password_plaintext && (
+                <p className="text-red-500 text-sm mt-1">{errors.password_plaintext}</p>
+              )}
+            </div>
           )}
-        </div>
-
-        {/* Genre */}
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium text-gray-700">Genre</label>
-          <select
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            className="border rounded p-1.5 focus:ring-2 focus:ring-blue-400 border-gray-300"
-            disabled={loading}
-          >
-            <option value="MALE">Masculin</option>
-            <option value="FEMALE">Féminin</option>
-          </select>
         </div>
       </form>
     </GenericModal>
   );
 }
-
-
-// 'use client';
-
-// import React, { Dispatch, SetStateAction } from "react";
-// import GenericModal from "../GenericModal";
-// import { Label } from "@/components/ui/label";
-// import { Input } from "@/components/ui/input";
-// import {
-//   Select,
-//   SelectTrigger,
-//   SelectValue,
-//   SelectContent,
-//   SelectItem,
-// } from "@/components/ui/select";
-// import { gender, ICreateUser } from "@/types/userTypes"; // à adapter avec ton type utilisateur
-// import { ACTION } from "@/constant";
-
-// interface ModalUserProps {
-//   open: boolean;
-//   onOpenChange: (open: boolean) => void;
-//   formData: ICreateUser | null;
-//   setFormData: Dispatch<SetStateAction<ICreateUser | null>>;
-//   onConfirm: () => void;
-//   action: ACTION;
-// }
-
-// const ModalUser: React.FC<ModalUserProps> = ({
-//   open,
-//   onOpenChange,
-//   formData,
-//   setFormData,
-//   onConfirm,
-//   action,
-// }) => {
-//   return (
-//     <GenericModal
-//       open={open}
-//       onOpenChange={onOpenChange}
-//       title={action === "CREATE" ? "Créer un nouvel utilisateur" : "Modifier un utilisateur"}
-//       onCancel={() => {
-//         onOpenChange(false);
-//         setFormData(null);
-//       }}
-//       onConfirm={onConfirm}
-//       confirmText={action === "CREATE" ? "Créer l'utilisateur" : "Mettre à jour"}
-//     >
-//       <div className="grid grid-cols-2 gap-4">
-//         {/* Prénom */}
-//         <div className="space-y-2">
-//           <Label htmlFor="first_name">Prénom</Label>
-//           <Input
-//             id="first_name"
-//             value={formData && formData.first_name || ""}
-//             onChange={(e) => {if(formData) setFormData({ ...formData, first_name: e.target.value })}}
-//           />
-//         </div>
-
-//         {/* Nom */}
-//         <div className="space-y-2">
-//           <Label htmlFor="last_name">Nom</Label>
-//           <Input
-//             id="last_name"
-//             value={formData && formData.last_name || ""}
-//             onChange={(e) => {if(formData) setFormData({ ...formData, last_name: e.target.value })}}
-//           />
-//         </div>
-
-//         {/* Email */}
-//         <div className="space-y-2">
-//           <Label htmlFor="email">Email</Label>
-//           <Input
-//             id="email"
-//             type="email"
-//             value={formData && formData.email || ""}
-//             onChange={(e) => {if(formData) setFormData({ ...formData, email: e.target.value })}}
-//           />
-//         </div>
-
-//         {/* Téléphone */}
-//         {action === "CREATE" && (
-//             <div className="space-y-2">
-//             <Label htmlFor="phone_number">Téléphone</Label>
-//             <Input
-//                 id="phone_number"
-//                 value={formData && formData.phone_number || ""}
-//                 onChange={(e) => {if(formData) setFormData({ ...formData, phone_number: e.target.value })}}
-//             />
-//             </div>
-//         )}
-
-//         {/* Mot de passe */}
-//         {action === "CREATE" && (
-//           <div className="space-y-2">
-//             <Label htmlFor="password_plaintext">Mot de passe</Label>
-//             <Input
-//               id="password_plaintext"
-//               type="password"
-//               value={formData && formData.password_plaintext || ""}
-//               onChange={(e) => {if(formData) setFormData({ ...formData, password_plaintext: e.target.value })}}
-//             />
-//           </div>
-//         )}
-
-//         {/* Genre */}
-//         <div className="space-y-2">
-//           <Label htmlFor="gender">Genre</Label>
-//           <Select
-//             value={formData ? formData.gender : 'MALE'}
-//             onValueChange={(value) => {if(formData) setFormData({ ...formData, gender: value as gender })}}
-//           >
-//             <SelectTrigger>
-//               <SelectValue placeholder="Sélectionner un genre" />
-//             </SelectTrigger>
-//             <SelectContent>
-//               <SelectItem value="MALE">Masculin</SelectItem>
-//               <SelectItem value="FEMALE">Féminin</SelectItem>
-//             </SelectContent>
-//           </Select>
-//         </div>
-
-//         {/* Rôle */}
-//         {/* <div className="space-y-2">
-//           <Label htmlFor="role">Rôle</Label>
-//           <Select
-//             value={formData.role}
-//             onValueChange={(value) => setFormData({ ...formData, role: value })}
-//           >
-//             <SelectTrigger>
-//               <SelectValue placeholder="Sélectionner un rôle" />
-//             </SelectTrigger>
-//             <SelectContent>
-//               <SelectItem value="ADMINISTRATOR">Administrateur</SelectItem>
-//               <SelectItem value="REGISTRAR">Scolarité</SelectItem>
-//               <SelectItem value="HR">RH</SelectItem>
-//               <SelectItem value="TEACHER">Enseignant</SelectItem>
-//               <SelectItem value="STUDENT">Étudiant</SelectItem>
-//             </SelectContent>
-//           </Select>
-//         </div> */}
-//       </div>
-//     </GenericModal>
-//   );
-// };
-
-// export default ModalUser;

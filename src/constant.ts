@@ -29,14 +29,13 @@ export const USER_ROLE = [
 
 export const USER_TABLE_HEADERS = [
   "Utilisateur",
+  "Département",
+  "Poste",
   "Rôles",
   "Statut",
   "Dernière connexion",
   "Actions",
 ];
-
-
-
 
 
 
