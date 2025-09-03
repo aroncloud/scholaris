@@ -44,7 +44,12 @@ export default function UserDropdown() {
         <div className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/30 bg-white/20 text-white font-medium text-lg">
           {fullName.charAt(0).toUpperCase()}
         </div>
-        <span>{fullName}</span>
+        <div>
+          <p>{fullName}</p>
+          <p>{user.email}</p>
+          
+        </div>
+        
       </button>
 
       {isOpen && (

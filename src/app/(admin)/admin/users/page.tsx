@@ -147,22 +147,12 @@ export default function UsersPage() {
       
       const result = await apiAction(payloadToSend as any);
 
+      // Remove all toast calls here
       if (result && 'code' in result && result.code === 'success') {
-        const successMessage = action === 'CREATE' 
-          ? 'Utilisateur créé avec succès' 
-          : 'Utilisateur mis à jour avec succès';
-        
-        toast.success(successMessage, {
-          duration: 5000,
-          position: 'top-center',
-          style: { background: '#10B981', color: 'white' }
-        });
-        
         await init();
         setIsEditDialogOpen(false);
-        return 1;
+        return 1; // success indicator for ModalUser
       } else {
-        // Return error details
         return {
           code: 'error',
           message: (result as any)?.message || 'Une erreur est survenue lors de la sauvegarde',
@@ -172,7 +162,6 @@ export default function UsersPage() {
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue';
-      console.error('Error in handleSaveUserInfo:', error);
       console.error('Error in handleSaveUserInfo:', error);
       return {
         code: 'error',
@@ -184,6 +173,9 @@ export default function UsersPage() {
       setLoading(false);
     }
   };
+
+
+
 
   const handleDeleteUser = async () => {
     if (userFormData?.user_code) {

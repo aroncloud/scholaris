@@ -193,14 +193,6 @@ const UserSection = ({
                     </TableCell>
 
                     <TableCell>
-                      <div className="font-medium">{user.department || '-'}</div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="font-medium">{user.job_title || '-'}</div>
-                    </TableCell>
-
-                    <TableCell>
                       <div className="flex flex-wrap gap-2">
                         {user.profiles.length > 0 ? (
                           user.profiles.map((role) => (

@@ -185,7 +185,18 @@ export default function ModalUser({ isOpen, onClose, initialData, action, onSave
       description={action === "CREATE" ? "Remplissez les champs ci-dessous pour créer un nouvel utilisateur." : "Modifiez les informations de l'utilisateur ci-dessous."}
       onCancel={onClose}
       onConfirm={handleButtonClick}
-      confirmText={loading ? <Loader2 className="h-4 w-4 animate-spin" /> : action === "CREATE" ? "Créer" : "Mettre à jour"}
+      // confirmText={loading ? <Loader2 className="h-4 w-4 animate-spin" /> : action === "CREATE" ? "Créer" : "Mettre à jour"}
+      confirmText={
+        loading ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {action === "CREATE" ? "Création..." : "Mise à jour..."}
+          </span>
+        ) : (
+          action === "CREATE" ? "Créer" : "Mettre à jour"
+        )
+      }
+
     >
       <form id="user-form" onSubmit={handleFormSubmit} className="space-y-6" noValidate>
         {/* Section 1: Informations personnelles */}
