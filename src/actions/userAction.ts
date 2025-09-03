@@ -347,13 +347,13 @@ export async function getUserList(limit = 100, offset = 0) {
         data: null
       };
     }
-
-    console.log('Successfully fetched user list:', response.data);
+    console.log('Successfully fetched user list:', response.data.body[0]);
     return {
       code: 'success',
       error: null,
       data: response.data,
     };
+    
   } catch (error: any) {
     console.error('Error in getUserList:', {
       message: error.message,

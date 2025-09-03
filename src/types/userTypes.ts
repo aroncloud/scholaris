@@ -101,14 +101,10 @@ export interface IUserList {
   updated_at: number;
   last_login_at: number | null;
   status_code: string;
-  department?: string;
-  job_title?: string;
-  staff_number?: string;
-  phone_number?: string;
   profiles: {
-      "profile_code": string,
-      "role_code": string,
-      "role_title": string
+    profile_code: string;
+    role_code: string;
+    role_title: string;
   }[];
 }
 
