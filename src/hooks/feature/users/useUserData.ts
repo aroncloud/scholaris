@@ -9,7 +9,7 @@ import {
   getUserList,
   updateUser,
 } from "@/actions/userAction";
-import { ICreateUser, IUserList } from "@/types/userTypes";
+import { ICreateUser, IUserList } from "@/types/staffType";
 
 export function useUserData() {
   const [userList, setUserList] = useState<IUserList[]>([]);

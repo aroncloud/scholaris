@@ -92,7 +92,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ICreateStudent, IEnrollmentRequest, IListStudent, IStudent } from "@/types/userTypes";
+import { ICreateStudent, IEnrollmentRequest, IListStudent, IStudent } from "@/types/staffType";
 import Header from "./Header";
 import { getUserList } from "@/actions/programsAction";
 

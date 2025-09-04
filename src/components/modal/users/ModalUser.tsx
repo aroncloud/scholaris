@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import { ICreateUser } from "@/types/userTypes";
+import { ICreateUser } from "@/types/staffType";
 import { Loader2, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import GenericModal from "../GenericModal";

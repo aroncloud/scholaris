@@ -7,7 +7,7 @@ import Label from "@/components/form/Label";
 import Checkbox from "@/components/form/input/Checkbox";
 import { Button } from "../ui/button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
-import { ILoginForm } from "@/types/userTypes";
+import { ILoginForm } from "@/types/staffType";
 import { login } from "@/actions/authAction";
 import { showToast } from "@/lib/utils";
 import { useRouter } from "next/navigation";
