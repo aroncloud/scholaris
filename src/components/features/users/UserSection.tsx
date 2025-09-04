@@ -47,7 +47,7 @@ import {
   Filter,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import { ICreateUser, IUserList } from "@/types/userTypes";
+import { ICreateUser, IUserList } from "@/types/staffType";
 import { ACTION, USER_ROLE, USER_TABLE_HEADERS } from "@/constant";
 import { getRoleColor, getStatusColor } from "@/lib/utils";
 

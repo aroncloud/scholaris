@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { IInitiateStudentApplication } from "@/types/userTypes";
+import { IInitiateStudentApplication } from "@/types/staffType";
 import { ICurriculum } from "@/types/programTypes";
 import { toast } from "sonner";
 import { initiateStudentApplication } from "@/actions/studentAction";

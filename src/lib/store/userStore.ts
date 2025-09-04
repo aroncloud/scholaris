@@ -3,7 +3,7 @@
 
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { UserState  } from '@/types/userTypes';
+import { UserState  } from '@/types/staffType';
 
 // Initialisation de l'état par défaut
 const initialState = {

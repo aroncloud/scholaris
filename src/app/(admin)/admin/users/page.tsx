@@ -16,7 +16,7 @@ import {
 } from "@/actions/userAction";
 
 // Types
-import { ICreateUser, IUserList } from "@/types/userTypes";
+import { ICreateUser, IUserList } from "@/types/staffType";
 
 // Components
 import { Button } from "@/components/ui/button";

@@ -11,7 +11,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { gender, ICreateStudent } from "@/types/userTypes";
+import { gender, ICreateStudent } from "@/types/staffType";
 
 interface ModalStudentProps {
   open: boolean;

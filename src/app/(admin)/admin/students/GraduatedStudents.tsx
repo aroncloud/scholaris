@@ -90,7 +90,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { IEnrollmentRequest, IListStudent, IStudent } from "@/types/userTypes";
+import { IEnrollmentRequest, IListStudent, IStudent } from "@/types/staffType";
 import Header from "./Header";
 import { getMentionColor } from "@/lib/utils";
 import { getUserList } from "@/actions/programsAction";

@@ -2,7 +2,7 @@
 import { createSession } from "@/lib/session";
 import { SessionPayload } from "@/types/authTypes";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ILoginForm } from "@/types/userTypes";
+import { ILoginForm } from "@/types/staffType";
 import axios from "axios";
 export async function login (data: ILoginForm) {
     try {

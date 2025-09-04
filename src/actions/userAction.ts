@@ -3,7 +3,7 @@
 import { verifySession } from "@/lib/session";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { ICreateUser } from "@/types/userTypes";
+import { ICreateUser } from "@/types/staffType";
 
 
 
