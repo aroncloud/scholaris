@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import GenericModal from './GenericModal';
+import GenericModal from '../GenericModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -122,7 +122,11 @@ const SaisieParUEModal: React.FC<SaisieParUEModalProps> = ({
       title="Saisie par Unité d'Enseignement"
       description="Saisir les notes pour tous les étudiants d'une UE"
       onConfirm={handleSubmit}
-      confirmText="Enregistrer toutes les notes"
+      confirmText={
+        <span className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+          Enregistrer toutes les notes
+        </span>
+      }
       cancelText="Annuler"
       size="max-w-4xl"
     >
@@ -156,9 +160,10 @@ const SaisieParUEModal: React.FC<SaisieParUEModalProps> = ({
                 <SelectValue placeholder="Type d'évaluation" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="exam">Examen</SelectItem>
-                <SelectItem value="quiz">Quiz</SelectItem>
-                <SelectItem value="homework">Devoir</SelectItem>
+                <SelectItem value="TP">Travaux Pratiques (TP)</SelectItem>
+                <SelectItem value="CC">Contrôle Continu (CC)</SelectItem>
+                <SelectItem value="SN">Session Normale (SN)</SelectItem>
+                <SelectItem value="exam">Examen Final</SelectItem>
                 <SelectItem value="project">Projet</SelectItem>
               </SelectContent>
             </Select>
@@ -171,8 +176,8 @@ const SaisieParUEModal: React.FC<SaisieParUEModalProps> = ({
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
+                  variant="default"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.date ? format(formData.date, "PPP", { locale: fr }) : "Sélectionner une date"}
@@ -255,7 +260,11 @@ const SaisieParUEModal: React.FC<SaisieParUEModalProps> = ({
 
             <div className="space-y-2">
               <Label>&nbsp;</Label>
-              <Button onClick={addStudent} className="w-full">
+              <Button
+                variant="default"
+                onClick={addStudent}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Ajouter
               </Button>
@@ -296,8 +305,9 @@ const SaisieParUEModal: React.FC<SaisieParUEModalProps> = ({
                         <td className="px-4 py-2">{student.max}</td>
                         <td className="px-4 py-2">
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
                             onClick={() => removeStudent(index)}
                           >
                             <Trash2 className="h-4 w-4" />
