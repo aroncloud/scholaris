@@ -261,3 +261,29 @@ export enum content_types {
 // INSERT INTO content_types VALUES('CNI_RECTO',1,'ID Card (Front)');
 // INSERT INTO content_types VALUES('SELFIE',1,'Selfie');
 // INSERT INTO content_types VALUES('BIRTH_CERTIFICATE',1,'Birth Certificate'); 
+
+// Grades Entry Constants
+export const GRADES_ENTRY_CONSTANTS = {
+  PAGE_TITLE: "Gestion des Notes",
+  PAGE_DESCRIPTION: "Saisie et suivi des évaluations de vos étudiants",
+  BUTTONS: {
+    EXPORT: "Exporter",
+    IMPORT: "Importer", 
+    SAISIE_UE: "Saisie par UE",
+    SAISIR_NOTE: "Saisir note"
+  },
+  TABS: {
+    MATIERES: "Matières",
+    SAISIE: "Saisie"
+  },
+  STATS: {
+    TOTAL_GRADES: "Total notes",
+    AVERAGE: "Moyenne générale",
+    EVALUATED_STUDENTS: "Étudiants évalués", 
+    PENDING: "En attente"
+  },
+  COURSE_LIST_TITLE: "Liste des matières enseignées"
+} as const;
+
+
+
