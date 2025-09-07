@@ -22,7 +22,13 @@ export default function CourseListSection({ courses, onOpen }: { courses: Teache
               <Users className="w-4 h-4" />
               <span>{c.studentsCount} étudiants</span>
             </div>
-            <Button className="w-full" variant="outline" onClick={() => onOpen(c.id)}>Ouvrir</Button>
+            <Button 
+              className="w-full hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200" 
+              variant="outline" 
+              onClick={() => onOpen(c.id)}
+            >
+              Ouvrir
+            </Button>
           </CardContent>
         </Card>
       ))}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import GenericModal from './GenericModal';
+import GenericModal from '../GenericModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +21,10 @@ interface SaisirNoteModalProps {
 
 interface GradeData {
   studentId: string;
+  studentName: string;
+  matricule: string;
   courseId: string;
+  courseName: string;
   evaluation: string;
   value: number;
   max: number;
@@ -36,7 +39,10 @@ const SaisirNoteModal: React.FC<SaisirNoteModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<GradeData>({
     studentId: '',
+    studentName: '',
+    matricule: '',
     courseId: '',
+    courseName: '',
     evaluation: '',
     value: 0,
     max: 20,
@@ -53,7 +59,10 @@ const SaisirNoteModal: React.FC<SaisirNoteModalProps> = ({
     // Reset form
     setFormData({
       studentId: '',
+      studentName: '',
+      matricule: '',
       courseId: '',
+      courseName: '',
       evaluation: '',
       value: 0,
       max: 20,
@@ -73,10 +82,12 @@ const SaisirNoteModal: React.FC<SaisirNoteModalProps> = ({
     <GenericModal
       open={open}
       onOpenChange={onOpenChange}
-      title="Saisir une note"
-      description="Ajouter une nouvelle note pour un étudiant"
+      title="Saisir une nouvelle note"
+      description="Entrez les détails de l'évaluation"
+      titleClassName="bg-blue-600 text-white p-4 -mx-6 -mt-6 mb-4 rounded-t-lg"
       onConfirm={handleSubmit}
       confirmText="Enregistrer"
+      confirmButtonClassName="bg-blue-600 hover:bg-blue-700 text-white"
       cancelText="Annuler"
       size="max-w-2xl"
     >
@@ -84,28 +95,54 @@ const SaisirNoteModal: React.FC<SaisirNoteModalProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="student">Étudiant</Label>
-            <Select value={formData.studentId} onValueChange={(value) => handleInputChange('studentId', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un étudiant" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="student1">Jean Dupont</SelectItem>
-                <SelectItem value="student2">Marie Martin</SelectItem>
-                <SelectItem value="student3">Pierre Durand</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Select 
+                value={formData.studentId} 
+                onValueChange={(value) => {
+                  const [id, name, matricule] = value.split('|');
+                  setFormData(prev => ({
+                    ...prev,
+                    studentId: id,
+                    studentName: name,
+                    matricule: matricule
+                  }));
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un étudiant" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student1|Jean Dupont|MAT001">Jean Dupont (MAT001)</SelectItem>
+                  <SelectItem value="student2|Marie Martin|MAT002">Marie Martin (MAT002)</SelectItem>
+                  <SelectItem value="student3|Pierre Durand|MAT003">Pierre Durand (MAT003)</SelectItem>
+                </SelectContent>
+              </Select>
+              {formData.matricule && (
+                <p className="text-sm text-gray-500">Matricule: {formData.matricule}</p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="course">Matière</Label>
-            <Select value={formData.courseId} onValueChange={(value) => handleInputChange('courseId', value)}>
+            <Select 
+              value={formData.courseId} 
+              onValueChange={(value) => {
+                const [id, name] = value.split('|');
+                setFormData(prev => ({
+                  ...prev,
+                  courseId: id,
+                  courseName: name
+                }));
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner une matière" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="course1">Mathématiques</SelectItem>
-                <SelectItem value="course2">Physique</SelectItem>
-                <SelectItem value="course3">Informatique</SelectItem>
+                <SelectItem value="course1|Anatomie générale">Anatomie générale</SelectItem>
+                <SelectItem value="course2|Physiologie spécialisée">Physiologie spécialisée</SelectItem>
+                <SelectItem value="course3|TP Anatomie">TP Anatomie</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -119,10 +156,9 @@ const SaisirNoteModal: React.FC<SaisirNoteModalProps> = ({
                 <SelectValue placeholder="Type d'évaluation" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="exam">Examen</SelectItem>
-                <SelectItem value="quiz">Quiz</SelectItem>
-                <SelectItem value="homework">Devoir</SelectItem>
-                <SelectItem value="project">Projet</SelectItem>
+                <SelectItem value="TP">Travaux Pratiques (TP)</SelectItem>
+                <SelectItem value="CC">Contrôle Continu (CC)</SelectItem>
+                <SelectItem value="SN">Session Normale (SN)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -166,7 +202,7 @@ const SaisirNoteModal: React.FC<SaisirNoteModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="max">Note maximale</Label>
+            <Label htmlFor="max">Barème</Label>
             <Input
               id="max"
               type="number"

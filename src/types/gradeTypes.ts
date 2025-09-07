@@ -20,11 +20,13 @@ export interface GradeEntry {
   id: string;
   courseId: string;
   studentId: string;
+  matricule: string; // Added matricule field
   evaluation: EvaluationKind;
   value: number; // value on 20
   max: number;   // default 20
   date: string;  // ISO date
   comment?: string;
+  studentName?: string; // For display purposes
 }
 
 export interface GradesStats {

@@ -96,6 +96,9 @@ interface GenericModalProps {
   confirmText?: React.ReactNode;
   cancelText?: string;
   size?: string;
+  titleClassName?: string;
+  confirmButtonClassName?: string;
+  cancelButtonClassName?: string;
 }
 
 const GenericModal: React.FC<GenericModalProps> = ({
@@ -106,17 +109,24 @@ const GenericModal: React.FC<GenericModalProps> = ({
   children,
   onCancel,
   onConfirm,
-  confirmText = "Confirmer",
-  cancelText = "Annuler",
-  size = "max-w-2xl",
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  size = "max-w-lg",
+  titleClassName = "",
+  confirmButtonClassName = "",
+  cancelButtonClassName = "",
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={size}>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+        <DialogHeader className={titleClassName}>
+          <DialogTitle className={titleClassName.includes("text-white") ? "text-white" : ""}>
+            {title}
+          </DialogTitle>
           {description && (
-            <DialogDescription>{description}</DialogDescription>
+            <DialogDescription className={titleClassName.includes("text-white") ? "text-white/90" : ""}>
+              {description}
+            </DialogDescription>
           )}
         </DialogHeader>
         
@@ -129,19 +139,23 @@ const GenericModal: React.FC<GenericModalProps> = ({
         <div className="mt-4 w-full h-px bg-border" aria-hidden="true" />
         
         <div className="flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            onClick={onCancel || (() => onOpenChange(false))}
-            aria-label={cancelText}
+          <Button
             type="button"
+            variant="outline"
+            onClick={onCancel || (() => onOpenChange(false))}
+            className={cancelButtonClassName}
           >
             {cancelText}
           </Button>
           {onConfirm && (
-            <Button 
+            <Button
+              type="button"
+              variant="default"
               onClick={onConfirm}
-              aria-label={typeof confirmText === 'string' ? confirmText : 'Confirm'}
-              type="submit"
+              className={cn(
+                'bg-primary text-primary-foreground hover:bg-primary/90',
+                confirmButtonClassName
+              )}
             >
               {confirmText}
             </Button>

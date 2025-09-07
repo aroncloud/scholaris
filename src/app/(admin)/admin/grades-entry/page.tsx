@@ -9,8 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Award, Users, BarChart3, Calendar, Download, Upload, Plus, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import StatCard from '@/components/cards/StatCard';
-import SaisirNoteModal from '@/components/modal/SaisirNoteModal';
-import SaisieParUEModal from '@/components/modal/SaisieParUEModal';
+import SaisirNoteModal from '@/components/modal/grades/SaisirNoteModal';
+import SaisieParUEModal from '@/components/modal/grades/SaisieParUEModal';
 import { GRADES_ENTRY_CONSTANTS } from '@/constant';
 
 export default function GradesEntryPage() {
@@ -41,20 +41,27 @@ export default function GradesEntryPage() {
           <p className="text-gray-600">{GRADES_ENTRY_CONSTANTS.PAGE_DESCRIPTION}</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
+          <Button variant="outline" className="hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200">
             <Download className="h-4 w-4 mr-2" />
             {GRADES_ENTRY_CONSTANTS.BUTTONS.EXPORT}
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" className="hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200">
             <Upload className="h-4 w-4 mr-2" />
             {GRADES_ENTRY_CONSTANTS.BUTTONS.IMPORT}
           </Button>
-          <Button variant="outline" onClick={() => setSaisieParUEModalOpen(true)}>
+          <Button 
+            variant="outline" 
+            onClick={() => setSaisieParUEModalOpen(true)}
+            className="hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
+          >
             <Plus className="h-4 w-4 mr-2" />
             {GRADES_ENTRY_CONSTANTS.BUTTONS.SAISIE_UE}
           </Button>
-          <Button className="bg-blue-700" onClick={() => setSaisirNoteModalOpen(true)}>
-            <Plus className="h-4 w-4 mr-2 " />
+          <Button 
+            className="bg-blue-700 hover:bg-blue-800" 
+            onClick={() => setSaisirNoteModalOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
             {GRADES_ENTRY_CONSTANTS.BUTTONS.SAISIR_NOTE}
           </Button>
         </div>
@@ -66,21 +73,25 @@ export default function GradesEntryPage() {
           <StatCard
             title={GRADES_ENTRY_CONSTANTS.STATS.TOTAL_GRADES}
             value={stats.totalGrades}
+            description="Notes saisies"
             icon={<BarChart3 className="w-4 h-4" />}
           />
           <StatCard
             title={GRADES_ENTRY_CONSTANTS.STATS.AVERAGE}
             value={`${stats.averageOn20}/20`}
+             description="Toutes matières"
             icon={<Award className="w-4 h-4" />}
           />
           <StatCard
             title={GRADES_ENTRY_CONSTANTS.STATS.EVALUATED_STUDENTS}
             value={stats.distinctStudents}
+             description="Ayant des notes"
             icon={<Users className="w-4 h-4" />}
           />
           <StatCard
             title={GRADES_ENTRY_CONSTANTS.STATS.PENDING}
             value={stats.pendingCount}
+             description="Notes à saisir"
             icon={<Calendar className="w-4 h-4" />}
           />
         </div>
@@ -108,19 +119,6 @@ export default function GradesEntryPage() {
         <TabsContent value="saisie" className="space-y-4">
           {selectedCourse && (
             <>
-              {/* Back button */}
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBackToMatieres}
-                  className="flex items-center space-x-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span>Retour aux matières</span>
-                </Button>
-              </div>
-              
               <GradeEntrySection
                 course={selectedCourse}
                 students={students}
@@ -128,7 +126,24 @@ export default function GradesEntryPage() {
                 activeEval={activeEval}
                 onChangeEval={changeEvaluation}
                 onSave={async ({ studentId, value, max, evaluation, courseId }) => {
-                  await addGrade({ courseId, studentId, evaluation, value, max });
+                  // Find the student to get their matricule
+                  const student = students.find(s => s.id === studentId);
+                  if (!student) return;
+                  
+                  await addGrade({ 
+                    courseId, 
+                    studentId, 
+                    evaluation, 
+                    value, 
+                    max,
+                    matricule: student.matricule
+                  });
+                }}
+                onDelete={async (gradeId: string) => {
+                  // Implement delete functionality here
+                  console.log('Deleting grade:', gradeId);
+                  // Add your delete API call here
+                  // await deleteGrade(gradeId);
                 }}
               />
             </>
