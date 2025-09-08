@@ -16,9 +16,36 @@ const mockStudentsByCourse: Record<string, Student[]> = {
 };
 
 let mockGrades: GradeEntry[] = [
-  { id: 'g1', courseId: 'c1', studentId: 's10', evaluation: 'TP', value: 14, max: 20, date: '2025-01-15' },
-  { id: 'g2', courseId: 'c1', studentId: 's11', evaluation: 'CC', value: 12, max: 20, date: '2025-01-16' },
-  { id: 'g3', courseId: 'c2', studentId: 's21', evaluation: 'SN', value: 16, max: 20, date: '2025-01-20' },
+  { 
+    id: 'g1', 
+    courseId: 'c1', 
+    studentId: 's10', 
+    matricule: 'ETU24100', 
+    evaluation: 'TP', 
+    value: 14, 
+    max: 20, 
+    date: '2025-01-15' 
+  },
+  { 
+    id: 'g2', 
+    courseId: 'c1', 
+    studentId: 's11', 
+    matricule: 'ETU24101', 
+    evaluation: 'CC', 
+    value: 12, 
+    max: 20, 
+    date: '2025-01-16' 
+  },
+  { 
+    id: 'g3', 
+    courseId: 'c2', 
+    studentId: 's21', 
+    matricule: 'ETU24200', 
+    evaluation: 'SN', 
+    value: 16, 
+    max: 20, 
+    date: '2025-01-20' 
+  },
 ];
 
 // ---- ACTIONS ----

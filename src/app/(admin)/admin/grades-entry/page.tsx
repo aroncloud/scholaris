@@ -1,23 +1,195 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useGradesData } from '@/hooks/feature/grades/useGradesData';
 import CourseListSection from '@/components/features/grades/CourseListTab';
 import GradeEntrySection from '@/components/features/grades/GradeEntryTab';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Users, BarChart3, Calendar, Download, Upload, Plus, ArrowLeft } from 'lucide-react';
+import { Award, Users, BarChart3, Calendar, Download, Upload, Plus, ArrowLeft, X, Save, ChevronLeft } from 'lucide-react';
+import { UESELECTION_CONSTANTS } from '@/constant';
 import { Button } from '@/components/ui/button';
 import StatCard from '@/components/cards/StatCard';
 import SaisirNoteModal from '@/components/modal/grades/SaisirNoteModal';
-import SaisieParUEModal from '@/components/modal/grades/SaisieParUEModal';
 import { GRADES_ENTRY_CONSTANTS } from '@/constant';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+interface UESelectionProps {
+  onSelect?: (data: { filiere: string; niveau: string; ue: string }) => void;
+  className?: string;
+}
+
+const UESelection: React.FC<UESelectionProps> = ({ onSelect, className = '' }) => {
+  const router = useRouter();
+  const [filiere, setFiliere] = useState('');
+  const [niveau, setNiveau] = useState('');
+  const [ue, setUe] = useState('');
+  
+  const handleBack = () => {
+    // Navigate to the main grades entry page with the matieres tab active
+    router.push('/admin/grades-entry?tab=matieres');
+  };
+
+  const filieres = [
+    { id: 'info', name: 'Informatique' },
+    { id: 'gestion', name: 'Gestion' },
+    { id: 'compta', name: 'Comptabilité' },
+  ];
+
+  const niveaux = [
+    { id: 'l1', name: 'Licence 1' },
+    { id: 'l2', name: 'Licence 2' },
+    { id: 'l3', name: 'Licence 3' },
+  ];
+
+  const ues = [
+    { id: 'ue1', name: 'UE1 - Programmation avancée' },
+    { id: 'ue2', name: 'UE2 - Base de données' },
+    { id: 'ue3', name: 'UE3 - Réseaux' },
+  ];
+
+  const isFormValid = filiere && niveau && ue;
+
+  const handleSave = () => {
+    if (isFormValid && onSelect) {
+      onSelect({ filiere, niveau, ue });
+    }
+  };
+
+  return (
+    <div className={`${className} bg-gray-50 min-h-screen`}>
+      {/* Header */}
+      <div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline" 
+                onClick={handleBack}
+                className="flex items-center space-x-2 text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span>{UESELECTION_CONSTANTS.HEADER.BACK}</span>
+              </Button>
+              <div className="text-left">
+                <h1 className="text-2xl font-bold text-gray-900">{UESELECTION_CONSTANTS.TITLE}</h1>
+                <p className="text-sm text-gray-500 mt-1">{UESELECTION_CONSTANTS.SUBTITLE}</p>
+              </div>
+            </div>
+        
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="outline"
+                className="text-gray-700 hover:bg-gray-50 border-gray-300"
+                onClick={() => {
+                  setFiliere('');
+                  setNiveau('');
+                  setUe('');
+                }}
+              >
+                <X className="h-4 w-4 mr-2" />
+                {UESELECTION_CONSTANTS.HEADER.RESET}
+              </Button>
+              <Button 
+                onClick={handleSave}
+                disabled={!isFormValid}
+                className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed px-6"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {UESELECTION_CONSTANTS.HEADER.SAVE}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="mb-8">
+            <h2 className="text-lg font-medium text-gray-900">{UESELECTION_CONSTANTS.FORM.TITLE}</h2>
+            <p className="text-sm text-gray-500 mt-1">{UESELECTION_CONSTANTS.FORM.DESCRIPTION}</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {UESELECTION_CONSTANTS.FORM.FIELDS.FILIERE.LABEL}
+              </label>
+              <Select value={filiere} onValueChange={setFiliere}>
+                <SelectTrigger>
+                  <SelectValue placeholder={UESELECTION_CONSTANTS.FORM.FIELDS.FILIERE.PLACEHOLDER} />
+                </SelectTrigger>
+                <SelectContent>
+                  {filieres.map((f) => (
+                    <SelectItem key={f.id} value={f.id}>
+                      {f.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {UESELECTION_CONSTANTS.FORM.FIELDS.NIVEAU.LABEL}
+              </label>
+              <Select value={niveau} onValueChange={setNiveau}>
+                <SelectTrigger>
+                  <SelectValue placeholder={UESELECTION_CONSTANTS.FORM.FIELDS.NIVEAU.PLACEHOLDER} />
+                </SelectTrigger>
+                <SelectContent>
+                  {niveaux.map((n) => (
+                    <SelectItem key={n.id} value={n.id}>
+                      {n.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {UESELECTION_CONSTANTS.FORM.FIELDS.UE.LABEL}
+              </label>
+              <Select value={ue} onValueChange={setUe}>
+                <SelectTrigger>
+                  <SelectValue placeholder={UESELECTION_CONSTANTS.FORM.FIELDS.UE.PLACEHOLDER} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ues.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function GradesEntryPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { courses, selectedCourse, students, grades, activeEval, stats, selectCourse, changeEvaluation, addGrade } = useGradesData();
   const [activeTab, setActiveTab] = useState(selectedCourse ? 'saisie' : 'matieres');
   const [saisirNoteModalOpen, setSaisirNoteModalOpen] = useState(false);
-  const [saisieParUEModalOpen, setSaisieParUEModalOpen] = useState(false);
+
+  // Update tab based on URL parameter
+  useEffect(() => {
+    const tab = searchParams?.get('tab');
+    if (tab && ['matieres', 'saisie', 'saisie-ue'].includes(tab)) {
+      setActiveTab(tab);
+    } else {
+      // Default to matieres if no valid tab is specified
+      setActiveTab(selectedCourse ? 'saisie' : 'matieres');
+    }
+  }, [searchParams, selectedCourse]);
 
   const handleBackToMatieres = () => {
     setActiveTab('matieres');
@@ -28,10 +200,18 @@ export default function GradesEntryPage() {
     // Handle the note data here
   };
 
-  const handleSaisieParUE = (data: any) => {
-    console.log('Saisie par UE data:', data);
-    // Handle the UE data here
+  const handleUESelect = (data: any) => {
+    console.log('UE Selection data:', data);
+    // Handle UE selection here
   };
+
+  if (activeTab === 'saisie-ue') {
+    return (
+      <div className="p-6">
+        <UESelection onSelect={handleUESelect} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -51,7 +231,7 @@ export default function GradesEntryPage() {
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => setSaisieParUEModalOpen(true)}
+            onClick={() => router.push('/admin/grades-entry?tab=saisie-ue')}
             className="hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -156,12 +336,6 @@ export default function GradesEntryPage() {
         open={saisirNoteModalOpen}
         onOpenChange={setSaisirNoteModalOpen}
         onSave={handleSaisirNote}
-      />
-
-      <SaisieParUEModal
-        open={saisieParUEModalOpen}
-        onOpenChange={setSaisieParUEModalOpen}
-        onSave={handleSaisieParUE}
       />
     </div>
   );

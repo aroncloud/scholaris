@@ -49,7 +49,7 @@ const GradeTable = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedGrade, setSelectedGrade] = useState<GradeEntry | null>(null);
+  const [selectedGrade, setSelectedGrade] = useState<GradeEntry & { firstName: string; lastName: string; barem: number } | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   const getCurrentGrade = (studentId: string) => {
@@ -68,23 +68,46 @@ const GradeTable = ({
   const handleModifyClick = (student: Student) => {
     const studentGrade = grades.find(g => g.studentId === student.id && g.evaluation === evaluation);
     setSelectedStudent(student);
-    setSelectedGrade(studentGrade || {
-      id: '',
-      studentId: student.id,
-      courseId: course.id,
-      evaluation: evaluation,
-      value: 0,
-      max: 20,
-      date: new Date().toISOString(),
-      matricule: student.matricule
-    });
+    
+    if (studentGrade) {
+      // If grade exists, ensure it has all required properties
+      setSelectedGrade({
+        ...studentGrade,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        barem: (studentGrade as any).barem || 20
+      });
+    } else {
+      // Create a new grade object with all required properties
+      setSelectedGrade({
+        id: '',
+        studentId: student.id,
+        courseId: course.id,
+        evaluation: evaluation,
+        value: 0,
+        max: 20,
+        date: new Date().toISOString().split('T')[0],
+        comment: '',
+        studentName: `${student.firstName} ${student.lastName}`.trim(),
+        matricule: student.matricule,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        barem: 20 // Default barem value
+      });
+    }
+    
     setIsModifyModalOpen(true);
   };
 
   const handleDeleteClick = (student: Student) => {
     const grade = getCurrentGrade(student.id);
     if (grade?.id) {
-      setSelectedGrade(grade);
+      setSelectedGrade({
+        ...grade,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        barem: (grade as any).barem || 20
+      });
       setIsDeleteModalOpen(true);
     }
   };
