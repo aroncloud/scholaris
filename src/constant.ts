@@ -287,3 +287,32 @@ export const GRADES_ENTRY_CONSTANTS = {
 
 
 
+
+export const UESELECTION_CONSTANTS = {
+  TITLE: "Saisir des Notes",
+  SUBTITLE: "Saisie des notes par unité d'enseignement",
+  HEADER: {
+    BACK: "Retour",
+    RESET: "Réinitialiser",
+    SAVE: "Sauvegarder"
+  },
+  FORM: {
+    TITLE: "Sélection de l'Unité d'Enseignement",
+    DESCRIPTION: "Choisissez la filière, le niveau et l'UE pour saisir les notes",
+    FIELDS: {
+      FILIERE: {
+        LABEL: "Filière",
+        PLACEHOLDER: "Sélectionnez une filière"
+      },
+      NIVEAU: {
+        LABEL: "Niveau",
+        PLACEHOLDER: "Sélectionnez un niveau"
+      },
+      UE: {
+        LABEL: "Unité d'Enseignement",
+        PLACEHOLDER: "Sélectionnez une UE"
+      }
+    }
+  }
+} as const;
+
