@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,23 +32,36 @@ const UESelection: React.FC<UESelectionProps> = ({
   const [niveau, setNiveau] = useState('');
   const [ue, setUe] = useState('');
 
+  // Define filiere options
   const filieres = [
-    { id: 'med', name: 'Medecine' },
-    { id: 'pha', name: 'Phamacie' },
-    { id: 'kine', name: 'Kinesitherapie' },
+    { id: 'pharmacie', name: 'Pharmacie' },
+    { id: 'medecine', name: 'Medecine' },
+    { id: 'kinesitherapie', name: 'Kinesitherapie' },
   ];
 
+  // Define niveau options
   const niveaux = [
-    { id: 'n1', name: 'niveau 1' },
-    { id: 'n2', name: 'niveaux 2' },
-    { id: 'n3', name: 'niveau3 3' },
+    { id: 'annee1', name: 'Année 1' },
+    { id: 'annee2', name: 'Année 2' },
+    { id: 'annee3', name: 'Année 3' },
   ];
 
+  // Define UE options - this is a simplified example
+  // In a real app, you would want to filter these based on the selected filiere and niveau
   const ues = [
     { id: 'ue1', name: 'UE1 - Physiologie spécialisée' },
     { id: 'ue2', name: 'UE2 - Anatomie générale' },
-    { id: 'ue3', name: 'UE3 - TP Anatomie' },
+    { id: 'ue3', name: 'UE3 - Biochimie' },
+    { id: 'ue4', name: 'UE4 - Biophysique' },
+    { id: 'ue5', name: 'UE5 - Pharmacologie' },
   ];
+
+  // Filter UEs based on selected filiere and niveau
+  const filteredUes = useMemo(() => {
+    // In a real app, you would fetch UEs based on filiere and niveau
+    // This is just a placeholder implementation
+    return ues;
+  }, [filiere, niveau]);
 
   const isFormValid = filiere && niveau && ue;
 
@@ -153,7 +166,7 @@ const UESelection: React.FC<UESelectionProps> = ({
                     <SelectValue placeholder="Sélectionner une UE" />
                   </SelectTrigger>
                   <SelectContent>
-                    {ues.map((u) => (
+                    {filteredUes.map((u) => (
                       <SelectItem key={u.id} value={u.id}>
                         {u.name}
                       </SelectItem>
