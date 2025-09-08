@@ -33,21 +33,21 @@ const UESelection: React.FC<UESelectionProps> = ({
   const [ue, setUe] = useState('');
 
   const filieres = [
-    { id: 'info', name: 'Informatique' },
-    { id: 'gestion', name: 'Gestion' },
-    { id: 'compta', name: 'Comptabilité' },
+    { id: 'med', name: 'Medecine' },
+    { id: 'pha', name: 'Phamacie' },
+    { id: 'kine', name: 'Kinesitherapie' },
   ];
 
   const niveaux = [
-    { id: 'l1', name: 'Licence 1' },
-    { id: 'l2', name: 'Licence 2' },
-    { id: 'l3', name: 'Licence 3' },
+    { id: 'n1', name: 'niveau 1' },
+    { id: 'n2', name: 'niveaux 2' },
+    { id: 'n3', name: 'niveau3 3' },
   ];
 
   const ues = [
-    { id: 'ue1', name: 'UE1 - Programmation avancée' },
-    { id: 'ue2', name: 'UE2 - Base de données' },
-    { id: 'ue3', name: 'UE3 - Réseaux' },
+    { id: 'ue1', name: 'UE1 - Physiologie spécialisée' },
+    { id: 'ue2', name: 'UE2 - Anatomie générale' },
+    { id: 'ue3', name: 'UE3 - TP Anatomie' },
   ];
 
   const isFormValid = filiere && niveau && ue;
