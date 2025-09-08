@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useGradesData } from '@/hooks/feature/grades/useGradesData';
 import CourseListSection from '@/components/features/grades/CourseListTab';
 import GradeEntrySection from '@/components/features/grades/GradeEntryTab';
@@ -27,26 +28,27 @@ const UESelection: React.FC<UESelectionProps> = ({ onSelect, className = '' }) =
   const [ue, setUe] = useState('');
   
   const handleBack = () => {
-    // Navigate to the main grades entry page with the matieres tab active
     router.push('/admin/grades-entry?tab=matieres');
   };
 
   const filieres = [
-    { id: 'info', name: 'Informatique' },
-    { id: 'gestion', name: 'Gestion' },
-    { id: 'compta', name: 'Comptabilité' },
+    { id: 'pharmacie', name: 'Pharmacie' },
+    { id: 'medecine', name: 'Medecine' },
+    { id: 'kinesitherapie', name: 'Kinesitherapie' },
   ];
 
   const niveaux = [
-    { id: 'l1', name: 'Licence 1' },
-    { id: 'l2', name: 'Licence 2' },
-    { id: 'l3', name: 'Licence 3' },
+    { id: 'annee1', name: 'Année 1' },
+    { id: 'annee2', name: 'Année 2' },
+    { id: 'annee3', name: 'Année 3' },
   ];
 
   const ues = [
-    { id: 'ue1', name: 'UE1 - Programmation avancée' },
-    { id: 'ue2', name: 'UE2 - Base de données' },
-    { id: 'ue3', name: 'UE3 - Réseaux' },
+    { id: 'ue1', name: 'UE1 - Physiologie spécialisée' },
+    { id: 'ue2', name: 'UE2 - Anatomie générale' },
+    { id: 'ue3', name: 'UE3 - Biochimie' },
+    { id: 'ue4', name: 'UE4 - Biophysique' },
+    { id: 'ue5', name: 'UE5 - Pharmacologie' },
   ];
 
   const isFormValid = filiere && niveau && ue;
@@ -57,69 +59,73 @@ const UESelection: React.FC<UESelectionProps> = ({ onSelect, className = '' }) =
     }
   };
 
+  // Dummy student data
+  const dummyStudents = useMemo(() => [
+    { id: 's1', matricule: 'ETU25001', nom: 'Dupont', prenom: 'Marie', note: '15.5/20', statut: 'Validé' },
+    { id: 's2', matricule: 'ETU25002', nom: 'Martin', prenom: 'Jean', note: '12.0/20', statut: 'Validé' },
+    { id: 's3', matricule: 'ETU25003', nom: 'Bernard', prenom: 'Sophie', note: '08.5/20', statut: 'Rattrapage' },
+    { id: 's4', matricule: 'ETU25004', nom: 'Petit', prenom: 'Pierre', note: '16.0/20', statut: 'Validé' },
+    { id: 's5', matricule: 'ETU25005', nom: 'Durand', prenom: 'Julie', note: '09.0/20', statut: 'Rattrapage' },
+  ], []);
+
   return (
-    <div className={`${className} bg-gray-50 min-h-screen`}>
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="outline" 
-                onClick={handleBack}
-                className="flex items-center space-x-2 text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                <span>{UESELECTION_CONSTANTS.HEADER.BACK}</span>
-              </Button>
-              <div className="text-left">
-                <h1 className="text-2xl font-bold text-gray-900">{UESELECTION_CONSTANTS.TITLE}</h1>
-                <p className="text-sm text-gray-500 mt-1">{UESELECTION_CONSTANTS.SUBTITLE}</p>
-              </div>
+    <div className={className}>
+      <div className="relative mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBack}
+              className="border-blue-600 text-blue-600 hover:bg-blue-50 bg-white"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Retour
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Saisir des Notes</h1>
+              <p className="text-gray-600">Saisie des notes par unité d'enseignement</p>
             </div>
-        
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="outline"
-                className="text-gray-700 hover:bg-gray-50 border-gray-300"
-                onClick={() => {
-                  setFiliere('');
-                  setNiveau('');
-                  setUe('');
-                }}
-              >
-                <X className="h-4 w-4 mr-2" />
-                {UESELECTION_CONSTANTS.HEADER.RESET}
-              </Button>
-              <Button 
-                onClick={handleSave}
-                disabled={!isFormValid}
-                className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed px-6"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {UESELECTION_CONSTANTS.HEADER.SAVE}
-              </Button>
-            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setFiliere('');
+                setNiveau('');
+                setUe('');
+              }}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 bg-white"
+            >
+              Réinitialiser
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleSave}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={!isFormValid}
+            >
+              Sauvegarder
+            </Button>
           </div>
         </div>
-      </div>
-      
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="mb-8">
-            <h2 className="text-lg font-medium text-gray-900">{UESELECTION_CONSTANTS.FORM.TITLE}</h2>
-            <p className="text-sm text-gray-500 mt-1">{UESELECTION_CONSTANTS.FORM.DESCRIPTION}</p>
+        
+        <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">Sélection de l'Unité d'Enseignement</h2>
+            <p className="text-sm text-gray-500 mt-1">Choisissez la filière, le niveau et l'UE pour saisir les notes</p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {UESELECTION_CONSTANTS.FORM.FIELDS.FILIERE.LABEL}
+                Filière
               </label>
               <Select value={filiere} onValueChange={setFiliere}>
                 <SelectTrigger>
-                  <SelectValue placeholder={UESELECTION_CONSTANTS.FORM.FIELDS.FILIERE.PLACEHOLDER} />
+                  <SelectValue placeholder="Sélectionnez une filière" />
                 </SelectTrigger>
                 <SelectContent>
                   {filieres.map((f) => (
@@ -133,41 +139,102 @@ const UESelection: React.FC<UESelectionProps> = ({ onSelect, className = '' }) =
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {UESELECTION_CONSTANTS.FORM.FIELDS.NIVEAU.LABEL}
+                Niveau
               </label>
               <Select value={niveau} onValueChange={setNiveau}>
                 <SelectTrigger>
-                  <SelectValue placeholder={UESELECTION_CONSTANTS.FORM.FIELDS.NIVEAU.PLACEHOLDER} />
+                  <SelectValue placeholder="Sélectionnez un niveau" />
                 </SelectTrigger>
-                <SelectContent>
-                  {niveaux.map((n) => (
-                    <SelectItem key={n.id} value={n.id}>
-                      {n.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  <SelectContent>
+                    {niveaux.map((n) => (
+                      <SelectItem key={n.id} value={n.id}>
+                        {n.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {UESELECTION_CONSTANTS.FORM.FIELDS.UE.LABEL}
-              </label>
-              <Select value={ue} onValueChange={setUe}>
-                <SelectTrigger>
-                  <SelectValue placeholder={UESELECTION_CONSTANTS.FORM.FIELDS.UE.PLACEHOLDER} />
-                </SelectTrigger>
-                <SelectContent>
-                  {ues.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Unité d'enseignement
+                </label>
+                <Select value={ue} onValueChange={setUe}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez une UE" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ues.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            
+            {isFormValid && (
+              <div className="mt-10 pt-6 border-t border-gray-200">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Liste des étudiants - {ues.find(u => u.id === ue)?.name}</h3>
+                  {/* <div className="flex space-x-3">
+                    <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
+                      Exporter en Excel
+                    </Button>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      Enregistrer les modifications
+                    </Button>
+                  </div> */}
+                </div>
+                
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-gray-50">
+                      <TableRow>
+                        <TableHead className="font-semibold text-gray-700">Matricule</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Nom</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Prénom</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Note</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Statut</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dummyStudents.map((student) => (
+                        <TableRow key={student.id}>
+                          <TableCell className="font-medium">{student.matricule}</TableCell>
+                          <TableCell>{student.nom}</TableCell>
+                          <TableCell>{student.prenom}</TableCell>
+                          <TableCell className={parseFloat(student.note) < 10 ? 'text-red-600' : 'text-green-600'}>
+                            {student.note}
+                          </TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              student.statut === 'Validé' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {student.statut}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="mt-4 border-t border-gray-200 pt-4">
+                  <div className="flex justify-end space-x-3">
+                    <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
+                      Exporter en Excel
+                    </Button>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      Enregistrer les modifications
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
       </div>
     </div>
   );
@@ -186,7 +253,6 @@ export default function GradesEntryPage() {
     if (tab && ['matieres', 'saisie', 'saisie-ue'].includes(tab)) {
       setActiveTab(tab);
     } else {
-      // Default to matieres if no valid tab is specified
       setActiveTab(selectedCourse ? 'saisie' : 'matieres');
     }
   }, [searchParams, selectedCourse]);
@@ -259,19 +325,19 @@ export default function GradesEntryPage() {
           <StatCard
             title={GRADES_ENTRY_CONSTANTS.STATS.AVERAGE}
             value={`${stats.averageOn20}/20`}
-             description="Toutes matières"
+            description="Toutes matières"
             icon={<Award className="w-4 h-4" />}
           />
           <StatCard
             title={GRADES_ENTRY_CONSTANTS.STATS.EVALUATED_STUDENTS}
             value={stats.distinctStudents}
-             description="Ayant des notes"
+            description="Ayant des notes"
             icon={<Users className="w-4 h-4" />}
           />
           <StatCard
             title={GRADES_ENTRY_CONSTANTS.STATS.PENDING}
             value={stats.pendingCount}
-             description="Notes à saisir"
+            description="Notes à saisir"
             icon={<Calendar className="w-4 h-4" />}
           />
         </div>
@@ -285,7 +351,7 @@ export default function GradesEntryPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="matieres" className="space-y-4">
+        <TabsContent value="matieres">
           <Card>
             <CardHeader>
               <CardTitle>{GRADES_ENTRY_CONSTANTS.COURSE_LIST_TITLE}</CardTitle>
@@ -296,42 +362,45 @@ export default function GradesEntryPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="saisie" className="space-y-4">
+        <TabsContent value="saisie">
           {selectedCourse && (
-            <>
-              <GradeEntrySection
-                course={selectedCourse}
-                students={students}
-                grades={grades}
-                activeEval={activeEval}
-                onChangeEval={changeEvaluation}
-                onSave={async ({ studentId, value, max, evaluation, courseId }) => {
-                  // Find the student to get their matricule
-                  const student = students.find(s => s.id === studentId);
-                  if (!student) return;
+            <GradeEntrySection
+              course={selectedCourse}
+              students={students}
+              grades={grades}
+              activeEval={activeEval}
+              onChangeEval={changeEvaluation}
+              onSave={async (payload) => {
+                try {
+                  // Create the grade object with the expected structure
+                  const gradeData = {
+                    studentId: payload.studentId,
+                    value: payload.value,
+                    max: payload.max,
+                    evaluation: payload.evaluation,
+                    courseId: selectedCourse.id,
+                    // Add any additional required fields here
+                    matricule: payload.studentId, // Assuming studentId can be used as matricule
+                    date: new Date().toISOString()
+                  };
                   
-                  await addGrade({ 
-                    courseId, 
-                    studentId, 
-                    evaluation, 
-                    value, 
-                    max,
-                    matricule: student.matricule
-                  });
-                }}
-                onDelete={async (gradeId: string) => {
-                  // Implement delete functionality here
-                  console.log('Deleting grade:', gradeId);
-                  // Add your delete API call here
-                  // await deleteGrade(gradeId);
-                }}
-              />
-            </>
+                  await addGrade(gradeData);
+                  // Don't return anything (implicitly returns Promise<void>)
+                } catch (error) {
+                  console.error('Failed to save grade:', error);
+                  throw error;
+                }
+              }}
+              onDelete={async (gradeId: string) => {
+                console.log('Deleting grade:', gradeId);
+                // Add your delete API call here
+                // await deleteGrade(gradeId);
+              }}
+            />
           )}
         </TabsContent>
       </Tabs>
 
-      {/* Modals */}
       <SaisirNoteModal
         open={saisirNoteModalOpen}
         onOpenChange={setSaisirNoteModalOpen}
@@ -340,4 +409,3 @@ export default function GradesEntryPage() {
     </div>
   );
 }
-
