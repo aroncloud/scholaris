@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { ChevronDownIcon, HorizontaLDots } from "../icons/index";
-import { Book, BookOpen, GraduationCap, LayoutDashboard, FileText, Users, UserSquare } from "lucide-react";
+import { Book, BookOpen, GraduationCap, LayoutDashboard, FileText, Users, UserSquare, School } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -50,6 +50,11 @@ const navItems: NavItem[] = [
     icon: <FileText className="w-5 h-5" />, //Saisir les notes
     name: "Saisir les notes",
     path: "/admin/grades-entry"
+  },
+  {
+    icon: <School className="w-5 h-5" />, // Classroom
+    name: "Classroom",
+    path: "/admin/classroom"
   }
   
 ];
