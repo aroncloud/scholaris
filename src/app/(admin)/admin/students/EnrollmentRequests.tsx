@@ -91,7 +91,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { IEnrollmentRequest, IStudent } from "@/types/userTypes";
+import { IEnrollmentRequest, IStudent } from "@/types/staffType";
 import Header from "./Header";
 import { getStatusColor, formatDateToText } from "@/lib/utils";
 

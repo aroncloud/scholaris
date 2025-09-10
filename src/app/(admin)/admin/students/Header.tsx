@@ -19,7 +19,7 @@ import {
   Award,
   Clock,
 } from "lucide-react";
-import { IEnrollmentRequest } from "@/types/userTypes";
+import { IEnrollmentRequest } from "@/types/staffType";
 
 
 type MyComponentProps = {
