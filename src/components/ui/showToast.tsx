@@ -99,17 +99,17 @@ export const showToast = ({
     <div className='flex items-center gap-2'>
       <Avatar>
         {avatar.src && <AvatarImage src={avatar.src} alt={avatar.alt || 'Avatar'} />}
-        <AvatarFallback className='text-xs'>{avatar.fallback || 'NA'}</AvatarFallback>
+        <AvatarFallback className='text-sm'>{avatar.fallback || 'NA'}</AvatarFallback>
       </Avatar>
       <div>
         {message}
-        {description && <div className='text-sm opacity-80'>{description}</div>}
+        {description && <div className='opacity-80'>{description}</div>}
       </div>
     </div>
   ) : description ? (
     <div>
       {message}
-      <div className='text-sm opacity-80'>{description}</div>
+      <div className='opacity-80'>{description}</div>
     </div>
   ) : (
     message

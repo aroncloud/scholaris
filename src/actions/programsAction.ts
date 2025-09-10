@@ -293,7 +293,7 @@ export async function createSemester(semesterInfo: ICreateSemester){
         return errResult;
     }
 }
-export async function updateSemester(semesterInfo: ICreateSemester){
+export async function updateSemester(semesterInfo: ICreateSemester, semester_code: string){
     console.log('-->updateSemester', semesterInfo)
     try {
         const session = await verifySession();
@@ -301,7 +301,7 @@ export async function updateSemester(semesterInfo: ICreateSemester){
         const token = session.accessToken;
         
 
-        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/sequences${semesterInfo.sequence_code}`, {
+        const response = await axios.put(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/sequences/${semester_code}`, {
         ...semesterInfo
         },{
         headers: {
