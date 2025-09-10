@@ -18,8 +18,22 @@ export const APPLICATION_STATUS = [
   { value: ApplicationStatus.ALL, label: "Tout" }
 ];
 
+export const USER_ROLE = [
+  { value: "ALL", label: "Tous les rôles" },
+  { value: "STUDENT", label: "Étudiants" },
+  { value: "TEACHER", label: "Enseignants" },
+  { value: "RH", label: "RH" },
+  { value: "REGISTAR_OFFICE", label: "Scolarité" },
+  { value: "ADMIN", label: "Administrateurs" },
+];
 
-
+export const USER_TABLE_HEADERS = [
+  "Utilisateur",
+  "Rôles",
+  "Statut",
+  "Dernière connexion",
+  "Actions",
+];
 
 
 

@@ -2,7 +2,7 @@
 'use server'
 
 import { verifySession } from "@/lib/session";
-import { IInitiateStudentApplication } from "@/types/userTypes";
+import { IInitiateStudentApplication } from "@/types/staffType";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
 

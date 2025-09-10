@@ -1,7 +1,7 @@
 'use server'
 
 import { verifySession } from "@/lib/session";
-import { ICreateStudent } from "@/types/userTypes";
+import { ICreateStudent } from "@/types/staffType";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
 import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE } from "@/types/programTypes";
