@@ -1,19 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search } from "lucide-react";
-import CreateResourceModal from "@/components/features/classroom/modal/CreateResourceModal";
 import ResourcesTab from "@/components/features/classroom/ResourcesTab";
 import PlanningTab from "@/components/features/classroom/PlanningTab";
+import { DialogCreateClassroom } from "@/components/features/classroom/modal/DialogCreateClassroom";
+import { ICreateClassroom } from "@/types/classroomType";
+import { createClassroom } from "@/actions/classroomAction";
+import { showToast } from "@/components/ui/showToast";
 
 export default function ClassroomPage() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isCreateClassroom, setIsCreateClassroomDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("ALL");
 
+  const handleCreateDomain = async (classroom: ICreateClassroom) => {
+    console.log('classroom', classroom)
+    const result = await createClassroom (classroom);
+    console.log("Create classroom result:", result);
+
+    if (result.code === 'success') {
+      setIsCreateClassroomDialogOpen(false);
+      showToast({
+        variant: "success-solid",
+        message: 'Salle de classe créé avec succès',
+        description: `${classroom.resource_name} a été ajouté.`,
+        position: 'top-center',
+      });
+      // refresh();
+      return true
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Impossible de créer la salle de classe",
+        description:result.error ?? "Une erreur est survenue, essayez encore ou veuillez contacter l'administrateur",
+        position: 'top-center',
+      });
+    }
+    return false
+  };
   return (
     <div className="p-6">
       {/* Header */}
@@ -28,7 +54,7 @@ export default function ClassroomPage() {
         </div>
 
         <Button
-          onClick={() => setIsOpen(true)}
+          onClick={() => setIsCreateClassroomDialogOpen(true)}
           className="bg-blue-500 hover:bg-blue-600 text-white"
         >
           + Nouvelle ressource
@@ -73,7 +99,19 @@ export default function ClassroomPage() {
       </Tabs>
 
       {/* Modal */}
-      <CreateResourceModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <DialogCreateClassroom
+        onOpenChange={setIsCreateClassroomDialogOpen}
+        onSave={handleCreateDomain}
+        open={isCreateClassroom}
+      />
+
+        {/* <DialogCreateDomain
+          curriculumName={curriculum.curriculum_name}
+          onOpenChange={setIsCreateDomainDialogOpen}
+          open={isCreateDomainDialogOpen}
+          onSave={handleCreateDomain}
+          sequenceList={selectedSequenceList}
+        /> */}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useClassroomData } from "@/hooks/feature/classroom/useClassroomData";
 import {
@@ -9,13 +9,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import EditResourceModal from "@/components/features/classroom/modal/EditResourceModal";
-import DeleteResourceModal from "@/components/features/classroom/modal/DeleteResourceModal"; // ✅ import delete modal
-import { ICreateResource } from "@/types/classroomType";
+
+import { ICreateClassroom, IGetClassroom } from "@/types/classroomType";
+import DialogUpdateClassroom from "./modal/DialogUpdateClassroom";
+import { deleteClassroom, updateClassroom } from "@/actions/classroomAction";
+import { showToast } from "@/components/ui/showToast";
+import DialogDeleteGeneric from "@/components/modal/DialogDeleteGeneric";
 
 interface ResourcesTabProps {
   search: string;
@@ -25,39 +28,83 @@ interface ResourcesTabProps {
 }
 
 export default function ResourcesTab({ search, filterType, setSearch, setFilterType }: ResourcesTabProps) {
-  const { resources, addResource, updateResource, deleteResource } = useClassroomData();
+  const { data, loading, error, refresh } =  useClassroomData();
 
   // Modals state
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedResource, setSelectedResource] = useState<ICreateResource | null>(null);
+  const [isEditClassRoomDialogOpen, setIsEditClassRoomDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedClassroom, setSelectedClassroom] = useState<IGetClassroom | null>(null);
 
-  // Pre-fill with mock data on mount
-  useEffect(() => {
-    if (resources.length === 0) {
-      addResource({ name: "Amphi 200", capacity: 200, location: "Bloc A-1", type: "AMPHI", description: "Grand amphithéâtre principal" });
-      addResource({ name: "Salle TD 101", capacity: 40, location: "Bloc B-1", type: "TD", description: "Salle de travaux dirigés 1" });
-      addResource({ name: "Laboratoire Médecine", capacity: 25, location: "Bloc C-1", type: "LAB", description: "Laboratoire équipé pour expériences Médecine" });
-    }
-  }, [resources, addResource]);
 
   // Filtering
-  const filtered = resources.filter((r) => {
-    const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase());
-    const matchesType = filterType === "ALL" ? true : r.type?.toUpperCase() === filterType;
-    return matchesSearch && matchesType;
+  const filtered = data.filter((c) => {
+    const matchesSearch = c.resource_name.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch;
   });
 
   // Open edit modal
-  const handleEditClick = (resource: ICreateResource) => {
-    setSelectedResource(resource);
-    setIsEditOpen(true);
+  const handleUpdateClassroom = async (classroom: ICreateClassroom) => {
+    if (selectedClassroom) {
+      const result = await updateClassroom(
+        classroom,
+        selectedClassroom.resource_code
+      );
+      console.log("Update classroom result:", result);
+
+      if (result.code === "success") {
+        setIsEditClassRoomDialogOpen(false);
+        showToast({
+          variant: "success-solid",
+          message: "Salle mise à jour avec succès",
+          description: `${classroom.resource_name} a été mise à jour.`,
+          position: "top-center",
+        });
+        refresh();
+      } else {
+        showToast({
+          variant: "error-solid",
+          message: "Impossible de mettre à jour la salle",
+          description:
+            result.error ??
+            "Une erreur est survenue, essayez encore ou contactez l'administrateur",
+          position: "top-center",
+        });
+      }
+    }
   };
 
+const handleDeleteClassroom = async () => {
+  if (selectedClassroom) {
+    const result = await deleteClassroom(selectedClassroom.resource_code);
+    console.log("Delete classroom result:", result);
+
+    if(result.code === "success") {
+      setIsDeleteDialogOpen(false);
+      showToast({
+        variant: "success-solid",
+        message: "Salle supprimée avec succès",
+        description: `${selectedClassroom.resource_name} a été supprimée.`,
+        position: "top-center",
+      });
+      refresh();
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Impossible de supprimer la salle",
+        description:
+          result.error ??
+          "Une erreur est survenue, essayez encore ou contactez l'administrateur",
+        position: "top-center",
+      });
+    }
+  }
+};
+
+
   // Open delete modal
-  const handleDeleteClick = (resource: ICreateResource) => {
-    setSelectedResource(resource);
-    setIsDeleteOpen(true);
+  const handleDeleteClick = (classroom: IGetClassroom) => {
+    setSelectedClassroom(classroom);
+    setIsDeleteDialogOpen(true);
   };
 
   return (
@@ -114,12 +161,12 @@ export default function ResourcesTab({ search, filterType, setSearch, setFilterT
               </thead>
               <tbody>
                 {filtered.length > 0 ? (
-                  filtered.map((res, i) => (
+                  filtered.map((cls, i) => (
                     <tr key={i} className="border-t hover:bg-gray-50 transition">
-                      <td className="p-3 font-medium">{res.name}</td>
-                      <td className="p-3">{res.capacity}</td>
-                      <td className="p-3">{res.type}</td>
-                      <td className="p-3">{res.location}</td>
+                      <td className="p-3 font-medium">{cls.resource_name}</td>
+                      <td className="p-3">{cls.capacity}</td>
+                      <td className="p-3">{cls.type_code}</td>
+                      <td className="p-3">{cls.location}</td>
                       <td className="p-3">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -128,14 +175,19 @@ export default function ResourcesTab({ search, filterType, setSearch, setFilterT
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditClick(res)}>
+                            <DropdownMenuItem onClick={() => {
+                              setSelectedClassroom(cls);
+                              setIsEditClassRoomDialogOpen(true);
+                            }}>
+                              <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-red-600 focus:text-red-600"
-                              onClick={() => handleDeleteClick(res)}
+                              onClick={() => handleDeleteClick(cls)}
                             >
-                              Supprimer
+                               <Trash2 className="mr-2 h-4 w-4 text-red-600" />
+                                Supprimer
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -155,25 +207,22 @@ export default function ResourcesTab({ search, filterType, setSearch, setFilterT
         </CardContent>
       </Card>
 
-      {/* Edit Resource Modal */}
-      {selectedResource && (
-        <EditResourceModal
-          isOpen={isEditOpen}
-          onClose={() => setIsEditOpen(false)}
-          resource={selectedResource}
-          updateResource={updateResource}
+      {selectedClassroom && (
+        <DialogUpdateClassroom
+          open={isEditClassRoomDialogOpen}
+          onOpenChange={setIsEditClassRoomDialogOpen}
+          classroom={selectedClassroom}
+          onSave={handleUpdateClassroom}
         />
       )}
 
-      {/* Delete Resource Modal */}
-      {selectedResource && (
-        <DeleteResourceModal
-          isOpen={isDeleteOpen}
-          onClose={() => setIsDeleteOpen(false)}
-          resource={selectedResource}
-          deleteResource={deleteResource}
-        />
-      )}
+      
+      <DialogDeleteGeneric
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onDelete={handleDeleteClassroom}
+        
+      />
     </>
   );
 }
