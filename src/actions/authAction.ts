@@ -2,7 +2,7 @@
 import { createSession } from "@/lib/session";
 import { SessionPayload } from "@/types/authTypes";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ILoginForm } from "@/types/userTypes";
+import { ILoginForm } from "@/types/staffType";
 import axios from "axios";
 export async function login (data: ILoginForm) {
     try {
@@ -16,6 +16,7 @@ export async function login (data: ILoginForm) {
             accessToken: response.data.body.accessToken,
             refreshToken: response.data.body.refreshToken,
             profile: 'ADMIN',
+            email: data.username,
             expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000)
         }
         console.log('-->sessionInfo', sessionInfo);

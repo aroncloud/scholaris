@@ -44,6 +44,7 @@ type Address = {
 export type SessionPayload = {
   accessToken: string;
   refreshToken: string;
+  email: string;
   profile: string;
   expiresAt: Date;
 }
