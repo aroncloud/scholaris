@@ -1,60 +1,40 @@
-import { useState } from "react";
-import { ICreateResource } from "@/types/classroomType";
+import { useCallback, useEffect, useState } from "react";
+import { IGetClassroom } from "@/types/classroomType";
 import * as ClassroomAction from "@/actions/classroomAction";
 
-export const useClassroomData = () => {
-  const [resources, setResources] = useState<ICreateResource[]>(ClassroomAction.getResources());
 
-  const addResource = async (newResource: ICreateResource) => {
-    const updated = await ClassroomAction.addResource(newResource);
-    setResources([...updated]);
+export function useClassroomData() {
+  const [data, setData] = useState<IGetClassroom[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await ClassroomAction.getClassroomList();
+      console.log('-->useClassrooms.result', result)
+      if (result.code === "success") {
+        setData(result.data.body as IGetClassroom[]);
+      } else {
+        setError(result.error || "Erreur lors de la récupération des salles");
+      }
+    } catch (err) {
+      console.error("-->useClassrooms.error", err);
+      setError("Erreur inattendue");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return {
+    data,
+    loading,
+    error,
+    refresh: fetchData,
   };
-
-  const updateResource = async (updatedResource: ICreateResource) => {
-    const updated = await ClassroomAction.updateResource(updatedResource);
-    setResources([...updated]);
-  };
-
-  const deleteResource = async (resourceToDelete: ICreateResource) => {
-    const updated = await ClassroomAction.deleteResource(resourceToDelete);
-    setResources([...updated]);
-  };
-
-  return { 
-    resources, 
-    addResource, 
-    updateResource, 
-    deleteResource };
-};
-
-
-
-
-// import { useState } from "react";
-// import { ICreateResource } from "@/types/classroomType";
-
-// export const useClassroomData = () => {
-//   const [resources, setResources] = useState<ICreateResource[]>([]);
-
-//   const addResource = async (newResource: ICreateResource) => {
-//   setResources(prev => [...prev, newResource]);
-// };
-
-
-//   const updateResource = async (updatedResource: ICreateResource) => {
-//     setResources(resources.map(r =>
-//       r.name === updatedResource.name ? updatedResource : r
-//     ));
-//   };
-
-//   const deleteResource = async (resourceToDelete: ICreateResource) => {
-//   setResources(prev => prev.filter(r => r.name !== resourceToDelete.name));
-// };
-
-
-//   return { 
-//     resources, 
-//     addResource, 
-//     updateResource, 
-//     deleteResource };
-// };
+}
