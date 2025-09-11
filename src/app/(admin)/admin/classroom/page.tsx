@@ -9,13 +9,15 @@ import { DialogCreateClassroom } from "@/components/features/classroom/modal/Dia
 import { ICreateClassroom } from "@/types/classroomType";
 import { createClassroom } from "@/actions/classroomAction";
 import { showToast } from "@/components/ui/showToast";
+import { useClassroomData } from "@/hooks/feature/classroom/useClassroomData";
 
 export default function ClassroomPage() {
   const [isCreateClassroom, setIsCreateClassroomDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("ALL");
+    const { refresh } =  useClassroomData();
 
-  const handleCreateDomain = async (classroom: ICreateClassroom) => {
+  const handleCreateClassroom = async (classroom: ICreateClassroom) => {
     console.log('classroom', classroom)
     const result = await createClassroom (classroom);
     console.log("Create classroom result:", result);
@@ -28,7 +30,9 @@ export default function ClassroomPage() {
         description: `${classroom.resource_name} a été ajouté.`,
         position: 'top-center',
       });
-      // refresh();
+      console.log('before refresh')
+      await refresh();
+      console.log('after refresh')
       return true
     } else {
       showToast({
@@ -101,17 +105,9 @@ export default function ClassroomPage() {
       {/* Modal */}
       <DialogCreateClassroom
         onOpenChange={setIsCreateClassroomDialogOpen}
-        onSave={handleCreateDomain}
+        onSave={handleCreateClassroom}
         open={isCreateClassroom}
       />
-
-        {/* <DialogCreateDomain
-          curriculumName={curriculum.curriculum_name}
-          onOpenChange={setIsCreateDomainDialogOpen}
-          open={isCreateDomainDialogOpen}
-          onSave={handleCreateDomain}
-          sequenceList={selectedSequenceList}
-        /> */}
     </div>
   );
 }

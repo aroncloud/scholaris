@@ -25,7 +25,7 @@ export function DialogCreateClassroom({
   onOpenChange,
   onSave,
 }: DialogCreateClassroomProps) {
-  const [formData, setFormData] = useState<Partial<ICreateClassroom>>({});
+  const [formData, setFormData] = useState<Partial<ICreateClassroom>>({is_available: 1});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,7 +34,7 @@ export function DialogCreateClassroom({
     if (!formData.resource_name) newErrors.resource_name = "Nom de la salle requis";
     if (formData.capacity === undefined || formData.capacity <= 0) newErrors.capacity = "Capacité requise";
     if (!formData.location) newErrors.location = "Localisation requise";
-    if (formData.is_available === undefined) newErrors.is_available = "Disponibilité requise";
+    if (formData.is_available === undefined) {console.log(formData.is_available); newErrors.is_available = "Disponibilité requise";}
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -66,6 +66,8 @@ export function DialogCreateClassroom({
     field: K,
     value: ICreateClassroom[K]
   ) => {
+    console.log('-->field', field);
+    console.log('-->value', value);
     setFormData({ ...formData, [field]: value });
     if (errors[field as string]) {
       const newErrors = { ...errors };
@@ -114,6 +116,7 @@ export function DialogCreateClassroom({
             <Label htmlFor="location">Localisation </Label>
             <Input
               id="location"
+              placeholder="Batiment A, deuxième etage"
               value={formData.location || ""}
               onChange={(e) => handleFieldChange("location", e.target.value)}
               disabled={isSubmitting}
@@ -126,16 +129,15 @@ export function DialogCreateClassroom({
             <Label htmlFor="is_available">Disponibilité</Label>
             <select
               id="is_available"
-              value={formData.is_available !== undefined ? String(formData.is_available) : ""}
+              value={formData.is_available !== undefined ? String(formData.is_available) : "1"}
               onChange={(e) => handleFieldChange("is_available", Number(e.target.value) as 0 | 1)}
               disabled={isSubmitting}
               className={`w-full border rounded-md px-2 py-1 ${errors.is_available ? "border-red-500" : ""}`}
             >
-              <option value="">-- Sélectionnez --</option>
               <option value="1">Disponible</option>
               <option value="0">Non disponible</option>
             </select>
-            {/* {errors.is_available && <p className="text-red-600 text-sm">{errors.is_available}</p>} */}
+            {errors.is_available && <p className="text-red-600 text-sm">{errors.is_available}</p>}
           </div>
         </div>
 
