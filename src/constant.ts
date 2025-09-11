@@ -261,3 +261,58 @@ export enum content_types {
 // INSERT INTO content_types VALUES('CNI_RECTO',1,'ID Card (Front)');
 // INSERT INTO content_types VALUES('SELFIE',1,'Selfie');
 // INSERT INTO content_types VALUES('BIRTH_CERTIFICATE',1,'Birth Certificate'); 
+
+// Grades Entry Constants
+export const GRADES_ENTRY_CONSTANTS = {
+  PAGE_TITLE: "Gestion des Notes",
+  PAGE_DESCRIPTION: "Saisie et suivi des évaluations de vos étudiants",
+  BUTTONS: {
+    EXPORT: "Exporter",
+    IMPORT: "Importer", 
+    SAISIE_UE: "Saisie par UE",
+    SAISIR_NOTE: "Saisir note"
+  },
+  TABS: {
+    MATIERES: "Matières",
+    SAISIE: "Saisie"
+  },
+  STATS: {
+    TOTAL_GRADES: "Total notes",
+    AVERAGE: "Moyenne générale",
+    EVALUATED_STUDENTS: "Étudiants évalués", 
+    PENDING: "En attente"
+  },
+  COURSE_LIST_TITLE: "Liste des matières enseignées"
+} as const;
+
+
+
+
+export const UESELECTION_CONSTANTS = {
+  TITLE: "Saisir des Notes",
+  SUBTITLE: "Saisie des notes par unité d'enseignement",
+  HEADER: {
+    BACK: "Retour",
+    RESET: "Réinitialiser",
+    SAVE: "Sauvegarder"
+  },
+  FORM: {
+    TITLE: "Sélection de l'Unité d'Enseignement",
+    DESCRIPTION: "Choisissez la filière, le niveau et l'UE pour saisir les notes",
+    FIELDS: {
+      FILIERE: {
+        LABEL: "Filière",
+        PLACEHOLDER: "Sélectionnez une filière"
+      },
+      NIVEAU: {
+        LABEL: "Niveau",
+        PLACEHOLDER: "Sélectionnez un niveau"
+      },
+      UE: {
+        LABEL: "Unité d'Enseignement",
+        PLACEHOLDER: "Sélectionnez une UE"
+      }
+    }
+  }
+} as const;
+
