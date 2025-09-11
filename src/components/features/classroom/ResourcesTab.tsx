@@ -7,6 +7,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
@@ -19,6 +21,9 @@ import DialogUpdateClassroom from "./modal/DialogUpdateClassroom";
 import { deleteClassroom, updateClassroom } from "@/actions/classroomAction";
 import { showToast } from "@/components/ui/showToast";
 import DialogDeleteGeneric from "@/components/modal/DialogDeleteGeneric";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { getStatusColor } from "@/lib/utils";
 
 interface ResourcesTabProps {
   search: string;
@@ -28,7 +33,7 @@ interface ResourcesTabProps {
 }
 
 export default function ResourcesTab({ search, filterType, setSearch, setFilterType }: ResourcesTabProps) {
-  const { data, loading, error, refresh } =  useClassroomData();
+  const { data, refresh } =  useClassroomData();
 
   // Modals state
   const [isEditClassRoomDialogOpen, setIsEditClassRoomDialogOpen] = useState(false);
@@ -39,7 +44,8 @@ export default function ResourcesTab({ search, filterType, setSearch, setFilterT
   // Filtering
   const filtered = data.filter((c) => {
     const matchesSearch = c.resource_name.toLowerCase().includes(search.toLowerCase());
-    return matchesSearch;
+    const matchLocalisation = c.location.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch || matchLocalisation;
   });
 
   // Open edit modal
@@ -59,7 +65,7 @@ export default function ResourcesTab({ search, filterType, setSearch, setFilterT
           description: `${classroom.resource_name} a été mise à jour.`,
           position: "top-center",
         });
-        refresh();
+        await refresh();
       } else {
         showToast({
           variant: "error-solid",
@@ -86,7 +92,7 @@ const handleDeleteClassroom = async () => {
         description: `${selectedClassroom.resource_name} a été supprimée.`,
         position: "top-center",
       });
-      refresh();
+      await refresh();
     } else {
       showToast({
         variant: "error-solid",
@@ -109,100 +115,115 @@ const handleDeleteClassroom = async () => {
 
   return (
     <>
-      {/* Search & Filter Card */}
-      <Card className="mb-4">
-        <CardContent className="space-y-4">
-          <h2 className="text-lg font-semibold">Filtres et recherche</h2>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Rechercher une ressource..."
-                className="pl-10"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            {/* Filter dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex justify-between items-center w-60 px-6 py-3 text-base hover:bg-blue-50"
-                >
-                  {filterType === "ALL" ? "Tous les types" : filterType}
-                  <span className="ml-2 text-gray-500 text-xl">▾</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-60">
-                <DropdownMenuItem onClick={() => setFilterType("ALL")}>Tous les types</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterType("AMPHI")}>Amphi</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterType("TD")}>TD</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterType("LAB")}>Laboratoire</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Resources Table */}
       <Card>
         <CardContent className="p-4 space-y-4">
           <div>
-            <table className="w-full border-collapse">
-              <thead className="bg-gray-100 text-left">
-                <tr>
-                  <th className="p-3">Nom</th>
-                  <th className="p-3">Capacité</th>
-                  <th className="p-3">Type</th>
-                  <th className="p-3">Localisation</th>
-                  <th className="p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">Filtres et recherche</h2>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Rechercher une ressource..."
+                  className="pl-10"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              {/* Filter dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex justify-between items-center w-60 px-6 py-3 text-base hover:bg-blue-50"
+                  >
+                    {filterType === "ALL" ? "Tous les types" : filterType}
+                    <span className="ml-2 text-gray-500 text-xl">▾</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-60">
+                  <DropdownMenuItem onClick={() => setFilterType("ALL")}>Tous les types</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterType("AMPHI")}>Amphi</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterType("TD")}>TD</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterType("LAB")}>Laboratoire</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+          <div className="overflow-x-auto border rounded-lg">
+            <Table className="min-w-full border-collapse">
+              <TableHeader className="bg-gray-100">
+                <TableRow>
+                  <TableHead className="px-4 py-3 border-b border-gray-200 text-left rounded-tl-lg">Nom</TableHead>
+                  <TableHead className="px-4 py-3 border-b border-gray-200 text-left">Capacité</TableHead>
+                  <TableHead className="px-4 py-3 border-b border-gray-200 text-left">Type</TableHead>
+                  <TableHead className="px-4 py-3 border-b border-gray-200 text-left">Disponibilié</TableHead>
+                  <TableHead className="px-4 py-3 border-b border-gray-200 text-left">Localisation</TableHead>
+                  <TableHead className="px-4 py-3 border-b border-gray-200 text-left rounded-tr-lg">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
                 {filtered.length > 0 ? (
-                  filtered.map((cls, i) => (
-                    <tr key={i} className="border-t hover:bg-gray-50 transition">
-                      <td className="p-3 font-medium">{cls.resource_name}</td>
-                      <td className="p-3">{cls.capacity}</td>
-                      <td className="p-3">{cls.type_code}</td>
-                      <td className="p-3">{cls.location}</td>
-                      <td className="p-3">
+                  filtered.map((cls) => (
+                    <TableRow
+                      key={cls.resource_code}
+                      className="hover:bg-gray-50 border-b last:border-b-0 transition"
+                    >
+                      <TableCell className="px-4 py-2 border-r border-gray-200 font-medium">{cls.resource_name}</TableCell>
+                      <TableCell className="px-4 py-2 border-r border-gray-200">{cls.capacity}</TableCell>
+                      <TableCell className="px-4 py-2 border-r border-gray-200">
+                        {cls.type_code}
+                      </TableCell>
+                      <TableCell className="px-4 py-2 border-r border-gray-200">
+                        <Badge className={getStatusColor(cls.is_available == 1 ? "ACTIVE" : "INACTIVE")}>
+                          {cls.is_available == 1 ? "Disponible" : "Non disponible"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="px-4 py-2 border-r border-gray-200">{cls.location}</TableCell>
+                      <TableCell className="px-4 py-2 text-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                            <Button variant="ghost" className="h-8 w-8 p-0">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => {
-                              setSelectedClassroom(cls);
-                              setIsEditClassRoomDialogOpen(true);
-                            }}>
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedClassroom(cls);
+                                setIsEditClassRoomDialogOpen(true);
+                              }}
+                            >
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              className="text-red-600 focus:text-red-600"
+                              className="text-red-600"
                               onClick={() => handleDeleteClick(cls)}
                             >
-                               <Trash2 className="mr-2 h-4 w-4 text-red-600" />
-                                Supprimer
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Supprimer
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 ) : (
-                  <tr>
-                    <td className="p-3 text-center text-gray-500" colSpan={5}>
+                  <TableRow>
+                    <TableCell colSpan={5} className="px-4 py-3 text-center text-gray-500">
                       Aucune ressource trouvée.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
+
+
           </div>
         </CardContent>
       </Card>
