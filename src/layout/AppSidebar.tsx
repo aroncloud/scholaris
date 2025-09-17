@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { ChevronDownIcon, HorizontaLDots } from "../icons/index";
-import { Book, BookOpen, GraduationCap, LayoutDashboard, Package, FileText, Users, UserSquare, School } from "lucide-react";
+import {  BookOpen, GraduationCap, LayoutDashboard, FileText, Users, UserSquare, School, Calendar, Calendar1, Settings, Award } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -55,6 +55,26 @@ const navItems: NavItem[] = [
     icon: <School className="w-5 h-5" />, // Classroom
     name: "Classroom",
     path: "/admin/classroom"
+  },
+  {
+    icon: <Calendar className="w-5 h-5" />, // Planification
+    name: "Planification des Cours",
+    path: "/admin/planification"
+  },
+  {
+    icon: <Calendar1 className="w-5 h-5" />, // Planification
+    name: "Planification des Évaluations",
+    path: "/admin/exam-planning"
+  },
+  {
+    icon: <Settings className="w-5 h-5" />, // Planification
+    name: "Gestion des Règles de Calcul",
+    path: "/admin/exam-config"
+  },
+  {
+    icon: <Award className="w-5 h-5" />, // Planification
+    name: "Gestion des notes",
+    path: "/admin/grade-management"
   }
   
 ];

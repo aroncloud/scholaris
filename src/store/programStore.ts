@@ -2,12 +2,13 @@
 
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { ICreateProgram, ICurriculumDetail, IFactorizedProgram } from '@/types/programTypes';
-import { getCurriculumList } from '@/actions/programsAction';
+import { ICreateProgram, ICurriculumDetail, IFactorizedProgram, IGetUECurriculum } from '@/types/programTypes';
+import { getCurriculumList, getUEListPerCurriculum } from '@/actions/programsAction';
 import { showToast } from '@/components/ui/showToast';
 
 interface ProgramStoreState {
-  factorizedPrograms: IFactorizedProgram[]; // tableau
+  factorizedPrograms: IFactorizedProgram[];
+  UEPerCurriculumList: Record<string, IGetUECurriculum[]>;
   loading: boolean;
   error: string | null;
 
@@ -25,6 +26,8 @@ export const useFactorizedProgramStore = create<ProgramStoreState>()(
   persist(
     (set, get) => ({
       factorizedPrograms: [],
+      // initialisation correcte pour un Record
+      UEPerCurriculumList: {} as Record<string, IGetUECurriculum[]>,
       loading: false,
       error: null,
 
@@ -45,7 +48,7 @@ export const useFactorizedProgramStore = create<ProgramStoreState>()(
               : p
           ),
         })),
-      resetPrograms: () => set({ factorizedPrograms: [] }),
+      resetPrograms: () => set({ factorizedPrograms: [], UEPerCurriculumList: {} as Record<string, IGetUECurriculum[]> }),
 
       // Async fetch
       fetchPrograms: async () => {
@@ -53,23 +56,46 @@ export const useFactorizedProgramStore = create<ProgramStoreState>()(
         try {
           const result = await getCurriculumList();
           if (result.code === "success") {
-            // factoriser par programme
             const grouped: { [key: string]: IFactorizedProgram } = {};
-            result.data.body.forEach((item: ICurriculumDetail) => {
+
+            // lancer toutes les requêtes en parallèle
+            const uePromises = result.data.body.map(async (item: ICurriculumDetail) => {
               const { program, training_sequences, ...curriculumInfo } = item;
+
               if (!grouped[item.program_code]) {
                 grouped[item.program_code] = {
                   program,
                   curriculums: [],
                 };
               }
+
               grouped[item.program_code].curriculums.push({
                 ...curriculumInfo,
                 program,
                 training_sequences,
               });
+
+              // récupérer les UE liées à ce curriculum
+              const UEList = await getUEListPerCurriculum(item.curriculum_code);
+              if (UEList.code === "success") {
+                return { curriculum_code: item.curriculum_code, ue: UEList.data.body as IGetUECurriculum[] };
+              }
+              return { curriculum_code: item.curriculum_code, ue: [] as IGetUECurriculum[] };
             });
-            set({ factorizedPrograms: Object.values(grouped), loading: false });
+
+            const allUEs = await Promise.all(uePromises);
+
+            // construire un Record<string, IGetUECurriculum[]>
+            const UEPerCurriculumList = allUEs.reduce<Record<string, IGetUECurriculum[]>>((acc, curr) => {
+              acc[curr.curriculum_code] = curr.ue;
+              return acc;
+            }, {});
+
+            set({
+              factorizedPrograms: Object.values(grouped),
+              UEPerCurriculumList,
+              loading: false,
+            });
           } else {
             showToast({
               variant: "error-solid",

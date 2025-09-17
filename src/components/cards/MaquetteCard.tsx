@@ -2,8 +2,7 @@
 import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Calendar, ChevronDown, ChevronRight, Edit, Eye, Loader2, MoreHorizontal, Plus, Trash2 } from 'lucide-react'
-import { Button } from '../ui/button'
-import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateSemester, ICreateUE, ICurriculumDetail, IModulePerDomain, IUEPerModuleList } from '@/types/programTypes'
+import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateSemester, ICreateUE, ICurriculumDetail, IModulePerDomain, IGetUEPerModule } from '@/types/programTypes'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
 import { v4 as uuidv4 } from 'uuid'
 import { Badge } from '../ui/badge'
@@ -21,6 +20,8 @@ import { DialogUpdateDomain } from '../features/programs/Modal/DialogUpdateDomai
 import { DialogCreateModule } from '../features/programs/Modal/DialogCreateModule'
 import { DialogUpdateModule } from '../features/programs/Modal/DialogUpdateModule'
 import { DialogCreateUE } from '../features/programs/Modal/DialogCreateUE'
+import { Button } from '../ui/button'
+import { useRouter } from 'next/navigation'
 
 type MyComponentProps = {
   curriculum: ICurriculumDetail
@@ -35,10 +36,11 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
   const [fetchedModuleList, setFetchedModuleList] = useState<IModulePerDomain[]>([])
-  const [fetchedUEList, setFetchedUEList] = useState<IUEPerModuleList[]>([])
+  const [fetchedUEList, setFetchedUEList] = useState<IGetUEPerModule[]>([])
   const [loadingModules, setLoadingModules] = useState<Set<string>>(new Set())
   const [loadingUE, setLoadingUE] = useState<Set<string>>(new Set())
   const [selectedCurriculum, setSelectedCurriculum] = useState<ICreateCurriculum | null>(null);
+  const router = useRouter();
   
   const [isUpdateCurriculumDialogOpen, setIsUpdateCurriculumDialogOpen] = useState(false);
   
@@ -357,25 +359,44 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
                   {curriculum.status_code}
                 </Badge>
                 <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedCurriculum({
-                        curriculum_code: curriculum.curriculum_code,
-                        curriculum_name: curriculum.curriculum_name,
-                        program_code: curriculum.program.program_code,
-                        study_level: curriculum.study_level,
-                        status_code: curriculum.status_code,
-                      });
-                      setIsUpdateCurriculumDialogOpen(true);
-                    }}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-7 w-7 p-4"
+                      >
+                        <MoreHorizontal className="h-4 w-7" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => {
+                        router.push(`/admin/programs/${curriculum.curriculum_code}`)
+                      }}>
+                        <Eye className="mr-2 h-5 w-5" />
+                        Detail
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedCurriculum({
+                            curriculum_code: curriculum.curriculum_code,
+                            curriculum_name: curriculum.curriculum_name,
+                            program_code: curriculum.program.program_code,
+                            study_level: curriculum.study_level,
+                            status_code: curriculum.status_code,
+                          });
+                          setIsUpdateCurriculumDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Modifier
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {}}>
+                        <Trash2 className="mr-2 h-4 w-4 text-red-600" />
+                        Supprimer
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>
@@ -429,7 +450,7 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
               ))}
               <Button
                 className="text-sm h-6 rounded ml-3"
-                variant={"outline-info"}
+                variant={"outline"}
                 onClick={() => {
                   setIsCreateSequenceDialogOpen(true);
                 }}
@@ -443,7 +464,7 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
             <Separator />
             <Button
               className="text-sm h-6 rounded w-fit my-3 ml-7"
-              variant={"outline-info"}
+              variant={"outline"}
               onClick={() => {
                 setIsCreateDomainDialogOpen(true);
                 setSelectedSequenceList(curriculum.training_sequences);
@@ -477,7 +498,7 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
                     <div className="flex flex-wrap gap-2">
                       <Button
                         className="text-sm h-6 rounded"
-                        variant={"outline-info"}
+                        variant={"outline"}
                         onClick={() => {
                           setIsCreateModuleDialogOpen(true);
                           setSelectedSequenceList(curriculum.training_sequences);
@@ -555,7 +576,7 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
                               <div className="flex flex-wrap gap-2">
                                 <Button
                                   className="text-sm h-6 rounded"
-                                  variant={"outline-info"}
+                                  variant={"outline"}
                                   onClick={() => {
                                     setSelectedModule({
                                       coefficient: mod.coefficient,

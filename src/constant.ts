@@ -1,4 +1,4 @@
-import { ApplicationStatus } from "./types/teacherTypes";
+import { ApplicationStatus, PlanificationStatus } from "./types/teacherTypes";
 
 export type gender = 'FEMALE' | 'MALE';
 export type ACTION = 'CREATE' | 'UPDATE' | 'DELETE' | 'DESACTIVATE' | 'ACTIVATE';
@@ -18,6 +18,14 @@ export const APPLICATION_STATUS = [
   { value: ApplicationStatus.ALL, label: "Tout" }
 ];
 
+export const PLANIFICATION_FILTER = [
+  { value: PlanificationStatus.CURRICULUM, label: "Curriculum" },
+  { value: PlanificationStatus.PERIOD, label: "Période" },
+  { value: PlanificationStatus.TEACHER, label: "Enseignant" },
+  { value: PlanificationStatus.RESSOURCE, label: "Ressource" },
+];
+
+
 export const USER_ROLE = [
   { value: "ALL", label: "Tous les rôles" },
   { value: "STUDENT", label: "Étudiants" },
@@ -35,7 +43,7 @@ export const USER_TABLE_HEADERS = [
   "Actions",
 ];
 
-
+export const CALENDAR_COLORS = ["success", "danger", "primary", "warning", "info", "purple", "pink", "teal"];
 
 
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { IGetClassroom } from "@/types/classroomType";
-import * as ClassroomAction from "@/actions/classroomAction";
+import { getClassroomList } from "@/actions/classroomAction";
 
 
 export function useClassroomData() {
@@ -12,7 +12,7 @@ export function useClassroomData() {
     setLoading(true);
     setError(null);
     try {
-      const result = await ClassroomAction.getClassroomList();
+      const result = await getClassroomList();
       console.log('-->useClassrooms.result', result)
       if (result.code === "success") {
         setData(result.data.body as IGetClassroom[]);

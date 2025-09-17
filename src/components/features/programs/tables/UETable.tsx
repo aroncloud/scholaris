@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ICreateUE, IUEPerModuleList } from "@/types/programTypes"; // adapte le chemin si besoin
+import { ICreateUE, IGetUEPerModule } from "@/types/programTypes"; // adapte le chemin si besoin
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,7 @@ import { showToast } from "@/components/ui/showToast";
 import { updateUE } from "@/actions/programsAction";
 
 type UETableProps = {
-  ues: IUEPerModuleList[];
+  ues: IGetUEPerModule[];
   compact?: boolean; // optionnel: lignes plus serrées
   refresh: () => void;
 };

@@ -104,6 +104,13 @@ export enum ApplicationStatus {
   ALL = "ALL"
 }
 
+export enum PlanificationStatus {
+  TEACHER = "TEACHER",
+  RESSOURCE = "RESSOURCE",
+  CURRICULUM = "CURRICULUM",
+  PERIOD = "PERIOD"
+}
+
 export interface GetTeacherApplication {
   applicant_email: string;
   applicant_first_name: string;
