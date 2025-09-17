@@ -229,46 +229,66 @@ export default function EnrollmentDetailPage() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {/* Colonne de gauche */}
                                     <div className="space-y-4">
-                                        <div className="flex items-start sm:items-center gap-3">
-                                        <Code className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-medium">Code Curriculum</p>
-                                            <p className="text-sm text-muted-foreground break-all">
+                                    <div className="flex items-center gap-3">
+                                        <Code className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                        <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900">Code Curriculum</p>
+                                        <p className="text-sm text-gray-600 mt-0.5">
                                             {curriculum.curriculum_code}
-                                            </p>
-                                        </div>
-                                        </div>
-                                        <div className="flex items-start sm:items-center gap-3">
-                                        <BookOpen className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-medium">Code Programme</p>
-                                            <p className="text-sm text-muted-foreground break-all">
-                                            {curriculum.program_code}
-                                            </p>
-                                        </div>
+                                        </p>
                                         </div>
                                     </div>
+                                    
+                                    <div className="flex items-center gap-3">
+                                        <BookOpen className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                        <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900">Code Programme</p>
+                                        <p className="text-sm text-gray-600 mt-0.5">
+                                            {curriculum.program_code}
+                                        </p>
+                                        </div>
+                                    </div>
+                                    </div>
+
+                                    {/* Colonne de droite */}
                                     <div className="space-y-4">
-                                        <div className="flex items-start sm:items-center gap-3">
-                                        <GraduationCap className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-medium">Niveau d'études</p>
-                                            <p className="text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-3">
+                                        <GraduationCap className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                        <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900">Niveau d'études</p>
+                                        <p className="text-sm text-gray-600 mt-0.5">
                                             {curriculum.study_level}
-                                            </p>
+                                        </p>
                                         </div>
-                                        </div>
-                                        <div className="flex items-start sm:items-center gap-3">
-                                        <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-medium">Date de création</p>
-                                            <p className="text-sm text-muted-foreground">
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-3">
+                                        <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                        <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900">Date de création</p>
+                                        <p className="text-sm text-gray-600 mt-0.5">
                                             {formatDateToText(curriculum.created_at)}
-                                            </p>
+                                        </p>
                                         </div>
-                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+
+                                {/* Section séparée pour les statistiques */}
+                                <div className="border-t border-gray-100 mt-6 pt-4">
+                                    <div className="flex items-center gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                                        <span className="text-sm font-semibold text-blue-600">
+                                        {sequenceList.length}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900">Séquences</p>
+                                        <p className="text-xs text-gray-500">Nombre total de séquence</p>
+                                    </div>
                                     </div>
                                 </div>
                             </CardContent>
@@ -278,16 +298,13 @@ export default function EnrollmentDetailPage() {
                         <Card>
                             <CardHeader>
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                                    <ListOrdered className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                                    <h2 className="text-2xl font-bold text-gray-900">Horaires Académiques</h2>
-                                </CardTitle>
-                                <Badge variant="secondary" className="self-start sm:ml-auto">
-                                    {sequenceList.length} séquence{sequenceList.length > 1 ? 's' : ''}
-                                </Badge>
+                                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                                        <ListOrdered className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                        <h2 className="text-2xl font-bold text-gray-900">Horaires Académiques</h2>
+                                    </CardTitle>
                                 </div>
                                 <CardDescription className="text-sm">
-                                Liste des séquences de formation associées à ce curriculum
+                                    Historique des séquences anuelles associées à ce curriculum
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -301,46 +318,40 @@ export default function EnrollmentDetailPage() {
                                                 key={academicYear.academic_year_code} 
                                                 className="border border-gray-200 hover:border-gray-300 transition-colors"
                                             >
-                                                <CardHeader className="pb-3">
-                                                <div className="flex justify-between items-center">
-                                                    <div>
-                                                    <CardTitle className="text-lg font-semibold text-gray-900">
-                                                        {academicYear.academic_year_name}
-                                                    </CardTitle>
-                                                    <CardDescription className="text-sm text-gray-500 mt-1">
-                                                        {formatDateToText(academicYear.academic_year_start)} - {formatDateToText(academicYear.academic_year_end)}
-                                                    </CardDescription>
+                                                <CardHeader className="">
+                                                    <div className="flex justify-between items-center">
+                                                        <div>
+                                                        <CardTitle className="text-lg font-semibold text-gray-900">
+                                                            {academicYear.academic_year_name}
+                                                        </CardTitle>
+                                                        <CardDescription className="text-sm text-gray-500 mt-1">
+                                                            {formatDateToText(academicYear.academic_year_start)} - {formatDateToText(academicYear.academic_year_end)}
+                                                        </CardDescription>
+                                                        </div>
+                                                        <Badge className={getStatusColor(academicYear.academic_year_status)}>
+                                                            {academicYear.academic_year_status}
+                                                        </Badge>
                                                     </div>
-                                                    <Badge className={getStatusColor(academicYear.academic_year_status)}>
-                                                    {academicYear.academic_year_status}
-                                                    </Badge>
-                                                </div>
                                                 </CardHeader>
 
                                                 <CardContent className="pt-0">
-                                                <div className="border-t border-gray-100 pt-3">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-sm font-medium text-gray-600">
-                                                        Séquences ({schedulesForYear.length})
-                                                    </span>
-                                                    </div>
-                                                    
-                                                    <div className="space-y-1">
-                                                    {schedulesForYear.map((sequence) => (
-                                                        <div 
-                                                        key={uuidv4()} 
-                                                        className="flex justify-between items-center py-1.5 text-sm"
-                                                        >
-                                                        <span className="font-medium text-gray-800">
-                                                            {sequence.sequence_name}
-                                                        </span>
-                                                        <span className="text-gray-500">
-                                                            {formatDateToText(sequence.start_date)} - {formatDateToText(sequence.end_date)}
-                                                        </span>
+                                                    <div className="border-t border-gray-100 pt-3">
+                                                        <div className="space-y-1">
+                                                        {schedulesForYear.map((sequence) => (
+                                                            <div 
+                                                            key={uuidv4()} 
+                                                            className="flex justify-between items-center py-1.5 text-sm"
+                                                            >
+                                                            <span className="font-medium text-gray-800">
+                                                                {sequence.sequence_name}
+                                                            </span>
+                                                            <span className="text-gray-500">
+                                                                {formatDateToText(sequence.start_date)} - {formatDateToText(sequence.end_date)}
+                                                            </span>
+                                                            </div>
+                                                        ))}
                                                         </div>
-                                                    ))}
                                                     </div>
-                                                </div>
                                                 </CardContent>
                                             </Card>
                                             );
