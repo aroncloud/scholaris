@@ -13,25 +13,18 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { v4 as uuidv4 } from "uuid";
 import {
   ArrowLeft,
-  User,
-  Mail,
-  Phone,
   GraduationCap,
   Calendar,
   FileText,
-  CheckCircle,
-  XCircle,
   Clock,
-  Download,
-  UserPlus,
   Code,
   BookOpen,
   ListOrdered,
   CalendarDays,
   Power,
-  MoreHorizontal,
 } from "lucide-react";
 import { getStatusColor, formatDateToText } from "@/lib/utils";
 import { getCurriculumDetail, getListAcademicYearsSchedulesForCurriculum, getSemesterForCurriculum } from "@/actions/programsAction";
@@ -43,7 +36,7 @@ import { ICreateAcademicYearSchedules } from "@/types/planificationType";
 import { createAcademicYearSchedule } from "@/actions/planificationAction";
 import { useAcademicYearSchedules } from "@/hooks/feature/planifincation/useAcademicYearSchedules";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
-import { formatDate } from "date-fns";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export default function EnrollmentDetailPage() {
     const params = useParams();
@@ -122,12 +115,29 @@ export default function EnrollmentDetailPage() {
     const handleDeactivate = () => {
         console.log('Désactiver le curriculum');
     };
+    
 
     useEffect(() => {
         loadApplicationDetails();
     }, [programCode, loadApplicationDetails]);
 
+    function groupSchedulesByAcademicYear(
+        schedules: IAcademicYearsSchedulesForCurriculum[]
+        ): IAcademicYearsSchedulesForCurriculum[][] {
+        const grouped = schedules.reduce((accumulator, currentSchedule) => {
+            const { academic_year_code } = currentSchedule;
+            
+            if (!accumulator[academic_year_code]) {
+            accumulator[academic_year_code] = [];
+            }
 
+            accumulator[academic_year_code].push(currentSchedule);
+
+            return accumulator;
+        }, {} as Record<string, IAcademicYearsSchedulesForCurriculum[]>);
+
+        return Object.values(grouped);
+    }
 
 
     if (!curriculum || !sequenceList) {
@@ -220,46 +230,46 @@ export default function EnrollmentDetailPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                                <div className="space-y-4">
-                                    <div className="flex items-start sm:items-center gap-3">
-                                    <Code className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium">Code Curriculum</p>
-                                        <p className="text-sm text-muted-foreground break-all">
-                                        {curriculum.curriculum_code}
-                                        </p>
+                                    <div className="space-y-4">
+                                        <div className="flex items-start sm:items-center gap-3">
+                                        <Code className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium">Code Curriculum</p>
+                                            <p className="text-sm text-muted-foreground break-all">
+                                            {curriculum.curriculum_code}
+                                            </p>
+                                        </div>
+                                        </div>
+                                        <div className="flex items-start sm:items-center gap-3">
+                                        <BookOpen className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium">Code Programme</p>
+                                            <p className="text-sm text-muted-foreground break-all">
+                                            {curriculum.program_code}
+                                            </p>
+                                        </div>
+                                        </div>
                                     </div>
+                                    <div className="space-y-4">
+                                        <div className="flex items-start sm:items-center gap-3">
+                                        <GraduationCap className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium">Niveau d'études</p>
+                                            <p className="text-sm text-muted-foreground">
+                                            {curriculum.study_level}
+                                            </p>
+                                        </div>
+                                        </div>
+                                        <div className="flex items-start sm:items-center gap-3">
+                                        <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium">Date de création</p>
+                                            <p className="text-sm text-muted-foreground">
+                                            {formatDateToText(curriculum.created_at)}
+                                            </p>
+                                        </div>
+                                        </div>
                                     </div>
-                                    <div className="flex items-start sm:items-center gap-3">
-                                    <BookOpen className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium">Code Programme</p>
-                                        <p className="text-sm text-muted-foreground break-all">
-                                        {curriculum.program_code}
-                                        </p>
-                                    </div>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="flex items-start sm:items-center gap-3">
-                                    <GraduationCap className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium">Niveau d'études</p>
-                                        <p className="text-sm text-muted-foreground">
-                                        {curriculum.study_level}
-                                        </p>
-                                    </div>
-                                    </div>
-                                    <div className="flex items-start sm:items-center gap-3">
-                                    <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium">Date de création</p>
-                                        <p className="text-sm text-muted-foreground">
-                                        {formatDateToText(curriculum.created_at)}
-                                        </p>
-                                    </div>
-                                    </div>
-                                </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -270,7 +280,7 @@ export default function EnrollmentDetailPage() {
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                                     <ListOrdered className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                                    Séquences de formation
+                                    <h2 className="text-2xl font-bold text-gray-900">Horaires Académiques</h2>
                                 </CardTitle>
                                 <Badge variant="secondary" className="self-start sm:ml-auto">
                                     {sequenceList.length} séquence{sequenceList.length > 1 ? 's' : ''}
@@ -281,151 +291,66 @@ export default function EnrollmentDetailPage() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                {sequenceList.length === 0 ? (
-                                <div className="text-center py-8">
-                                    <p className="text-muted-foreground">Aucune séquence de formation trouvée</p>
-                                </div>
-                                ) : (
-                                <div className="space-y-3 sm:space-y-4">
-                                    {sequenceList.map((sequence, index) => (
-                                    <div key={sequence.sequence_code}>
-                                        <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                                        <div className="flex-shrink-0">
-                                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span className="text-xs sm:text-sm font-semibold text-primary">
-                                                {sequence.sequence_number}
-                                            </span>
-                                            </div>
-                                        </div>
-                                        <div className="flex-1 min-w-0 space-y-2">
-                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                            <h3 className="font-semibold text-sm sm:text-base break-words">
-                                                {sequence.sequence_name}
-                                            </h3>
-                                            <Badge className={getStatusColor(sequence.status_code)} variant="secondary">
-                                                {sequence.status_code}
-                                            </Badge>
-                                            </div>
-                                            <p className="text-xs sm:text-sm text-muted-foreground break-all">
-                                            Code: {sequence.sequence_code}
-                                            </p>
-                                            {sequence.description && (
-                                            <p className="text-xs sm:text-sm leading-relaxed">
-                                                {sequence.description}
-                                            </p>
-                                            )}
-                                            {!sequence.description && (
-                                            <p className="text-xs sm:text-sm text-muted-foreground italic">
-                                                Aucune description disponible
-                                            </p>
-                                            )}
-                                        </div>
-                                        </div>
-                                        {index < sequenceList.length - 1 && (
-                                        <Separator className="my-2 sm:my-2" />
-                                        )}
+                                <div className="">
+                                    <div className="space-y-4">
+                                        {groupSchedulesByAcademicYear(academicYearsSchedulesForCurriculumList).map((schedulesForYear) => {
+                                            const academicYear = schedulesForYear[0];
+                                            
+                                            return (
+                                            <Card 
+                                                key={academicYear.academic_year_code} 
+                                                className="border border-gray-200 hover:border-gray-300 transition-colors"
+                                            >
+                                                <CardHeader className="pb-3">
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                    <CardTitle className="text-lg font-semibold text-gray-900">
+                                                        {academicYear.academic_year_name}
+                                                    </CardTitle>
+                                                    <CardDescription className="text-sm text-gray-500 mt-1">
+                                                        {formatDateToText(academicYear.academic_year_start)} - {formatDateToText(academicYear.academic_year_end)}
+                                                    </CardDescription>
+                                                    </div>
+                                                    <Badge className={getStatusColor(academicYear.academic_year_status)}>
+                                                    {academicYear.academic_year_status}
+                                                    </Badge>
+                                                </div>
+                                                </CardHeader>
+
+                                                <CardContent className="pt-0">
+                                                <div className="border-t border-gray-100 pt-3">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-sm font-medium text-gray-600">
+                                                        Séquences ({schedulesForYear.length})
+                                                    </span>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-1">
+                                                    {schedulesForYear.map((sequence) => (
+                                                        <div 
+                                                        key={uuidv4()} 
+                                                        className="flex justify-between items-center py-1.5 text-sm"
+                                                        >
+                                                        <span className="font-medium text-gray-800">
+                                                            {sequence.sequence_name}
+                                                        </span>
+                                                        <span className="text-gray-500">
+                                                            {formatDateToText(sequence.start_date)} - {formatDateToText(sequence.end_date)}
+                                                        </span>
+                                                        </div>
+                                                    ))}
+                                                    </div>
+                                                </div>
+                                                </CardContent>
+                                            </Card>
+                                            );
+                                        })}
                                     </div>
-                                    ))}
                                 </div>
-                                )}
                             </CardContent>
                         </Card>
                     </div>
                 </main>
-
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 mb-6">
-                        <GraduationCap className="h-6 w-6 text-blue-600" />
-                        <h2 className="text-2xl font-bold text-gray-900">Horaires Académiques</h2>
-                        <Badge variant="outline" className="ml-2">
-                        {academicYearsSchedulesForCurriculumList.length} élément(s)
-                        </Badge>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {academicYearsSchedulesForCurriculumList.map((item, index) => (
-                        <Card key={`${item.schedule_code}-${index}`} className="hover:shadow-md transition-shadow">
-                            <CardHeader className="pb-3">
-                            <div className="flex justify-between items-start">
-                                <CardTitle className="text-lg font-semibold text-blue-700">
-                                {item.program_name}
-                                </CardTitle>
-                                <Badge className={getStatusColor(item.status_code)}>
-                                {item.status_code}
-                                </Badge>
-                            </div>
-                            <CardDescription className="text-sm text-gray-600">
-                                {item.curriculum_name}
-                            </CardDescription>
-                            </CardHeader>
-                            
-                            <CardContent className="space-y-3">
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                <div>
-                                <div className="flex items-center gap-1 text-gray-500 mb-1">
-                                    <Calendar className="h-4 w-4" />
-                                    <span className="font-medium">Année académique</span>
-                                </div>
-                                <p className="font-medium text-gray-900">{item.academic_year_name}</p>
-                                <p className="text-xs text-gray-500">
-                                    {formatDateToText(item.academic_year_start)} - {formatDateToText(item.academic_year_end)}
-                                </p>
-                                </div>
-                                
-                                <div>
-                                <div className="flex items-center gap-1 text-gray-500 mb-1">
-                                    <Clock className="h-4 w-4" />
-                                    <span className="font-medium">Séquence</span>
-                                </div>
-                                <p className="font-medium text-gray-900">{item.sequence_name}</p>
-                                <p className="text-xs text-gray-500">N° {item.sequence_number}</p>
-                                </div>
-                            </div>
-
-                            <div className="border-t pt-3">
-                                <div className="flex items-center gap-1 text-gray-500 mb-2">
-                                <BookOpen className="h-4 w-4" />
-                                <span className="font-medium text-sm">Période du programme</span>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Début: {formatDateToText(item.start_date)}</span>
-                                <span className="text-gray-600">Fin: {formatDateToText(item.end_date)}</span>
-                                </div>
-                            </div>
-
-                            <div className="border-t pt-3 space-y-2">
-                                <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-                                <div>
-                                    <span className="font-medium">Code Programme:</span>
-                                    <p className="text-gray-700">{item.program_code}</p>
-                                </div>
-                                <div>
-                                    <span className="font-medium">Code Curriculum:</span>
-                                    <p className="text-gray-700">{item.curriculum_code}</p>
-                                </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-                                <div>
-                                    <span className="font-medium">Code Horaire:</span>
-                                    <p className="text-gray-700">{item.schedule_code}</p>
-                                </div>
-                                <div>
-                                    <span className="font-medium">Code Séquence:</span>
-                                    <p className="text-gray-700">{item.sequence_code}</p>
-                                </div>
-                                </div>
-                            </div>
-
-                            <div className="border-t pt-2">
-                                <Badge variant="outline" className="text-xs">
-                                Statut académique: {item.academic_year_status}
-                                </Badge>
-                            </div>
-                            </CardContent>
-                        </Card>
-                        ))}
-                    </div>
-                </div>
             </div>
 
 
