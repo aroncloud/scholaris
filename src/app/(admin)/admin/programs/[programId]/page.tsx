@@ -146,7 +146,7 @@ export default function EnrollmentDetailPage() {
             <div className="container mx-auto p-4 sm:p-6">
             <Card>
                 <CardContent className="flex items-center justify-center h-64">
-                <p className="text-muted-foreground">Aucune donnée de curriculum disponible</p>
+                <p className="text-muted-foreground">Aucune donnée de curriculum disponible.</p>
                 </CardContent>
             </Card>
             </div>
