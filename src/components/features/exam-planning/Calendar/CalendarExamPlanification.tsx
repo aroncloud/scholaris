@@ -17,9 +17,9 @@ import { IGetUEPerModule } from "@/types/programTypes";
 import { createSession } from "@/actions/planificationAction";
 import { showToast } from "@/components/ui/showToast";
 import { IFullCalendarEvent } from "../../planification/Calendar/CalendarPlanification";
-import { DialogCreateExam } from "../Modal/DialogCreateExam";
 import { ICreateEvaluation } from "@/types/examTypes";
 import { createEvaluation } from "@/actions/examAction";
+import DialogCreateExam from "../Modal/DialogCreateExam";
 
 
 

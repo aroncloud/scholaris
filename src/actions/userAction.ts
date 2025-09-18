@@ -286,31 +286,6 @@ export async function createUser(user: ICreateUser) {
 }
 
 
-// export async function getUserList(){
-//     try {
-//         const session = await verifySession();
-        
-//         const token = session.accessToken;
-        
-
-//         const response = await axios.get(`${process.env.AIM_WORKER_ENDPOINT}/api/users/profiles?limit=10&offset=0`,{
-//             headers: {
-//               Authorization: `Bearer ${token}`,
-//             },
-//         });
-//         console.log('-->result', response);
-        
-//         return {
-//             code: 'success',
-//             error: null,
-//             data: response.data
-//         }
-//     } catch (error: unknown) {
-//         console.log('-->userAction.getUserList.error')
-//         const errResult = actionErrorHandler(error);
-//         return errResult;
-//     }
-// }
 export async function getUserList(limit = 100, offset = 0) {
   try {
     console.log('Fetching user list with limit:', limit, 'offset:', offset);

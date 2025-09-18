@@ -102,11 +102,11 @@ export default function ProgramsPage() {
       {/* Main Content */}
       <Tabs defaultValue="program" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="academic_year">Années académiques</TabsTrigger>
           <TabsTrigger value="program">
             Filières ({programs.length})
           </TabsTrigger>
           <TabsTrigger value="maquettes">Maquettes pédagogiques</TabsTrigger>
-          <TabsTrigger value="calendrier">Calendrier académique</TabsTrigger>
         </TabsList>
 
         {/* Filieres Tab */}

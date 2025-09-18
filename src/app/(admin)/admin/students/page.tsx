@@ -267,6 +267,7 @@ export default function StudentsPage() {
       const result = await getStudentApplicationList();
       if(result.code === 'success') {
         const transformedData = transformApplicationData(result.data.body || []);
+        console.log('transformedData-->', transformedData)
         setEnrollmentRequests(transformedData);
       } else {
         console.error('Error loading enrollment requests:', result.error);
@@ -438,9 +439,6 @@ export default function StudentsPage() {
             </TabsTrigger>
             <TabsTrigger value="etudiants">
               Étudiants actuels ({studentList.length})
-            </TabsTrigger>
-            <TabsTrigger value="diplomes">
-              Diplômés ({graduatedStudents.length})
             </TabsTrigger>
           </TabsList>
 

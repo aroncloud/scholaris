@@ -92,7 +92,14 @@ export interface IGetModulePerCurriculum {
   coefficient: number;
   max_score: number;
 }
-
+export interface IGetCurrentAcademicYear {
+  academic_year_code: string;
+  year_code: string;
+  start_date: string;   // format ISO: "YYYY-MM-DD"
+  end_date: string;     // format ISO: "YYYY-MM-DD"
+  status_code: string;  // ex: "IN_PROGRESS", "CLOSED", etc.
+  description: string | null;
+}
 // ------------------- UE (Course Unit) -------------------
 export interface ICreateUE {
   course_unit_code: string;

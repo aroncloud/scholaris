@@ -3,7 +3,7 @@
 import { verifySession } from "@/lib/session";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { ICreateAcademicYearSchedules, ICreateSession } from "@/types/planificationType";
+import { ICreateAcademicYear, ICreateAcademicYearSchedules, ICreateSession } from "@/types/planificationType";
 
 
 export async function createSession(sessionData: ICreateSession) {
@@ -88,7 +88,6 @@ export async function createAcademicYearSchedule(scheduleData: ICreateAcademicYe
     return actionErrorHandler(error);
   }
 }
-
 // Mettre à jour un schedule
 export async function updateAcademicYearSchedule(
   scheduleData: ICreateAcademicYearSchedules,
@@ -100,6 +99,22 @@ export async function updateAcademicYearSchedule(
 
     const response = await axios.put(
       `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/academic-years/schedules/${schedule_code}`,
+      scheduleData,
+      { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+    );
+
+    return { code: "success", error: null, data: response.data };
+  } catch (error: unknown) {
+    return actionErrorHandler(error);
+  }
+}
+export async function createAcademicYear(scheduleData: ICreateAcademicYear) {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.post(
+      `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/academics/academic-years`,
       scheduleData,
       { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
     );
@@ -135,6 +150,22 @@ export async function getAcademicYear() {
 
     const response = await axios.get(
       `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/academics/academic-years`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    return { code: "success", error: null, data: response.data };
+  } catch (error: unknown) {
+    return actionErrorHandler(error);
+  }
+}
+
+export async function getCurrentAcademicYear() {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.get(
+      `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/academics/academic-years/current`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 

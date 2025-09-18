@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { TabsContent } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -30,18 +30,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -49,46 +37,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  GraduationCap,
-  Users,
-  BookOpen,
   FileText,
-  Download,
-  Upload,
   Search,
   Filter,
   MoreHorizontal,
-  Edit,
-  Trash2,
   Plus,
   Eye,
-  UserPlus,
-  Calendar,
-  Award,
   AlertTriangle,
   CheckCircle,
-  Clock,
   Mail,
   Phone,
-  MapPin,
-  UserCheck,
-  UserX,
-  Lock,
-  Unlock,
-  DollarSign,
-  Bell,
-  MessageSquare,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { IEnrollmentRequest, IStudent } from "@/types/staffType";
@@ -162,7 +120,6 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
             <TableHeader>
               <TableRow>
                 <TableHead>Candidat</TableHead>
-                <TableHead>Contact</TableHead>
                 <TableHead>Formation</TableHead>
                 <TableHead>Date demande</TableHead>
                 <TableHead>Documents</TableHead>
@@ -178,17 +135,8 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
                       <div className="font-medium">
                         {request.prenom} {request.nom}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center text-sm">
-                        <Mail className="h-3 w-3 mr-1" />
+                      <div className="text-sm text-muted-foreground">
                         {request.email}
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <Phone className="h-3 w-3 mr-1" />
-                        {request.telephone}
                       </div>
                     </div>
                   </TableCell>
@@ -218,15 +166,7 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
                   </TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(request.statut)}>
-                      {request.statut === "en_attente"
-                        ? "En attente"
-                        : request.statut === "approuve"
-                          ? "Approuvé"
-                          : request.statut === "rejete"
-                            ? "Rejeté"
-                            : request.statut === "converti"
-                              ? "Converti"
-                              : "En attente"}
+                      {request.statut}
                     </Badge>
                     {request.commentaire && (
                       <div className="text-xs text-red-600 mt-1">

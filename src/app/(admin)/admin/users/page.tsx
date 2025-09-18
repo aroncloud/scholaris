@@ -88,7 +88,13 @@ export default function UsersPage() {
       setLoading(true);
       const result = await getUserList();
       if (result.code === 'success') {
-        setUserList(result.data?.body || []);
+        if (result.data?.body?.length > 0) {
+          const users = result.data.body.filter((user: IUserList) => 
+            user.profiles?.some(profile => profile.role_code !== "STUDENT")
+          );
+          setUserList(users);
+        }
+        
       } else {
         toast.error('Erreur lors du chargement des utilisateurs', {
           description: result.error || 'Une erreur est survenue',
