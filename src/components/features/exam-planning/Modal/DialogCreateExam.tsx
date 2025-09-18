@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useForm, Controller, useWatch } from "react-hook-form";
@@ -37,16 +38,20 @@ interface DialogCreateEvaluationProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (data: ICreateEvaluation) => Promise<boolean>;
+  examType?: "CC" | "EXAM_SEQ";
+  curriculum_code?: string;
 }
 
-export function DialogCreateExam({
+export default function DialogCreateExam({
   open,
   onOpenChange,
   onSave,
+  examType,
+  curriculum_code
 }: DialogCreateEvaluationProps) {
   const { factorizedPrograms, UEPerCurriculumList } = useFactorizedProgramStore();
-  const { refresh, academicYearSchedule, loading } = useAcademicYearSchedules();
-  const { academicYears } = useAcademicYearStore();
+  const { academicYearSchedule, loading } = useAcademicYearSchedules();
+  const { } = useAcademicYearStore();
 
   const [moduleList, setModuleList] = useState<IGetModulePerCurriculum[]>([]);
 
@@ -60,14 +65,15 @@ export function DialogCreateExam({
   } = useForm<ICreateEvaluation>({
     defaultValues: {
       target_code: "",
-      target_level: "",
+      target_level: examType === "CC" ? "COURSE_UNIT" : "MODULE",
       schedule_code: "",
-      evaluation_type_code: "",
+      evaluation_type_code: examType,
       title: "",
       evaluation_date: "",
       max_score: 20,
       coefficient: 1,
       status: "DRAFT",
+      curriculum_code: curriculum_code ?? "",
     },
   });
 
@@ -75,18 +81,20 @@ export function DialogCreateExam({
   const selectedCurriculum = useWatch({ control, name: "curriculum_code" });
   const evaluationType = useWatch({ control, name: "evaluation_type_code" });
 
-  const fetchCurrentSemesters = useCallback(async () => {
-    console.log('-->academicYears', academicYears);
-    const currentYear = academicYears.find(acy => acy.status_code === 'IN_PROGRESS');
-    if (currentYear) {
-      await refresh(currentYear.academic_year_code);
-    }
-  }, [academicYears, refresh]);
+  // const fetchCurrentSemesters = useCallback(async () => {
+  //   console.log('-->academicYears', academicYears);
+  //   const currentYear = academicYears.find(acy => acy.status_code === 'IN_PROGRESS');
+  //   console.log('-->currentYear', currentYear);
+  //   console.log('-->academicYears', academicYears);
+  //   if (currentYear) {
+  //     await refresh(currentYear.academic_year_code);
+  //   }
+  // }, [academicYears, refresh]);
 
   // Récupération schedule selon année
-  useEffect(() => {
-    fetchCurrentSemesters();
-  }, [fetchCurrentSemesters]);
+  // useEffect(() => {
+  //   // fetchCurrentSemesters();
+  // }, [fetchCurrentSemesters]);
 
   // Récupération UE
   const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);

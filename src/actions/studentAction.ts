@@ -38,9 +38,12 @@ export async function initiateStudentApplication(applicationData: IInitiateStude
 export async function getStudentApplication(applicationCode: string) {
     console.log('-->getStudentApplication', applicationCode)
     try {
-        const response = await axios.get(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/public/student-applications/${applicationCode}`, {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        const response = await axios.get(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/admin/student-applications/${applicationCode}`, {
             headers: {
-                "X-API-Key": process.env.PUBLIC_API_KEY,
+                Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
         });

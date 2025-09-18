@@ -1,462 +1,430 @@
-/* eslint-disable react/no-unescaped-entities */
+"use client"
 /* eslint-disable @typescript-eslint/no-unused-vars */
-'use client'
+import React, { useCallback, useEffect, useState } from 'react';
+import { ArrowLeft, User, MapPin, Phone, Mail, Calendar, FileText, Users } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  ArrowLeft,
-  User,
-  Mail,
-  Phone,
-  GraduationCap,
-  Calendar,
-  FileText,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Download,
-  UserPlus,
-} from "lucide-react";
-import { getStudentApplication, reviewStudentApplication, convertStudentApplication } from "@/actions/studentAction";
-import { getStatusColor, formatDateToText } from "@/lib/utils";
-import { toast } from "sonner";
+import { getStatusColor } from '@/lib/utils';
+import { useParams, useRouter } from 'next/navigation';
+import { showToast } from '@/components/ui/showToast';
+import { getStudentApplication } from '@/actions/studentAction';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { IGetApplicationDetail } from '@/types/userType';
 
-interface ApplicationDetail {
-  application_code: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-  gender: string;
-  date_of_birth: string | null;
-  place_of_birth: string | null;
-  cni_number: string | null;
-  cni_issue_date: string | null;
-  cni_issue_location: string | null;
-  curriculum_code: string;
-  application_status_code: string;
-  submitted_at: string | null;
-  processed_at: string | null;
-  rejection_reason: string | null;
-  region_code: string | null;
-  department_code: string | null;
-  arrondissement_code: string | null;
-  village: string | null;
-  country: string | null;
-  city: string | null;
-  street: string | null;
-  address_details: string | null;
-  education_level_code: string | null;
-  ethnicity_code: string | null;
-  marital_status_code: string | null;
-  cirriculum?: {
-    curriculum_name: string;
-    study_level: string;
-    duration: string;
-  };
-}
 
-export default function EnrollmentDetailPage() {
+
+const ApplicationDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const applicationCode = params.id as string;
   
-  const [application, setApplication] = useState<ApplicationDetail | null>(null);
+  const [applicationData, setApplicationData] = useState<IGetApplicationDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [processing, setProcessing] = useState(false);
   const [converting, setConverting] = useState(false);
 
-  useEffect(() => {
-    loadApplicationDetails();
-  }, [applicationCode]);
 
-  const loadApplicationDetails = async () => {
+  const loadApplicationDetails = useCallback(async () => {
     try {
       const result = await getStudentApplication(applicationCode);
+      console.log('-->result', result)
       if (result.code === 'success') {
-        setApplication(result.data.body);
+        setApplicationData(result.data.body);
       } else {
-        toast.error("Erreur lors du chargement des détails");
-        router.push('/admin/students');
+        showToast({
+          variant: "success-solid",
+          message: 'Erreur',
+          description: `Erreur lors du chargement des détails`,
+          position: 'top-center',
+        });
+        // router.push('/admin/students');
       }
     } catch (error) {
-      toast.error("Une erreur s'est produite");
-      router.push('/admin/students');
+      showToast({
+        variant: "success-solid",
+        message: 'Erreur',
+        description: `Une erreur s'est produite`,
+        position: 'top-center',
+      });
+      // router.push('/admin/students');
     } finally {
       setLoading(false);
     }
-  };
+  }, [applicationCode, router]);
+
+
+  useEffect(() => {
+    loadApplicationDetails();
+  }, [applicationCode, loadApplicationDetails]);
 
   const handleApprove = async () => {
     setProcessing(true);
-    try {
-      const result = await reviewStudentApplication(applicationCode, 'APPROVED');
-      if (result.code === 'success') {
-        toast.success("Demande approuvée avec succès");
-        await loadApplicationDetails();
-      } else {
-        toast.error("Erreur lors de l'approbation", {
-          description: result.error,
-        });
-      }
-    } catch (error) {
-      toast.error("Erreur lors de l'approbation");
-    } finally {
-      setProcessing(false);
-    }
+    // try {
+    //   const result = await reviewStudentApplication(applicationCode, 'APPROVED');
+    //   if (result.code === 'success') {
+    //     toast.success("Demande approuvée avec succès");
+    //     await loadApplicationDetails();
+    //   } else {
+    //     toast.error("Erreur lors de l'approbation", {
+    //       description: result.error,
+    //     });
+    //   }
+    // } catch (error) {
+    //   toast.error("Erreur lors de l'approbation");
+    // } finally {
+    //   setProcessing(false);
+    // }
   };
 
   const handleReject = async () => {
-    if (!rejectionReason.trim()) {
-      toast.error("Veuillez saisir une raison de rejet");
-      return;
-    }
+    // if (!rejectionReason.trim()) {
+    //   toast.error("Veuillez saisir une raison de rejet");
+    //   return;
+    // }
     
-    setProcessing(true);
-    try {
-      const result = await reviewStudentApplication(applicationCode, 'REJECTED', rejectionReason);
-      if (result.code === 'success') {
-        toast.success("Demande rejetée");
-        setRejectDialogOpen(false);
-        setRejectionReason("");
-        await loadApplicationDetails();
-      } else {
-        toast.error("Erreur lors du rejet", {
-          description: result.error,
-        });
-      }
-    } catch (error) {
-      toast.error("Erreur lors du rejet");
-    } finally {
-      setProcessing(false);
-    }
+    // setProcessing(true);
+    // try {
+    //   const result = await reviewStudentApplication(applicationCode, 'REJECTED', rejectionReason);
+    //   if (result.code === 'success') {
+    //     toast.success("Demande rejetée");
+    //     setRejectDialogOpen(false);
+    //     setRejectionReason("");
+    //     await loadApplicationDetails();
+    //   } else {
+    //     toast.error("Erreur lors du rejet", {
+    //       description: result.error,
+    //     });
+    //   }
+    // } catch (error) {
+    //   toast.error("Erreur lors du rejet");
+    // } finally {
+    //   setProcessing(false);
+    // }
   };
 
   const handleConvert = async () => {
-    setConverting(true);
-    try {
-      const result = await convertStudentApplication(applicationCode);
-      if (result.code === 'success') {
-        toast.success("Candidature convertie en étudiant avec succès");
-        await loadApplicationDetails();
-      } else {
-        toast.error("Erreur lors de la conversion", {
-          description: result.error,
-        });
-      }
-    } catch (error) {
-      toast.error("Erreur lors de la conversion");
-    } finally {
-      setConverting(false);
+    // setConverting(true);
+    // try {
+    //   const result = await convertStudentApplication(applicationCode);
+    //   if (result.code === 'success') {
+    //     toast.success("Candidature convertie en étudiant avec succès");
+    //     await loadApplicationDetails();
+    //   } else {
+    //     toast.error("Erreur lors de la conversion", {
+    //       description: result.error,
+    //     });
+    //   }
+    // } catch (error) {
+    //   toast.error("Erreur lors de la conversion");
+    // } finally {
+    //   setConverting(false);
+    // }
+  };
+
+  const handleBack = () => {
+    // Navigation de retour - à implémenter selon votre routeur
+    console.log('Retour à la liste des applications');
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'CONVERTED':
+        return 'default';
+      case 'APPROVED':
+        return 'default';
+      case 'REJECTED':
+        return 'destructive';
+      case 'PENDING':
+        return 'secondary';
+      default:
+        return 'outline';
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusMap = {
-      DRAFT: { label: "Brouillon", color: "bg-gray-100 text-gray-800" },
-      SUBMITTED: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
-      APPROVED: { label: "Approuvé", color: "bg-green-100 text-green-800" },
-      REJECTED: { label: "Rejeté", color: "bg-red-100 text-red-800" },
-      CONVERTED: { label: "Converti", color: "bg-blue-100 text-blue-800" },
+  const getRelationshipLabel = (code: string) => {
+    const labels: { [key: string]: string } = {
+      'FATHER': 'Père',
+      'MOTHER': 'Mère',
+      'SPOUSE': 'Conjoint(e)',
+      'SIBLING': 'Frère/Sœur',
+      'CHILD': 'Enfant'
     };
-    
-    const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.SUBMITTED;
-    return <Badge className={statusInfo.color}>{statusInfo.label}</Badge>;
+    return labels[code] || code;
   };
 
+  // Affichage du loader pendant le chargement
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size={48} message="Chargement du contenu ..." />
       </div>
     );
   }
 
-  if (!application) {
+  // Affichage d'erreur si les données ne sont pas disponibles
+  if (!applicationData) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p>Demande d'inscription introuvable</p>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center space-x-4 mb-6">
+            <Button variant="outline" size="sm" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Détail de l&apos;Application
+              </h1>
+            </div>
+          </div>
+          
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-gray-500">Aucune donnée d&apos;application trouvée.</p>
+              <Button variant="outline" className="mt-4" onClick={() => loadApplicationDetails()}>
+                Réessayer
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/admin/students')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">
-              {application.first_name} {application.last_name}
-            </h1>
-            <p className="text-muted-foreground">
-              Code: {application.application_code}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          {getStatusBadge(application.application_status_code)}
-          {(application.application_status_code === 'DRAFT' || application.application_status_code === 'SUBMITTED') && (
-            <div className="flex space-x-2">
-              <Button
-                onClick={handleApprove}
-                disabled={processing}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Approuver
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => setRejectDialogOpen(true)}
-                disabled={processing}
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Rejeter
-              </Button>
-            </div>
-          )}
-          {application.application_status_code === 'APPROVED' && (
-            <Button
-              onClick={handleConvert}
-              disabled={converting}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              {converting ? "Conversion..." : "Convertir en étudiant"}
+    <div className="min-h-screen">
+      <div className="mx-auto space-y-6">
+        {/* Header avec bouton retour */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" size="sm" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour
             </Button>
-          )}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Détail de l&apos;Application
+              </h1>
+              <p className="text-gray-500">{applicationData.application_code}</p>
+            </div>
+          </div>
+          <Badge variant={getStatusBadgeVariant(applicationData.application_status_code)}>
+            {applicationData.application_status_code}
+          </Badge>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Informations personnelles */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <User className="h-5 w-5 mr-2" />
-              Informations personnelles
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Prénom</Label>
-                <p>{application.first_name}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Nom</Label>
-                <p>{application.last_name}</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Email</Label>
-                <p className="flex items-center">
-                  <Mail className="h-4 w-4 mr-2" />
-                  {application.email}
-                </p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Téléphone</Label>
-                <p className="flex items-center">
-                  <Phone className="h-4 w-4 mr-2" />
-                  {application.phone_number}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Genre</Label>
-                <p>{application.gender === 'MALE' ? 'Masculin' : 'Féminin'}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Date de naissance</Label>
-                <p>{application.date_of_birth ? formatDateToText(application.date_of_birth) : 'Non renseignée'}</p>
-              </div>
-            </div>
-
-            {application.cni_number && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Informations personnelles */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <User className="h-5 w-5" />
+                <span>Informations Personnelles</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-muted-foreground">CNI</Label>
-                  <p>{application.cni_number}</p>
+                  <label className="text-sm font-medium text-gray-500">Prénom</label>
+                  <p className="text-sm text-gray-900">{applicationData.first_name}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-muted-foreground">Lieu d'émission CNI</Label>
-                  <p>{application.cni_issue_location || 'Non renseigné'}</p>
+                  <label className="text-sm font-medium text-gray-500">Nom</label>
+                  <p className="text-sm text-gray-900">{applicationData.last_name}</p>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Curriculum et statut */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <GraduationCap className="h-5 w-5 mr-2" />
-                Formation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-muted-foreground">Programme</Label>
-                  <p className="font-medium">{application.cirriculum?.curriculum_name || 'Non défini'}</p>
+                  <label className="text-sm font-medium text-gray-500">Date de naissance</label>
+                  <p className="text-sm text-gray-900">{formatDate(applicationData.date_of_birth)}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-muted-foreground">Niveau</Label>
-                  <p>{application.cirriculum?.study_level || 'Non défini'}</p>
+                  <label className="text-sm font-medium text-gray-500">Lieu de naissance</label>
+                  <p className="text-sm text-gray-900">{applicationData.place_of_birth}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Genre</label>
+                  <p className="text-sm text-gray-900">{applicationData.gender}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-muted-foreground">Durée</Label>
-                  <p>{application.cirriculum?.duration || 'Non définie'}</p>
+                  <label className="text-sm font-medium text-gray-500">Village</label>
+                  <p className="text-sm text-gray-900">{applicationData.village}</p>
                 </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Niveau d&apos;éducation</label>
+                <p className="text-sm text-gray-900">{applicationData.education_level_code}</p>
               </div>
             </CardContent>
           </Card>
 
+          {/* Informations de contact */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Clock className="h-5 w-5 mr-2" />
-                Chronologie
+              <CardTitle className="flex items-center space-x-2">
+                <Phone className="h-5 w-5" />
+                <span>Contact</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-sm font-medium text-muted-foreground">Date de soumission</Label>
-                  <p>{application.submitted_at ? formatDateToText(application.submitted_at) : 'Non soumise'}</p>
-                </div>
-                {application.processed_at && (
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Date de traitement</Label>
-                    <p>{formatDateToText(application.processed_at)}</p>
-                  </div>
-                )}
-                {/* {application.converted_to_user_code && (
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Code étudiant créé</Label>
-                    <p className="text-green-600 font-medium">{application.converted_to_user_code}</p>
-                  </div>
-                )} */}
-                {application.rejection_reason && (
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Raison du rejet</Label>
-                    <p className="text-red-600">{application.rejection_reason}</p>
-                  </div>
-                )}
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-500">Email</label>
+                <p className="text-sm text-gray-900">{applicationData.email}</p>
               </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Téléphone</label>
+                <p className="text-sm text-gray-900">{applicationData.phone_number || 'Non renseigné'}</p>
+              </div>
+              <Separator />
+              <div>
+                <label className="text-sm font-medium text-gray-500">N° CNI</label>
+                <p className="text-sm text-gray-900">{applicationData.cni_number || 'Non renseigné'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Date d&apos;émission CNI</label>
+                <p className="text-sm text-gray-900">{formatDate(applicationData.cni_issue_date)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Lieu d&apos;émission CNI</label>
+                <p className="text-sm text-gray-900">{applicationData.cni_issue_location || 'Non renseigné'}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Programme d'études */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <FileText className="h-5 w-5" />
+                <span>Programme d&apos;Études</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-500">Code Programme</label>
+                <p className="text-sm text-gray-900">{applicationData.cirriculum.program_code}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Nom du Programme</label>
+                <p className="text-sm text-gray-900">{applicationData.cirriculum.program_name}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Curriculum</label>
+                <p className="text-sm text-gray-900">{applicationData.cirriculum.curriculum_name}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Niveau d&apos;études</label>
+                <p className="text-sm text-gray-900">{applicationData.cirriculum.study_level}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Informations de traitement */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Calendar className="h-5 w-5" />
+                <span>Traitement</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-500">Soumise le</label>
+                <p className="text-sm text-gray-900">{formatDate(applicationData.submitted_at)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Traitée le</label>
+                <p className="text-sm text-gray-900">{formatDate(applicationData.processed_at)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Traitée par</label>
+                <p className="text-sm text-gray-900">{applicationData.processed_user_code}</p>
+              </div>
+              {applicationData.converted_to_user_code && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Convertie vers utilisateur</label>
+                  <p className="text-sm text-gray-900">{applicationData.converted_to_user_code}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
-      </div>
 
-      {/* Adresse */}
-      {(application.country || application.city || application.street) && (
+        {/* Proches */}
+        {applicationData.relatives && applicationData.relatives.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Users className="h-5 w-5" />
+                <span>Proches</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {applicationData.relatives.map((relative, index) => (
+                  <div key={index} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary">
+                        {getRelationshipLabel(relative.relationship_type_code)}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="font-medium">{relative.last_name} {relative.first_name}</p>
+                      <p className="text-sm text-gray-500">{relative.phone_number}</p>
+                      {relative.occupation && (
+                        <p className="text-sm text-gray-500">{relative.occupation}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Documents */}
         <Card>
           <CardHeader>
-            <CardTitle>Adresse</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <FileText className="h-5 w-5" />
+              <span>Documents</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Pays</Label>
-                <p>{application.country || 'Non renseigné'}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Ville</Label>
-                <p>{application.city || 'Non renseignée'}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Rue</Label>
-                <p>{application.street || 'Non renseignée'}</p>
-              </div>
-            </div>
-            {application.address_details && (
-              <div className="mt-4">
-                <Label className="text-sm font-medium text-muted-foreground">Détails de l'adresse</Label>
-                <p>{application.address_details}</p>
+            {applicationData.documents.length === 0 ? (
+              <p className="text-gray-500">Aucun document attaché</p>
+            ) : (
+              <div className="space-y-2">
+                {applicationData.documents.map((doc, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 border rounded">
+                    <span>{doc.document_name || `Document ${index + 1}`}</span>
+                    <Button variant="outline" size="sm">
+                      Télécharger
+                    </Button>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
-      )}
-
-      {/* Dialog de rejet */}
-      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rejeter la demande</DialogTitle>
-            <DialogDescription>
-              Veuillez indiquer la raison du rejet de cette demande d'inscription.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="rejection-reason">Raison du rejet *</Label>
-              <Textarea
-                id="rejection-reason"
-                placeholder="Expliquez pourquoi cette demande est rejetée..."
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                rows={4}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setRejectDialogOpen(false)}
-              disabled={processing}
-            >
-              Annuler
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleReject}
-              disabled={processing}
-            >
-              {processing ? "Rejet..." : "Rejeter la demande"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      </div>
     </div>
   );
-}
+};
+
+export default ApplicationDetailPage;

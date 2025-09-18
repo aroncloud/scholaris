@@ -6,7 +6,7 @@ import { useState, useCallback, useEffect } from "react";
 
 
 export function useAcademicYears() {
-  const [academicYearSchedule, setAcademicYearSchedule] = useState<IGetAcademicYears[]>([]);
+  const [academicYearList, setAcademicYearList] = useState<IGetAcademicYears[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +16,7 @@ export function useAcademicYears() {
     try {
       const result = await getAcademicYear();
       if (result.code === "success") {
-        setAcademicYearSchedule(result.data.body as IGetAcademicYears[]);
+        setAcademicYearList(result.data.body.reverse() as IGetAcademicYears[]);
       } else {
         setError(result.error || "Erreur lors de la récupération des schedules");
       }
@@ -33,7 +33,7 @@ export function useAcademicYears() {
   }, [fetchData]);
 
   return {
-    academicYearSchedule,
+    academicYearList,
     loading,
     error,
     fetchAcademicYear: fetchData,
