@@ -82,6 +82,16 @@ export interface IModulePerDomain {
   description: string | null;
   coefficient: number;
 }
+export interface IGetModulePerCurriculum {
+  module_code: string;
+  domain_code: string;
+  sequence_code: string;
+  module_name: string;
+  internal_code: string;
+  description: string | null;
+  coefficient: number;
+  max_score: number;
+}
 
 // ------------------- UE (Course Unit) -------------------
 export interface ICreateUE {
@@ -93,7 +103,7 @@ export interface ICreateUE {
   lab_tutorial_hours: number;
 }
 
-export interface IUEPerModuleList {
+export interface IGetUEPerModule {
   course_unit_code: string;
   module_code: string;
   teacher_user_code: string | null;
@@ -107,6 +117,14 @@ export interface IUEPerModuleList {
   status_code: string;
 }
 
+export interface IGetTrainingSequenceForCurriculum {
+  sequence_code: string;
+  curriculum_code: string;
+  sequence_name: string;
+  sequence_number: string;
+  description: string | null;
+  status_code: string;
+}
 
 
 export interface ICreateProgram {
@@ -116,6 +134,14 @@ export interface ICreateProgram {
   degree_name: string;
   degree_code: string;
   description: string;
+}
+export interface IGetCurriculumDetail {
+  curriculum_code: string;
+  program_code: string;
+  study_level: string;
+  curriculum_name: string;
+  created_at: string;
+  status_code: string;
 }
 
 export interface ICreateSemester {
@@ -154,6 +180,49 @@ export interface IDomainPerCurriculum {
   internal_code: string;
 }
 
+
+
+export interface ICreateCurriculum {
+  "curriculum_code": string,
+  "program_code": string,
+  "study_level": string,
+  "curriculum_name": string,
+  "status_code": string
+}
+
+export interface IGetUECurriculum {
+  course_unit_code: string;
+  module_code: string;
+  teacher_user_code: string;
+  course_unit_name: string;
+  internal_code: string;
+  lecture_hours: number;
+  lab_tutorial_hours: number;
+  coefficient: number;
+  is_mandatory: number;
+  is_module_coordinator: number;
+  status_code: string;
+  max_score: number;
+}
+
+export interface IAcademicYearsSchedulesForCurriculum {
+  academic_year_code: string;
+  academic_year_end: string;
+  academic_year_name: string;
+  academic_year_start: string;
+  academic_year_status: string;
+  curriculum_code: string;
+  curriculum_name: string;
+  end_date: string;
+  program_code: string;
+  program_name: string;
+  schedule_code: string;
+  sequence_code: string;
+  sequence_name: string;
+  sequence_number: string;
+  start_date: string;
+  status_code: string;
+}
 
 
 export interface ICreateCurriculum {

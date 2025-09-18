@@ -176,6 +176,35 @@ export async function getProgramList(){
         return errResult;
     }
 }
+export async function getProgramDetail(programCode: string) {
+  console.log('-->getProgramDetail', programCode);
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.get(
+      `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/programs/${programCode}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    console.log('-->result', response.data);
+
+    return {
+      code: 'success',
+      error: null,
+      data: response.data,
+    };
+  } catch (error: unknown) {
+    console.log('-->getProgramDetail.error');
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
+}
 
 
 export async function createCurriculum(curriculumInfo: ICreateCurriculum){
@@ -261,6 +290,67 @@ export async function getCurriculumList(){
         return errResult;
     }
 }
+export async function getCurriculumDetail(curriculumCode: string) {
+  console.log('-->getCurriculumDetail', curriculumCode);
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.get(
+      `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/curriculums/${curriculumCode}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    console.log('-->result', response.data);
+
+    return {
+      code: 'success',
+      error: null,
+      data: response.data,
+    };
+  } catch (error: unknown) {
+    console.log('-->getCurriculumDetail.error');
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
+}
+export async function getListAcademicYearsSchedulesForCurriculum(curriculum_code: string) {
+    try {
+        const session = await verifySession();
+        const token = session.accessToken;
+
+        const response = await axios.get(
+        `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/academics/academic-years/schedules`,
+        {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            },
+            params: {
+            curriculum_code,
+            },
+        }
+        );
+
+        console.log("-->result", response.data);
+
+        return {
+        code: "success" as const,
+        error: null,
+        data: response.data,
+        };
+    } catch (error: unknown) {
+        console.log("-->getListAcademicYearsSchedulesForCurriculum.error");
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+
 
 
 
@@ -347,7 +437,31 @@ export async function getSemesterList(idCurriculum: string){
         return errResult;
     }
 }
+export async function getSemesterForCurriculum(idCurriculum: string){
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
 
+        const response = await axios.get(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/sequences/for-curriculum/${idCurriculum}`,{
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log('-->result', response.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->getSemesterList.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
 
 // matiere
 export async function createDomain(domainInfo: ICreateDomain){
@@ -520,6 +634,31 @@ export async function getModuleListPerDomain(idDomain: string){
         return errResult;
     }
 }
+export async function getModuleListPerCurriculum(curriculum_code: string){
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.get(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/modules/for-curriculum/${curriculum_code}`,{
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log('-->result', response.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->getModuleListPerCurriculum.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
 
 
 
@@ -602,6 +741,31 @@ export async function getUEListPerModule(moduleId: string){
         }
     } catch (error: unknown) {
         console.log('-->getUEListPerModule.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+export async function getUEListPerCurriculum(curriculumId: string){
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+
+        const response = await axios.get(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units/for-curriculum/${curriculumId}`,{
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log('-->result', response.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->getUEListPerCurriculum.error')
         const errResult = actionErrorHandler(error);
         return errResult;
     }
