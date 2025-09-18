@@ -8,7 +8,8 @@ import { useFactorizedProgramStore } from "@/store/programStore";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
 import { useClassroomStore } from "@/store/useClassroomStore";
 import { useTeacherStore } from "@/store/useTeacherStore";
-import React, { useEffect } from "react";
+import { useFactorizedProgramStore } from "@/store/programStore";
+import React, { useEffect }, { useEffect } from "react";
 
 export default function AdminLayout({
   children,

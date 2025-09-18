@@ -223,3 +223,12 @@ export interface IAcademicYearsSchedulesForCurriculum {
   start_date: string;
   status_code: string;
 }
+
+
+export interface ICreateCurriculum {
+  "curriculum_code": string,
+  "program_code": string,
+  "study_level": string,
+  "curriculum_name": string,
+  "status_code": string
+}
