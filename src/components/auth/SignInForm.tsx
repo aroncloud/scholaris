@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import { ILoginForm } from "@/types/staffType";
 import { login } from "@/actions/authAction";
-import { showToast } from "@/lib/utils";
+import { showToast } from "../ui/showToast";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useAuthStore";
 import Link from "next/link";
@@ -34,7 +34,7 @@ export default function SignInForm() {
   const handleLogin = async (data: ILoginForm) => {
     setLoginError(null);
     const result = await login(data);
-
+    console.log('-->result', result)
     if(result.code === 'success') {
       setUser({
         accessToken: result.data.body.accessToken,
@@ -44,8 +44,18 @@ export default function SignInForm() {
         expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000)
       });
 
-      showToast("success", "Connexion réussie");
-      router.push('/admin');
+      showToast({
+        variant: "success-solid",
+        message: 'Connexion réussie',
+        description: `Bien venu dand votre espace Mr. ` + result.data.body.user.last_name,
+        position: 'top-center',
+      });
+      // router.push('/admin');
+      if(result.data.body.user.user_code == "usr_9b1ec8d5-f89a-4412-a356-e009a8cd0dce") {
+        router.push('/student');
+      } else {
+        router.push('/admin');
+      }
     } else {
       setLoginError(result.error);
     }
