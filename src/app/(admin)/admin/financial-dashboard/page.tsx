@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState } from "react";
@@ -277,7 +278,7 @@ export default function FinancialDashboardPage() {
             Tableau de bord Financier
           </h2>
           <p className="text-muted-foreground">
-            Vue d'ensemble des finances et situations financières des étudiants
+            Vue d&apos;ensemble des finances et situations financières des étudiants
           </p>
         </div>
 
@@ -460,7 +461,7 @@ export default function FinancialDashboardPage() {
           <DialogHeader>
             <DialogTitle>Détails Financiers - {selectedStudent?.nom}</DialogTitle>
             <DialogDescription>
-              Informations complètes sur la situation financière de l'étudiant
+              Informations complètes sur la situation financière de l&apos;étudiant
             </DialogDescription>
           </DialogHeader>
           {selectedStudent && (

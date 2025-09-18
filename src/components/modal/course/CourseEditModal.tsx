@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -14,7 +15,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Course } from '@/types/courseType';
 import { useCoursData } from '@/hooks/feature/cours/useCoursData';
 import { Loader2, Save, X } from 'lucide-react';
 
@@ -22,7 +22,7 @@ interface CourseEditModalProps {
   courseId: string | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (course: Course) => void;
+  onSave: (course: any) => void;
 }
 
 const CourseEditModal: React.FC<CourseEditModalProps> = ({
@@ -97,7 +97,7 @@ const CourseEditModal: React.FC<CourseEditModalProps> = ({
       const updatedCourse = await updateCourse(course.id, formData.progress);
       
       // Update the course with new form data
-      const finalCourse: Course = {
+      const finalCourse = {
         ...updatedCourse,
         ...formData,
         updatedAt: new Date()
@@ -234,7 +234,7 @@ const CourseEditModal: React.FC<CourseEditModalProps> = ({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="students">Nombre d'étudiants</Label>
+                  <Label htmlFor="students">Nombre d&apos;étudiants</Label>
                   <Input
                     id="students"
                     type="number"

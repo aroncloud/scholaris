@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -61,6 +61,7 @@ const UESelection: React.FC<UESelectionProps> = ({
     // In a real app, you would fetch UEs based on filiere and niveau
     // This is just a placeholder implementation
     return ues;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filiere, niveau]);
 
   const isFormValid = filiere && niveau && ue;
@@ -91,7 +92,7 @@ const UESelection: React.FC<UESelectionProps> = ({
           </Button>
           <div className="text-left">
             <h2 className="text-xl font-semibold">Saisir des Notes</h2>
-            <p className="text-sm text-gray-500">saisie des notes par unité d'enseignement</p>
+            <p className="text-sm text-gray-500">saisie des notes par unité d&apos;enseignement</p>
           </div>
         </div>
         
@@ -120,8 +121,8 @@ const UESelection: React.FC<UESelectionProps> = ({
         {/* Main Content */}
         <div className="p-6 space-y-6 flex-1 overflow-y-auto">
           <div>
-            <h3 className="text-lg font-medium mb-1">Sélection de l'Unité d'Enseignement</h3>
-            <p className="text-sm text-gray-500 mb-6">Choisissez la filière, le niveau et l'UE pour saisir les notes</p>
+            <h3 className="text-lg font-medium mb-1">Sélection de l&apos;Unité d&apos;Enseignement</h3>
+            <p className="text-sm text-gray-500 mb-6">Choisissez la filière, le niveau et l&apos;UE pour saisir les notes</p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Filiere Dropdown */}
@@ -160,7 +161,7 @@ const UESelection: React.FC<UESelectionProps> = ({
 
               {/* UE Dropdown */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Unité d'Enseignement</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Unité d&apos;Enseignement</label>
                 <Select value={ue} onValueChange={setUe}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Sélectionner une UE" />

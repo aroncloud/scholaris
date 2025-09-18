@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Course } from '@/types/courseType';
 import { useCoursData } from '@/hooks/feature/cours/useCoursData';
 import {
   BookOpen,
@@ -24,7 +23,6 @@ import {
   GraduationCap,
   FileText,
   Edit,
-  X
 } from 'lucide-react';
 
 interface CourseDetailsModalProps {
@@ -44,9 +42,7 @@ const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
     selectedCourse: course,
     courseSessions: sessions,
     loadingCourse,
-    loadingSessions,
     courseError,
-    sessionsError,
     fetchCourseById,
     fetchCourseSessions
   } = useCoursData();
@@ -147,7 +143,7 @@ const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
 
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="overview">Vue d&apos;ensemble</TabsTrigger>
             <TabsTrigger value="sessions">Séances</TabsTrigger>
             <TabsTrigger value="students">Étudiants</TabsTrigger>
           </TabsList>

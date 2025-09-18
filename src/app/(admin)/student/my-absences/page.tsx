@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -50,13 +50,10 @@ import {
   Progress
 } from "@/components/ui/progress";
 import {
-  ClipboardList,
   Clock,
   CheckCircle,
-  XCircle,
   AlertTriangle,
   TrendingUp,
-  TrendingDown,
   Upload,
   RefreshCw,
   Search,
@@ -64,11 +61,6 @@ import {
   Eye,
   Plus,
   FileText,
-  Calendar,
-  CalendarDays,
-  BookOpen,
-  User,
-  MessageSquare,
   FileUp,
   Link2,
   AlertCircle,
@@ -369,12 +361,6 @@ export default function MyAbsencesPage() {
     return matchesSearch;
   });
 
-  const getProgressColor = (percentage: number, seuil: number) => {
-    const ratio = (percentage / seuil) * 100;
-    if (ratio >= 80) return "bg-red-500";
-    if (ratio >= 60) return "bg-orange-500";
-    return "bg-green-500";
-  };
 
   return (
     <div className="space-y-6">
@@ -385,7 +371,7 @@ export default function MyAbsencesPage() {
             Mes Absences
           </h2>
           <p className="text-muted-foreground">
-            Tableau de bord d'assiduité et gestion de vos justificatifs
+            Tableau de bord d&apos;assiduité et gestion de vos justificatifs
           </p>
         </div>
 
@@ -436,9 +422,9 @@ export default function MyAbsencesPage() {
           {/* UE Stats */}
           <Card>
             <CardHeader>
-              <CardTitle>Décompte d'absences par UE</CardTitle>
+              <CardTitle>Décompte d&apos;absences par UE</CardTitle>
               <CardDescription>
-                Suivi détaillé de vos heures d'absence par unité d'enseignement
+                Suivi détaillé de vos heures d&apos;absence par unité d&apos;enseignement
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -685,7 +671,7 @@ export default function MyAbsencesPage() {
       <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Détails de l'Absence</DialogTitle>
+            <DialogTitle>Détails de l&apos;Absence</DialogTitle>
             <DialogDescription>
               Informations complètes sur cette absence
             </DialogDescription>

@@ -55,7 +55,7 @@ const ApplicationDetailPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [applicationCode, router]);
+  }, [applicationCode]);
 
 
   useEffect(() => {

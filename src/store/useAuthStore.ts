@@ -22,8 +22,6 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: "user-storage",
-      getStorage: () => localStorage,
-      // Zustand automatically handles hydration with this
     }
   )
 );

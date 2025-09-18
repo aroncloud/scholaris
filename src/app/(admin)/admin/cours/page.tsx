@@ -17,7 +17,6 @@ import CourseCard from "@/components/features/cours/CourseCardTab";
 import CourseDetailsModal from "@/components/modal/course/CourseDetailsModal";
 import CourseEditModal from "@/components/modal/course/CourseEditModal";
 import PlanificationComponent from "@/components/features/cours/planificationTab";
-import { ICourse } from "@/types/courseType";
 import { useCoursData } from "@/hooks/feature/cours/useCoursData";
 import StatCard from "@/components/cards/StatCard";
 
@@ -70,7 +69,7 @@ const MesCoursPage: React.FC = () => {
     setSelectedCourseId(null);
   };
 
-  const handleSaveCourse = async (updatedCourse: ICourse) => {
+  const handleSaveCourse = async () => {
     await refreshData();
   };
 
@@ -92,7 +91,7 @@ const MesCoursPage: React.FC = () => {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-gray-900">Mes Cours</h1>
           <p className="text-gray-600">
-            Gestion et suivi de vos enseignements assignés par l'administration
+            Gestion et suivi de vos enseignements assignés par l&apos;administration
           </p>
         </div>
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -158,7 +159,7 @@ const ModifyGradeModal: React.FC<ModifyGradeModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label>Date d'évaluation</Label>
+            <Label>Date d&apos;évaluation</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -188,7 +189,7 @@ const ModifyGradeModal: React.FC<ModifyGradeModalProps> = ({
 
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="evaluation">Type d'évaluation</Label>
+            <Label htmlFor="evaluation">Type d&apos;évaluation</Label>
             <Select
               value={formData.evaluation}
               onValueChange={(value) => handleInputChange('evaluation', value as EvaluationKind)}

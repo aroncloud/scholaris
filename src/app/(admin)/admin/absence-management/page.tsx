@@ -1,6 +1,7 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client'
 
-import { useState, useEffect, useCallback } from "react";
+import { useState  } from "react";
 import {
   Card,
   CardContent,
@@ -56,10 +57,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Users,
   Clock,
   CheckCircle,
-  XCircle,
   AlertTriangle,
   TrendingUp,
   TrendingDown,
@@ -71,14 +70,9 @@ import {
   Check,
   X,
   FileText,
-  Calendar,
-  CalendarDays,
   Bell,
-  User,
-  GraduationCap,
   MessageSquare,
   FileDown,
-  Filter,
 } from "lucide-react";
 
 // Interfaces TypeScript

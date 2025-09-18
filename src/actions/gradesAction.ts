@@ -15,7 +15,7 @@ const mockStudentsByCourse: Record<string, Student[]> = {
   c3: Array.from({ length: 5 }).map((_, i) => ({ id: `s3${i}`, matricule: `ETU24${300+i}`, firstName: 'Sophie', lastName: `Bernard-${i}` })),
 };
 
-let mockGrades: GradeEntry[] = [
+const mockGrades: GradeEntry[] = [
   { 
     id: 'g1', 
     courseId: 'c1', 

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import GenericModal from '../GenericModal';
-import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 
 interface DeleteGradeModalProps {

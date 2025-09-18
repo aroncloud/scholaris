@@ -32,11 +32,11 @@ export default function DossierEtudiant() {
     <div className="p-6 space-y-6">
       {/* Header étudiant */}
        <Card className="p-4 flex items-center gap-4">
-        <img
+        {/* <img
           src="/placeholder-avatar.png"
           alt="photo etudiant"
           className="w-16 h-16 rounded-full border"
-        />
+        /> */}
         <div>
           <h1 className="text-xl font-bold">Nganda Ryan</h1>
           <p className="text-sm text-muted-foreground">Matricule : 2024001</p>

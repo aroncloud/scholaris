@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -297,7 +297,7 @@ export default function TransactionsPage() {
             Transactions Diverses
           </h2>
           <p className="text-muted-foreground">
-            Gestion des recettes et dépenses diverses de l'établissement
+            Gestion des recettes et dépenses diverses de l&apos;établissement
           </p>
         </div>
 

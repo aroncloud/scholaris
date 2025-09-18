@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { useState } from 'react';
@@ -18,23 +20,18 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCoursData } from '@/hooks/feature/cours/useCoursData';
-import { ICourse } from '@/types/courseType';
 import { 
   Calendar as CalendarIcon,
   Clock,
   MapPin,
   Users,
-  Plus,
   Edit,
   Trash2,
-  BookOpen,
-  GraduationCap
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';

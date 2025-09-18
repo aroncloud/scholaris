@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -35,7 +36,7 @@ export function useGradesData() {
       setGrades(await getCourseGrades(courseId, evaluation));
       setStats(await getGradesStats(courseId));
     } catch (e) {
-      setError('Failed to load course data');
+      setError('Failed to load course data',);
     } finally {
       setLoading(false);
     }

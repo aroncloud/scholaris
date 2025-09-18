@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState } from 'react';
@@ -166,7 +167,7 @@ const GradeTable = ({
             <TableHeader className="bg-gray-50">
               <TableRow>
                 <TableHead>Étudiant</TableHead>
-                <TableHead className="w-[200px]">Type d'évaluation</TableHead>
+                <TableHead className="w-[200px]">Type d&apos;évaluation</TableHead>
                 <TableHead className="w-[120px]">Note /20</TableHead>
                 <TableHead className="w-[120px]">Date</TableHead>
                 <TableHead className="w-[60px] text-right">Actions</TableHead>
