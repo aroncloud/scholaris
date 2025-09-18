@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { ChevronDownIcon, HorizontaLDots } from "../icons/index";
-import {  BookOpen, GraduationCap, LayoutDashboard, FileText, Users, UserSquare, School, Calendar, Calendar1, Settings, Award } from "lucide-react";
+import {  BookOpen, GraduationCap, LayoutDashboard, FileText, Users, UserSquare, School, Calendar, Calendar1, Settings, Award, DollarSign, ClipboardList } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -75,8 +75,23 @@ const navItems: NavItem[] = [
     icon: <Award className="w-5 h-5" />, // Planification
     name: "Gestion des notes",
     path: "/admin/grade-management"
+  },
+  {
+    icon: <DollarSign className="w-5 h-5" />, // Gestion Financière
+    name: "Gestion Financière",
+    subItems: [
+      { name: "Tableau de bord Financier", path: "/admin/financial-dashboard" },
+      { name: "Gestion des Paiements", path: "/admin/payment-management" },
+      { name: "Transactions Diverses", path: "/admin/transactions" },
+      { name: "Gestion des Absences", path: "/admin/absence-management" }
+    ]
+  },
+  {
+    icon: <ClipboardList className="w-5 h-5" />, // Mes Absences
+    name: "Mes Absences",
+    path: "/student/my-absences"
   }
-  
+
 ];
 
 const AppSidebar: React.FC = () => {
