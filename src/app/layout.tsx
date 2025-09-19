@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${SpaceGrotesk.className} dark:bg-gray-900`}>
+      <body className={`${SpaceGrotesk.className} dark:bg-gray-900 bg-gray-50`}>
         <ThemeProvider>
           <ToastProvider>
             <SidebarProvider>{children}</SidebarProvider>

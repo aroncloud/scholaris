@@ -16,6 +16,7 @@ import DialogCreateAcademicYear from "./Modal/DialogCreateAcademicYear"
 import { ICreateAcademicYear, IGetAcademicYears } from "@/types/planificationType"
 import { createAcademicYear } from "@/actions/planificationAction"
 import { showToast } from "@/components/ui/showToast"
+import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable"
 
 
 const CalendrierTab = () => {
@@ -49,7 +50,78 @@ const CalendrierTab = () => {
         return false
     }
 
-    
+    const academicYearColumns: TableColumn<IGetAcademicYears>[] = [
+        {
+            key: "year_code",
+            label: "Code",
+            render: (_, year) => (
+            <div>
+                <div className="font-medium">{year.year_code}</div>
+                <div className="text-sm text-muted-foreground">{year.academic_year_code}</div>
+            </div>
+            ),
+        },
+        {
+            key: "start_date",
+            label: "Date de début",
+            render: (_, year) => formatDateToText(year.start_date),
+        },
+        {
+            key: "end_date",
+            label: "Date de fin",
+            render: (_, year) => formatDateToText(year.end_date),
+        },
+        {
+            key: "status_code",
+            label: "Statut",
+            render: (_, year) => (
+            <Badge className={getStatusColor(year.status_code)}>
+                {year.status_code}
+            </Badge>
+            ),
+        },
+        {
+            key: "actions",
+            label: "Actions",
+            render: (_, year) => (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                    <MoreHorizontal className="h-4 w-4" />
+                </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem>
+                    <Eye className="mr-2 h-4 w-4" /> Voir détails
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <Edit className="mr-2 h-4 w-4" /> Modifier
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <FileText className="mr-2 h-4 w-4" /> Générer rapport
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <Calendar className="mr-2 h-4 w-4" /> Calendrier
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {year.status_code === "IN_PROGRESS" ? (
+                    <DropdownMenuItem className="text-red-600">
+                    <Lock className="mr-2 h-4 w-4" /> Clôturer
+                    </DropdownMenuItem>
+                ) : (
+                    <DropdownMenuItem className="text-green-600">
+                    <Unlock className="mr-2 h-4 w-4" /> Rouvrir
+                    </DropdownMenuItem>
+                )}
+                <DropdownMenuItem className="text-red-600">
+                    <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+                </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            ),
+        },
+    ];
 
 
     return (
@@ -93,92 +165,12 @@ const CalendrierTab = () => {
                         </> : <>
 
                             <div className="overflow-x-auto border rounded-lg">
-                                <Table className="min-w-full border-collapse">
-                                    <TableHeader className="bg-gray-100 border-b">
-                                    <TableRow>
-                                        <TableHead className="border-r px-4 py-2 text-left">Code</TableHead>
-                                        <TableHead className="border-r px-4 py-2 text-left">Date de début</TableHead>
-                                        <TableHead className="border-r px-4 py-2 text-left">Date de fin</TableHead>
-                                        <TableHead className="border-r px-4 py-2 text-left">Statut</TableHead>
-                                        <TableHead className="px-4 py-2 text-left">Actions</TableHead>
-                                    </TableRow>
-                                    </TableHeader>
-
-                                    <TableBody>
-                                        {academicYearList.map((year) => (
-                                            <TableRow
-                                            key={year.academic_year_code}
-                                            className="hover:bg-gray-50 border-b last:border-b-0"
-                                            >
-                                            <TableCell className="border-r px-4 py-2">
-                                                <div>
-                                                    <div className="font-medium">{year.year_code}</div>
-                                                    <div className="text-sm text-muted-foreground">{year.academic_year_code}</div>
-                                                </div>
-                                            </TableCell>
-
-                                            <TableCell className="border-r px-4 py-2">
-                                                {formatDateToText(year.start_date)}
-                                            </TableCell>
-
-                                            <TableCell className="border-r px-4 py-2">
-                                                {formatDateToText((year.end_date))}
-                                            </TableCell>
-
-                                            <TableCell className="border-r px-4 py-2">
-                                                <Badge className={getStatusColor(year.status_code)}>
-                                                    {year.status_code}
-                                                </Badge>
-                                            </TableCell>
-
-                                            <TableCell className="text-center">
-                                                <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>
-                                                        <Eye className="mr-2 h-4 w-4" />
-                                                        Voir détails
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <Edit className="mr-2 h-4 w-4" />
-                                                        Modifier
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <FileText className="mr-2 h-4 w-4" />
-                                                        Générer rapport
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <Calendar className="mr-2 h-4 w-4" />
-                                                        Calendrier
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    {year.status_code === "IN_PROGRESS" ? (
-                                                    <DropdownMenuItem className="text-red-600">
-                                                        <Lock className="mr-2 h-4 w-4" />
-                                                        Clôturer
-                                                    </DropdownMenuItem>
-                                                    ) : (
-                                                    <DropdownMenuItem className="text-green-600">
-                                                        <Unlock className="mr-2 h-4 w-4" />
-                                                        Rouvrir
-                                                    </DropdownMenuItem>
-                                                    )}
-                                                    <DropdownMenuItem className="text-red-600">
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Supprimer
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                <ResponsiveTable
+                                    columns={academicYearColumns}
+                                    data={academicYearList}
+                                    paginate={20}
+                                    searchKey={["year_code", "academic_year_code"]}
+                                />
                             </div>
                         
                         </>

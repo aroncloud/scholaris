@@ -265,6 +265,7 @@ export default function StudentsPage() {
   const loadEnrollmentRequests = useCallback(async () => {
     try {
       const result = await getStudentApplicationList();
+      console.log('-->result', result)
       if(result.code === 'success') {
         const transformedData = transformApplicationData(result.data.body || []);
         console.log('transformedData-->', transformedData)
@@ -370,10 +371,7 @@ export default function StudentsPage() {
       filiere: app.cirriculum?.curriculum_name || 'N/A',
       niveau: app.cirriculum?.study_level || 'N/A',
       datedemande: app.submitted_at || new Date().toISOString().split('T')[0],
-      statut: app.application_status_code === 'DRAFT' ? 'en_attente' : 
-             app.application_status_code === 'SUBMITTED' ? 'en_attente' :
-             app.application_status_code === 'APPROVED' ? 'approuve' : 
-             app.application_status_code === 'REJECTED' ? 'rejete' : 'en_attente',
+      statut: app.application_status_code,
       documents: ['Documents non disponibles'], 
       commentaire: app.rejection_reason || undefined
     }));
@@ -432,15 +430,27 @@ export default function StudentsPage() {
         />
 
         {/* Main Content */}
-        <Tabs defaultValue="inscriptions" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="inscriptions">
-              Demandes d'inscription ({enrollmentRequests.length})
-            </TabsTrigger>
+        <Tabs defaultValue="etudiants" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="etudiants">
               Étudiants actuels ({studentList.length})
             </TabsTrigger>
+            <TabsTrigger value="inscriptions">
+              Demandes d'inscription ({enrollmentRequests.length})
+            </TabsTrigger>
           </TabsList>
+
+          {/* Current Students Tab */}
+          <CurrentStudents
+            setAction={setAction}
+            setDeleteDialogOpen={setDeleteDialogOpen}
+            setIsStudentDialogOpen={setIsStudentModalOpen}
+            setSelectedStudent={setSelectedStudent}
+            setFormData={setStudentFormData}
+            setStudentToDelete={setStudentToDelete}
+            setIsRequestDialogOpen={setIsRequestDialogOpen}
+            studentList={currentStudents}
+          />
 
           {/* Enrollment Requests Tab */}
           <EnrollmentRequests
@@ -453,18 +463,6 @@ export default function StudentsPage() {
             setSearchTerm={setSearchTerm}
             setSelectedRequest={setSelectedRequest}
             onCreateEnrollment={handleCreateEnrollment}
-          />
-
-          {/* Current Students Tab */}
-          <CurrentStudents
-            setAction={setAction}
-            setDeleteDialogOpen={setDeleteDialogOpen}
-            setIsStudentDialogOpen={setIsStudentModalOpen}
-            setSelectedStudent={setSelectedStudent}
-            setFormData={setStudentFormData}
-            setStudentToDelete={setStudentToDelete}
-            setIsRequestDialogOpen={setIsRequestDialogOpen}
-            studentList={currentStudents}
           />
 
           {/* Graduated Students Tab */}

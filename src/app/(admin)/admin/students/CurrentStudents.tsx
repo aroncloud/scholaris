@@ -257,168 +257,168 @@ const CurrentStudents = ({
                         </div>
                     </div>
 
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Étudiant</TableHead>
-                            <TableHead>Formation</TableHead>
-                            <TableHead>Statut</TableHead>
-                            <TableHead>Financier</TableHead>
-                            <TableHead>Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredCurrentStudents.map((student) => (
-                            <TableRow key={uuidv4()}>
-                                <TableCell>
-                                    <div>
-                                    <div className="font-medium">
-                                        {student.first_name} {student.last_name}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                        {student.student_number}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                        {student.email}
-                                    </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <div>
-                                    <div className="font-medium">{student.cirriculum.program_name}</div>
-                                    <div className="text-sm text-muted-foreground">
-                                        {student.cirriculum.study_level}
-                                    </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    {/* <Badge className={statutLabels[student.statut].color}>
-                                    {statutLabels[student.statut].label}
-                                    </Badge> */}
-                                    -
-                                </TableCell>
-                                <TableCell>
-                                    {/* {student.statutFinancier && (
-                                        <div className="space-y-1">
-                                            <Badge
-                                            className={
-                                                statutFinancierLabels[student.statutFinancier]
-                                                .color
-                                            }
-                                            >
-                                            {
-                                                statutFinancierLabels[student.statutFinancier]
-                                                .label
-                                            }
-                                            </Badge>
-                                            {student.montantDu && student.montantDu > 0 && (
-                                            <div className="text-xs text-red-600">
-                                                Dû: {student.montantDu}€
-                                            </div>
-                                            )}
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Étudiant</TableHead>
+                                <TableHead>Formation</TableHead>
+                                <TableHead>Statut</TableHead>
+                                <TableHead>Financier</TableHead>
+                                <TableHead>Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredCurrentStudents.map((student) => (
+                                <TableRow key={uuidv4()}>
+                                    <TableCell>
+                                        <div>
+                                        <div className="font-medium">
+                                            {student.first_name} {student.last_name}
                                         </div>
-                                    )} */}
-                                    -
-                                </TableCell>
-                                <TableCell>
-                                    <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                        <DropdownMenuItem
-                                            onClick={() =>
-                                                handleViewStudentDetails(student.user_code)
-                                            }
+                                        <div className="text-sm text-muted-foreground">
+                                            {student.student_number}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {student.email}
+                                        </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div>
+                                        <div className="font-medium">{student.cirriculum.program_name}</div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {student.cirriculum.study_level}
+                                        </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {/* <Badge className={statutLabels[student.statut].color}>
+                                        {statutLabels[student.statut].label}
+                                        </Badge> */}
+                                        -
+                                    </TableCell>
+                                    <TableCell>
+                                        {/* {student.statutFinancier && (
+                                            <div className="space-y-1">
+                                                <Badge
+                                                className={
+                                                    statutFinancierLabels[student.statutFinancier]
+                                                    .color
+                                                }
+                                                >
+                                                {
+                                                    statutFinancierLabels[student.statutFinancier]
+                                                    .label
+                                                }
+                                                </Badge>
+                                                {student.montantDu && student.montantDu > 0 && (
+                                                <div className="text-xs text-red-600">
+                                                    Dû: {student.montantDu}€
+                                                </div>
+                                                )}
+                                            </div>
+                                        )} */}
+                                        -
+                                    </TableCell>
+                                    <TableCell>
+                                        <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                            <DropdownMenuItem
+                                                onClick={() =>
+                                                    handleViewStudentDetails(student.user_code)
+                                                }
+                                                >
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                Voir dossier complet
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                onClick={() => {
+                                                    setSelectedStudent(student);
+                                                    setAction('UPDATE')
+                                                    setFormData(
+                                                        {
+                                                            "password_plaintext": '',
+                                                            "email": student.email,
+                                                            "first_name": student.first_name,
+                                                            "last_name": student.last_name,
+                                                            "gender": 'MALE',
+                                                            "phone_number": student.phone_number,
+                                                            "curriculum_code": student.cirriculum.curriculum_code,
+                                                            "student_number": student.student_number,
+                                                            "education_level_code": 'LICENCE',
+                                                        }
+                                                    );
+                                                    setIsStudentDialogOpen(true);
+                                                }}
+                                                >
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                Modifier
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                onClick={() => handleDownloadBulletin(student)}
+                                                >
+                                                <FileText className="mr-2 h-4 w-4" />
+                                                Télécharger bulletin
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                                <DropdownMenuItem>
+                                                <Mail className="mr-2 h-4 w-4" />
+                                                Envoyer notification
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem>
+                                                <MessageSquare className="mr-2 h-4 w-4" />
+                                                Contacter
+                                                </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            {student.status_code === "actif" ? (
+                                            <DropdownMenuItem
+                                                className="text-red-600"
+                                                onClick={() =>
+                                                handleChangeStudentStatus(
+                                                    student.user_code,
+                                                    "suspendu",
+                                                )
+                                                }
                                             >
-                                            <Eye className="mr-2 h-4 w-4" />
-                                            Voir dossier complet
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
+                                                <Lock className="mr-2 h-4 w-4" />
+                                                Suspendre
+                                            </DropdownMenuItem>
+                                            ) : (
+                                            <DropdownMenuItem
+                                                className="text-green-600"
+                                                onClick={() =>
+                                                handleChangeStudentStatus(
+                                                    student.user_code,
+                                                    "actif",
+                                                )
+                                                }
+                                            >
+                                                <Unlock className="mr-2 h-4 w-4" />
+                                                Réactiver
+                                            </DropdownMenuItem>
+                                            )}
+                                            <DropdownMenuItem
                                             onClick={() => {
-                                                setSelectedStudent(student);
-                                                setAction('UPDATE')
-                                                setFormData(
-                                                    {
-                                                        "password_plaintext": '',
-                                                        "email": student.email,
-                                                        "first_name": student.first_name,
-                                                        "last_name": student.last_name,
-                                                        "gender": 'MALE',
-                                                        "phone_number": student.phone_number,
-                                                        "curriculum_code": student.cirriculum.curriculum_code,
-                                                        "student_number": student.student_number,
-                                                        "education_level_code": 'LICENCE',
-                                                    }
-                                                );
-                                                setIsStudentDialogOpen(true);
+                                                setStudentToDelete(student.user_code);
+                                                setDeleteDialogOpen(true);
                                             }}
                                             >
-                                            <Edit className="mr-2 h-4 w-4" />
-                                            Modifier
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            onClick={() => handleDownloadBulletin(student)}
-                                            >
-                                            <FileText className="mr-2 h-4 w-4" />
-                                            Télécharger bulletin
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                            <DropdownMenuItem>
-                                            <Mail className="mr-2 h-4 w-4" />
-                                            Envoyer notification
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Supprimer
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                            <MessageSquare className="mr-2 h-4 w-4" />
-                                            Contacter
-                                            </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        {student.status_code === "actif" ? (
-                                        <DropdownMenuItem
-                                            className="text-red-600"
-                                            onClick={() =>
-                                            handleChangeStudentStatus(
-                                                student.user_code,
-                                                "suspendu",
-                                            )
-                                            }
-                                        >
-                                            <Lock className="mr-2 h-4 w-4" />
-                                            Suspendre
-                                        </DropdownMenuItem>
-                                        ) : (
-                                        <DropdownMenuItem
-                                            className="text-green-600"
-                                            onClick={() =>
-                                            handleChangeStudentStatus(
-                                                student.user_code,
-                                                "actif",
-                                            )
-                                            }
-                                        >
-                                            <Unlock className="mr-2 h-4 w-4" />
-                                            Réactiver
-                                        </DropdownMenuItem>
-                                        )}
-                                        <DropdownMenuItem
-                                        onClick={() => {
-                                            setStudentToDelete(student.user_code);
-                                            setDeleteDialogOpen(true);
-                                        }}
-                                        >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Supprimer
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                                        </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </CardContent>
             </Card>
         </TabsContent>

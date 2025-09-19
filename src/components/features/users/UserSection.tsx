@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { Dispatch, SetStateAction, useState } from "react";
@@ -12,14 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TabsContent } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -46,10 +39,10 @@ import {
   UserX,
   Filter,
 } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
 import { ICreateUser, IUserList } from "@/types/staffType";
-import { ACTION, USER_ROLE, USER_TABLE_HEADERS } from "@/constant";
+import { ACTION, USER_ROLE } from "@/constant";
 import { getRoleColor, getStatusColor } from "@/lib/utils";
+import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 
 type MyComponentProps = {
   userList: IUserList[];
@@ -104,44 +97,99 @@ const UserSection = ({
     return matchesSearch && matchesRole;
   });
 
+
+  const userColumns: TableColumn<IUserList>[] = [
+    {
+      key: "user",
+      label: "Utilisateur",
+      render: (_, user) => (
+        <div className="flex items-center space-x-3">
+          <Avatar>
+            <AvatarFallback>
+              {(user.first_name + " " + user.last_name)
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium">{user.first_name} {user.last_name}</div>
+            <div className="text-sm text-muted-foreground">{user.email}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "profiles",
+      label: "Rôles",
+      render: (_, user) => (
+        <div className="flex flex-wrap gap-2">
+          {user.profiles.length > 0 ? (
+            user.profiles.map((role) => (
+              <Badge key={role.profile_code} variant="secondary" className={getRoleColor(role.role_title)}>
+                {role.role_title}
+              </Badge>
+            ))
+          ) : (
+            <div className="text-center">-</div>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "status_code",
+      label: "Statut",
+      render: (value) => <Badge variant="secondary" className={getStatusColor(value)}>{value}</Badge>,
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (_, user) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+            <DropdownMenuItem onClick={() => {}}>
+              <Edit className="mr-2 h-4 w-4" /> Modifier
+            </DropdownMenuItem>
+
+            <DropdownMenuItem>
+              <Shield className="mr-2 h-4 w-4" /> Gérer les rôles
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem onClick={() =>{} }>
+              {user.status_code === "ACTIVE" ? (
+                <><UserX className="mr-2 h-4 w-4" /> Désactiver</>
+              ) : (
+                <><UserCheck className="mr-2 h-4 w-4" /> Activer</>
+              )}
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem className="text-red-600" onClick={() => {}}>
+              <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
+
+
   return (
     <TabsContent value="users" className="space-y-4">
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filtres et recherche</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex space-x-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher un utilisateur..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-            </div>
-
-            <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="w-[200px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {USER_ROLE.map((role) => (
-                  <SelectItem key={role.value} value={role.value}>
-                    {role.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      
 
       {/* Users Table */}
       <Card>
@@ -150,181 +198,12 @@ const UserSection = ({
           <CardDescription>Liste de tous les utilisateurs du système</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader className="bg-gray-50 dark:bg-gray-800">
-              <TableRow className="hover:bg-transparent">
-                {USER_TABLE_HEADERS.map((header, index) => (
-                  <TableHead 
-                    key={index}
-                    className="font-semibold text-gray-700 dark:text-gray-300 px-4 py-3"
-                  >
-                    {header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={USER_TABLE_HEADERS.length} className="text-center">
-                    Aucun utilisateur trouvé
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredUsers.map((user) => (
-                  <TableRow 
-                    key={uuidv4()}
-                    className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                  >
-                    <TableCell>
-                      <div className="flex items-center space-x-3">
-                        <Avatar>
-                          <AvatarFallback>
-                            {(user.first_name + " " + user.last_name)
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{user.first_name + " " + user.last_name}</div>
-                          <div className="text-sm text-muted-foreground">{user.email}</div>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex flex-wrap gap-2">
-                        {user.profiles.length > 0 ? (
-                          user.profiles.map((role) => (
-                            <Badge
-                              key={uuidv4()}
-                              variant="secondary"
-                              className={getRoleColor(role.role_title)}
-                            >
-                              {role.role_title}
-                            </Badge>
-                          ))
-                        ) : (
-                          <div className="text-center">-</div>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge variant="secondary" className={getStatusColor(user.status_code)}>
-                        {user.status_code}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="text-sm text-muted-foreground">
-                      {user.last_login_at ?? "-"}
-                    </TableCell>
-
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setAction("UPDATE");
-                              setUserFormData({
-                                email: user.email,
-                                first_name: user.first_name,
-                                last_name: user.last_name,
-                                gender: 'MALE', // Default value
-                                phone_number: '', // Default empty
-                                password_plaintext: '', // Empty for security
-                                user_code: user.user_code,
-                                // Optional fields with defaults
-                                staff_number: `STAFF-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-                                job_title: 'Staff',
-                                department: 'General',
-                                hiring_date: new Date().toISOString().split('T')[0],
-                                salary: 0,
-                                profiles: user.profiles || []
-                              });
-                              setIsEditDialogOpen(true);
-                            }}
-                          >
-                            <Edit className="mr-2 h-4 w-4" /> Modifier
-                          </DropdownMenuItem>
-
-                          <DropdownMenuItem>
-                            <Shield className="mr-2 h-4 w-4" /> Gérer les rôles
-                          </DropdownMenuItem>
-
-                          <DropdownMenuSeparator />
-
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setIsCancelUserDialogOpen(true);
-                              setUserFormData({
-                                email: user.email,
-                                first_name: user.first_name,
-                                last_name: user.last_name,
-                                gender: 'MALE',
-                                phone_number: '',
-                                password_plaintext: '',
-                                user_code: user.user_code,
-                                staff_number: `STAFF-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-                                job_title: 'Staff',
-                                department: 'General',
-                                hiring_date: new Date().toISOString().split('T')[0],
-                                salary: 0,
-                                profiles: user.profiles || []
-                              });
-                              setAction(user.status_code === "ACTIVE" ? "DESACTIVATE" : "ACTIVATE");
-                            }}
-                          >
-                            {user.status_code === "ACTIVE" ? (
-                              <><UserX className="mr-2 h-4 w-4" /> Désactiver</>
-                            ) : (
-                              <><UserCheck className="mr-2 h-4 w-4" /> Activer</>
-                            )}
-                          </DropdownMenuItem>
-
-                          <DropdownMenuSeparator />
-
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => {
-                              setUserFormData({
-                                email: user.email,
-                                first_name: user.first_name,
-                                last_name: user.last_name,
-                                gender: 'MALE',
-                                phone_number: '',
-                                password_plaintext: '',
-                                user_code: user.user_code,
-                                staff_number: `STAFF-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-                                job_title: 'Staff',
-                                department: 'General',
-                                hiring_date: new Date().toISOString().split('T')[0],
-                                salary: 0,
-                                profiles: user.profiles || []
-                              });
-                              setAction("DELETE");
-                              setIsCancelUserDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ResponsiveTable<IUserList>
+            columns={userColumns}        
+            data={filteredUsers}         
+            paginate={10}                
+            searchKey={["first_name"]}      
+          />
         </CardContent>
       </Card>
     </TabsContent>

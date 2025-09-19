@@ -30,6 +30,7 @@ import { createTeacher } from "@/actions/teacherActions";
 import { toast } from "sonner";
 import { TeacherTabSkeleton } from "./skeleton/TeacherTabSkeleton";
 import { showToast } from "@/components/ui/showToast";
+import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 
 interface ComponentProps {
     teachers: Teacher[];
@@ -99,6 +100,87 @@ const TeacherTab = ({
         console.log("Creating teacher:", teacher);
     }
 
+    const teacherColumns: TableColumn<Teacher>[] = [
+        {
+            key: "teacher",
+            label: "Enseignant",
+            render: (_, t) => (
+            <div>
+                <div className="font-medium">{t.first_name} {t.last_name}</div>
+                <div className="text-sm text-muted-foreground">{t.teacher_number}</div>
+                <div className="text-sm text-muted-foreground">{t.email}</div>
+            </div>
+            ),
+        },
+        {
+            key: "specialty",
+            label: "Spécialité",
+            render: (_, t) => (
+            <div>
+                <div className="font-medium">{t.specialty}</div>
+                <div className="text-sm text-muted-foreground">{t.qualifications}</div>
+            </div>
+            ),
+        },
+        {
+            key: "type_code",
+            label: "Contrat",
+            render: (value) => value ? <Badge>{value}</Badge> : "-",
+        },
+        {
+            key: "hiring_date",
+            label: "Date d'embauche",
+            render: (value) => formatDateToText(value),
+        },
+        {
+            key: "status_code",
+            label: "Statut",
+            render: (value) => <Badge>{value}</Badge>,
+        },
+        {
+            key: "actions",
+            label: "Actions",
+            render: (_, t) => (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                    <MoreHorizontal className="h-4 w-4" />
+                </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => {/* Voir dossier */}}>
+                    <Eye className="mr-2 h-4 w-4" /> Voir dossier
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {/* Modifier */}}>
+                    <Edit className="mr-2 h-4 w-4" /> Modifier
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {/* Contrat */}}>
+                    <FileText className="mr-2 h-4 w-4" /> Contrat
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {/* Planning */}}>
+                    <Calendar className="mr-2 h-4 w-4" /> Planning
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {t.status_code === "ACTIVE" ? (
+                    <DropdownMenuItem className="text-red-600" onClick={() => {/* Suspendre */}}>
+                    <Lock className="mr-2 h-4 w-4" /> Suspendre
+                    </DropdownMenuItem>
+                ) : (
+                    <DropdownMenuItem className="text-green-600" onClick={() => {/* Réactiver */}}>
+                    <Unlock className="mr-2 h-4 w-4" /> Réactiver
+                    </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => {/* Supprimer */}}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+                </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            ),
+        },
+    ];
+
+
     return (
         <>
             <TabsContent value="enseignants" className="space-y-4">
@@ -144,135 +226,12 @@ const TeacherTab = ({
                             isDataLoading ? <TeacherTabSkeleton /> : <>
                         
                                 <div className="overflow-x-auto border rounded-lg">
-                                    <Table className="min-w-full border-collapse">
-                                        <TableHeader className="bg-gray-100 border-b">
-                                        <TableRow>
-                                            <TableHead className="border-r px-4 py-2 text-left">Enseignant</TableHead>
-                                            <TableHead className="border-r px-4 py-2 text-left">Spécialité</TableHead>
-                                            <TableHead className="border-r px-4 py-2 text-left">Contrat</TableHead>
-                                            <TableHead className="border-r px-4 py-2 text-left">Date d&apos;embauche</TableHead>
-                                            <TableHead className="border-r px-4 py-2 text-left">Statut</TableHead>
-                                            <TableHead className="px-4 py-2 text-left">Actions</TableHead>
-                                        </TableRow>
-                                        </TableHeader>
-
-                                        <TableBody>
-                                            {filteredTeachers.map((teacher) => (
-                                                <TableRow
-                                                    key={teacher.user_code}
-                                                    className="hover:bg-gray-50 border-b last:border-b-0"
-                                                    >
-                                                    <TableCell className="border-r px-4 py-2">
-                                                        <div>
-                                                            <div className="font-medium">{teacher.first_name} {teacher.last_name}</div>
-                                                            <div className="text-sm text-muted-foreground">{teacher.teacher_number}</div>
-                                                            <div className="text-sm text-muted-foreground">{teacher.email}</div>
-                                                        </div>
-                                                    </TableCell>
-
-                                                    <TableCell className="border-r px-4 py-2">
-                                                        <div>
-                                                            <div className="font-medium">{teacher.specialty}</div>
-                                                            <div className="text-sm text-muted-foreground">{teacher.qualifications}</div>
-                                                        </div>
-                                                    </TableCell>
-
-                                                    <TableCell className="border-r px-4 py-2">
-                                                        {teacher.type_code && (
-                                                        <Badge className={getStatusColor(teacher.type_code)}>
-                                                            {teacher.type_code}
-                                                        </Badge>
-                                                        )}
-                                                    </TableCell>
-
-                                                    <TableCell className="border-r px-4 py-2">
-                                                        {formatDateToText(teacher.hiring_date)}
-                                                    </TableCell>
-
-                                                    <TableCell className="border-r px-4 py-2">
-                                                        <Badge className={getStatusColor(teacher.status_code)}>
-                                                        {teacher.status_code}
-                                                        </Badge>
-                                                    </TableCell>
-
-                                                
-                                                    <TableCell className=" text-center">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                                                <MoreHorizontal className="h-4 w-4" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                                <DropdownMenuItem onClick={() => {}}>
-                                                                    <Eye className="mr-2 h-4 w-4" />
-                                                                    Voir le dossier
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem onClick={() => {
-                                                                    setSelectedTeacher({
-                                                                        email: teacher.email,
-                                                                        first_name: teacher.first_name,
-                                                                        last_name: teacher.last_name,
-                                                                        gender: teacher.gender ?? "MALE",
-                                                                        phone_number: teacher.phone_number ?? "",
-                                                                        teacher_number: teacher.teacher_number,
-                                                                        specialty: teacher.specialty,
-                                                                        hiring_date: teacher.hiring_date, // à adapter si tu as la date
-                                                                        salary: teacher.salary ?? 0,
-                                                                        qualifications: teacher.qualifications
-                                                                    });
-                                                                    setIsUpdateTeacherOpen(true);
-                                                                }}>
-                                                                    <Edit className="mr-2 h-4 w-4" />
-                                                                    Modifier
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem>
-                                                                    <FileText className="mr-2 h-4 w-4" />
-                                                                    Contrat
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem>
-                                                                    <Calendar className="mr-2 h-4 w-4" />
-                                                                    Planning
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuSeparator />
-                                                                    <DropdownMenuItem>
-                                                                        <Mail className="mr-2 h-4 w-4" />
-                                                                        Envoyer notification
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem>
-                                                                        <MessageSquare className="mr-2 h-4 w-4" />
-                                                                        Contacter
-                                                                    </DropdownMenuItem>
-                                                                <DropdownMenuSeparator />
-                                                                {teacher.status_code === "ACTIVE" ? (
-                                                                    <DropdownMenuItem
-                                                                    className="text-red-600"
-                                                                    onClick={() => {}}
-                                                                    >
-                                                                    <Lock className="mr-2 h-4 w-4" />
-                                                                    Suspendre
-                                                                    </DropdownMenuItem>
-                                                                ) : (
-                                                                    <DropdownMenuItem
-                                                                    className="text-green-600"
-                                                                    onClick={() => {}}
-                                                                    >
-                                                                    <Unlock className="mr-2 h-4 w-4" />
-                                                                    Réactiver
-                                                                    </DropdownMenuItem>
-                                                                )}
-                                                                <DropdownMenuItem onClick={() => {}}>
-                                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                                    Supprimer
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                    <ResponsiveTable
+                                        data={filteredTeachers}
+                                        columns={teacherColumns}
+                                        paginate={20}
+                                       searchKey={["first_name", "last_name", "email"]}
+                                    />
                                 </div>
 
                             </>

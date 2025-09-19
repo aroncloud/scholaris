@@ -163,34 +163,6 @@ export default function SequenceTab() {
     getFilteredResult(start, end);
   }, [getFilteredResult, selectedFilter]);
 
-  const handleSesionsession = async (session: ICreateSession) => {
-    console.log('session', session)
-    const result = await createSession(session);
-    console.log("Create session result:", result);
-
-    if (result.code === 'success') {
-      setIsCreateSequenceDialogOpen(false);
-      showToast({
-        variant: "success-solid",
-        message: 'Seqie,ce de classe créé avec succès',
-        description: `${session.session_title} a été ajouté.`,
-        position: 'top-center',
-      });
-      console.log('before refresh')
-      
-      
-      console.log('after refresh')
-      return true
-    } else {
-      showToast({
-        variant: "error-solid",
-        message: "Impossible de créer la salle de classe",
-        description:result.error ?? "Une erreur est survenue, essayez encore ou veuillez contacter l'administrateur",
-        position: 'top-center',
-      });
-    }
-    return false
-  };
 
   const initCalendar = async (curriculum_code: string | null) =>{
     const today = new Date();
@@ -232,70 +204,7 @@ export default function SequenceTab() {
 
   return (
     <div className="text-gray-700">
-      <CardContent>
-        <div className="flex flex-col mb-6">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Calendriers de séquences
-            </h1>
-            <p className="text-gray-600">
-              Dates de début et fin de chaque séquence par filière et niveau
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {/* Code séquence */}
-            <div className="space-y-1">
-              <Label htmlFor="sequence_code">Filtrer par <span className="text-red-600">*</span></Label>
-              <Select
-                value={selectedFilter.value || ""}
-                onValueChange={(value) => {
-                  setSelectedFilter(PLANIFICATION_FILTER.find(filter => filter.value === value) || PLANIFICATION_FILTER[0])
-                  setSelectedSubFilter(null);
-                  setSubFilterValue([]);
-                }}
-              >
-                  <SelectTrigger className={`w-full`}>
-                      <SelectValue placeholder="Choisissez une séquence" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                      {PLANIFICATION_FILTER.map(filter => (
-                          <SelectItem
-                              key={filter.value}
-                              value={filter.value}
-                          >
-                              {filter.label}
-                          </SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
-            </div>
-            { subFilterValue.length > 0 &&
-              <div className="space-y-1">
-                <Label htmlFor="sequence_code">Veillez choisir une valeur <span className="text-red-600">*</span></Label>
-                
-                <Select
-                  value={selectedSubFilter?.value || ""}
-                  onValueChange={(value) => {
-                    const selected = subFilterValue.find(f => f.value === value) || null;
-                    setSelectedSubFilter(selected);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choisissez une séquence" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    {subFilterValue.map(filter => (
-                      <SelectItem key={filter.value} value={filter.value}>
-                        {filter.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select> 
-              </div>
-            }
-
-          </div>
-        </div>
+      <CardContent>      
         <div>
           <Calendar
             events={convertIntoFullCalendarFormat(
@@ -315,17 +224,6 @@ export default function SequenceTab() {
           />
         </div>
       </CardContent>
-
-      {/* <DialogCreateSession
-        open = {isCreateSequenceDialogOpen}
-        onSave={handleSesionsession}
-        onOpenChange={setIsCreateSequenceDialogOpen}
-        teachers={teacherList}
-        classrooms={data}
-        UEPerCurriculumList={UEPerCurriculumList}
-        academicYearSchedule={academicYearSchedule}
-        factorizedPrograms={factorizedPrograms}
-      /> */}
     </div>
   );
 }

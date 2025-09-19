@@ -133,8 +133,12 @@ export async function getAcademicYearSchedulesList(academic_year_code: string) {
     const token = session.accessToken;
 
     const response = await axios.get(
-      `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/academics/academic-years/${academic_year_code}/schedules`,
-      { headers: { Authorization: `Bearer ${token}` } }
+      `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/academics/academic-years/schedules`,
+      { 
+        headers: { Authorization: `Bearer ${token}` }, 
+        params: { academic_year_code }
+      }
+      ,
     );
 
     return { code: "success", error: null, data: response.data };

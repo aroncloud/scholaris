@@ -30,6 +30,7 @@ import { DialogCreateProgram } from "./Modal/DialogCreateProgram";
 import { showToast } from "@/components/ui/showToast";
 import { createProgram, updateProgram } from "@/actions/programsAction";
 import DialogUpdateProgram from "./Modal/DialogUpdateProgram";
+import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 
 type MyComponentProps = {
   programList: IFactorizedProgram[];
@@ -55,13 +56,8 @@ const statusOptions = [
 const FilieresTab = ({
   programList,
   isCreateProgramOpen,
-  isDataLoading,
-  isExportModalOpen,
-  isImportModalOpen,
   refresh,
-  setIExportModalOpen,
   setIsCreateProgramOpen,
-  setIsImportModalOpen 
 }: MyComponentProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatut, setFilterStatut] = useState("ALL");
@@ -122,6 +118,88 @@ const FilieresTab = ({
     }
   }
 
+  const filiereColumns: TableColumn<IFactorizedProgram>[] = [
+    {
+      key: "program",
+      label: "Filière",
+      render: (_, filiere) => (
+        <div>
+          <div className="font-medium">{filiere.program.program_name}</div>
+          <div className="text-sm text-muted-foreground">
+            {filiere.program.description}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "curriculums",
+      label: "Durée",
+      render: (_, filiere) => (
+        <div className="flex items-center space-x-1">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <span>{filiere.curriculums.length} ans</span>
+        </div>
+      ),
+    },
+    {
+      key: "curriculums",
+      label: "Maquettes",
+      render: (_, filiere) => (
+        <Badge variant="outline">{filiere.curriculums.length} maquette(s)</Badge>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (_, filiere) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+            <DropdownMenuItem
+              onClick={() => {
+                setSelectedProgram({
+                  program_name: filiere.program.program_name,
+                  internal_code: filiere.program.internal_code,
+                  degree_name: filiere.program.degree_name,
+                  degree_code: filiere.program.degree_code,
+                  description: filiere.program.description || '',
+                  program_code: filiere.program.program_code,
+                });
+                setIsEditProgramOpen(true);
+              }}
+            >
+              <Edit className="mr-2 h-4 w-4" /> Modifier
+            </DropdownMenuItem>
+
+            <DropdownMenuItem>
+              <Plus className="mr-2 h-4 w-4" /> Nouvelle maquette
+            </DropdownMenuItem>
+
+            <DropdownMenuItem>
+              <FileText className="mr-2 h-4 w-4" /> Voir maquettes
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem>
+              <Eye className="mr-2 h-4 w-4" /> Archiver
+            </DropdownMenuItem>
+
+            <DropdownMenuItem>
+              <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
   
   return (
     <TabsContent value="program" className="space-y-4">
@@ -132,15 +210,6 @@ const FilieresTab = ({
         </CardHeader>
         <CardContent>
           <div className="flex justify-between items-center mb-4">
-            <div className="relative w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher une filière..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
-            </div>
             <Select value={filterStatut} onValueChange={setFilterStatut}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filtrer par statut" />
@@ -153,74 +222,11 @@ const FilieresTab = ({
             </Select>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Filière</TableHead>
-                <TableHead>Durée</TableHead>
-                <TableHead>Maquettes</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredFilieres.map((filiere) => (
-                <TableRow key={filiere.program.program_code}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{filiere.program.program_name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {filiere.program.description}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-1">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{filiere.curriculums.length} ans</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {filiere.curriculums.length} maquette(s)
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => {
-                          setSelectedProgram({
-                            program_name: filiere.program.program_name,
-                            internal_code: filiere.program.internal_code,
-                            degree_name: filiere.program.degree_name,
-                            degree_code: filiere.program.degree_code,
-                            description: filiere.program.description || '',
-                            program_code: filiere.program.program_code,
-                          })
-                          setIsEditProgramOpen(true);
-                        }}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Modifier
-                        </DropdownMenuItem>
-                        <DropdownMenuItem><Plus className="mr-2 h-4 w-4" />Nouvelle maquette</DropdownMenuItem>
-                        <DropdownMenuItem><FileText className="mr-2 h-4 w-4" />Voir maquettes</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem><Eye className="mr-2 h-4 w-4" />Archiver</DropdownMenuItem>
-                        <DropdownMenuItem><Trash2 className="mr-2 h-4 w-4" />Supprimer</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ResponsiveTable
+            columns={filiereColumns}
+            data={filteredFilieres.map(fil => ({...fil, program_code: fil.program.program_code}))}
+            paginate={20}
+          />
         </CardContent>
       </Card>
 

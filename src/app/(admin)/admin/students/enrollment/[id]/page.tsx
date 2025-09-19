@@ -1,20 +1,21 @@
 "use client"
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, User, MapPin, Phone, Mail, Calendar, FileText, Users } from 'lucide-react';
+import { ArrowLeft, User, Phone, FileText, Users, Calendar, CheckCircle, XCircle, UserPlus, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-import { getStatusColor } from '@/lib/utils';
+import { formatDateToText, getStatusColor } from '@/lib/utils';
 import { useParams, useRouter } from 'next/navigation';
 import { showToast } from '@/components/ui/showToast';
-import { getStudentApplication } from '@/actions/studentAction';
+import { convertStudentApplication, getStudentApplication, reviewStudentApplication } from '@/actions/studentAction';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { IGetApplicationDetail } from '@/types/userType';
-
-
 
 const ApplicationDetailPage: React.FC = () => {
   const params = useParams();
@@ -28,7 +29,6 @@ const ApplicationDetailPage: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [converting, setConverting] = useState(false);
 
-
   const loadApplicationDetails = useCallback(async () => {
     try {
       const result = await getStudentApplication(applicationCode);
@@ -37,122 +37,113 @@ const ApplicationDetailPage: React.FC = () => {
         setApplicationData(result.data.body);
       } else {
         showToast({
-          variant: "success-solid",
+          variant: "error-solid",
           message: 'Erreur',
           description: `Erreur lors du chargement des détails`,
           position: 'top-center',
         });
-        // router.push('/admin/students');
       }
     } catch (error) {
       showToast({
-        variant: "success-solid",
+        variant: "error-solid",
         message: 'Erreur',
         description: `Une erreur s'est produite`,
         position: 'top-center',
       });
-      // router.push('/admin/students');
     } finally {
       setLoading(false);
     }
   }, [applicationCode]);
 
-
   useEffect(() => {
     loadApplicationDetails();
   }, [applicationCode, loadApplicationDetails]);
 
+  const handleBack = () => {
+    router.push('/admin/students');
+  };
+
   const handleApprove = async () => {
     setProcessing(true);
-    // try {
-    //   const result = await reviewStudentApplication(applicationCode, 'APPROVED');
-    //   if (result.code === 'success') {
-    //     toast.success("Demande approuvée avec succès");
-    //     await loadApplicationDetails();
-    //   } else {
-    //     toast.error("Erreur lors de l'approbation", {
-    //       description: result.error,
-    //     });
-    //   }
-    // } catch (error) {
-    //   toast.error("Erreur lors de l'approbation");
-    // } finally {
-    //   setProcessing(false);
-    // }
+    try {
+      const result = await reviewStudentApplication(applicationCode, 'APPROVED');
+      console.log('-->result', result)
+      if(result.code === 'success') {
+        showToast({
+          variant: "success",
+          message: 'Succès',
+          description: 'Candidature approuvée avec succès',
+          position: 'top-center',
+        });
+      }
+      await loadApplicationDetails();
+    } catch (error) {
+      showToast({
+        variant: "error-solid",
+        message: 'Erreur',
+        description: 'Erreur lors de l\'approbation',
+        position: 'top-center',
+      });
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleReject = async () => {
-    // if (!rejectionReason.trim()) {
-    //   toast.error("Veuillez saisir une raison de rejet");
-    //   return;
-    // }
-    
-    // setProcessing(true);
-    // try {
-    //   const result = await reviewStudentApplication(applicationCode, 'REJECTED', rejectionReason);
-    //   if (result.code === 'success') {
-    //     toast.success("Demande rejetée");
-    //     setRejectDialogOpen(false);
-    //     setRejectionReason("");
-    //     await loadApplicationDetails();
-    //   } else {
-    //     toast.error("Erreur lors du rejet", {
-    //       description: result.error,
-    //     });
-    //   }
-    // } catch (error) {
-    //   toast.error("Erreur lors du rejet");
-    // } finally {
-    //   setProcessing(false);
-    // }
+    try {
+      setProcessing(true);
+      const result = await reviewStudentApplication(applicationCode, 'REJECTED', rejectionReason);
+      if(result.code === 'success'){
+        showToast({
+          variant: "default",
+          message: 'Succès',
+          description: 'Candidature rejetée',
+          position: 'top-center',
+        });
+      }
+        
+      setRejectDialogOpen(false);
+      await loadApplicationDetails();
+    } catch (error) {
+      showToast({
+        variant: "error-solid",
+        message: 'Erreur',
+        description: 'Erreur lors du rejet',
+        position: 'top-center',
+      });
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleConvert = async () => {
-    // setConverting(true);
-    // try {
-    //   const result = await convertStudentApplication(applicationCode);
-    //   if (result.code === 'success') {
-    //     toast.success("Candidature convertie en étudiant avec succès");
-    //     await loadApplicationDetails();
-    //   } else {
-    //     toast.error("Erreur lors de la conversion", {
-    //       description: result.error,
-    //     });
-    //   }
-    // } catch (error) {
-    //   toast.error("Erreur lors de la conversion");
-    // } finally {
-    //   setConverting(false);
-    // }
-  };
-
-  const handleBack = () => {
-    // Navigation de retour - à implémenter selon votre routeur
-    console.log('Retour à la liste des applications');
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'CONVERTED':
-        return 'default';
-      case 'APPROVED':
-        return 'default';
-      case 'REJECTED':
-        return 'destructive';
-      case 'PENDING':
-        return 'secondary';
-      default:
-        return 'outline';
+    setConverting(true);
+    try {
+      const result = await convertStudentApplication(applicationCode);
+      console.log('-->handleConverted.result', result);
+      if(result.code === 'success') {
+        showToast({
+          variant: "default",
+          message: 'Succès',
+          description: 'Candidature convertie en étudiant avec succès',
+          position: 'top-center',
+        });
+      }
+      await loadApplicationDetails();
+    } catch (error) {
+      showToast({
+        variant: "error-solid",
+        message: 'Erreur',
+        description: 'Erreur lors de la conversion',
+        position: 'top-center',
+      });
+    } finally {
+      setConverting(false);
     }
   };
+
+
+
 
   const getRelationshipLabel = (code: string) => {
     const labels: { [key: string]: string } = {
@@ -164,6 +155,10 @@ const ApplicationDetailPage: React.FC = () => {
     };
     return labels[code] || code;
   };
+
+  const canApprove = () => (applicationData?.application_status_code == 'SUBMITTED');
+  const canReject = () => (applicationData?.application_status_code == 'SUBMITTED');
+  const canConvert = () => applicationData?.application_status_code === 'APPROVED';
 
   // Affichage du loader pendant le chargement
   if (loading) {
@@ -178,25 +173,31 @@ const ApplicationDetailPage: React.FC = () => {
   if (!applicationData) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center space-x-4 mb-6">
             <Button variant="outline" size="sm" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Détail de l&apos;Application
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Détail de la Candidature
               </h1>
             </div>
           </div>
           
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-gray-500">Aucune donnée d&apos;application trouvée.</p>
-              <Button variant="outline" className="mt-4" onClick={() => loadApplicationDetails()}>
-                Réessayer
-              </Button>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-8 text-center">
+              <div className="flex flex-col items-center space-y-4">
+                <AlertTriangle className="h-12 w-12 text-gray-400" />
+                <div>
+                  <p className="text-lg font-medium text-gray-900">Aucune donnée trouvée</p>
+                  <p className="text-gray-500">Les informations de cette candidature sont indisponibles.</p>
+                </div>
+                <Button variant="outline" onClick={() => loadApplicationDetails()}>
+                  Réessayer
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -204,161 +205,250 @@ const ApplicationDetailPage: React.FC = () => {
     );
   }
 
+
   return (
     <div className="min-h-screen">
       <div className="mx-auto space-y-6">
-        {/* Header avec bouton retour */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm" onClick={handleBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Détail de l&apos;Application
-              </h1>
-              <p className="text-gray-500">{applicationData.application_code}</p>
+        {/* Header section */}
+        <div className="bg-white border-b border-gray-200 -mx-6 -mt-6 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" size="sm" onClick={handleBack} className="hover:bg-gray-100">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Candidatures
+              </Button>
+              <Separator orientation="vertical" className="h-6" />
+              <div>
+                <h1 className="text-2xl font-semibold text-gray-900">
+                  Détail de la Candidature
+                </h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  {applicationData.application_code} • Soumise le {formatDateToText(applicationData.submitted_at)}
+                </p>
+              </div>
+              <Separator orientation="vertical" className="h-6" />
+              <div>
+                <Badge className={getStatusColor(applicationData.application_status_code)}>
+                  {applicationData.application_status_code}
+                </Badge>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              {/* Action buttons */}
+              <div className="flex items-center justify-end space-x-3">
+                {canApprove() && (
+                  <Button 
+                    onClick={handleApprove}
+                    disabled={processing}
+                    variant={'success'}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Approuver
+                  </Button>
+                )}
+                
+                {canReject() && (
+                  <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="danger">
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Rejeter
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Rejeter la candidature</DialogTitle>
+                        <DialogDescription>
+                          Veuillez indiquer la raison du rejet. Cette action est irréversible.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Textarea
+                          placeholder="Raison du rejet..."
+                          value={rejectionReason}
+                          onChange={(e) => setRejectionReason(e.target.value)}
+                          className="min-h-[100px]"
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+                          Annuler
+                        </Button>
+                        <Button 
+                          onClick={handleReject}
+                          disabled={processing || !rejectionReason.trim()}
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          Confirmer le rejet
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+
+                {canConvert() && (
+                  <Button 
+                    onClick={handleConvert}
+                    disabled={converting}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    {converting ? 'Conversion...' : 'Convertir en Étudiant'}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-          <Badge variant={getStatusBadgeVariant(applicationData.application_status_code)}>
-            {applicationData.application_status_code}
-          </Badge>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Informations personnelles */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <User className="h-5 w-5" />
-                <span>Informations Personnelles</span>
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
+                <User className="h-5 w-5 mr-2 text-gray-600" />
+                Informations personnelles
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Prénom</label>
-                  <p className="text-sm text-gray-900">{applicationData.first_name}</p>
+                  <dt className="text-sm font-medium text-gray-500">Prénom</dt>
+                  <dd className="mt-1 text-sm text-gray-900 font-medium">{applicationData.first_name}</dd>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Nom</label>
-                  <p className="text-sm text-gray-900">{applicationData.last_name}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Date de naissance</label>
-                  <p className="text-sm text-gray-900">{formatDate(applicationData.date_of_birth)}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Lieu de naissance</label>
-                  <p className="text-sm text-gray-900">{applicationData.place_of_birth}</p>
+                  <dt className="text-sm font-medium text-gray-500">Nom de famille</dt>
+                  <dd className="mt-1 text-sm text-gray-900 font-medium">{applicationData.last_name}</dd>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Genre</label>
-                  <p className="text-sm text-gray-900">{applicationData.gender}</p>
+                  <dt className="text-sm font-medium text-gray-500">Date de naissance</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{formatDateToText(applicationData.date_of_birth)}</dd>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Village</label>
-                  <p className="text-sm text-gray-900">{applicationData.village}</p>
+                  <dt className="text-sm font-medium text-gray-500">Lieu de naissance</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{applicationData.place_of_birth}</dd>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Genre</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{applicationData.gender === 'MALE' ? 'Masculin' : 'Féminin'}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Village/Localité</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{applicationData.village || 'Non renseigné'}</dd>
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Niveau d&apos;éducation</label>
-                <p className="text-sm text-gray-900">{applicationData.education_level_code}</p>
+                <dt className="text-sm font-medium text-gray-500">Niveau d&apos;éducation</dt>
+                <dd className="mt-1 text-sm text-gray-900">{applicationData.education_level_code}</dd>
               </div>
             </CardContent>
           </Card>
 
           {/* Informations de contact */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Phone className="h-5 w-5" />
-                <span>Contact</span>
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
+                <Phone className="h-5 w-5 mr-2 text-gray-600" />
+                Coordonnées
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Email</label>
-                <p className="text-sm text-gray-900">{applicationData.email}</p>
+                <dt className="text-sm font-medium text-gray-500">Adresse e-mail</dt>
+                <dd className="mt-1 text-sm text-gray-900 font-medium">{applicationData.email}</dd>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Téléphone</label>
-                <p className="text-sm text-gray-900">{applicationData.phone_number || 'Non renseigné'}</p>
+                <dt className="text-sm font-medium text-gray-500">Numéro de téléphone</dt>
+                <dd className="mt-1 text-sm text-gray-900">{applicationData.phone_number || 'Non renseigné'}</dd>
               </div>
               <Separator />
-              <div>
-                <label className="text-sm font-medium text-gray-500">N° CNI</label>
-                <p className="text-sm text-gray-900">{applicationData.cni_number || 'Non renseigné'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Date d&apos;émission CNI</label>
-                <p className="text-sm text-gray-900">{formatDate(applicationData.cni_issue_date)}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Lieu d&apos;émission CNI</label>
-                <p className="text-sm text-gray-900">{applicationData.cni_issue_location || 'Non renseigné'}</p>
+              <div className="space-y-3">
+                <h4 className="font-medium text-gray-900">Pièce d&apos;identité</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">N° CNI</dt>
+                    <dd className="mt-1 text-sm text-gray-900">{applicationData.cni_number || 'Non renseigné'}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">Date d&apos;émission</dt>
+                    <dd className="mt-1 text-sm text-gray-900">{formatDateToText(applicationData.cni_issue_date)}</dd>
+                  </div>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Lieu d&apos;émission</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{applicationData.cni_issue_location || 'Non renseigné'}</dd>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Programme d'études */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <FileText className="h-5 w-5" />
-                <span>Programme d&apos;Études</span>
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
+                <FileText className="h-5 w-5 mr-2 text-gray-600" />
+                Programme d&apos;études
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Code Programme</label>
-                <p className="text-sm text-gray-900">{applicationData.cirriculum.program_code}</p>
+                <dt className="text-sm font-medium text-gray-500">Programme</dt>
+                <dd className="mt-1 text-sm text-gray-900 font-medium">{applicationData.cirriculum.program_name}</dd>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Nom du Programme</label>
-                <p className="text-sm text-gray-900">{applicationData.cirriculum.program_name}</p>
+                <dt className="text-sm font-medium text-gray-500">Curriculum</dt>
+                <dd className="mt-1 text-sm text-gray-900">{applicationData.cirriculum.curriculum_name}</dd>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Curriculum</label>
-                <p className="text-sm text-gray-900">{applicationData.cirriculum.curriculum_name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Niveau d&apos;études</label>
-                <p className="text-sm text-gray-900">{applicationData.cirriculum.study_level}</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Code programme</dt>
+                  <dd className="mt-1 text-sm text-gray-900 font-mono">{applicationData.cirriculum.program_code}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Niveau d&apos;études</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{applicationData.cirriculum.study_level}</dd>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Informations de traitement */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5" />
-                <span>Traitement</span>
+          {/* Traitement */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
+                <Calendar className="h-5 w-5 mr-2 text-gray-600" />
+                Informations de traitement
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-500">Soumise le</label>
-                <p className="text-sm text-gray-900">{formatDate(applicationData.submitted_at)}</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Date de soumission</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{formatDateToText(applicationData.submitted_at)}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Date de traitement</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{formatDateToText(applicationData.processed_at)}</dd>
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Traitée le</label>
-                <p className="text-sm text-gray-900">{formatDate(applicationData.processed_at)}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Traitée par</label>
-                <p className="text-sm text-gray-900">{applicationData.processed_user_code}</p>
-              </div>
+              {/* <div>
+                <dt className="text-sm font-medium text-gray-500">Traitée par</dt>
+                <dd className="mt-1 text-sm text-gray-900 font-mono">{applicationData.processed_user_code}</dd>
+              </div> */}
               {applicationData.converted_to_user_code && (
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Convertie vers utilisateur</label>
-                  <p className="text-sm text-gray-900">{applicationData.converted_to_user_code}</p>
+                  <dt className="text-sm font-medium text-gray-500">Convertie vers utilisateur</dt>
+                  <dd className="mt-1 text-sm text-gray-900 font-mono">{applicationData.converted_to_user_code}</dd>
+                </div>
+              )}
+              {applicationData.rejection_reason && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <dt className="text-sm font-medium text-red-800">Raison du rejet</dt>
+                  <dd className="mt-1 text-sm text-red-700">{applicationData.rejection_reason}</dd>
                 </div>
               )}
             </CardContent>
@@ -367,27 +457,37 @@ const ApplicationDetailPage: React.FC = () => {
 
         {/* Proches */}
         {applicationData.relatives && applicationData.relatives.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>Proches</span>
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
+                <Users className="h-5 w-5 mr-2 text-gray-600" />
+                Personnes de référence
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {applicationData.relatives.map((relative, index) => (
-                  <div key={index} className="border rounded-lg p-4 space-y-2">
+                  <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" className="text-xs">
                         {getRelationshipLabel(relative.relationship_type_code)}
                       </Badge>
                     </div>
-                    <div>
-                      <p className="font-medium">{relative.last_name} {relative.first_name}</p>
-                      <p className="text-sm text-gray-500">{relative.phone_number}</p>
+                    <div className="space-y-2">
+                      <p className="font-medium text-gray-900">
+                        {relative.last_name} {relative.first_name}
+                      </p>
+                      {relative.phone_number && (
+                        <p className="text-sm text-gray-600 flex items-center">
+                          <Phone className="h-3 w-3 mr-1" />
+                          {relative.phone_number}
+                        </p>
+                      )}
                       {relative.occupation && (
-                        <p className="text-sm text-gray-500">{relative.occupation}</p>
+                        <p className="text-sm text-gray-600">{relative.occupation}</p>
+                      )}
+                      {relative.address && (
+                        <p className="text-sm text-gray-600">{relative.address}</p>
                       )}
                     </div>
                   </div>
@@ -398,21 +498,29 @@ const ApplicationDetailPage: React.FC = () => {
         )}
 
         {/* Documents */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <FileText className="h-5 w-5" />
-              <span>Documents</span>
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
+              <FileText className="h-5 w-5 mr-2 text-gray-600" />
+              Documents joints
             </CardTitle>
           </CardHeader>
           <CardContent>
             {applicationData.documents.length === 0 ? (
-              <p className="text-gray-500">Aucun document attaché</p>
+              <div className="text-center py-6">
+                <FileText className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500">Aucun document attaché</p>
+              </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {applicationData.documents.map((doc, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 border rounded">
-                    <span>{doc.document_name || `Document ${index + 1}`}</span>
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="flex items-center">
+                      <FileText className="h-4 w-4 text-gray-400 mr-3" />
+                      <span className="text-sm font-medium text-gray-900">
+                        {doc.document_name || `Document ${index + 1}`}
+                      </span>
+                    </div>
                     <Button variant="outline" size="sm">
                       Télécharger
                     </Button>
