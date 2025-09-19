@@ -4,7 +4,8 @@
 'use client';
 
 import { useState, useMemo, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from "@bprogress/next/app";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useGradesData } from '@/hooks/feature/grades/useGradesData';
 import CourseListSection from '@/components/features/grades/CourseListTab';

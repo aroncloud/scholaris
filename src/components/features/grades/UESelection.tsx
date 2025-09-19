@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from "@bprogress/next/app";
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {

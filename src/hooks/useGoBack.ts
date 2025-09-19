@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 
 const useGoBack = () => {
   const router = useRouter();

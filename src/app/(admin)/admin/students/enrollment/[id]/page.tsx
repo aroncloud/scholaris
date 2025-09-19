@@ -11,7 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 import { formatDateToText, getStatusColor } from '@/lib/utils';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from "@bprogress/next/app";
 import { showToast } from '@/components/ui/showToast';
 import { convertStudentApplication, getStudentApplication, reviewStudentApplication } from '@/actions/studentAction';
 import LoadingSpinner from '@/components/LoadingSpinner';

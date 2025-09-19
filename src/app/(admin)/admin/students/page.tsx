@@ -91,7 +91,7 @@ import {
   Bell,
   MessageSquare,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { IEnrollmentRequest, IStudent, ICreateStudent, IListStudent } from "@/types/staffType";
 import Header from "./Header";
 import EnrollmentRequests from "./EnrollmentRequests";

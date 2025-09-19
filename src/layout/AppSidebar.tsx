@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { ChevronDownIcon, HorizontaLDots } from "../icons/index";
 import {  BookOpen, GraduationCap, LayoutDashboard, FileText, Users, UserSquare, School, Calendar, Calendar1, Settings, Award, DollarSign, ClipboardList } from "lucide-react";
+import { useMemo } from "react";
+
 
 type NavItem = {
   name: string;
@@ -102,7 +104,48 @@ const AppSidebar: React.FC = () => {
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const isActive = useCallback((path: string) => path === pathname, [pathname]);
+  const allNavPaths = useMemo(() => {
+    const paths: string[] = [];
+    navItems.forEach((nav) => {
+      if (nav.path) paths.push(nav.path);
+      if (nav.subItems) {
+        nav.subItems.forEach((s) => {
+          if (s.path) paths.push(s.path);
+        });
+      }
+    });
+    return Array.from(new Set(paths)); // garantir unicité
+  }, []);
+
+  const normalizePath = (p: string) => (p === "/" ? "/" : p.replace(/\/+$/, ""));
+  const currentPath = normalizePath(pathname ?? "/");
+
+  const matchLength = useCallback(
+    (p: string) => {
+      if (!p) return 0;
+      const t = normalizePath(p);
+      if (t === "/") return currentPath === "/" ? 1 : 0;
+      if (currentPath === t) return t.length; // exact match
+      if (currentPath.startsWith(`${t}/`)) return t.length; // sous-chemin
+      return 0;
+    },
+    [currentPath] // dépend seulement du path courant
+  );
+
+  const bestMatchLength = useMemo(() => {
+    if (!currentPath) return 0;
+    let best = 0;
+    for (const p of allNavPaths) {
+      const len = matchLength(p);
+      if (len > best) best = len;
+    }
+    return best;
+  }, [allNavPaths, currentPath, matchLength]);
+
+  const isActive = useCallback(
+    (path: string) => matchLength(path) === bestMatchLength && bestMatchLength > 0,
+    [bestMatchLength, currentPath]
+  );
 
   useEffect(() => {
     let submenuMatched = false;

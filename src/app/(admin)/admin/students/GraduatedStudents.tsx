@@ -89,7 +89,7 @@ import {
   Bell,
   MessageSquare,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { IEnrollmentRequest, IListStudent, IStudent } from "@/types/staffType";
 import Header from "./Header";
 import { getMentionColor } from "@/lib/utils";

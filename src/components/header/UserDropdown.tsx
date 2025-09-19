@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { useUserStore } from "@/store/useAuthStore";
 import { Dropdown } from "../custom-ui/dropdown/Dropdown";
 import { DropdownItem } from "../custom-ui/dropdown/DropdownItem";

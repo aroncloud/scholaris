@@ -37,21 +37,21 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen xl:flex">
-      {/* Sidebar */}
-      <AppSidebar />
-      <Backdrop />
+        {/* Sidebar */}
+        <AppSidebar />
+        <Backdrop />
 
-      <div className="flex-1">
-        {/* Header fixe qui prend toute la largeur */}
-        <AppHeader />
+        <div className="flex-1">
+          {/* Header fixe qui prend toute la largeur */}
+          <AppHeader />
 
-        {/* Contenu avec marge dynamique */}
-        <main className={`transition-all duration-300 ease-in-out pt-20 ${mainContentMargin}`}>
-          <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
-            {children}
-          </div>
-        </main>
-      </div>
+          {/* Contenu avec marge dynamique */}
+          <main className={`transition-all duration-300 ease-in-out pt-20 ${mainContentMargin}`}>
+            <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+              {children}
+            </div>
+          </main>
+        </div>
     </div>
   );
 }

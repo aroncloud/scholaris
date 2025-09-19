@@ -10,7 +10,7 @@ import { EyeCloseIcon, EyeIcon } from "@/icons";
 import { ILoginForm } from "@/types/staffType";
 import { login } from "@/actions/authAction";
 import { showToast } from "../ui/showToast";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { useUserStore } from "@/store/useAuthStore";
 import Link from "next/link";
 
@@ -143,7 +143,7 @@ export default function SignInForm() {
 // import { Controller, useForm } from "react-hook-form";
 // import { login } from "@/actions/authAction";
 // import { showToast } from "@/lib/utils";
-// import { useRouter } from "next/navigation";
+// import { useRouter } from "@bprogress/next/app";
 
 // export default function SignInForm() {
 //   const [showPassword, setShowPassword] = useState(false);

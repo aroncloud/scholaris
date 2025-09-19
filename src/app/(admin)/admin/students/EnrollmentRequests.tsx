@@ -37,7 +37,7 @@ import {
   AlertTriangle,
   CheckCircle,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { IEnrollmentRequest } from "@/types/staffType";
 import { getStatusColor, formatDateToText } from "@/lib/utils";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
@@ -204,7 +204,6 @@ const EnrollmentRequests = ({ setIsRequestDialogOpen, setSelectedRequest, enroll
               columns={columns}
               data={enrollmentRequests}
               paginate={20}
-              keyField="id"
               searchKey={["nom"]}
             />
           </div>

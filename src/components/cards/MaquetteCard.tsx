@@ -21,7 +21,7 @@ import { DialogCreateModule } from '../features/programs/Modal/DialogCreateModul
 import { DialogUpdateModule } from '../features/programs/Modal/DialogUpdateModule'
 import { DialogCreateUE } from '../features/programs/Modal/DialogCreateUE'
 import { Button } from '../ui/button'
-import { useRouter } from 'next/navigation'
+import { useRouter } from "@bprogress/next/app";
 
 type MyComponentProps = {
   curriculum: ICurriculumDetail
