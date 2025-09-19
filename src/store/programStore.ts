@@ -3,12 +3,11 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { ICreateProgram, ICurriculumDetail, IFactorizedProgram, IGetUECurriculum } from '@/types/programTypes';
-import { getCurriculumList, getUEListPerCurriculum } from '@/actions/programsAction';
+import { getCurriculumList } from '@/actions/programsAction';
 import { showToast } from '@/components/ui/showToast';
 
 interface ProgramStoreState {
   factorizedPrograms: IFactorizedProgram[];
-  UEPerCurriculumList: Record<string, IGetUECurriculum[]>;
   loading: boolean;
   error: string | null;
 
@@ -48,7 +47,7 @@ export const useFactorizedProgramStore = create<ProgramStoreState>()(
               : p
           ),
         })),
-      resetPrograms: () => set({ factorizedPrograms: [], UEPerCurriculumList: {} as Record<string, IGetUECurriculum[]> }),
+      resetPrograms: () => set({ factorizedPrograms: [] }),
 
       // Async fetch
       fetchPrograms: async () => {
@@ -57,9 +56,7 @@ export const useFactorizedProgramStore = create<ProgramStoreState>()(
           const result = await getCurriculumList();
           if (result.code === "success") {
             const grouped: { [key: string]: IFactorizedProgram } = {};
-
-            // lancer toutes les requêtes en parallèle
-            const uePromises = result.data.body.map(async (item: ICurriculumDetail) => {
+            result.data.body.forEach((item: ICurriculumDetail) => {
               const { program, training_sequences, ...curriculumInfo } = item;
 
               if (!grouped[item.program_code]) {
@@ -74,28 +71,14 @@ export const useFactorizedProgramStore = create<ProgramStoreState>()(
                 program,
                 training_sequences,
               });
-
-              // récupérer les UE liées à ce curriculum
-              const UEList = await getUEListPerCurriculum(item.curriculum_code);
-              if (UEList.code === "success") {
-                return { curriculum_code: item.curriculum_code, ue: UEList.data.body as IGetUECurriculum[] };
-              }
-              return { curriculum_code: item.curriculum_code, ue: [] as IGetUECurriculum[] };
             });
-
-            const allUEs = await Promise.all(uePromises);
-
-            // construire un Record<string, IGetUECurriculum[]>
-            const UEPerCurriculumList = allUEs.reduce<Record<string, IGetUECurriculum[]>>((acc, curr) => {
-              acc[curr.curriculum_code] = curr.ue;
-              return acc;
-            }, {});
-
+            console.log("-->factorizedPrograms.grouped", grouped);
             set({
               factorizedPrograms: Object.values(grouped),
-              UEPerCurriculumList,
               loading: false,
             });
+
+
           } else {
             showToast({
               variant: "error-solid",

@@ -7,14 +7,15 @@ import interactionPlugin from "@fullcalendar/interaction";
 import {
   EventInput,
   EventContentArg,
+  EventClickArg,
 } from "@fullcalendar/core";
 import { ICreateSession, IGetSchedule } from "@/types/planificationType";
 import { CALENDAR_COLORS } from "@/constant";
 import { format } from "date-fns";
-import { IGetUEPerModule } from "@/types/programTypes";
 import { DialogCreateSession } from "../Modal/DialogCreateSession";
-import { createSession } from "@/actions/planificationAction";
+import { cancelSession, createSession, updateSession } from "@/actions/planificationAction";
 import { showToast } from "@/components/ui/showToast";
+import { DialogUpdateSession } from "../Modal/DialogUpdateSession";
 
 
 export interface IFullCalendarEvent extends EventInput {
@@ -31,9 +32,7 @@ export interface IFullCalendarEvent extends EventInput {
 interface CalendarPlanificationProps {
   events: IFullCalendarEvent[];
   onDateChange: (start: string, end: string) => Promise<void>;
-  UEList: IGetUEPerModule[];
   curriculum_code: string | null;
-  course_unit_code: string | null;
   refreshData: (curriculum_code: string | null) => Promise<void>;
 }
 
@@ -49,22 +48,24 @@ export function convertIntoFullCalendarFormat(sessions: IGetSchedule[]): IFullCa
   }));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: propsEvents, onDateChange, curriculum_code, course_unit_code, refreshData }) => {
+const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: propsEvents, onDateChange, curriculum_code, refreshData }) => {
   const [events, setEvents] = useState<IFullCalendarEvent[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<IFullCalendarEvent | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
 
+  useEffect(() => {
+    console.log("-->curriculum_code", curriculum_code)
+  }, [curriculum_code])
 
   useEffect(() => {
     if (propsEvents && propsEvents.length > 0) {
-      console.log('-->propsEvents', propsEvents)
       setEvents(propsEvents);
+    } else{
+      setEvents([]);
     }
   }, [propsEvents]);
-
-
-
 
   const handleAddEvent = async (session: ICreateSession) => {
     console.log('session', session)
@@ -99,6 +100,79 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
     return false
   };
 
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    const event = clickInfo.event;
+    const currentEvent = {
+      id: event.id,
+      title: event.title,
+      start: event.start?.toDateString() ?? "",
+      end: event.end?.toDateString() ?? "",
+      ...event.extendedProps,
+    } as IFullCalendarEvent
+    setSelectedEvent(currentEvent);
+
+    setIsUpdateOpen(true);
+  };
+
+  const handleCancelEvent = async () => {
+    if(selectedEvent) {
+      console.log('session canceled', selectedEvent.id)
+      const result = await cancelSession(selectedEvent.id);
+      console.log("Create Session result:", result);
+
+      if (result.code === 'success') {
+        setIsOpen(false);
+        showToast({
+          variant: "success-solid",
+          message: 'Session programméé avec succès',
+          description: `La session ${selectedEvent.title} a été annulée avec succès.`,
+          position: 'top-center',
+        });
+
+        refreshData(curriculum_code)
+        return true
+      } else {
+        showToast({
+          variant: "error-solid",
+          message: "Echec de l'action",
+          description:result.error ?? "Une erreur est survenue. Essayer encore ou veillez contacter l'administrateur",
+          position: 'top-center',
+        });
+      }
+    }
+      return false
+  };
+
+
+  const handleSaveEvent = async (session: { resource_code: string; session_title: string }) => {
+    console.log('handleSaveEvent.session', session)
+    if(selectedEvent) {
+      const result = await updateSession(session, selectedEvent.id);
+      console.log("handleSaveEvent result:", result);
+
+      if (result.code === 'success') {
+        setIsOpen(false);
+        showToast({
+          variant: "success-solid",
+          message: 'Session mise à jour avec succès',
+          description: `La session ${session.session_title} a été mise à jour avec succès.`,
+          position: 'top-center',
+        });
+
+        refreshData(curriculum_code)
+        return true
+      } else {
+        showToast({
+          variant: "error-solid",
+          message: "Impossible de créer la salle de classe",
+          description:result.error ?? "Une erreur est survenue, essayez encore ou veuillez contacter l'administrateur",
+          position: 'top-center',
+        });
+      }
+    }
+    return false
+  };
+
   return (
     <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
       <div className="custom-calendar">
@@ -113,10 +187,11 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
           }}
           events={events}
           selectable={true}
+          eventClick={handleEventClick}
           eventContent={renderEventContent}
           customButtons={{
             addEventButton: {
-              text: "Add Event +",
+              text: "Planifier un cours +",
               click: () => setIsOpen(true),
             },
           }}
@@ -135,8 +210,17 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
         open={isOpen}
         onOpenChange={setIsOpen}
         onSave={handleAddEvent}
-        // curriculum_code={curriculum_code}
-        // course_unit_code={course_unit_code}
+        curriculum_code={curriculum_code ?? ""}
+      />
+
+      <DialogUpdateSession
+        eventData={selectedEvent}
+        onCancelSession={handleCancelEvent}
+        onOpenChange={setIsUpdateOpen}
+        onSave={handleSaveEvent}
+        open={isUpdateOpen}
+      
+      
       />
     </div>
   );

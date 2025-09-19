@@ -5,8 +5,9 @@ import { cookies } from 'next/headers'
 // 👉 Routes autorisées par rôle
 const routeRoles: Record<string, string[]> = {
   'STUDENT': ['/student', '/settings', '/profile', '/images'],
-  'TEACHER': ['/support', '/settings', '/profile', '/images'],
-  'ADMIN': ['/admin', '/settings', '/profile', '/images'],
+  'TEACHER': ['/teacher', '/support', '/settings', '/profile', '/images'],
+  'ADMIN_SUPER': ['/admin', '/settings', '/profile', '/images'],
+  'ADMIN_ACADEMIC': ['/admin', '/settings', '/profile', '/images'],
 };
 
 const publicRoutes = [
@@ -25,10 +26,8 @@ const publicRoutes = [
 
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  
-  // 🚨 DIAGNOSTIC: Toujours logger l'exécution du middleware
 
-  // ✅ Vérification des routes publiques (root path handled separately)
+  // Vérification des routes publiques (root inclus)
   const isPublic = publicRoutes.some(publicPath => path.startsWith(publicPath)) || path === '/';
   if (isPublic) {
     return NextResponse.next();
@@ -37,20 +36,20 @@ export default async function middleware(req: NextRequest) {
   try {
     // 🔒 Lire et décrypter le cookie
     const cookie = (await cookies()).get('session')?.value;
-    
     const session = await decrypt(cookie);
 
-    // ⛔️ Pas de session, rediriger vers login
+    // ⛔️ Pas de session
     if (!session) {
       return NextResponse.redirect(new URL('/signin', req.nextUrl));
     }
 
     // 🔐 Vérification des autorisations
-    const userRole = session.profile || '';
-    const userRoutes = routeRoles[userRole] || [];
-    
+    const userRoles: string[] = Array.isArray(session.roles) ? session.roles : [session.roles];
 
-    // Vérifier l'autorisation
+    // Agréger toutes les routes autorisées pour tous les rôles de l’utilisateur
+    const userRoutes = userRoles.flatMap(role => routeRoles[role] || []);
+
+    // Vérifier si l’utilisateur peut accéder à la route actuelle
     const isAuthorized = userRoutes.some(route => path.startsWith(route));
 
     if (!isAuthorized) {
@@ -67,16 +66,7 @@ export default async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Pattern recommandé par Next.js pour exclure les routes internes et fichiers statiques
-     * Exclut: api, _next/static, _next/image, favicon.ico et tous les fichiers avec extension
-     */
+    // Exclut: api, _next/static, _next/image, favicon.ico et fichiers statiques
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|images).*)',
   ],
-}
-
-// 🔧 Pour debug : exporter une fonction de test
-export function testMiddleware() {
-  console.log('Middleware file loaded successfully');
-  return true;
-}
+};

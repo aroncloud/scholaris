@@ -45,7 +45,7 @@ export type SessionPayload = {
   accessToken: string;
   refreshToken: string;
   email: string;
-  profile: string;
+  roles: string[];
   expiresAt: Date;
 }
 

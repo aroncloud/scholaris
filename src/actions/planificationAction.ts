@@ -23,7 +23,7 @@ export async function createSession(sessionData: ICreateSession) {
   }
 }
 
-export async function updateSession(sessionData: ICreateSession, session_code: string) {
+export async function updateSession(sessionData: { resource_code: string; session_title: string }, session_code: string) {
   try {
     const session = await verifySession();
     const token = session.accessToken;
@@ -56,13 +56,14 @@ export async function getSessionList() {
   }
 }
 
-export async function deleteSession(session_code: string) {
+export async function cancelSession(session_code: string) {
   try {
     const session = await verifySession();
     const token = session.accessToken;
 
-    const response = await axios.delete(
+    const response = await axios.patch(
       `${process.env.TIMETABLE_WORKER_ENDPOINT}/api/sessions/${session_code}`,
+      {"status_code": "CANCELLED"},
       { headers: { Authorization: `Bearer ${token}` } }
     );
 

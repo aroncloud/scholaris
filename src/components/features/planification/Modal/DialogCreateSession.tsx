@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ICreateSession } from "@/types/planificationType";
+import { ICreateSession, IGetAcademicYearsSchedulesForCurriculum } from "@/types/planificationType";
 import { DateTimePicker } from "@/components/ui/DateTimePicker";
 import { useFactorizedProgramStore } from "@/store/programStore";
 import { useTeacherStore } from "@/store/useTeacherStore";
@@ -25,63 +25,97 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
-import { useAcademicYearSchedules } from "@/hooks/feature/planifincation/useAcademicYearSchedules";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getListAcademicYearsSchedulesForCurriculum, getUEListPerCurriculum } from "@/actions/programsAction";
+import { IGetUECurriculum } from "@/types/programTypes";
 
 interface DialogCreateSessionProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (data: ICreateSession) => Promise<boolean>;
+  curriculum_code: string;
 }
 
 export function DialogCreateSession({
   open,
   onOpenChange,
   onSave,
+  curriculum_code
 }: DialogCreateSessionProps) {
-    const { refresh, academicYearSchedule, loading } = useAcademicYearSchedules();
-    const { factorizedPrograms, UEPerCurriculumList } = useFactorizedProgramStore();
+    const [scheduleList, setScheduleList] = useState<IGetAcademicYearsSchedulesForCurriculum[]>([]);
+    const [UEList, setUEList] = useState<IGetUECurriculum[]>([]);
+    const { factorizedPrograms } = useFactorizedProgramStore();
     const { teacherList } = useTeacherStore();
     const { classrooms } = useClassroomStore();
-    const { academicYears } = useAcademicYearStore();
-
+    const { academicYears, getCurrentAcademicYear } = useAcademicYearStore();
+    const currentAcademicYear = getCurrentAcademicYear();
     const {
         register,
         handleSubmit,
         control,
         reset,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<ICreateSession>({
         defaultValues: {
-        course_unit_code: "",
-        curriculum_code: "",
-        teacher_user_code: "",
-        schedule_code: "",
-        resource_code: "",
-        session_title: "",
-        start_time: "",
-        end_time: "",
+            course_unit_code: "",
+            curriculum_code: curriculum_code,
+            teacher_user_code: "",
+            schedule_code: "",
+            resource_code: "",
+            session_title: "",
+            start_time: "",
+            end_time: "",
+            academic_year_code: currentAcademicYear ? currentAcademicYear.academic_year_code : "",
         },
     });
 
+    useEffect(() => {
+        const currentAcademicYear = getCurrentAcademicYear();
+        setValue("curriculum_code", curriculum_code);
+        setValue(
+            "academic_year_code",
+            currentAcademicYear ? currentAcademicYear.academic_year_code : ""
+        );
+    }, [curriculum_code, getCurrentAcademicYear, setValue]);
     // Watch curriculum_code pour filtrer UEs et séquences
     const selectedCurriculum = useWatch({
         control,
         name: "curriculum_code",
     });
 
+    const selectedUE = useWatch({
+        control,
+        name: "course_unit_code",
+    });
     // Watch curriculum_code pour filtrer UEs et séquences
     const selectedAcademicYear = useWatch({
         control,
         name: "academic_year_code",
     });
 
+
     useEffect(() => {
-        refresh(selectedAcademicYear);
-    }, [refresh, selectedAcademicYear])
+        if(selectedCurriculum) {
+            fetchUEListPerCurriculum(selectedCurriculum)
+        }
+    }, [selectedCurriculum]);
+
+
+    useEffect(() => {
+        if(selectedUE) {
+            setValue('session_title', UEList.find(ue => ue.course_unit_code === selectedUE)?.course_unit_name ?? '')
+        }
+    }, [selectedUE, setValue]);
+    useEffect(() => {
+        if(selectedCurriculum && selectedAcademicYear) {
+            fetchListAcademicYearsSchedulesForCurriculum(selectedCurriculum, selectedAcademicYear);
+        }
+    }, [selectedAcademicYear, selectedCurriculum]);
+
+
 
     const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
-    const ueList = selectedCurriculum ? UEPerCurriculumList[selectedCurriculum] || [] : [];
 
     const onSubmit = async (data: ICreateSession) => {
         const result = await onSave(data);
@@ -97,6 +131,16 @@ export function DialogCreateSession({
         reset();
         onOpenChange(false);
     };
+
+    const fetchListAcademicYearsSchedulesForCurriculum = async (curriculum_code: string, academic_year_code: string) => {
+        const result = await getListAcademicYearsSchedulesForCurriculum(curriculum_code, academic_year_code);
+        setScheduleList(result.data.body)
+    }
+
+    const fetchUEListPerCurriculum = async (curriculum_code: string) => {
+        const result = await getUEListPerCurriculum(curriculum_code);
+        setUEList(result.data.body)
+    }
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
@@ -120,16 +164,16 @@ export function DialogCreateSession({
                     rules={{ required: "Curriculum requis" }}
                     render={({ field }) => (
                         <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
-                        <SelectTrigger className={errors.curriculum_code ? "border-red-500 w-full" : "w-full"}>
-                            <SelectValue placeholder="Sélectionner un curriculum" />
-                        </SelectTrigger>
-                        <SelectContent className="w-full">
-                            {curriculumList.map((c) => (
-                            <SelectItem key={c.curriculum_code} value={c.curriculum_code}>
-                                {c.curriculum_name}
-                            </SelectItem>
-                            ))}
-                        </SelectContent>
+                            <SelectTrigger className={errors.curriculum_code ? "border-red-500 w-full" : "w-full"}>
+                                <SelectValue placeholder="Sélectionner un curriculum" />
+                            </SelectTrigger>
+                            <SelectContent className="w-full">
+                                {curriculumList.map((c) => (
+                                <SelectItem key={c.curriculum_code} value={c.curriculum_code}>
+                                    {c.curriculum_name}
+                                </SelectItem>
+                                ))}
+                            </SelectContent>
                         </Select>
                     )}
                 />
@@ -151,13 +195,13 @@ export function DialogCreateSession({
                         <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={isSubmitting || !selectedCurriculum}
+                        disabled={isSubmitting || UEList.length == 0}
                         >
                         <SelectTrigger className={errors.course_unit_code ? "border-red-500 w-full" : "w-full"}>
                             <SelectValue placeholder="Sélectionner une UE" />
                         </SelectTrigger>
                         <SelectContent className="w-full">
-                            {ueList.map((ue) => (
+                            {UEList.map((ue) => (
                             <SelectItem key={ue.course_unit_code} value={ue.course_unit_code}>
                                 {ue.course_unit_name}
                             </SelectItem>
@@ -201,12 +245,12 @@ export function DialogCreateSession({
                 name="schedule_code"
                     control={control}
                     render={({ field }) => (
-                        <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting || loading}>
+                        <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting || scheduleList.length == 0}>
                         <SelectTrigger className={errors.schedule_code ? "border-red-500 w-full" : "w-full"}>
                             <SelectValue placeholder="Sélectionner une séquence" />
                         </SelectTrigger>
                         <SelectContent className="w-full">
-                            {academicYearSchedule.map((ays) => (
+                            {scheduleList.map((ays) => (
                                 <SelectItem key={ays.schedule_code} value={ays.schedule_code}>
                                     {ays.sequence_name}
                                 </SelectItem>

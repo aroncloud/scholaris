@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
@@ -49,7 +50,7 @@ export default function DialogCreateExam({
   examType,
   curriculum_code
 }: DialogCreateEvaluationProps) {
-  const { factorizedPrograms, UEPerCurriculumList } = useFactorizedProgramStore();
+  const { factorizedPrograms } = useFactorizedProgramStore();
   const { academicYearSchedule, loading } = useAcademicYearSchedules();
   const { } = useAcademicYearStore();
 
@@ -98,7 +99,7 @@ export default function DialogCreateExam({
 
   // Récupération UE
   const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
-  const ueList = selectedCurriculum ? UEPerCurriculumList[selectedCurriculum] || [] : [];
+  const ueList: any[] = [];
 
   // Récupération module quand EXAM_SEQ
   useEffect(() => {
@@ -230,7 +231,7 @@ export default function DialogCreateExam({
                         <SelectValue placeholder="Sélectionner une UE" />
                       </SelectTrigger>
                       <SelectContent className="w-full">
-                        {ueList.map((ue) => (
+                        {ueList.map((ue: any) => (
                           <SelectItem key={ue.course_unit_code} value={ue.course_unit_code}>
                             {ue.course_unit_name}
                           </SelectItem>

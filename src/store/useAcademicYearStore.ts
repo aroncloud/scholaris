@@ -12,6 +12,7 @@ interface AcademicYearStoreState {
 
   setAcademicYears: (data: IGetAcademicYears[]) => void;
   addAcademicYear: (data: IGetAcademicYears) => void;
+  getCurrentAcademicYear: () => IGetAcademicYears | null;
   updateAcademicYear: (year_code: string, academicYear: Partial<ICreateAcademicYear>) => void;
   resetAcademicYears: () => void;
 
@@ -57,6 +58,10 @@ export const useAcademicYearStore = create<AcademicYearStoreState>()(
             }
         },
 
+        getCurrentAcademicYear: () => {
+            const { academicYears } = get();
+            return academicYears.find(ay => ay.status_code === "IN_PROGRESS") || null;
+        },
         refreshAcademicYears: async () => {
             await get().fetchAcademicYears();
         },

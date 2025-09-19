@@ -16,7 +16,7 @@ export async function login (data: ILoginForm) {
         const sessionInfo: SessionPayload = {
             accessToken: response.data.body.accessToken,
             refreshToken: response.data.body.refreshToken,
-            profile: response.data.body.user.user_code == 'usr_9b1ec8d5-f89a-4412-a356-e009a8cd0dce' ? 'STUDENT' : 'ADMIN',
+            roles: response.data.body.roles,
             email: data.username,
             expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000)
         }

@@ -55,12 +55,11 @@ export default function Page () {
     const [isCardExpanded, setIsCardExpanded] = useState(false);
 
 
-    const { factorizedPrograms, UEPerCurriculumList } = useFactorizedProgramStore();
+    const { factorizedPrograms } = useFactorizedProgramStore();
     const { fetchEvaluationForCurriculum, fetchEvaluationForTeacher } = useEvaluationData();
     const { teacherList } = useTeacherStore();
     const { classrooms } = useClassroomStore();
     const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
-    const ueList = selectedCurriculum ? UEPerCurriculumList[selectedCurriculum] || [] : [];
 
     useEffect(() => {
         if(selectedCurriculum.trim().length > 0) {

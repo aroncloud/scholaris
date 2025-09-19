@@ -319,7 +319,7 @@ export async function getCurriculumDetail(curriculumCode: string) {
     return errResult;
   }
 }
-export async function getListAcademicYearsSchedulesForCurriculum(curriculum_code: string) {
+export async function getListAcademicYearsSchedulesForCurriculum(curriculum_code: string, academic_year_code?: string) {
     try {
         const session = await verifySession();
         const token = session.accessToken;
@@ -332,7 +332,8 @@ export async function getListAcademicYearsSchedulesForCurriculum(curriculum_code
             "Content-Type": "application/json",
             },
             params: {
-            curriculum_code,
+                academic_year_code,
+                curriculum_code,
             },
         }
         );

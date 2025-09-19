@@ -65,3 +65,23 @@ export interface ICreateAcademicYear {
   end_date: string;          // ISO date string, ex: "2025-07-31"
   status_code: string; 
 }
+
+
+export interface IGetAcademicYearsSchedulesForCurriculum {
+  schedule_code: string;
+  start_date: string;
+  end_date: string;
+  status_code: string;
+  sequence_code: string;
+  sequence_name: string;
+  sequence_number: string;
+  curriculum_code: string;
+  curriculum_name: string;
+  program_code: string;
+  program_name: string;
+  academic_year_code: string;
+  academic_year_name: string;
+  academic_year_start: string;
+  academic_year_end: string;
+  academic_year_status: string;
+}

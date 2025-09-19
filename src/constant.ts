@@ -20,19 +20,60 @@ export const APPLICATION_STATUS = [
 
 export const PLANIFICATION_FILTER = [
   { value: PlanificationStatus.CURRICULUM, label: "Curriculum" },
-  { value: PlanificationStatus.PERIOD, label: "Période" },
   { value: PlanificationStatus.TEACHER, label: "Enseignant" },
   { value: PlanificationStatus.RESSOURCE, label: "Ressource" },
 ];
 
 
 export const USER_ROLE = [
-  { value: "ALL", label: "Tous les rôles" },
-  { value: "STUDENT", label: "Étudiants" },
-  { value: "TEACHER", label: "Enseignants" },
-  { value: "RH", label: "RH" },
-  { value: "REGISTAR_OFFICE", label: "Scolarité" },
-  { value: "ADMIN", label: "Administrateurs" },
+  {
+      "role_code": "ADMIN_SUPER",
+      "description": "Full system access, including ownership/promoter level decisions.",
+      "is_active": 1,
+      "title": "Super Administrateur"
+  },
+  {
+      "role_code": "ADMIN_HR",
+      "description": "Manages employee lifecycle (hiring, contracts, leave).",
+      "is_active": 1,
+      "title": "Administrateur RH"
+  },
+  {
+      "role_code": "ADMIN_ACADEMIC",
+      "description": "Manages student lifecycle and all curriculum data.",
+      "is_active": 1,
+      "title": "Administrateur Académique"
+  },
+  {
+      "role_code": "FINANCE",
+      "description": "Manages payroll, fees, and financial records.",
+      "is_active": 1,
+      "title": "Comptable / Service Financier"
+  },
+  {
+      "role_code": "DEPT_HEAD",
+      "description": "Managerial role for initiating recruitment and evaluating staff.",
+      "is_active": 1,
+      "title": "Chef de Département"
+  },
+  {
+      "role_code": "TEACHER",
+      "description": "Manages courses, students, and grades.",
+      "is_active": 1,
+      "title": "Enseignant"
+  },
+  {
+      "role_code": "STUDENT",
+      "description": "Access to personal academic dossier and portal.",
+      "is_active": 1,
+      "title": "Étudiant"
+  },
+  {
+      "role_code": "STAFF",
+      "description": "General non-teaching, non-admin employee role.",
+      "is_active": 1,
+      "title": "Personnel / Collaborateur"
+  }
 ];
 
 export const USER_TABLE_HEADERS = [
