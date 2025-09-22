@@ -2,9 +2,126 @@
 
 import { verifySession } from "@/lib/session";
 import { ICreateStudent } from "@/types/staffType";
+import { ICreateEnrollment } from "@/types/programTypes"
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE } from "@/types/programTypes";
+import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE, IEnrollmentHistory, IEnrollmentHistoryResponse } from "@/types/programTypes";
+
+
+interface IEnrollmentResponse {
+  code: string;
+  message: string;
+  exit: string;
+  body: IEnrollmentHistory[];
+}
+
+export async function getStudentEnrollmentHistory(studentCode: string) {
+  try {
+    console.log(`[getStudentEnrollmentHistory] Fetching enrollment history for student: ${studentCode}`);
+    
+    if (!studentCode) {
+      console.error('No student code provided to getStudentEnrollmentHistory');
+      return {
+        code: 'error' as const,
+        data: [],
+        error: 'No student code provided',
+      };
+    }
+
+    const session = await verifySession();
+    if (!session?.accessToken) {
+      console.error('No access token available');
+      return {
+        code: 'error' as const,
+        data: [],
+        error: 'Authentication required',
+      };
+    }
+
+    const token = session.accessToken;
+    const apiUrl = `${process.env.AIM_WORKER_ENDPOINT}/api/students/${studentCode}/enrollments`;
+    
+    console.log(`[getStudentEnrollmentHistory] Calling API: ${apiUrl}`);
+    
+    const response = await axios.get<IEnrollmentResponse>(apiUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-API-Key': process.env.PUBLIC_API_KEY || '',
+      },
+      timeout: 10000, // 10 seconds timeout
+      validateStatus: (status) => status < 500, // Don't throw for 404
+    });
+
+    console.log(`[getStudentEnrollmentHistory] API response status: ${response.status}`, response.data);
+    
+    // Handle 404 - No enrollments found (not necessarily an error)
+    if (response.status === 404) {
+      console.log(`[getStudentEnrollmentHistory] No enrollments found for student ${studentCode}`);
+      return {
+        code: 'success' as const,
+        data: [],
+        error: null,
+      };
+    }
+
+    // Handle other error status codes
+    if (response.status >= 400) {
+      const errorMessage = response.data?.message || `API returned status ${response.status}`;
+      console.error(`[getStudentEnrollmentHistory] API error: ${errorMessage}`);
+      return {
+        code: 'error' as const,
+        data: [],
+        error: errorMessage,
+      };
+    }
+    
+    // Handle successful response
+    if (response.data && response.data.code === '200') {
+      return {
+        code: 'success' as const,
+        data: response.data.body || [],
+        error: null,
+      };
+    }
+    
+    // Handle unexpected response format
+    console.error('Unexpected API response format:', response.data);
+    return {
+      code: 'error' as const,
+      data: [],
+      error: 'Unexpected API response format',
+    };
+    
+  } catch (error: any) {
+    console.error('Error in getStudentEnrollmentHistory:', {
+      message: error.message,
+      code: error.code,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    
+    // Handle network errors
+    if (error.code === 'ECONNABORTED') {
+      return {
+        code: 'error' as const,
+        data: [],
+        error: 'Request timed out. Please try again.',
+      };
+    }
+    
+    // Handle other errors
+    const errorMessage = error.response?.data?.message || 
+                        error.message || 
+                        'Failed to fetch enrollment history';
+    
+    return {
+      code: 'error' as const,
+      data: [],
+      error: errorMessage,
+    };
+  }
+}
 
 export async function createUser (student: ICreateStudent) {
     console.log('-->createStudent', student)
@@ -91,6 +208,70 @@ export async function getUserList(){
     }
 }
 
+
+
+export async function createEnrollment(studentCode: string, enrollmentData: ICreateEnrollment) {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    if (!process.env.AIM_WORKER_ENDPOINT) {
+      throw new Error('AIM_WORKER_ENDPOINT is not defined in environment variables');
+    }
+
+    const payload = {
+      academic_year_code: enrollmentData.academic_year_code,
+      curriculum_code: enrollmentData.curriculum_code,
+      notes: enrollmentData.notes || 'Enrollment created',
+    };
+
+    console.log('Creating enrollment with payload:', JSON.stringify(payload, null, 2));
+    console.log('Student code:', studentCode);
+    console.log('API Endpoint:', `${process.env.AIM_WORKER_ENDPOINT}/api/students/${studentCode}/enrollments`);
+
+    const response = await axios.post(
+      `https://student-worker-dev.scholaris-sys.workers.dev/api/students/${studentCode}/enrollments`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-API-Key': process.env.PUBLIC_API_KEY || '',
+        },
+      }
+    );
+
+    console.log('Enrollment response:', response.data);
+
+    return {
+      code: 'success' as const,
+      error: null,
+      data: response.data,
+    };
+  } catch (error: unknown) {
+    console.error('Error creating enrollment:', error);
+    
+    let errorMessage = 'An unexpected error occurred';
+    
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        errorMessage = error.response.data?.message || error.response.data?.error || error.message;
+      } else if (error.request) {
+        errorMessage = 'No response received from the server';
+      } else {
+        errorMessage = error.message;
+      }
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
+    return {
+      code: 'error' as const,
+      error: errorMessage,
+      data: null,
+    };
+  }
+}
 
 
 export async function createProgram(programInfo: ICreateProgram){

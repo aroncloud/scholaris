@@ -79,13 +79,13 @@ const Header = ({ setIsCreateStudentOpen }: MyComponentProps) => {
                     <Upload className="h-4 w-4 mr-2" />
                     Importer
                 </Button>
-                <Button
-                    onClick={() => setIsCreateStudentOpen(true)}
-                    variant="info"
-                    className="text-sm w-full sm:w-fit flex-1 sm:flex-none"
-                >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nouvel étudiant
+               <Button
+                  onClick={() => setIsCreateStudentOpen(true)}
+                  variant="info"
+                  className="text-sm w-full sm:w-fit flex-1 sm:flex-none"
+                  >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouvel étudiant
                 </Button>
             </div>
 
