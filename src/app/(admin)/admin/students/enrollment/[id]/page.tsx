@@ -124,7 +124,7 @@ const ApplicationDetailPage: React.FC = () => {
       console.log('-->handleConverted.result', result);
       if(result.code === 'success') {
         showToast({
-          variant: "default",
+          variant: "success", // ← change from "default" to "success"
           message: 'Succès',
           description: 'Candidature convertie en étudiant avec succès',
           position: 'top-center',
@@ -141,7 +141,8 @@ const ApplicationDetailPage: React.FC = () => {
     } finally {
       setConverting(false);
     }
-  };
+};
+
 
 
 

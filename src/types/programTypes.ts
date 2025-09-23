@@ -272,6 +272,30 @@ export interface IEnrollmentHistoryResponse {
   body: IEnrollmentHistory[];
 }
 
+export interface IStudentDetail {
+  user_code: string;
+  curriculum_code: string;
+  student_number: string;
+  status_code: string;
+  enrollment_date: string;
+  education_level_code: string;
+  financial_status: string;
+  academic_year_code: string;
+  cirriculum: {
+    curriculum_code: string;
+    curriculum_name: string;
+    study_level: string;
+    program_code: string;
+    program_name: string;
+  };
+}
+
+export interface IStudentDetailResponse {
+  code: string;
+  message: string;
+  exit: string;
+  body: IStudentDetail;
+}
 
 export interface ICreateEnrollment {
   academic_year_code: string;

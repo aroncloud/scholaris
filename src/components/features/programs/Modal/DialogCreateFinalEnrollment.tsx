@@ -20,16 +20,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
 interface DialogCreateFinalEnrollmentProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
   studentCode: string;
   studentId?: string;
   curriculumCode: string;
   programName?: string;
   onSuccess?: (enrollment: any) => void;
-  onEnrollmentSuccess?: (studentId: string, status: string) => void;
+  // onEnrollmentSuccess?: (studentId: string, status: string) => void;
+ onEnrollmentSuccess?: (studentId: string, status: string, academicYear?: string) => void;
+
+
+
 }
 
 type EnrollmentFormData = {
@@ -39,8 +42,8 @@ type EnrollmentFormData = {
 };
 
 export function DialogCreateFinalEnrollment({
-  open,
-  onOpenChange,
+  isOpen,
+  onClose,
   studentCode,
   curriculumCode,
   programName = '',
@@ -49,25 +52,26 @@ export function DialogCreateFinalEnrollment({
 }: DialogCreateFinalEnrollmentProps) {
   const { academicYears, fetchAcademicYears } = useAcademicYearStore();
   const updateStudentStatus = useStudentStore(state => state.updateStudentStatus);
-
   const [submitting, setSubmitting] = useState(false);
-  const [enrolled, setEnrolled] = useState(false); // ✅ Track success
+  const [enrolled, setEnrolled] = useState(false);
 
-  const { control, handleSubmit, reset, setValue, formState: { errors }, watch } = useForm<EnrollmentFormData>({
+  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<EnrollmentFormData>({
     defaultValues: { academic_year_code: '', curriculum_code: '', notes: '' },
   });
 
   useEffect(() => {
-    if (open && curriculumCode) {
+    if (isOpen && curriculumCode) {
       reset({ academic_year_code: '', curriculum_code: curriculumCode, notes: '' });
       setValue('curriculum_code', curriculumCode, { shouldValidate: true });
-      setEnrolled(false); // Reset on modal open
+      setEnrolled(false);
     }
-  }, [open, curriculumCode, reset, setValue]);
+  }, [isOpen, curriculumCode, reset, setValue]);
 
   useEffect(() => {
-    if (open) fetchAcademicYears();
-  }, [open, fetchAcademicYears]);
+    if (isOpen) {
+      fetchAcademicYears();
+    }
+  }, [isOpen, fetchAcademicYears]);
 
   const onSubmit = async (data: EnrollmentFormData) => {
     try {
@@ -81,15 +85,15 @@ export function DialogCreateFinalEnrollment({
       };
 
       const result = await createEnrollment(studentCode, payload);
+      
 
-      if (result?.code === 'success') {
-        updateStudentStatus(studentCode, 'ENROLLED'); // ✅ Update store
-        setEnrolled(true); // ✅ Disable button
-        if (onEnrollmentSuccess) onEnrollmentSuccess(studentCode, 'ENROLLED');
-        if (onSuccess) onSuccess(result.data);
-
-        showToast({ variant: 'success', message: 'Inscription créée avec succès' });
-      } else {
+     if (result?.code === 'success') {
+      updateStudentStatus(studentCode, 'ENROLLED'); 
+      setEnrolled(true); 
+      if (onEnrollmentSuccess) onEnrollmentSuccess(studentCode, 'ENROLLED', result.data.academic_year_code);
+      if (onSuccess) onSuccess(result.data);
+    }
+    else {
         throw new Error(result?.error || "Échec de la création de l'inscription");
       }
     } catch (error: any) {
@@ -99,9 +103,19 @@ export function DialogCreateFinalEnrollment({
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onClose();
+      // Reset form when closing
+      reset({ academic_year_code: '', curriculum_code: curriculumCode, notes: '' });
+      setEnrolled(false);
+    }
+  };
+  
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[600px] w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Finaliser l&apos;inscription</DialogTitle>
           <DialogDescription>
@@ -118,13 +132,14 @@ export function DialogCreateFinalEnrollment({
               rules={{ required: "L'année académique est requise" }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value} disabled={submitting || enrolled}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Sélectionner une année académique" />
                   </SelectTrigger>
                   <SelectContent>
                     {academicYears.map((year: IGetAcademicYears) => (
                       <SelectItem key={year.academic_year_code} value={year.academic_year_code}>
-                        {year.academic_year_code}
+                        {/* {year.academic_year_code} */}
+                        {year.academic_year_code.replace(/^ay-/, "")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -137,13 +152,13 @@ export function DialogCreateFinalEnrollment({
           </div>
 
           <div className="space-y-1">
-            <Label>Programme</Label>
+            <Label>Curriculum</Label>
             <Controller
               name="curriculum_code"
               control={control}
               rules={{ required: 'Le code du programme est requis' }}
               render={({ field }) => (
-                <Input {...field} placeholder="Code du programme" disabled readOnly className="bg-gray-100" />
+                <Input {...field} placeholder="Code du programme" disabled readOnly className="w-full bg-gray-100" />
               )}
             />
           </div>
@@ -154,13 +169,13 @@ export function DialogCreateFinalEnrollment({
               name="notes"
               control={control}
               render={({ field }) => (
-                <Textarea {...field} placeholder="Ajoutez des notes" className="min-h-[100px]" disabled={submitting || enrolled} />
+                <Textarea {...field} placeholder="Ajoutez des notes" className="w-full min-h-[120px]" disabled={submitting || enrolled} />
               )}
             />
           </div>
 
           <DialogFooter className="mt-5 flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
               Annuler
             </Button>
             <Button type="submit" disabled={submitting || enrolled}>
@@ -169,6 +184,7 @@ export function DialogCreateFinalEnrollment({
           </DialogFooter>
         </form>
       </DialogContent>
+
     </Dialog>
   );
 }
