@@ -265,12 +265,19 @@ export interface IEnrollmentHistory {
   };
 }
 
-export interface IEnrollmentHistoryResponse {
+// export interface IEnrollmentHistoryResponse {
+//   code: string;
+//   message: string;
+//   exit: string;
+//   body: IEnrollmentHistory[];
+// }
+export interface IEnrollmentResponse {
   code: string;
   message: string;
   exit: string;
   body: IEnrollmentHistory[];
 }
+
 
 export interface IStudentDetail {
   user_code: string;

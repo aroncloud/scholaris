@@ -5,15 +5,8 @@ import { ICreateStudent } from "@/types/staffType";
 import { ICreateEnrollment } from "@/types/programTypes"
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE, IEnrollmentHistory, IEnrollmentHistoryResponse } from "@/types/programTypes";
+import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE, IEnrollmentHistory, IEnrollmentResponse } from "@/types/programTypes";
 
-
-interface IEnrollmentResponse {
-  code: string;
-  message: string;
-  exit: string;
-  body: IEnrollmentHistory[];
-}
 
 export async function getStudentEnrollmentHistory(studentCode: string) {
   try {

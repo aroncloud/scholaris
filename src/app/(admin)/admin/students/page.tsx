@@ -93,9 +93,9 @@ import {
 } from "lucide-react";
 import { useRouter } from "@bprogress/next/app";
 import { IEnrollmentRequest, IStudent, ICreateStudent, IListStudent } from "@/types/staffType";
-import Header from "./Header";
-import EnrollmentRequests from "./EnrollmentRequests";
-import CurrentStudents from "./CurrentStudents";
+import Header from "../../../../components/features/admin-students/HeaderSection";
+import EnrollmentRequests from "../../../../components/features/admin-students/EnrollmentRequestsTab";
+import CurrentStudents from "../../../../components/features/admin-students/CurrentStudentsTab";
 import GenericModal from "@/components/modal/GenericModal";
 import { createUser, getUserList, updateUser } from "@/actions/programsAction";
 import { getStudentApplication, getStudentApplicationList } from "@/actions/studentAction";
@@ -103,7 +103,7 @@ import { student_statuses } from "@/constant";
 import { showToast } from "@/lib/utils";
 import { toast } from "sonner"
 import ModalStudent from "@/components/modal/ModalStudent";
-import CreateEnrollmentDialog from "@/components/modal/CreateEnrollmentDialog";
+import CreateEnrollmentDialog from "@/components/features/admin-students/modals/DialogCreateEnrollmentRequest";
 
 
 
