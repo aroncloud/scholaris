@@ -19,8 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
 import { useForm } from "react-hook-form";
+import { showToast } from "@/components/ui/showToast";
 
 import { initiateStudentApplication } from "@/actions/studentAction";
 import { useFactorizedProgramStore } from '@/store/programStore';
@@ -66,17 +66,28 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
       const result = await initiateStudentApplication(data);
 
       if (result.code === 'success') {
-        toast.success("Demande d'inscription créée avec succès");
+        showToast({
+        variant: 'success-solid', 
+        message: 'Succès', 
+        description: "Demande d'inscription créée avec succès" 
+        });
         onOpenChange(false);
         reset();
         onSuccess?.();
       } else {
-        toast.error("Erreur lors de la création de la demande", {
-          description: result.error,
+        showToast({
+          variant: 'error-solid',
+          message: 'error',
+          description: "Erreur lors de la création de la demande"
+          // description: result.error
         });
       }
     } catch (error) {
-      toast.error("Une erreur inattendue s'est produite");
+      showToast({
+        variant: 'error-solid',
+        message: 'error',
+        description: "Une erreur inattendue s'est produite"
+      });
       console.error(error);
     } finally {
       setIsLoading(false);

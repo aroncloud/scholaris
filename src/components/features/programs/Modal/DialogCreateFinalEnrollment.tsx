@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useAcademicYearStore } from '@/store/useAcademicYearStore';
 import { useStudentStore } from '@/store/studentStore';
-import { createEnrollment } from '@/actions/programsAction';
+import { createEnrollment, getCurriculumList } from '@/actions/programsAction';
 import { showToast } from '@/components/ui/showToast';
 import { IGetAcademicYears } from '@/types/planificationType';
+import { ICreateCurriculum } from '@/types/programTypes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,11 +29,9 @@ interface DialogCreateFinalEnrollmentProps {
   curriculumCode: string;
   programName?: string;
   onSuccess?: (enrollment: any) => void;
-  // onEnrollmentSuccess?: (studentId: string, status: string) => void;
- onEnrollmentSuccess?: (studentId: string, status: string, academicYear?: string) => void;
-
-
-
+  onEnrollmentSuccess?: (studentId: string, status: string, academicYear?: string) => void;
+  onCurriculumChange?: (curriculumCode: string) => void;
+  onAcademicYearChange?: (academicYear: string) => void;
 }
 
 type EnrollmentFormData = {
@@ -40,6 +39,11 @@ type EnrollmentFormData = {
   curriculum_code: string;
   notes: string;
 };
+
+interface CurriculumOption {
+  value: string;
+  label: string;
+}
 
 export function DialogCreateFinalEnrollment({
   isOpen,
@@ -49,20 +53,86 @@ export function DialogCreateFinalEnrollment({
   programName = '',
   onSuccess,
   onEnrollmentSuccess,
+  onCurriculumChange,
+  onAcademicYearChange,
 }: DialogCreateFinalEnrollmentProps) {
   const { academicYears, fetchAcademicYears } = useAcademicYearStore();
   const updateStudentStatus = useStudentStore(state => state.updateStudentStatus);
   const [submitting, setSubmitting] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
+  const [curriculums, setCurriculums] = useState<CurriculumOption[]>([]);
+  const [loadingCurriculums, setLoadingCurriculums] = useState(false);
 
   const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<EnrollmentFormData>({
-    defaultValues: { academic_year_code: '', curriculum_code: '', notes: '' },
+    defaultValues: { 
+      academic_year_code: '', 
+      curriculum_code: curriculumCode || '', 
+      notes: '' 
+    },
   });
 
+  const handleCurriculumChange = (value: string) => {
+    setValue('curriculum_code', value, { shouldValidate: true });
+    if (onCurriculumChange) {
+      onCurriculumChange(value);
+    }
+  };
+
+  const handleAcademicYearChange = (value: string) => {
+    setValue('academic_year_code', value, { shouldValidate: true });
+    if (onAcademicYearChange) {
+      onAcademicYearChange(value);
+    }
+  };
+
   useEffect(() => {
-    if (isOpen && curriculumCode) {
-      reset({ academic_year_code: '', curriculum_code: curriculumCode, notes: '' });
-      setValue('curriculum_code', curriculumCode, { shouldValidate: true });
+    const fetchCurriculums = async () => {
+      try {
+        setLoadingCurriculums(true);
+        const result = await getCurriculumList();
+        console.log('Curriculum list response:', result); // Debug log
+        
+        if (result.code === 'success' && result.data) {
+          // Check if result.data has a body property, if not use result.data directly
+          const curriculumData = result.data.body || result.data;
+          
+          // Ensure curriculumData is an array before mapping
+          if (Array.isArray(curriculumData)) {
+            const curriculumOptions = curriculumData.map((curriculum: ICreateCurriculum) => ({
+              value: curriculum.curriculum_code,
+              label: curriculum.curriculum_name || curriculum.curriculum_code
+            }));
+            setCurriculums(curriculumOptions);
+          } else if (typeof curriculumData === 'object' && curriculumData !== null) {
+            // Handle case where data is a single object instead of an array
+            const curriculumOptions = [{
+              value: curriculumData.curriculum_code,
+              label: curriculumData.curriculum_name || curriculumData.curriculum_code
+            }];
+            setCurriculums(curriculumOptions);
+          } else {
+            console.error('Unexpected curriculum data format:', curriculumData);
+            showToast({ variant: 'error', message: 'Format de données de curriculum inattendu' });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching curriculums:', error);
+        showToast({ variant: 'error', message: 'Erreur lors du chargement des curriculums' });
+      } finally {
+        setLoadingCurriculums(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchCurriculums();
+      if (curriculumCode) {
+        reset({ 
+          academic_year_code: '', 
+          curriculum_code: curriculumCode, 
+          notes: '' 
+        });
+        setValue('curriculum_code', curriculumCode, { shouldValidate: true });
+      }
       setEnrolled(false);
     }
   }, [isOpen, curriculumCode, reset, setValue]);
@@ -131,7 +201,14 @@ export function DialogCreateFinalEnrollment({
               control={control}
               rules={{ required: "L'année académique est requise" }}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value} disabled={submitting || enrolled}>
+                <Select 
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    handleAcademicYearChange(value);
+                  }} 
+                  value={field.value} 
+                  disabled={submitting || enrolled}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Sélectionner une année académique" />
                   </SelectTrigger>
@@ -156,11 +233,32 @@ export function DialogCreateFinalEnrollment({
             <Controller
               name="curriculum_code"
               control={control}
-              rules={{ required: 'Le code du programme est requis' }}
+              rules={{ required: 'Le curriculum est requis' }}
               render={({ field }) => (
-                <Input {...field} placeholder="Code du programme" disabled readOnly className="w-full bg-gray-100" />
+                <Select 
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    handleCurriculumChange(value);
+                  }} 
+                  value={field.value}
+                  disabled={submitting || enrolled || loadingCurriculums}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={loadingCurriculums ? "Chargement des curriculums..." : "Sélectionner un curriculum"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {curriculums.map((curriculum) => (
+                      <SelectItem key={curriculum.value} value={curriculum.value}>
+                        {curriculum.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             />
+            {errors.curriculum_code && (
+              <p className="text-red-600 text-sm">{errors.curriculum_code.message}</p>
+            )}
           </div>
 
           <div className="space-y-1">

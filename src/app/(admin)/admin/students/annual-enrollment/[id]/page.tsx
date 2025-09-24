@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonAnnualEnrollmentSection } from '@/components/features/skeleton/SkeletonAnnualEnrollmentSection';
 import { showToast } from '@/components/ui/showToast';
 import { IStudentDetail } from '@/types/programTypes';
 import { getStudentDetails } from '@/actions/studentAction';
@@ -32,6 +33,8 @@ export default function AnnualEnrollmentPage() {
   const [isEnrollmentModalOpen, setIsEnrollmentModalOpen] = useState(false);
   const [enrollmentHistory, setEnrollmentHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
+  const [selectedCurriculum, setSelectedCurriculum] = useState('');
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState('');
   
   const openEnrollmentModal = useCallback(() => {
     console.log('Opening enrollment modal');
@@ -44,18 +47,88 @@ export default function AnnualEnrollmentPage() {
   }, []);
 
   // Fetch enrollment history
-  const loadEnrollmentHistory = useCallback(async (studentCode: string) => {
-    if (!studentCode) return;
+  const loadEnrollmentHistory = useCallback(async (studentCode: string, studentData: any = null) => {
+    if (!studentCode) {
+      console.warn('No student code provided to loadEnrollmentHistory');
+      return;
+    }
     try {
+      console.log('Starting to load enrollment history for:', studentCode);
       setHistoryLoading(true);
-      const result = await getStudentEnrollmentHistory(studentCode);
-      if (result.code === 'success') {
-        setEnrollmentHistory(result.data || []);
+      let result;
+      try {
+        result = await getStudentEnrollmentHistory(studentCode);
+        console.log('Raw enrollment history API response:', result);
+      } catch (error) {
+        console.error('Network error when fetching enrollment history:', error);
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur de connexion',
+          description: 'Impossible de se connecter au serveur. Veuillez vérifier votre connexion internet et réessayer.'
+        });
+        setHistoryLoading(false);
+        return;
+      }
+      
+      if (result?.code === 'success') {
+        // The API returns data in result.data according to the function's return type
+        let historyData = Array.isArray(result.data) ? result.data : [];
+        
+        // If no history but student has an active enrollment, create a history entry from current enrollment
+        const currentStudent = studentData || student;
+        if (historyData.length === 0 && currentStudent?.status_code === 'ENROLLED' && currentStudent?.academic_year_code) {
+          console.log('No history found, creating entry from current enrollment');
+          historyData = [{
+            enrollment_code: `${currentStudent.user_code}@${currentStudent.academic_year_code}@${currentStudent.curriculum_code}`,
+            student_user_code: currentStudent.user_code,
+            academic_year_code: currentStudent.academic_year_code,
+            curriculum_code: currentStudent.curriculum_code,
+            status_code: currentStudent.status_code,
+            enrollment_date: currentStudent.enrollment_date || new Date().toISOString(),
+            notes: '',  // Add the missing required property
+            academic_year: {
+              academic_year_code: currentStudent.academic_year_code,
+              year_code: currentStudent.academic_year_code.replace('ay-', '').replace(/-/g, '/'),
+              start_date: new Date().toISOString(),
+              end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
+              status_code: 'ACTIVE'
+            },
+            cirriculum: currentStudent.cirriculum || {
+              curriculum_code: currentStudent.curriculum_code || '',
+              curriculum_name: currentStudent.cirriculum?.curriculum_name || 'N/A',
+              study_level: currentStudent.cirriculum?.study_level || 'N/A',
+              program_code: currentStudent.cirriculum?.program_code || 'N/A',
+              program_name: currentStudent.cirriculum?.program_name || 'N/A'
+            }
+          }];
+        }
+        
+        console.log('Processed enrollment history data:', {
+          count: historyData.length,
+          data: historyData,
+          studentCode
+        });
+        
+        if (historyData.length === 0) {
+          console.log('No enrollment history found for student:', studentCode);
+        }
+        
+        setEnrollmentHistory(historyData);
       } else {
-        console.error('Failed to load enrollment history:', result.error);
+        console.error('Failed to load enrollment history:', result?.error);
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
+          description: result?.error?.message || 'Impossible de charger l\'historique des inscriptions. Veuillez réessayer plus tard.'
+        });
       }
     } catch (error) {
-      console.error('Error loading enrollment history:', error);
+      console.error('Unexpected error loading enrollment history:', error);
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur inattendue',
+        description: 'Une erreur inattendue est survenue. Veuillez réessayer ou contacter le support technique.'
+      });
     } finally {
       setHistoryLoading(false);
     }
@@ -66,21 +139,30 @@ export default function AnnualEnrollmentPage() {
     if (!params.id) return;
     try {
       setLoading(true);
+      console.log('Fetching student details for ID:', params.id);
       const result = await getStudentDetails(params.id);
+      console.log('Student details result:', result);
+      
       if (result.code === 'success' && result.data?.body) {
         const studentData = result.data.body;
+        console.log('Setting student data:', studentData);
         setStudent(studentData);
+        
         // Load enrollment history after student data is loaded
         if (studentData.user_code) {
-          await loadEnrollmentHistory(studentData.user_code);
+          console.log('Loading enrollment history for user:', studentData.user_code);
+          // Pass the student data to the loadEnrollmentHistory function
+          await loadEnrollmentHistory(studentData.user_code, studentData);
+        } else {
+          console.warn('No user_code found in student data');
         }
       } else {
-        showToast({ variant: 'error', message: 'Erreur', description: 'Impossible de charger les détails de l\'étudiant' });
+        showToast({ variant: 'error-solid', message: 'Erreur', description: 'Impossible de charger les détails de l\'étudiant' });
         router.push('/admin/students');
       }
     } catch (err) {
       console.error(err);
-      showToast({ variant: 'error', message: 'Erreur', description: 'Une erreur est survenue lors du chargement des détails' });
+      showToast({ variant: 'error-solid', message: 'Erreur', description: 'Une erreur est survenue lors du chargement des détails' });
       router.push('/admin/students');
     } finally {
       setLoading(false);
@@ -154,26 +236,21 @@ export default function AnnualEnrollmentPage() {
       const storeState = useStudentStore.getState();
       storeState.updateStudentStatus(params.id, 'ENROLLED');
       
-      // Update the local state to reflect the change
-      setStudent(prev => ({
-        ...(prev || {} as IStudentDetail),
-        status_code: 'ENROLLED',
-        academic_year_code: newEnrollment.academic_year_code || prev?.academic_year_code,
-        enrollment_date: newEnrollment.enrollment_date || prev?.enrollment_date,
-      }));
+      // Refresh the student data to get the latest information
+      await loadStudent();
       
       // Close the modal
       closeEnrollmentModal();
       
       showToast({ 
-        variant: 'success', 
+        variant: 'success-solid', 
         message: 'Succès', 
         description: 'L\'inscription a été effectuée avec succès' 
       });
     } catch (err) {
       console.error('Error updating enrollment status:', err);
       showToast({ 
-        variant: 'error', 
+        variant: 'error-solid', 
         message: 'Erreur', 
         description: 'Impossible de mettre à jour le statut' 
       });
@@ -182,22 +259,8 @@ export default function AnnualEnrollmentPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-6 bg-gray-50">
-        <div className="flex items-center space-x-4 mb-6">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-[200px]" />
-            <Skeleton className="h-4 w-[150px]" />
-          </div>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader><Skeleton className="h-4 w-[100px]" /></CardHeader>
-              <CardContent><Skeleton className="h-6 w-[150px]" /></CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="p-6">
+        <SkeletonAnnualEnrollmentSection />
       </div>
     );
   }
@@ -237,26 +300,20 @@ export default function AnnualEnrollmentPage() {
               <Separator orientation="vertical" className="h-6" />
               <div>{student.status_code && getStatusBadge(student.status_code)}</div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  console.log('Button clicked, opening modal');
-                  openEnrollmentModal();
-                  // Force a state update to ensure the modal opens
-                  setTimeout(() => {
-                    console.log('Forcing state update');
+            {!['ENROLLED', 'PROMOTED'].includes(student?.status_code || '') && (
+              <div className="flex items-center space-x-3">
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('Button clicked, opening modal');
                     openEnrollmentModal();
-                  }, 0);
-                }}
-                disabled={!student || student?.status_code === 'ENROLLED'}
-                className={student?.status_code === 'ENROLLED' 
-                  ? 'bg-gray-300 text-gray-800 cursor-not-allowed' 
-                  : 'bg-primary hover:bg-primary/90 text-white'}
-              >
-                {!student ? 'Chargement...' : (student.status_code === 'ENROLLED' ? "Finaliser l'inscription" : "Finaliser l'inscription")}
-              </Button>
-            </div>
+                  }}
+                  className="bg-primary hover:bg-primary/90 text-white"
+                >
+                  Finaliser l'inscription
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -357,20 +414,42 @@ export default function AnnualEnrollmentPage() {
                       key={idx}
                       className="p-3 border rounded-lg bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between"
                     >
-                      <div>
-                        <p className="font-medium">
-                          Année académique: {formatAcademicYear(history.academic_year_code)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Date: {formatDate(history.enrollment_date)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Programme: {history.program_name || "N/A"}
-                        </p>
-                      </div>
-                      <div className="mt-2 md:mt-0 flex items-center space-x-2">
-                        {getStatusBadge(history.status_code)}
-                        {getFinancialStatusBadge(history.financial_status)}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+                        <div className="space-y-1">
+                          <p className="text-sm">
+                            <span className="text-muted-foreground">Année académique:</span> {formatAcademicYear(history.academic_year?.year_code || history.academic_year_code)}
+                          </p>
+                          <p className="text-sm">
+                            <span className="text-muted-foreground">Date d'inscription:</span> {formatDate(history.enrollment_date)}
+                          </p>
+                          <p className="text-sm">
+                            <span className="text-muted-foreground">Statut:</span> {getStatusBadge(history.status_code)}
+                          </p>
+                          {history.financial_status && (
+                            <p className="text-sm">
+                              <span className="text-muted-foreground">Statut financier:</span> {getFinancialStatusBadge(history.financial_status)}
+                            </p>
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-medium">
+                            <span className="text-muted-foreground">Programme:</span> {history.cirriculum?.program_name || history.curriculum_name || "N/A"}
+                          </p>
+                          <p className="text-sm">
+                            <span className="text-muted-foreground">Code Programme:</span> {history.cirriculum?.program_code || "N/A"}
+                          </p>
+                          <p className="text-sm">
+                            <span className="text-muted-foreground">Niveau:</span> {history.cirriculum?.study_level || "N/A"}
+                          </p>
+                          <p className="text-sm">
+                            <span className="text-muted-foreground">Code Curriculum:</span> {history.curriculum_code || "N/A"}
+                          </p>
+                          {history.notes && (
+                            <p className="text-sm">
+                              <span className="text-muted-foreground">Notes:</span> {history.notes}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -389,17 +468,34 @@ export default function AnnualEnrollmentPage() {
               onClose={closeEnrollmentModal}
               studentCode={student.user_code}
               studentId={student.user_code}
-              curriculumCode={student.cirriculum?.curriculum_code || ''}
+              curriculumCode={selectedCurriculum || student.cirriculum?.curriculum_code || ''}
               onSuccess={handleEnrollmentSuccess}
               onEnrollmentSuccess={(studentId, status, academicYear) => {
-              setStudent(prev => {
-                if (!prev) return null; // handle null case
-                return {
-                  ...prev,
-                  status_code: status,
-                  academic_year_code: academicYear ?? prev.academic_year_code, // use ?? instead of ||
-                };
-              });
+                setStudent(prev => {
+                  if (!prev) return null; // handle null case
+                  
+                  // Create an updated curriculum object
+                  const updatedCurriculum = {
+                    ...(prev.cirriculum || {}),
+                    curriculum_code: selectedCurriculum || prev.cirriculum?.curriculum_code || ''
+                  };
+                  
+                  return {
+                    ...prev,
+                    status_code: status,
+                    academic_year_code: academicYear ?? prev.academic_year_code,
+                    cirriculum: updatedCurriculum
+                  };
+                });
+                // Reset the selected values after enrollment
+                setSelectedCurriculum('');
+                setSelectedAcademicYear('');
+              }}
+              onCurriculumChange={(curriculumCode) => {
+                setSelectedCurriculum(curriculumCode);
+              }}
+              onAcademicYearChange={(academicYear) => {
+                setSelectedAcademicYear(academicYear);
               }}
 
             />

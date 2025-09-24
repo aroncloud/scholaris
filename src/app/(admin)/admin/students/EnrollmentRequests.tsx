@@ -218,9 +218,9 @@ const EnrollmentRequests = ({
                       {/* Formation */}
                       <TableCell className="px-4 py-2 whitespace-normal break-words border-r border-gray-200">
                         <div className="font-medium">{row.filiere}</div>
-                        <div className="text-sm text-muted-foreground">
+                        {/* <div className="text-sm text-muted-foreground">
                           {row.niveau}
-                        </div>
+                        </div> */}
                       </TableCell>
 
                       {/* Date demande */}
