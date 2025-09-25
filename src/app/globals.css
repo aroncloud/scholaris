@@ -520,27 +520,19 @@ span.flatpickr-weekday,
   @apply right-0;
 }
 
-
-
-
-
-
 .fc .fc-view-harness {
   @apply max-w-full overflow-x-auto custom-scrollbar;
 }
 .fc-dayGridMonth-view.fc-view.fc-daygrid {
   @apply min-w-[718px];
 }
-
 .fc .fc-scrollgrid-section > * {
   border-right-width: 0;
   border-bottom-width: 0;
 }
-
 .fc .fc-scrollgrid {
   border-left-width: 0;
 }
-
 .fc .fc-toolbar.fc-header-toolbar {
   @apply flex-col gap-4 px-6 pt-6 sm:flex-row;
 }
@@ -555,7 +547,6 @@ span.flatpickr-weekday,
   @apply inline-block mt-1;
   content: url("data:image/svg+xml,%3Csvg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.0068 6L9.75684 12.25L16.0068 18.5' stroke='%23344054' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A");
 }
-
 .fc-button-group .fc-button.fc-next-button:before {
   @apply inline-block mt-1;
   content: url("data:image/svg+xml,%3Csvg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.50684 19L15.7568 12.75L9.50684 6.5' stroke='%23344054' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A");
@@ -572,7 +563,6 @@ span.flatpickr-weekday,
 .fc-addEventButton-button {
   @apply rounded-lg! border-0! bg-brand-500! px-4! py-2.5! text-sm! font-medium! hover:bg-brand-600! focus:shadow-none!;
 }
-
 .fc-toolbar-title {
   @apply text-lg! font-medium! text-gray-800 dark:text-white/90;
 }
@@ -601,13 +591,11 @@ span.flatpickr-weekday,
   @apply bg-transparent;
 }
 .fc .fc-daygrid-day {
-  @apply p-1;
+  @apply p-2;
 }
-
 .fc .fc-daygrid-day.fc-day-today .fc-scrollgrid-sync-inner {
   @apply rounded-sm bg-gray-100 dark:bg-white/3;
 }
-
 .fc .fc-daygrid-day-number {
   @apply p-3! text-sm font-medium text-gray-700 dark:text-gray-400;
 }
@@ -624,25 +612,16 @@ span.flatpickr-weekday,
   @apply rounded-lg py-2.5 pl-4 pr-3;
 }
 .event-fc-color .fc-event-title {
-  @apply text-sm font-normal text-gray-700;
+  @apply p-0 text-sm font-normal text-gray-700;
 }
 .fc-daygrid-event-dot {
   @apply w-1 h-5 ml-0 mr-3 border-none rounded-sm;
 }
-
 .fc-event {
   @apply focus:shadow-none;
 }
-
-.fc-v-event {
-  @apply bg-transparent border-transparent pl-0.5
-}
-/* .fc-daygrid-event.fc-event-start {
+.fc-daygrid-event.fc-event-start {
   @apply ml-3!;
-} */
-
-.fc-timegrid-event .fc-event-main {
-    padding: 5px 1px 5px;
 }
 .event-fc-color.fc-bg-success {
   @apply border-success-50 bg-success-50;
@@ -668,67 +647,8 @@ span.flatpickr-weekday,
 .event-fc-color.fc-bg-warning .fc-daygrid-event-dot {
   @apply bg-orange-500;
 }
-.fc .fc-scroller-liquid-absolute {
-  overflow: hidden !important;  
-  overflow-x: hidden !important;  
-  overflow-y: hidden !important;
-}
-
-.event-fc-color.fc-bg-info {
-  @apply border-blue-50 bg-blue-50;
-}
-.event-fc-color.fc-bg-purple {
-  @apply border-purple-50 bg-purple-50;
-}
-.event-fc-color.fc-bg-pink {
-  @apply border-pink-50 bg-pink-50;
-}
-.event-fc-color.fc-bg-teal {
-  @apply border-teal-50 bg-teal-50;
-}
-
-/* Les petits points dans la grille */
-.event-fc-color.fc-bg-success .fc-daygrid-event-dot {
-  @apply bg-success-500;
-}
-.event-fc-color.fc-bg-danger .fc-daygrid-event-dot {
-  @apply bg-error-500;
-}
-.event-fc-color.fc-bg-primary .fc-daygrid-event-dot {
-  @apply bg-brand-500;
-}
-.event-fc-color.fc-bg-warning .fc-daygrid-event-dot {
-  @apply bg-orange-500;
-}
-
-.event-fc-color.fc-bg-info .fc-daygrid-event-dot {
-  @apply bg-blue-500;
-}
-.event-fc-color.fc-bg-purple .fc-daygrid-event-dot {
-  @apply bg-purple-500;
-}
-.event-fc-color.fc-bg-pink .fc-daygrid-event-dot {
-  @apply bg-pink-500;
-}
-.event-fc-color.fc-bg-teal .fc-daygrid-event-dot {
-  @apply bg-teal-500;
-}
-
 .fc-direction-ltr .fc-timegrid-slot-label-frame {
   @apply px-3 py-1.5 text-left text-sm font-medium text-gray-500 dark:text-gray-400;
-}
-.fc-timegrid-event, .fc-timegrid-event:focus, .fc-timegrid-event:active {
-  @apply outline-none! shadow-none! border-none!;
-}
-.fc-daygrid-event {
-  @apply m-1! p-0!;
-}
-.custom-calendar .fc-h-event {
-  @apply bg-transparent border-0 text-gray-900;
-}
-
-.event-fc-color {
-  @apply rounded-md p-1 text-xs;
 }
 .fc .fc-timegrid-axis-cushion {
   @apply text-sm font-medium text-gray-500 dark:text-gray-400;
@@ -741,15 +661,6 @@ span.flatpickr-weekday,
 .fc.fc-media-screen {
   @apply min-h-screen;
 }
-
-
-
-
-
-
-
-
-
 
 .input-date-icon::-webkit-inner-spin-button,
 .input-date-icon::-webkit-calendar-picker-indicator {

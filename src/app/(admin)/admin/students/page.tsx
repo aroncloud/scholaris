@@ -100,8 +100,7 @@ import GenericModal from "@/components/modal/GenericModal";
 import { createUser, getUserList, updateUser } from "@/actions/programsAction";
 import { getStudentApplication, getStudentApplicationList } from "@/actions/studentAction";
 import { student_statuses } from "@/constant";
-import { showToast } from "@/lib/utils";
-import { toast } from "sonner"
+import { showToast } from "@/components/ui/showToast";
 import ModalStudent from "@/components/modal/ModalStudent";
 import CreateEnrollmentDialog from "@/components/features/admin-students/modals/DialogCreateEnrollmentRequest";
 
@@ -272,13 +271,17 @@ export default function StudentsPage() {
         setEnrollmentRequests(transformedData);
       } else {
         console.error('Error loading enrollment requests:', result.error);
-        toast("Erreur", {
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
           description: "Impossible de charger les demandes d'inscription.",
         });
       }
     } catch (error) {
       console.error('Error loading enrollment requests:', error);
-      toast("Erreur", {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
         description: "Une erreur s'est produite lors du chargement des demandes.",
       });
     }
@@ -301,47 +304,64 @@ export default function StudentsPage() {
   
 
   const handleSaveStudentInfo = async () => {
-    if(action === "CREATE"){
-      const payload = {
-        ...sturentFormData,
-      } as ICreateStudent
+    try {
+      if (action === "CREATE") {
+        const payload = {
+          ...sturentFormData,
+        } as ICreateStudent;
 
-      const result = await createUser(payload)
-      console.log('result-->', result);
-      if(result.code == 'success'){
-        await init();
-        setIsStudentModalOpen(false);
-      } else {
-        toast("Erreur lors de la creation de l'etudiant", {
-          description: result.error,
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
-        })
-      }
-    } else {
-      const payload = {
-        ...sturentFormData,
-      } as ICreateStudent
-
-      const result = await updateUser(payload)
-      console.log('result-->', result);
-      if(result.code == 'success'){
+        const result = await createUser(payload);
+        console.log('result-->', result);
         
-        await init();
-        setIsStudentModalOpen(false);
-        setAction('CREATE');
+        if (result.code === 'success') {
+          showToast({
+            variant: 'success-solid',
+            message: 'Succès',
+            description: 'Étudiant créé avec succès',
+          });
+          await init();
+          setIsStudentModalOpen(false);
+          setStudentFormData({});
+        } else {
+          showToast({
+            variant: 'error-solid',
+            message: 'Erreur',
+            description: result.error || "Erreur lors de la création de l'étudiant",
+          });
+        }
       } else {
-        showToast("error", result.error);
-        toast("Erreur lors de la mise a jour de l'etudiant", {
-          description: result.error,
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
-        })
+        const payload = {
+          ...sturentFormData,
+        } as ICreateStudent;
+
+        const result = await updateUser(payload);
+        console.log('result-->', result);
+        
+        if (result.code === 'success') {
+          showToast({
+            variant: 'success-solid',
+            message: 'Succès',
+            description: 'Étudiant mis à jour avec succès',
+          });
+          await init();
+          setIsStudentModalOpen(false);
+          setAction('CREATE');
+          setStudentFormData({});
+        } else {
+          showToast({
+            variant: 'error-solid',
+            message: 'Erreur',
+            description: result.error || "Erreur lors de la mise à jour de l'étudiant",
+          });
+        }
       }
+    } catch (error) {
+      console.error('Error in handleSaveStudentInfo:', error);
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Une erreur inattendue est survenue',
+      });
     }
 
     // setCurrentStudents([...currentStudents, newStudent]);
@@ -383,17 +403,23 @@ export default function StudentsPage() {
       if (result.code === 'success') {
         console.log('Application details:', result.data);
         // Ici vous pouvez ouvrir un modal avec les détails ou naviguer vers une page dédiée
-        toast("Détails chargés", {
+        showToast({
+          variant: 'success-solid',
+          message: 'Détails chargés',
           description: "Les détails de la demande ont été récupérés avec succès.",
         });
       } else {
-        toast("Erreur", {
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
           description: "Impossible de récupérer les détails de la demande.",
         });
       }
     } catch (error) {
       console.error('Error loading application details:', error);
-      toast("Erreur", {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
         description: "Une erreur s'est produite lors du chargement des détails.",
       });
     }
@@ -405,7 +431,9 @@ export default function StudentsPage() {
         req.id === requestId ? { ...req, statut: "approuve" as const } : req,
       ),
     );
-    toast("Demande approuvée", {
+    showToast({
+      variant: 'success-solid',
+      message: 'Demande approuvée',
       description: "La demande d'inscription a été approuvée avec succès.",
     });
   };

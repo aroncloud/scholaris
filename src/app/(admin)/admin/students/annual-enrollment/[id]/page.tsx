@@ -18,7 +18,7 @@ import { SkeletonAnnualEnrollmentSection } from '@/components/features/admin-stu
 import { showToast } from '@/components/ui/showToast';
 import { IStudentDetail } from '@/types/programTypes';
 import { getStudentDetails } from '@/actions/studentAction';
-import { getStudentEnrollmentHistory } from '@/actions/programsAction';
+import { getStudentEnrollmentHistory, checkReenrollmentPrerequisites, type ReenrollmentResponse } from '@/actions/programsAction';
 import { DialogCreateFinalEnrollment } from '@/components/features/admin-students/modals/DialogCreateFinalEnrollment';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -35,6 +35,34 @@ export default function AnnualEnrollmentPage() {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [selectedCurriculum, setSelectedCurriculum] = useState('');
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('');
+  type ReenrollmentEligibilityState = {
+    isEligible: boolean;
+    message: string;
+    loading: boolean;
+    error: string | null;
+    lastEnrollment?: {
+      academic_year_code: string;
+      curriculum_code: string;
+      status: string;
+    };
+    requirements: {
+      hasOutstandingFees: boolean;
+      hasCompletedPreviousYear: boolean;
+      isAccountActive: boolean;
+    };
+  };
+
+  const [reenrollmentEligibility, setReenrollmentEligibility] = useState<ReenrollmentEligibilityState>({
+    isEligible: false,
+    message: '',
+    loading: true,
+    error: null,
+    requirements: {
+      hasOutstandingFees: false,
+      hasCompletedPreviousYear: false,
+      isAccountActive: false
+    }
+  });
   
   const openEnrollmentModal = useCallback(() => {
     console.log('Opening enrollment modal');
@@ -134,6 +162,77 @@ export default function AnnualEnrollmentPage() {
     }
   }, []);
 
+  // Check re-enrollment eligibility
+  const checkReenrollmentEligibility = useCallback(async (studentCode: string) => {
+    try {
+      setReenrollmentEligibility((prev: ReenrollmentEligibilityState) => ({
+        ...prev,
+        loading: true,
+        error: null
+      }));
+      
+      const result = await checkReenrollmentPrerequisites(studentCode) as ReenrollmentResponse;
+      
+      if (result.code === 'success' && result.data) {
+        // Success case
+        const data = result.data;
+        setReenrollmentEligibility({
+          isEligible: data.isEligible || false,
+          message: data.message || '',
+          loading: false,
+          error: null,
+          lastEnrollment: data.lastEnrollment,
+          requirements: 'requirements' in data ? data.requirements : {
+            hasOutstandingFees: false,
+            hasCompletedPreviousYear: false,
+            isAccountActive: false
+          }
+        });
+      } else if (result.code === 'error') {
+        // Error case with error message
+        setReenrollmentEligibility({
+          isEligible: false,
+          message: result.error || 'Unknown error occurred',
+          loading: false,
+          error: result.error || 'Unknown error',
+          requirements: {
+            hasOutstandingFees: false,
+            hasCompletedPreviousYear: false,
+            isAccountActive: false
+          }
+        });
+      } else {
+        // Error case with no data
+        setReenrollmentEligibility({
+          isEligible: false,
+          message: result.error || 'Failed to check re-enrollment eligibility',
+          loading: false,
+          error: result.error || 'Unknown error',
+          requirements: {
+            hasOutstandingFees: false,
+            hasCompletedPreviousYear: false,
+            isAccountActive: false
+          },
+          lastEnrollment: undefined
+        });
+      }
+    } catch (error) {
+      console.error('Error checking re-enrollment eligibility:', error);
+      setReenrollmentEligibility(prev => ({
+        ...prev,
+        isEligible: false,
+        message: 'An error occurred while checking re-enrollment eligibility',
+        loading: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requirements: {
+          hasOutstandingFees: false,
+          hasCompletedPreviousYear: false,
+          isAccountActive: false
+        }
+      }));
+    }
+  }, []);
+
   // Fetch student details
   const loadStudent = useCallback(async () => {
     if (!params.id) return;
@@ -153,6 +252,8 @@ export default function AnnualEnrollmentPage() {
           console.log('Loading enrollment history for user:', studentData.user_code);
           // Pass the student data to the loadEnrollmentHistory function
           await loadEnrollmentHistory(studentData.user_code, studentData);
+          // Check re-enrollment eligibility
+          await checkReenrollmentEligibility(studentData.user_code);
         } else {
           console.warn('No user_code found in student data');
         }
@@ -239,14 +340,13 @@ export default function AnnualEnrollmentPage() {
       // Refresh the student data to get the latest information
       await loadStudent();
       
+      // If this was a re-enrollment, update the re-enrollment eligibility
+      if (student?.user_code) {
+        await checkReenrollmentEligibility(student.user_code);
+      }
+      
       // Close the modal
       closeEnrollmentModal();
-      
-      showToast({ 
-        variant: 'success-solid', 
-        message: 'Succès', 
-        description: 'L\'inscription a été effectuée avec succès' 
-      });
     } catch (err) {
       console.error('Error updating enrollment status:', err);
       showToast({ 
@@ -300,25 +400,146 @@ export default function AnnualEnrollmentPage() {
               <Separator orientation="vertical" className="h-6" />
               <div>{student.status_code && getStatusBadge(student.status_code)}</div>
             </div>
-            {!['ENROLLED', 'PROMOTED'].includes(student?.status_code || '') && (
-              <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3">
+              {!['ENROLLED', 'PROMOTED'].includes(student?.status_code || '') && (
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    console.log('Button clicked, opening modal');
+                    console.log('New enrollment button clicked, opening modal');
                     openEnrollmentModal();
                   }}
                   className="bg-primary hover:bg-primary/90 text-white"
                 >
-                  Finaliser l'inscription
+                  Finaliser L'inscription
                 </Button>
-              </div>
-            )}
+              )}
+              
+              {reenrollmentEligibility.loading ? (
+                <Button disabled>Vérification en cours...</Button>
+              ) : reenrollmentEligibility.isEligible ? (
+                <Button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('Re-enrollment button clicked, opening modal');
+                    openEnrollmentModal();
+                  }}
+                  variant="default"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Réinscrire
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  disabled
+                  title={reenrollmentEligibility.message}
+                  className="opacity-75"
+                >
+                  Réinscription non disponible
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* Re-enrollment Prerequisites Card */}
+        {/* {!reenrollmentEligibility.loading && reenrollmentEligibility.requirements && (
+          <Card className="mt-6 border-blue-100 bg-blue-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center">
+                <Clock className="h-5 w-5 mr-2 text-blue-700" />
+                Conditions de Réinscription
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-white p-4 rounded-lg border">
+                <h3 className="font-medium text-blue-800 mb-3">Pour être éligible à la réinscription, l'étudiant doit :</h3>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    <span>Avoir un <span className="font-medium">compte actif</span> dans le système</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    <span>N'avoir <span className="font-medium">aucune dette en attente</span> des années précédentes</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    <span>Avoir <span className="font-medium">terminé avec succès</span> l'année académique précédente</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm text-blue-800">État actuel des conditions</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                  <div className={`flex items-center p-3 rounded-lg border ${reenrollmentEligibility.requirements.isAccountActive ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                    <span className={`inline-flex items-center justify-center w-6 h-6 mr-3 rounded-full ${reenrollmentEligibility.requirements.isAccountActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {reenrollmentEligibility.requirements.isAccountActive ? '✓' : '✗'}
+                    </span>
+                    <div>
+                      <p className="font-medium">Compte actif</p>
+                      <p className="text-xs opacity-75">Le compte de l'étudiant est {reenrollmentEligibility.requirements.isAccountActive ? 'actif' : 'inactif'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className={`flex items-center p-3 rounded-lg border ${!reenrollmentEligibility.requirements.hasOutstandingFees ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                    <span className={`inline-flex items-center justify-center w-6 h-6 mr-3 rounded-full ${!reenrollmentEligibility.requirements.hasOutstandingFees ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {!reenrollmentEligibility.requirements.hasOutstandingFees ? '✓' : '✗'}
+                    </span>
+                    <div>
+                      <p className="font-medium">Aucune dette</p>
+                      <p className="text-xs opacity-75">
+                        {!reenrollmentEligibility.requirements.hasOutstandingFees 
+                          ? 'Aucune dette en attente' 
+                          : 'Dettes en attente détectées'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className={`flex items-center p-3 rounded-lg border ${reenrollmentEligibility.requirements.hasCompletedPreviousYear ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                    <span className={`inline-flex items-center justify-center w-6 h-6 mr-3 rounded-full ${reenrollmentEligibility.requirements.hasCompletedPreviousYear ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {reenrollmentEligibility.requirements.hasCompletedPreviousYear ? '✓' : '✗'}
+                    </span>
+                    <div>
+                      <p className="font-medium">Année précédente</p>
+                      <p className="text-xs opacity-75">
+                        {reenrollmentEligibility.requirements.hasCompletedPreviousYear 
+                          ? 'Année précédente validée' 
+                          : 'Année précédente non validée'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {!reenrollmentEligibility.isEligible && reenrollmentEligibility.message && (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-700">
+                  <p className="font-medium flex items-start">
+                    <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>Raisons de la non-éligibilité : {reenrollmentEligibility.message}</span>
+                  </p>
+                </div>
+              )}
+              
+              {reenrollmentEligibility.isEligible && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                  <p className="font-medium flex items-start">
+                    <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Toutes les conditions sont remplies. L'étudiant peut procéder à la réinscription en cliquant sur le bouton "Réinscrire" ci-dessus.</span>
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )} */}
+
         {/* Main content */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
           {/* Personal Info */}
           <Card>
             <CardHeader className="pb-4">
@@ -329,8 +550,9 @@ export default function AnnualEnrollmentPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                 <p className="text-sm text-muted-foreground">Niveau</p>
-                  <p className="font-medium">{student?.cirriculum?.study_level || 'N/A'}</p>                </div>
+                <p className="text-sm text-muted-foreground">Niveau</p>
+                <p className="font-medium">{student?.cirriculum?.study_level || 'N/A'}</p>                
+              </div>
               <div>
                 <p className="text-sm text-muted-foreground">Date d'inscription</p>
                 <p className="font-medium">{formatDate(student.enrollment_date)}</p>
@@ -444,11 +666,16 @@ export default function AnnualEnrollmentPage() {
                           <p className="text-sm">
                             <span className="text-muted-foreground">Code Curriculum:</span> {history.curriculum_code || "N/A"}
                           </p>
-                          {history.notes && (
-                            <p className="text-sm">
-                              <span className="text-muted-foreground">Notes:</span> {history.notes}
-                            </p>
-                          )}
+                          
+                            <div className="mt-2">
+                              <p className="text-sm text-muted-foreground">Notes:</p>
+                              <div className={`text-sm p-2 rounded border mt-1 min-h-[40px] whitespace-pre-wrap ${
+                                history.notes ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-100 text-muted-foreground'
+                              }`}>
+                                {history.notes ? history.notes : 'Aucune note'}
+                              </div>
+                            </div>
+                        
                         </div>
                       </div>
                     </div>
@@ -456,6 +683,48 @@ export default function AnnualEnrollmentPage() {
                 </div>
               )}
             </CardContent>
+           {/* <div className="space-y-4 m-2">
+                <h4 className="font-medium text-sm text-blue-800">État actuel des conditions de la réinscription</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                  <div className={`flex items-center p-3 rounded-lg border ${reenrollmentEligibility.requirements.isAccountActive ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                    <span className={`inline-flex items-center justify-center w-6 h-6 mr-3 rounded-full ${reenrollmentEligibility.requirements.isAccountActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {reenrollmentEligibility.requirements.isAccountActive ? '✓' : '✗'}
+                    </span>
+                    <div>
+                      <p className="font-medium">Compte actif</p>
+                      <p className="text-xs opacity-75">Le compte de l'étudiant est {reenrollmentEligibility.requirements.isAccountActive ? 'actif' : 'inactif'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className={`flex items-center p-3 rounded-lg border ${!reenrollmentEligibility.requirements.hasOutstandingFees ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                    <span className={`inline-flex items-center justify-center w-6 h-6 mr-3 rounded-full ${!reenrollmentEligibility.requirements.hasOutstandingFees ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {!reenrollmentEligibility.requirements.hasOutstandingFees ? '✓' : '✗'}
+                    </span>
+                    <div>
+                      <p className="font-medium">Aucune dette</p>
+                      <p className="text-xs opacity-75">
+                        {!reenrollmentEligibility.requirements.hasOutstandingFees 
+                          ? 'Aucune dette en attente' 
+                          : 'Dettes en attente détectées'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className={`flex items-center p-3 rounded-lg border ${reenrollmentEligibility.requirements.hasCompletedPreviousYear ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                    <span className={`inline-flex items-center justify-center w-6 h-6 mr-3 rounded-full ${reenrollmentEligibility.requirements.hasCompletedPreviousYear ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {reenrollmentEligibility.requirements.hasCompletedPreviousYear ? '✓' : '✗'}
+                    </span>
+                    <div>
+                      <p className="font-medium">Année précédente</p>
+                      <p className="text-xs opacity-75">
+                        {reenrollmentEligibility.requirements.hasCompletedPreviousYear 
+                          ? 'Année précédente validée' 
+                          : 'Année précédente non validée'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div> */}
           </Card>
 
         </div>
@@ -470,9 +739,11 @@ export default function AnnualEnrollmentPage() {
               studentId={student.user_code}
               curriculumCode={selectedCurriculum || student.cirriculum?.curriculum_code || ''}
               onSuccess={handleEnrollmentSuccess}
-              onEnrollmentSuccess={(studentId, status, academicYear) => {
+              onEnrollmentSuccess={(studentId, status, academicYear, notes = '') => {
+                console.log('onEnrollmentSuccess called with notes:', notes); // Debug log
+                
                 setStudent(prev => {
-                  if (!prev) return null; // handle null case
+                  if (!prev) return null;
                   
                   // Create an updated curriculum object
                   const updatedCurriculum = {
@@ -480,16 +751,58 @@ export default function AnnualEnrollmentPage() {
                     curriculum_code: selectedCurriculum || prev.cirriculum?.curriculum_code || ''
                   };
                   
+                  // Create a new enrollment history entry with all necessary fields
+                  const newEnrollment = {
+                    enrollment_code: `${studentId}@${academicYear}@${selectedCurriculum || prev.cirriculum?.curriculum_code || ''}`,
+                    student_user_code: studentId,
+                    academic_year_code: academicYear || '',
+                    curriculum_code: selectedCurriculum || prev.cirriculum?.curriculum_code || '',
+                    status_code: status,
+                    enrollment_date: new Date().toISOString(),
+                    notes: notes, // Make sure notes are included
+                    academic_year: {
+                      academic_year_code: academicYear || '',
+                      year_code: academicYear ? academicYear.replace(/^ay-/, '').replace(/-/g, '/') : '',
+                      start_date: new Date().toISOString(),
+                      end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
+                      status_code: 'ACTIVE'
+                    },
+                    cirriculum: updatedCurriculum,
+                    curriculum_name: updatedCurriculum.curriculum_name || 'Nouveau Curriculum',
+                    program_name: updatedCurriculum.program_name || 'Nouveau Programme',
+                    program_code: updatedCurriculum.program_code || '',
+                    study_level: updatedCurriculum.study_level || ''
+                  };
+                  
+                  console.log('Adding new enrollment to history:', newEnrollment); // Debug log
+                  
+                  // Add the new enrollment to the history
+                  setEnrollmentHistory(prev => {
+                    const newHistory = [newEnrollment, ...prev];
+                    console.log('Updated enrollment history:', newHistory); // Debug log
+                    return newHistory;
+                  });
+                  
+                  // Update the student's status and academic year
                   return {
                     ...prev,
                     status_code: status,
                     academic_year_code: academicYear ?? prev.academic_year_code,
-                    cirriculum: updatedCurriculum
+                    cirriculum: updatedCurriculum,
+                    notes: notes // Also update the student's notes
                   };
                 });
+                
                 // Reset the selected values after enrollment
                 setSelectedCurriculum('');
-                setSelectedAcademicYear('');
+                setSelectedAcademicYear('ay-2024-2025'); // Reset to default academic year
+                
+                // Show success message
+                showToast({ 
+                  variant: 'success-solid', 
+                  message: 'Inscription réussie', 
+                  description: 'L\'inscription a été effectuée avec succès.' 
+                });
               }}
               onCurriculumChange={(curriculumCode) => {
                 setSelectedCurriculum(curriculumCode);

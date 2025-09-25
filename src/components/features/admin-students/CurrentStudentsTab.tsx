@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TabsContent } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Eye, Lock, Unlock, Mail, MessageSquare, FileText } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, Lock, Unlock, Mail, MessageSquare, FileText, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ICreateStudent, IListStudent } from "@/types/staffType";
 import { useStudentStore } from "@/store/studentStore";
@@ -99,6 +99,16 @@ const StudentFilters = React.memo(({
             <SelectItem value="ACTIVE">Actif</SelectItem>
             <SelectItem value="PENDING">En attente</SelectItem>
             <SelectItem value="SUSPENDED">Suspendu</SelectItem>
+            <SelectItem value="GRADUATED">Diplômé</SelectItem>
+            <SelectItem value="WITHDRAWN">Retiré</SelectItem>
+            <SelectItem value="TRANSFERRED">Transféré</SelectItem>
+            {/* <SelectItem value="DISMISSED">Exclu</SelectItem> */}
+            {/* <SelectItem value="GRADUATION_PENDING">En attente de diplôme</SelectItem> */}
+            {/* <SelectItem value="ALUMNI">Ancien élève</SelectItem> */}
+            {/* <SelectItem value="ON_LEAVE">En congé</SelectItem> */}
+            {/* <SelectItem value="PROBATION">En probation</SelectItem> */}
+            {/* <SelectItem value="REPEATER">Répétiteur</SelectItem> */}
+            {/* <SelectItem value="DROPPED_OUT">Abandon</SelectItem> */}
           </SelectContent>
         </Select>
       </div>
@@ -268,9 +278,33 @@ const CurrentStudents = ({
   return (
     <TabsContent value="etudiants" className="space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle>Étudiants actuels</CardTitle>
-          <CardDescription>Liste des étudiants actuellement inscrits</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div>
+            <CardTitle>Étudiants actuels</CardTitle>
+            <CardDescription>Liste des étudiants actuellement inscrits</CardDescription>
+          </div>
+          <Button
+            onClick={() => {
+              setAction("CREATE");
+              setFormData({
+                password_plaintext: "",
+                email: "",
+                first_name: "",
+                last_name: "",
+                gender: "MALE",
+                phone_number: "",
+                curriculum_code: "",
+                student_number: "",
+                education_level_code: "LICENCE"
+              });
+              setIsStudentDialogOpen(true);
+            }}
+            variant="info"
+            className="ml-4"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nouvel étudiant
+          </Button>
         </CardHeader>
         <CardContent className="overflow-visible">
           <StudentFilters 

@@ -29,7 +29,7 @@ interface DialogCreateFinalEnrollmentProps {
   curriculumCode: string;
   programName?: string;
   onSuccess?: (enrollment: any) => void;
-  onEnrollmentSuccess?: (studentId: string, status: string, academicYear?: string) => void;
+  onEnrollmentSuccess?: (studentId: string, status: string, academicYear?: string, notes?: string) => void;
   onCurriculumChange?: (curriculumCode: string) => void;
   onAcademicYearChange?: (academicYear: string) => void;
 }
@@ -63,13 +63,16 @@ export function DialogCreateFinalEnrollment({
   const [curriculums, setCurriculums] = useState<CurriculumOption[]>([]);
   const [loadingCurriculums, setLoadingCurriculums] = useState(false);
 
-  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<EnrollmentFormData>({
+  const { control, handleSubmit, reset, setValue, formState: { errors }, watch } = useForm<EnrollmentFormData>({
     defaultValues: { 
-      academic_year_code: '', 
+      academic_year_code: 'ay-2024-2025',
       curriculum_code: curriculumCode || '', 
       notes: '' 
     },
   });
+
+  // Watch the form values
+  const formValues = watch();
 
   const handleCurriculumChange = (value: string) => {
     setValue('curriculum_code', value, { shouldValidate: true });
@@ -112,12 +115,12 @@ export function DialogCreateFinalEnrollment({
             setCurriculums(curriculumOptions);
           } else {
             console.error('Unexpected curriculum data format:', curriculumData);
-            showToast({ variant: 'error', message: 'Format de données de curriculum inattendu' });
+            showToast({ variant: 'error-solid', message: 'Format de données de curriculum inattendu' });
           }
         }
       } catch (error) {
         console.error('Error fetching curriculums:', error);
-        showToast({ variant: 'error', message: 'Erreur lors du chargement des curriculums' });
+        showToast({ variant: 'error-solid', message: 'Erreur lors du chargement des curriculums' });
       } finally {
         setLoadingCurriculums(false);
       }
@@ -127,7 +130,8 @@ export function DialogCreateFinalEnrollment({
       fetchCurriculums();
       if (curriculumCode) {
         reset({ 
-          academic_year_code: '', 
+          // academic_year_code: '', 
+          academic_year_code: 'ay-2024-2025', 
           curriculum_code: curriculumCode, 
           notes: '' 
         });
@@ -147,27 +151,46 @@ export function DialogCreateFinalEnrollment({
     try {
       setSubmitting(true);
 
+      // Ensure notes are properly trimmed and handled
+      const notes = (data.notes || '').trim();
+      
       const payload = {
         academic_year_code: data.academic_year_code,
         curriculum_code: data.curriculum_code || curriculumCode,
-        notes: data.notes || 'Enrollment created',
+        notes: notes, // Use the trimmed notes
         status_code: 'ENROLLED',
       };
 
+      console.log('Submitting enrollment with payload:', payload); // Debug log
+
       const result = await createEnrollment(studentCode, payload);
       
+      if (result?.code === 'success') {
+        updateStudentStatus(studentCode, 'ENROLLED');
+        setEnrolled(true);
+        
+        // Call onSuccess first to ensure the parent updates its state
+        if (onSuccess) {
+          onSuccess({ ...result.data, notes });
+        }
 
-     if (result?.code === 'success') {
-      updateStudentStatus(studentCode, 'ENROLLED'); 
-      setEnrolled(true); 
-      if (onEnrollmentSuccess) onEnrollmentSuccess(studentCode, 'ENROLLED', result.data.academic_year_code);
-      if (onSuccess) onSuccess(result.data);
-    }
-    else {
+        // Then call onEnrollmentSuccess to update the parent's UI state
+        if (onEnrollmentSuccess) {
+          await onEnrollmentSuccess(
+            studentCode, 
+            'ENROLLED', 
+            result.data.academic_year_code, 
+            notes // Pass the trimmed notes
+          );
+        }
+        
+        // Close the modal after all state updates are complete
+        onClose();
+      } else {
         throw new Error(result?.error || "Échec de la création de l'inscription");
       }
     } catch (error: any) {
-      showToast({ variant: 'error', message: error?.message || 'Erreur lors de l’inscription' });
+      showToast({ variant: 'error-solid', message: error?.message || 'Erreur lors de l’inscription' });
     } finally {
       setSubmitting(false);
     }
@@ -177,7 +200,11 @@ export function DialogCreateFinalEnrollment({
     if (!open) {
       onClose();
       // Reset form when closing
-      reset({ academic_year_code: '', curriculum_code: curriculumCode, notes: '' });
+      reset({ 
+        academic_year_code: 'ay-2024-2025', 
+        curriculum_code: curriculumCode, 
+        notes: '' 
+      });
       setEnrolled(false);
     }
   };
@@ -201,26 +228,33 @@ export function DialogCreateFinalEnrollment({
               control={control}
               rules={{ required: "L'année académique est requise" }}
               render={({ field }) => (
-                <Select 
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    handleAcademicYearChange(value);
-                  }} 
-                  value={field.value} 
-                  disabled={submitting || enrolled}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Sélectionner une année académique" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {academicYears.map((year: IGetAcademicYears) => (
-                      <SelectItem key={year.academic_year_code} value={year.academic_year_code}>
-                        {/* {year.academic_year_code} */}
-                        {year.academic_year_code.replace(/^ay-/, "")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handleAcademicYearChange(value);
+                    }} 
+                    value={field.value} 
+                    defaultValue="ay-2024-2025"
+                    disabled={submitting || enrolled}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionner une année académique" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {academicYears.map((year: IGetAcademicYears) => (
+                        <SelectItem key={year.academic_year_code} value={year.academic_year_code}>
+                          {year.academic_year_code.replace(/^ay-/, "")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {field.value && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Sélectionné: {field.value.replace(/^ay-/, "")}
+                    </p>
+                  )}
+                </div>
               )}
             />
             {errors.academic_year_code && (

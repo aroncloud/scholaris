@@ -7,6 +7,140 @@ import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
 import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE, IEnrollmentHistory, IEnrollmentResponse } from "@/types/programTypes";
 
+export interface IReenrollmentPrerequisites {
+  isEligible: boolean;
+  message: string;
+  lastEnrollment?: {
+    academic_year_code: string;
+    curriculum_code: string;
+    status: string;
+  };
+  requirements: {
+    hasOutstandingFees: boolean;
+    hasCompletedPreviousYear: boolean;
+    isAccountActive: boolean;
+  };
+}
+
+export type ReenrollmentResponse = 
+  | { 
+      code: 'success';
+      data: IReenrollmentPrerequisites;
+      error: null;
+    }
+  | {
+      code: 'error';
+      data: null | IReenrollmentPrerequisites;
+      error: string;
+    };
+
+
+export async function checkReenrollmentPrerequisites(studentCode: string) {
+  try {
+    console.log(`[checkReenrollmentPrerequisites] Checking re-enrollment prerequisites for student: ${studentCode}`);
+    
+    if (!studentCode) {
+      console.error('No student code provided to checkReenrollmentPrerequisites');
+      return {
+        code: 'error' as const,
+        data: null,
+        error: 'No student code provided',
+      };
+    }
+
+    const session = await verifySession();
+    if (!session?.accessToken) {
+      console.error('No access token available');
+      return {
+        code: 'error' as const,
+        data: null,
+        error: 'Authentication required',
+      };
+    }
+
+    const token = session.accessToken;
+    const apiUrl = `${process.env.AIM_WORKER_ENDPOINT}/api/students/${studentCode}/reenrollment-prerequisites`;
+    
+    console.log(`[checkReenrollmentPrerequisites] Calling API: ${apiUrl}`);
+    
+    const response = await axios.get<IReenrollmentPrerequisites>(apiUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-API-Key': process.env.PUBLIC_API_KEY || '',
+      },
+      timeout: 10000,
+      validateStatus: () => true, // Don't throw for any status code
+    });
+
+    console.log(`[checkReenrollmentPrerequisites] API response status: ${response.status}`, response.data);
+    
+    if (response.status === 200) {
+      return {
+        code: 'success' as const,
+        data: response.data,
+        error: null,
+      };
+    }
+    
+    // Handle 403 - Forbidden (e.g., outstanding debts)
+    if (response.status === 403) {
+      return {
+        code: 'error' as const,
+        data: {
+          isEligible: false,
+          message: response.data?.message || 'Re-enrollment not allowed',
+          requirements: {
+            hasOutstandingFees: true,
+            hasCompletedPreviousYear: false,
+            isAccountActive: true
+          }
+        },
+        error: response.data?.message || 'Re-enrollment not allowed',
+      };
+    }
+    
+    // Handle 404 - Not Found (e.g., no previous enrollment)
+    if (response.status === 404) {
+      return {
+        code: 'error' as const,
+        data: {
+          isEligible: false,
+          message: 'No previous enrollment found or student not eligible for re-enrollment',
+          requirements: {
+            hasOutstandingFees: false,
+            hasCompletedPreviousYear: false,
+            isAccountActive: false
+          }
+        },
+        error: 'No previous enrollment found or student not eligible for re-enrollment',
+      };
+    }
+    
+    // Handle other error status codes
+    const errorMessage = response.data?.message || `API returned status ${response.status}`;
+    console.error(`[checkReenrollmentPrerequisites] API error: ${errorMessage}`);
+    return {
+      code: 'error' as const,
+      data: null,
+      error: errorMessage,
+    };
+    
+  } catch (error: any) {
+    console.error('Error in checkReenrollmentPrerequisites:', {
+      message: error.message,
+      code: error.code,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    
+    return {
+      code: 'error' as const,
+      data: null,
+      error: error.message || 'An error occurred while checking re-enrollment prerequisites',
+    };
+  }
+}
 
 export async function getStudentEnrollmentHistory(studentCode: string) {
   try {
@@ -215,8 +349,10 @@ export async function createEnrollment(studentCode: string, enrollmentData: ICre
     const payload = {
       academic_year_code: enrollmentData.academic_year_code,
       curriculum_code: enrollmentData.curriculum_code,
-      notes: enrollmentData.notes || 'Enrollment created',
+      notes: enrollmentData.notes || '', // Use empty string as default instead of 'Enrollment created'
     };
+    
+    console.log('Enrollment notes being sent:', enrollmentData.notes); // Debug log
 
     console.log('Creating enrollment with payload:', JSON.stringify(payload, null, 2));
     console.log('Student code:', studentCode);

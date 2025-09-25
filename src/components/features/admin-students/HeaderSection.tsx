@@ -35,18 +35,18 @@ const Header = ({ setIsCreateStudentOpen }: MyComponentProps) => {
       description: 'Actuellement inscrits',
       icon: <Users className="h-6 w-6 text-muted-foreground" />,
     },
-    {
-      title: 'Diplômés',
-      value: 2,
-      description: 'Cette année',
-      icon: <GraduationCap className="h-6 w-6 text-muted-foreground" />,
-    },
-    {
-      title: 'Moyenne générale',
-      value: 13.8,
-      description: 'Tous étudiants confondus',
-      icon: <Award className="h-6 w-6 text-muted-foreground" />,
-    },
+    // {
+    //   title: 'Diplômés',
+    //   value: 2,
+    //   description: 'Cette année',
+    //   icon: <GraduationCap className="h-6 w-6 text-muted-foreground" />,
+    // },
+    // {
+    //   title: 'Moyenne générale',
+    //   value: 13.8,
+    //   description: 'Tous étudiants confondus',
+    //   icon: <Award className="h-6 w-6 text-muted-foreground" />,
+    // },
   ];
 
   return (
@@ -71,19 +71,19 @@ const Header = ({ setIsCreateStudentOpen }: MyComponentProps) => {
             <Upload className="h-4 w-4 mr-2" />
             Importer
           </Button>
-          <Button
+          {/* <Button
             onClick={() => setIsCreateStudentOpen(true)}
             variant="info"
             className="text-sm w-full sm:w-fit flex-1 sm:flex-none"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouvel étudiant
-          </Button>
+          </Button> */}
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-4 ml-6">
         {StatsCardList.map((card) => (
           <StatCard
             key={uuidv4()}

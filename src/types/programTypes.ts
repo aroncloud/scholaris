@@ -288,6 +288,7 @@ export interface IStudentDetail {
   education_level_code: string;
   financial_status: string;
   academic_year_code: string;
+  notes: string;
   cirriculum: {
     curriculum_code: string;
     curriculum_name: string;
