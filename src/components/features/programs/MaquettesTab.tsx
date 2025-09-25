@@ -55,7 +55,7 @@ const MaquettesTab = ({curriculumList, refresh}: MyComponentProps) => {
 
 
   return (
-    <TabsContent value="maquettes" className="space-y-4">
+    <div>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">Maquettes de formation</h3>
         <Button
@@ -87,7 +87,7 @@ const MaquettesTab = ({curriculumList, refresh}: MyComponentProps) => {
         open={isCreateCurriculumDialogOpen}
 
       />
-    </TabsContent>
+    </div>
   )
 }
 

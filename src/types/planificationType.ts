@@ -85,3 +85,59 @@ export interface IGetAcademicYearsSchedulesForCurriculum {
   academic_year_end: string;
   academic_year_status: string;
 }
+
+export interface ICreateValidationRule {
+  curriculum_code: string;          // code de la filière
+  academic_year_code: string;       // code de l'année académique
+  rule_type: string;
+  formula_json: {
+    CONTROLE_CONTINU: number;       // ex: 0.3
+    EXAMEN_SEQUENTIEL: number;      // ex: 0.7
+  };
+  validation_threshold: number;     // ex: 12.0
+}
+
+
+export interface IGetStudentAttendence {
+  user_code: string;
+  enrollment_code: string;
+  first_name: string;
+  last_name: string;
+  student_number: string;
+  is_present: boolean;
+}
+
+export interface IGetAbsencesListRequest {
+  curriculumn_code: string;
+  schedule_code: string
+  limit: number;
+  offset: number;
+}
+
+
+interface IJustificationDetail {
+  justification_code: string;
+  justification_status: string; // Vous pourriez utiliser un type plus spécifique comme 'SUBMITTED' | 'APPROVED' | 'REJECTED'
+  reason: string;
+  submitted_at: string;
+  processed_at: string | null;
+  rejection_reason: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  documents: any[]; // Remplacer 'any[]' par l'interface des documents si elle existe (ex: IDocument[])
+}
+
+interface ISessionDetail {
+  session_code: string;
+  session_title: string;
+  start_time: string;
+  course_unit_name: string;
+  teacher_name: string;
+}
+
+export interface IGetJustificationDetail {
+  absence_code: string;
+  absence_status: string; // Idem, un type plus spécifique serait préférable
+  recorded_at: string;
+  session: ISessionDetail;
+  justification: IJustificationDetail;
+}

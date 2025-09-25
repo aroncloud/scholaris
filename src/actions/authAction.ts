@@ -18,7 +18,8 @@ export async function login (data: ILoginForm) {
             refreshToken: response.data.body.refreshToken,
             roles: response.data.body.roles,
             email: data.username,
-            expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000)
+            expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000),
+            user: response.data.body.user
         }
         console.log('-->sessionInfo', sessionInfo);
         await createSession(sessionInfo);

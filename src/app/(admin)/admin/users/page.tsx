@@ -2,13 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-// External Imports
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ACTION } from "@/constant";
 import { UserPlus, Upload, Download } from "lucide-react";
 
-// Actions
 import { 
   createUser, 
   updateUser, 
@@ -17,10 +15,8 @@ import {
   deactivateUser 
 } from "@/actions/userAction";
 
-// Types
 import { ICreateUser, IUserList } from "@/types/staffType";
 
-// Components
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -31,7 +27,6 @@ import RoleAndPermission from "@/components/features/users/RoleAndPermission";
 import ModalUser from "@/components/modal/users/ModalUser";
 import ModaleDesactivateDeleteUser from "@/components/modal/users/ModaleDesactivateDeleteUser";
 
-// Local constants
 const userRoleList = [
   { label: 'Enseignant', value: 'TEACHER' },
   { label: 'Coordonnateur', value: 'COORDINATOR' },

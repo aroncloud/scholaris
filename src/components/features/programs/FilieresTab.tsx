@@ -202,7 +202,7 @@ const FilieresTab = ({
 
   
   return (
-    <TabsContent value="program" className="space-y-4">
+    <div>
       <Card>
         <CardHeader>
           <CardTitle>Filières d&apos;études</CardTitle>
@@ -248,7 +248,7 @@ const FilieresTab = ({
         program={selectedProgram}
       />}
 
-    </TabsContent>
+    </div>
   );
 };
 

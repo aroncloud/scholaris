@@ -42,7 +42,8 @@ export default function SignInForm() {
         refreshToken: result.data.body.refreshToken,
         roles: roles || ["STUDENT"],
         email: data.username,
-        expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000)
+        expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000),
+        user: result.data.body.user,
       });
 
       showToast({

@@ -125,7 +125,7 @@ const CalendrierTab = () => {
 
 
     return (
-        <TabsContent value="academic_year" className="space-y-4">
+        <div>
             <Card>
                 <CardHeader className="flex justify-between items-center mb-10">
                     <div>
@@ -185,7 +185,7 @@ const CalendrierTab = () => {
                 open={isCreateYearDialogOpen}
                 onSave={handleCreateAcademicYear}
             />
-        </TabsContent>
+        </div>
     )
 }
 

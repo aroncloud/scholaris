@@ -31,12 +31,12 @@ export default function AdminLayout({
     : "lg:ml-[90px]";
 
   useEffect(() => {
-    if(user?.roles && !user.roles.includes("STUDENT")) {
-      fetchPrograms();
+    if(user?.roles && !user.roles.includes("STUDENT")&& !user.roles.includes("TEACHER")) {
       fetchTeacher();
       fetchClassrooms();
       fetchAcademicYears();
     }
+    fetchPrograms();
   }, [fetchPrograms, fetchTeacher, fetchClassrooms, fetchAcademicYears, user?.roles]);
 
   return (
@@ -51,7 +51,7 @@ export default function AdminLayout({
 
           {/* Contenu avec marge dynamique */}
           <main className={`transition-all duration-300 ease-in-out pt-20 ${mainContentMargin}`}>
-            <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+            <div className="mx-auto max-w-(--breakpoint-2xl) pt-2">
               {children}
             </div>
           </main>

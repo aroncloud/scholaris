@@ -3,7 +3,7 @@
 import { verifySession } from "@/lib/session";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { ICreateAcademicYear, ICreateAcademicYearSchedules, ICreateSession } from "@/types/planificationType";
+import { ICreateAcademicYear, ICreateAcademicYearSchedules, ICreateSession, ICreateValidationRule } from "@/types/planificationType";
 
 
 export async function createSession(sessionData: ICreateSession) {
@@ -254,3 +254,19 @@ export async function getResourceSchedule(resource_code: string, start_date: str
   }
 }
 
+export async function createValidationRule(payload: ICreateValidationRule) {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.post(
+      `${process.env.GRADE_WORKER_ENDPOINT}/api/rules`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+    );
+
+    return { code: "success", error: null, data: response.data };
+  } catch (error: unknown) {
+    return actionErrorHandler(error);
+  }
+}

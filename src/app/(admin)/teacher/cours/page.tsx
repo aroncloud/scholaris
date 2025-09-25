@@ -1,467 +1,350 @@
-"use client";
-
-import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+'use client'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  BookOpen, 
-  Users, 
-  Clock, 
-  TrendingUp, 
+import { Tabs, TabsContent, TabsList, TabsTrigger, TabsContents } from '@/components/animate-ui/components/animate/tabs';
+import {
+  BookOpen,
+  Users,
+  Clock,
   Search,
-  Calendar
+  BarChart3,
 } from "lucide-react";
-import CourseCard from "@/components/features/cours/CourseCardTab";
-import CourseDetailsModal from "@/components/modal/course/CourseDetailsModal";
-import CourseEditModal from "@/components/modal/course/CourseEditModal";
-import PlanificationComponent from "@/components/features/cours/planificationTab";
-import { useCoursData } from "@/hooks/feature/cours/useCoursData";
-import StatCard from "@/components/cards/StatCard";
+import MyCoursesTab from "@/components/features/cours/MyCoursesTab";
+import TeacherCoursePlanningTab from "@/components/features/cours/TeacherCoursePlanningTab";
+import TeacherSessionTab from "@/components/features/cours/TeacherSessionTab";
 
-const MesCoursPage: React.FC = () => {
-  const {
-    courses,
-    stats,
-    loading,
-    searchCourses,
-    refreshData
-  } = useCoursData();
+interface Course {
+  id: string;
+  name: string;
+  code: string;
+  filiere: string;
+  niveau: string;
+  semester: string;
+  credits: number;
+  totalHours: number;
+  completedHours: number;
+  students: number;
+  startDate: string;
+  endDate: string;
+  status: "active" | "completed" | "upcoming" | "paused";
+  description: string;
+  objectives: string[];
+  sessions: CourseSession[];
+}
 
+interface CourseSession {
+  id: string;
+  title: string;
+  type: "cours" | "tp" | "td";
+  date: string;
+  duration: number;
+  completed: boolean;
+  attendance?: number;
+}
+
+const mockCourses: Course[] = [
+  {
+    id: "1",
+    name: "Anatomie générale",
+    code: "ANAT101",
+    filiere: "Pharmacie",
+    niveau: "Année 1",
+    semester: "Semestre 1",
+    credits: 6,
+    totalHours: 45,
+    completedHours: 30,
+    students: 45,
+    startDate: "2023-09-01",
+    endDate: "2024-01-31",
+    status: "active",
+    description:
+      "Introduction à l'anatomie humaine avec focus sur les systèmes cardiovasculaire, respiratoire et nerveux.",
+    objectives: [
+      "Comprendre la structure anatomique du corps humain",
+      "Identifier les organes et leurs fonctions",
+      "Maîtriser la terminologie anatomique",
+      "Analyser les relations entre structure et fonction",
+    ],
+    sessions: [
+      {
+        id: "1",
+        title: "Introduction à l'anatomie",
+        type: "cours",
+        date: "2024-01-15",
+        duration: 1.5,
+        completed: true,
+        attendance: 44,
+      },
+      {
+        id: "2",
+        title: "Système cardiovasculaire",
+        type: "cours",
+        date: "2024-01-18",
+        duration: 2,
+        completed: true,
+        attendance: 43,
+      },
+      {
+        id: "3",
+        title: "TP Dissection",
+        type: "tp",
+        date: "2024-01-22",
+        duration: 3,
+        completed: false,
+      },
+    ],
+  },
+  {
+    id: "2",
+    name: "Physiologie spécialisée",
+    code: "PHYS201",
+    filiere: "Médecine",
+    niveau: "Année 2",
+    semester: "Semestre 2",
+    credits: 8,
+    totalHours: 60,
+    completedHours: 45,
+    students: 38,
+    startDate: "2024-02-01",
+    endDate: "2024-06-30",
+    status: "active",
+    description: "Étude approfondie des mécanismes physiologiques complexes.",
+    objectives: [
+      "Analyser les mécanismes de régulation physiologique",
+      "Comprendre les interactions entre systèmes",
+      "Interpréter les données physiologiques",
+      "Appliquer les connaissances en contexte clinique",
+    ],
+    sessions: [
+      {
+        id: "4",
+        title: "Régulation hormonale",
+        type: "cours",
+        date: "2024-01-20",
+        duration: 2,
+        completed: true,
+        attendance: 36,
+      },
+      {
+        id: "5",
+        title: "TP Électrophysiologie",
+        type: "tp",
+        date: "2024-01-25",
+        duration: 4,
+        completed: false,
+      },
+    ],
+  },
+  {
+    id: "3",
+    name: "TP Anatomie pratique",
+    code: "TPAN101",
+    filiere: "Kinésithérapie",
+    niveau: "Année 1",
+    semester: "Semestre 1",
+    credits: 4,
+    totalHours: 30,
+    completedHours: 20,
+    students: 22,
+    startDate: "2023-09-15",
+    endDate: "2024-01-15",
+    status: "completed",
+    description:
+      "Travaux pratiques d'anatomie avec manipulation et observation directe.",
+    objectives: [
+      "Manipuler les préparations anatomiques",
+      "Observer et identifier les structures",
+      "Développer les compétences pratiques",
+      "Comprendre l'anatomie palpatoire",
+    ],
+    sessions: [
+      {
+        id: "6",
+        title: "Membre supérieur",
+        type: "tp",
+        date: "2024-01-10",
+        duration: 3,
+        completed: true,
+        attendance: 22,
+      },
+      {
+        id: "7",
+        title: "Membre inférieur",
+        type: "tp",
+        date: "2024-01-15",
+        duration: 3,
+        completed: true,
+        attendance: 21,
+      },
+    ],
+  },
+];
+
+
+
+export default function TeacherCourses() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("mes-cours");
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const handleSearch = async () => {
-    if (searchTerm.trim()) {
-      await searchCourses(searchTerm);
-    } else {
-      await refreshData();
-    }
-  };
+  const filteredCourses = mockCourses.filter(
+    (course) =>
+      course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.filiere.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
-  const handleViewDetails = (courseId: string) => {
-    setSelectedCourseId(courseId);
-    setIsDetailsModalOpen(true);
-  };
-
-  const handleEdit = (courseId: string) => {
-    setSelectedCourseId(courseId);
-    setIsEditModalOpen(true);
-  };
-
-  const handleSettings = (courseId: string) => {
-    console.log('Settings for course:', courseId);
-    // Open course settings modal
-  };
+  const activeCourses = mockCourses.filter(
+    (course) => course.status === "active",
+  );
+  const totalStudents = mockCourses.reduce(
+    (sum, course) => sum + course.students,
+    0,
+  );
+  const totalHours = mockCourses.reduce(
+    (sum, course) => sum + course.completedHours,
+    0,
+  );
+  const averageProgress = Math.round(
+    mockCourses.reduce(
+      (sum, course) => sum + (course.completedHours / course.totalHours) * 100,
+      0,
+    ) / mockCourses.length,
+  );
 
 
-  const handleCloseDetailsModal = () => {
-    setIsDetailsModalOpen(false);
-    setSelectedCourseId(null);
-  };
+  
 
-  const handleCloseEditModal = () => {
-    setIsEditModalOpen(false);
-    setSelectedCourseId(null);
-  };
-
-  const handleSaveCourse = async () => {
-    await refreshData();
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des cours...</p>
-        </div>
-      </div>
-    );
-  }
+  const upcomingSessions = mockCourses
+    .flatMap((course) => course.sessions)
+    .filter((session) => !session.completed)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div>
+      <div className="space-y-6 p-6">
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Mes Cours</h1>
-          <p className="text-gray-600">
-            Gestion et suivi de vos enseignements assignés par l&apos;administration
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              title="Cours actifs"
-              value={stats.activeCourses}
-              description="En cours cette année"
-              icon={<BookOpen className="h-4 w-4 text-blue-600" />}
-            />
-            <StatCard
-              title="Total étudiants"
-              value={stats.totalStudents}
-              description="Tous cours confondus"
-              icon={<Users className="h-4 w-4 text-green-600" />}
-            />
-            <StatCard
-              title="Heures enseignées"
-              value={`${stats.hoursTaught}h`}
-              description="Cette année académique"
-              icon={<Clock className="h-4 w-4 text-orange-600" />}
-            />
-            <StatCard
-              title="Progression moyenne"
-              value={`${stats.averageProgress}%`}
-              description="Avancement des cours"
-              icon={<TrendingUp className="h-4 w-4 text-purple-600" />}
-            />
-          </div>
-        )}
-
-        {/* Search Bar */}
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Rechercher un cours..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                />
-              </div>
-              <Button onClick={handleSearch} variant="default">
-                Rechercher
-              </Button>
+          <CardHeader>
+            <CardTitle><h2 className="text-3xl font-bold tracking-tight">Mes Cours</h2></CardTitle>
+            <CardDescription>
+             <p className="text-muted-foreground">
+                Gestion et suivi de vos enseignements assignés par l&apos;administration
+              </p>
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            {/* Stats Cards */}
+            <div className="grid gap-4 md:grid-cols-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Cours actifs
+                  </CardTitle>
+                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{activeCourses.length}</div>
+                  <p className="text-xs text-muted-foreground">
+                    En cours cette année
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Total étudiants
+                  </CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{totalStudents}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Tous cours confondus
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Heures enseignées
+                  </CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{totalHours}h</div>
+                  <p className="text-xs text-muted-foreground">
+                    Cette année académique
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Progression moyenne
+                  </CardTitle>
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{averageProgress}%</div>
+                  <p className="text-xs text-muted-foreground">
+                    Avancement des cours
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </CardContent>
         </Card>
 
-        {/* Navigation Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="mes-cours" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Mes cours
-            </TabsTrigger>
-            <TabsTrigger value="planification" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Planification
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="mes-cours" className="space-y-6">
-            {/* Course Cards Grid */}
-             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-3">
-                  {courses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  onViewDetails={handleViewDetails}
-                  onEdit={handleEdit}
-                  onSettings={handleSettings}
-                />
-              ))}
-            </div>
-
-            {courses.length === 0 && (
-              <div className="text-center py-12">
-                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Aucun cours trouvé
-                </h3>
-                <p className="text-gray-500">
-                  {searchTerm
-                    ? "Aucun cours ne correspond à votre recherche."
-                    : "Vous n'avez pas encore de cours assignés."}
-                </p>
+        <Card>
+          <CardHeader>
+              {/* Search */}
+              <div className="flex justify-between items-center">
+                <div className="relative w-64">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Rechercher un cours..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
               </div>
-            )}
-          </TabsContent>
+          </CardHeader>
+          <CardContent>
+            {/* Main Content */}
+            <Tabs defaultValue="sessions" className="space-y-4">
+              <TabsList className="w-full">
+                <TabsTrigger value="courses">Mes cours</TabsTrigger>
+                <TabsTrigger value="sessions">Prochaines séances</TabsTrigger>
+                <TabsTrigger value="planning">Planification</TabsTrigger>
+              </TabsList>
+              <TabsContents>
+                <TabsContent value="courses" className="space-y-4">
+                  <MyCoursesTab courses={filteredCourses} />
+                </TabsContent>
 
-          <TabsContent value="planification">
-            <PlanificationComponent />
-          </TabsContent>
-        </Tabs>
+                <TabsContent value="sessions" className="space-y-4">
+                  <TeacherSessionTab sessionList={upcomingSessions} courseList={mockCourses}/>
+                </TabsContent>
 
-        {/* Modals */}
-        <CourseDetailsModal
-          courseId={selectedCourseId}
-          isOpen={isDetailsModalOpen}
-          onClose={handleCloseDetailsModal}
-          onEdit={handleEdit}
-        />
-        <CourseEditModal
-          courseId={selectedCourseId}
-          isOpen={isEditModalOpen}
-          onClose={handleCloseEditModal}
-          onSave={handleSaveCourse}
-        />
+                <TabsContent value="planning" className="space-y-4">
+                  <TeacherCoursePlanningTab />
+                </TabsContent>
+              </TabsContents>
+            </Tabs>
+          </CardContent>
+        </Card>
+
       </div>
     </div>
   );
-};
-
-export default MesCoursPage;
-
-
-
-
-// 'use client';
-
-// import React, { useState } from 'react';
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Button } from '@/components/ui/button';
-// import { Input } from '@/components/ui/input';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// import { Badge } from '@/components/ui/badge';
-// import { 
-//   BookOpen, 
-//   Users, 
-//   Clock, 
-//   TrendingUp, 
-//   Search,
-//   Calendar,
-//   Settings
-// } from 'lucide-react';
-// import CourseCard from '@/components/features/cours/CourseCardTab';
-// import CourseDetailsModal from '@/components/modal/course/CourseDetailsModal';
-// import CourseEditModal from '@/components/modal/course/CourseEditModal';
-// import PlanificationComponent from '@/components/features/cours/planificationTab';
-// import { Course } from '@/types/courseType';
-// import { useCoursData } from '@/hooks/feature/cours/useCoursData';
-
-// const MesCoursPage: React.FC = () => {
-//   // Use the custom hook for data management
-//   const {
-//     courses,
-//     stats,
-//     programs,
-//     loading,
-//     error,
-//     searchCourses,
-//     refreshData
-//   } = useCoursData();
-
-//   // Local UI state
-//   const [searchTerm, setSearchTerm] = useState('');
-//   const [activeTab, setActiveTab] = useState('mes-cours');
-//   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-//   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-//   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-//   const handleSearch = async () => {
-//     if (searchTerm.trim()) {
-//       await searchCourses(searchTerm);
-//     } else {
-//       await refreshData();
-//     }
-//   };
-
-//   const handleViewDetails = (courseId: string) => {
-//     setSelectedCourseId(courseId);
-//     setIsDetailsModalOpen(true);
-//   };
-
-//   const handleEdit = (courseId: string) => {
-//     setSelectedCourseId(courseId);
-//     setIsEditModalOpen(true);
-//   };
-
-//   const handleSettings = (courseId: string) => {
-//     console.log('Settings for course:', courseId);
-//     // Open course settings modal
-//   };
-
-//   const handleCloseDetailsModal = () => {
-//     setIsDetailsModalOpen(false);
-//     setSelectedCourseId(null);
-//   };
-
-//   const handleCloseEditModal = () => {
-//     setIsEditModalOpen(false);
-//     setSelectedCourseId(null);
-//   };
-
-//   const handleSaveCourse = async (updatedCourse: Course) => {
-//     // The hook will automatically update the courses state
-//     // and refresh the stats when a course is updated
-//     await refreshData();
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className="flex items-center justify-center min-h-screen">
-//         <div className="text-center">
-//           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-//           <p className="text-gray-600">Chargement des cours...</p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 p-6">
-//       <div className="max-w-7xl mx-auto space-y-6">
-//         {/* Header */}
-//         <div className="space-y-2">
-//           <h1 className="text-3xl font-bold text-gray-900">Mes Cours</h1>
-//           <p className="text-gray-600">
-//             Gestion et suivi de vos enseignements assignés par l'administration
-//           </p>
-//         </div>
-
-//         {/* Stats Cards */}
-//         {stats && (
-//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-//             <Card>
-//               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//                 <CardTitle className="text-sm font-medium text-gray-600">
-//                   Cours actifs
-//                 </CardTitle>
-//                 <BookOpen className="h-4 w-4 text-blue-600" />
-//               </CardHeader>
-//               <CardContent>
-//                 <div className="text-2xl font-bold text-gray-900">{stats.activeCourses}</div>
-//                 <p className="text-xs text-gray-500">En cours cette année</p>
-//               </CardContent>
-//             </Card>
-
-//             <Card>
-//               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//                 <CardTitle className="text-sm font-medium text-gray-600">
-//                   Total étudiants
-//                 </CardTitle>
-//                 <Users className="h-4 w-4 text-green-600" />
-//               </CardHeader>
-//               <CardContent>
-//                 <div className="text-2xl font-bold text-gray-900">{stats.totalStudents}</div>
-//                 <p className="text-xs text-gray-500">Tous cours confondus</p>
-//               </CardContent>
-//             </Card>
-
-//             <Card>
-//               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//                 <CardTitle className="text-sm font-medium text-gray-600">
-//                   Heures enseignées
-//                 </CardTitle>
-//                 <Clock className="h-4 w-4 text-orange-600" />
-//               </CardHeader>
-//               <CardContent>
-//                 <div className="text-2xl font-bold text-gray-900">{stats.hoursTaught}h</div>
-//                 <p className="text-xs text-gray-500">Cette année académique</p>
-//               </CardContent>
-//             </Card>
-
-//             <Card>
-//               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//                 <CardTitle className="text-sm font-medium text-gray-600">
-//                   Progression moyenne
-//                 </CardTitle>
-//                 <TrendingUp className="h-4 w-4 text-purple-600" />
-//               </CardHeader>
-//               <CardContent>
-//                 <div className="text-2xl font-bold text-gray-900">{stats.averageProgress}%</div>
-//                 <p className="text-xs text-gray-500">Avancement des cours</p>
-//               </CardContent>
-//             </Card>
-//           </div>
-//         )}
-
-//         {/* Search Bar */}
-//         <Card>
-//           <CardContent className="pt-6">
-//             <div className="flex items-center space-x-2">
-//               <div className="relative flex-1">
-//                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-//                 <Input
-//                   placeholder="Rechercher un cours..."
-//                   value={searchTerm}
-//                   onChange={(e) => setSearchTerm(e.target.value)}
-//                   className="pl-10"
-//                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-//                 />
-//               </div>
-//               <Button onClick={handleSearch} variant="default">
-//                 Rechercher
-//               </Button>
-//             </div>
-//           </CardContent>
-//         </Card>
-
-//         {/* Navigation Tabs */}
-//         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-//           <TabsList className="grid w-full grid-cols-2">
-//             <TabsTrigger value="mes-cours" className="flex items-center gap-2">
-//               <BookOpen className="h-4 w-4" />
-//               Mes cours
-//             </TabsTrigger>
-//             <TabsTrigger value="planification" className="flex items-center gap-2">
-//               <Calendar className="h-4 w-4" />
-//               Planification
-//             </TabsTrigger>
-//           </TabsList>
-
-//           <TabsContent value="mes-cours" className="space-y-6">
-//             {/* Course Cards Grid */}
-//             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-//               {courses.map((course) => (
-//                 <CourseCard
-//                   key={course.id}
-//                   course={course}
-//                   onViewDetails={handleViewDetails}
-//                   onEdit={handleEdit}
-//                   onSettings={handleSettings}
-//                 />
-//               ))}
-//             </div>
-
-//             {courses.length === 0 && (
-//               <div className="text-center py-12">
-//                 <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-//                 <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun cours trouvé</h3>
-//                 <p className="text-gray-500">
-//                   {searchTerm 
-//                     ? 'Aucun cours ne correspond à votre recherche.' 
-//                     : 'Vous n\'avez pas encore de cours assignés.'
-//                   }
-//                 </p>
-//               </div>
-//             )}
-//           </TabsContent>
-
-//           <TabsContent value="planification">
-//             <PlanificationComponent />
-//           </TabsContent>
-//         </Tabs>
-
-//         {/* Course Details Modal */}
-//         <CourseDetailsModal
-//           courseId={selectedCourseId}
-//           isOpen={isDetailsModalOpen}
-//           onClose={handleCloseDetailsModal}
-//           onEdit={handleEdit}
-//         />
-
-//         {/* Course Edit Modal */}
-//         <CourseEditModal
-//           courseId={selectedCourseId}
-//           isOpen={isEditModalOpen}
-//           onClose={handleCloseEditModal}
-//           onSave={handleSaveCourse}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default MesCoursPage;
+}

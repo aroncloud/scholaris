@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { IGetSchedule } from "@/types/planificationType";
 import {
   getCurriculumSchedule,
@@ -86,50 +86,58 @@ export default function CoursePlanningTab() {
   }, [selectedFilter, factorizedPrograms, teacherList, classrooms]);
 
   // Fonction pour récupérer les données filtrées
-  const fetchFilteredData = async (start: string, end: string) => {
-    if (!selectedSubFilter?.value) {
-      console.log("Pas de sous-filtre sélectionné");
-      setTimetableData([]);
-      return;
-    }
-
-    const key = String(selectedFilter.value);
-    setIsLoadingCalendarData(true);
-    console.log("Fetching data for:", { key, subFilter: selectedSubFilter.value, start, end });
-
-    try {
-      let result: any;
-
-      switch (key) {
-        case String(PlanificationStatus.CURRICULUM):
-          result = await getCurriculumSchedule(selectedSubFilter.value, start, end);
-          break;
-        case String(PlanificationStatus.TEACHER):
-          result = await getTeacherSchedule(selectedSubFilter.value, start, end);
-          break;
-        case String(PlanificationStatus.RESSOURCE):
-          result = await getResourceSchedule(selectedSubFilter.value, start, end);
-          break;
-        default:
-          result = null;
-          break;
-      }
-
-      console.log("API Result:", result);
-
-      if (result?.code === "success") {
-        setTimetableData(result.data.body || []);
-      } else {
+  const fetchFilteredData = useCallback(
+    async (start: string, end: string) => {
+      if (!selectedSubFilter?.value) {
+        console.log("Pas de sous-filtre sélectionné");
         setTimetableData([]);
-        console.error("Erreur API:", result?.error);
+        return;
       }
-    } catch (err) {
-      console.error("Erreur récupération calendrier :", err);
-      setTimetableData([]);
-    } finally {
-      setIsLoadingCalendarData(false);
-    }
-  };
+
+      const key = String(selectedFilter.value);
+      setIsLoadingCalendarData(true);
+      console.log("Fetching data for:", { key, subFilter: selectedSubFilter.value, start, end });
+
+      try {
+        let result: any;
+
+        switch (key) {
+          case String(PlanificationStatus.CURRICULUM):
+            result = await getCurriculumSchedule(selectedSubFilter.value, start, end);
+            break;
+          case String(PlanificationStatus.TEACHER):
+            result = await getTeacherSchedule(selectedSubFilter.value, start, end);
+            break;
+          case String(PlanificationStatus.RESSOURCE):
+            result = await getResourceSchedule(selectedSubFilter.value, start, end);
+            break;
+          default:
+            result = null;
+            break;
+        }
+
+        console.log("API Result:", result);
+
+        if (result?.code === "success") {
+          setTimetableData(result.data.body || []);
+        } else {
+          setTimetableData([]);
+          console.error("Erreur API:", result?.error);
+        }
+      } catch (err) {
+        console.error("Erreur récupération calendrier :", err);
+        setTimetableData([]);
+      } finally {
+        setIsLoadingCalendarData(false);
+      }
+    },
+    [
+      selectedSubFilter?.value,
+      selectedFilter?.value,
+      setTimetableData,
+      setIsLoadingCalendarData,
+    ]
+  );
 
   // Centraliser les dates du mois courant
   const getMonthRange = () => {

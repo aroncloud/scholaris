@@ -1,783 +1,640 @@
-'use client'
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react/no-unescaped-entities */
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Building2,
-  Settings,
-  Shield,
-  Database,
-  Users,
-  Key,
-  Bell,
-  Mail,
-  Server,
-  Monitor,
-  HardDrive,
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Download,
-  Upload,
-  RefreshCw,
-  Power,
-  Wifi,
-  Search,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Plus,
-  Eye,
-  Lock,
-  Unlock,
-} from "lucide-react";
+"use client"
 
-const systemStats = [
-  {
-    title: "Utilisation serveur",
-    value: "68%",
-    status: "normal",
-    description: "CPU et mémoire",
-  },
-  {
-    title: "Base de données",
-    value: "2.4 GB",
-    status: "normal",
-    description: "Espace utilisé",
-  },
-  {
-    title: "Utilisateurs connectés",
-    value: "247",
-    status: "normal",
-    description: "Sessions actives",
-  },
-  {
-    title: "Temps de réponse",
-    value: "89ms",
-    status: "excellent",
-    description: "Moyenne 24h",
-  },
-];
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { Download, CheckCircle, XCircle, Clock, ChevronDown, ChevronRight, FileText, BookOpen, GraduationCap } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-const systemConfig = [
-  {
-    id: 1,
-    category: "Général",
-    setting: "Nom de l'établissement",
-    value: "Université de Sciences de la Santé",
-    type: "text",
-    editable: true,
-  },
-  {
-    id: 2,
-    category: "Général",
-    setting: "Année académique courante",
-    value: "2023-2024",
-    type: "select",
-    editable: true,
-  },
-  {
-    id: 3,
-    category: "Sécurité",
-    setting: "Durée session (minutes)",
-    value: "120",
-    type: "number",
-    editable: true,
-  },
-  {
-    id: 4,
-    category: "Sécurité",
-    setting: "Authentification 2FA",
-    value: "Activé",
-    type: "toggle",
-    editable: true,
-  },
-  {
-    id: 5,
-    category: "Email",
-    setting: "Serveur SMTP",
-    value: "smtp.univ.fr",
-    type: "text",
-    editable: true,
-  },
-  {
-    id: 6,
-    category: "Email",
-    setting: "Notifications automatiques",
-    value: "Activé",
-    type: "toggle",
-    editable: true,
-  },
-];
+// Types simplifiés
+interface CCGrade {
+  id: string;
+  grade: number | null;
+  maxGrade: number;
+  date: string;
+  published: boolean;
+}
 
-const backupHistory = [
-  {
-    id: 1,
-    date: "2024-01-20 02:00",
-    type: "Complète",
-    taille: "124 MB",
-    statut: "Succès",
-    duree: "12 min",
-  },
-  {
-    id: 2,
-    date: "2024-01-19 02:00",
-    type: "Incrémentale",
-    taille: "23 MB",
-    statut: "Succès",
-    duree: "3 min",
-  },
-  {
-    id: 3,
-    date: "2024-01-18 02:00",
-    type: "Incrémentale",
-    taille: "31 MB",
-    statut: "Erreur",
-    duree: "5 min",
-    erreur: "Espace insuffisant",
-  },
-];
+interface UE {
+  id: string;
+  name: string;
+  code: string;
+  credits: number;
+  ccGrade: CCGrade;
+  validated: boolean | null;
+}
 
-const auditLogs = [
-  {
-    id: 1,
-    date: "2024-01-20 14:30",
-    utilisateur: "admin@univ.fr",
-    action: "Modification configuration",
-    ressource: "Paramètres système",
-    ip: "192.168.1.10",
-    statut: "Succès",
-  },
-  {
-    id: 2,
-    date: "2024-01-20 10:15",
-    utilisateur: "marie.dupont@rh.univ.fr",
-    action: "Création utilisateur",
-    ressource: "Profil enseignant",
-    ip: "192.168.1.25",
-    statut: "Succès",
-  },
-  {
-    id: 3,
-    date: "2024-01-20 09:45",
-    utilisateur: "inconnu",
-    action: "Tentative connexion",
-    ressource: "Interface admin",
-    ip: "203.45.67.89",
-    statut: "Échec",
-  },
-];
+interface SequentialExam {
+  id: string;
+  grade: number | null;
+  maxGrade: number;
+  date: string;
+  published: boolean;
+}
 
-const permissions = [
-  {
-    id: 1,
-    module: "Gestion des utilisateurs",
-    administrateur: true,
-    rh: true,
-    scolarite: false,
-    enseignant: false,
-    etudiant: false,
-  },
-  {
-    id: 2,
-    module: "Programmes académiques",
-    administrateur: true,
-    rh: false,
-    scolarite: true,
-    enseignant: false,
-    etudiant: false,
-  },
-  {
-    id: 3,
-    module: "Gestion des notes",
-    administrateur: true,
-    rh: false,
-    scolarite: true,
-    enseignant: true,
-    etudiant: false,
-  },
-  {
-    id: 4,
-    module: "Consultation dossier",
-    administrateur: true,
-    rh: true,
-    scolarite: true,
-    enseignant: false,
-    etudiant: true,
-  },
-];
+interface Module {
+  id: string;
+  name: string;
+  code: string;
+  category: string;
+  totalCredits: number;
+  coefficient: number;
+  ues: UE[];
+  sequentialExam: SequentialExam;
+  finalGrade: number | null;
+  validated: boolean | null;
+}
 
-export default function AdminPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
-  const [selectedConfig, setSelectedConfig] = useState(null);
+interface Curriculum {
+  id: string;
+  name: string;
+  level: string;
+  semester: string;
+  period: string;
+  modules: Module[];
+  generalAverage: number | null;
+  totalCredits: number;
+  validatedCredits: number;
+  juryDecision: 'ADMIS' | 'REFUSE' | 'RATTRAPAGE' | 'EN_COURS';
+  published: boolean;
+}
 
-  const getStatusColor = (statut: string) => {
-    switch (statut) {
-      case "Succès":
-      case "normal":
-      case "Activé":
-        return "bg-green-100 text-green-800";
-      case "Erreur":
-      case "Échec":
-        return "bg-red-100 text-red-800";
-      case "excellent":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+const HealthStudentPortal: React.FC = () => {
+  const [selectedCurriculum, setSelectedCurriculum] = useState<string>('inf-l2-s3');
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set(['mod-soins-inf']));
+
+  const studentInfo = {
+    name: 'Marie DUBOIS',
+    studentId: '2024-INF-001',
+    program: 'Formation Infirmier',
+    academicYear: '2024-2025'
   };
 
-  const getStatusIcon = (statut: string) => {
-    switch (statut) {
-      case "Succès":
-      case "normal":
-      case "excellent":
-        return <CheckCircle className="h-4 w-4" />;
-      case "Erreur":
-      case "Échec":
-        return <AlertTriangle className="h-4 w-4" />;
+  const curriculums: Curriculum[] = [
+    {
+      id: 'inf-l2-s3',
+      name: 'Formation Infirmier L2',
+      level: 'Licence 2',
+      semester: 'Semestre 3',
+      period: 'Sept 2024 - Jan 2025',
+      generalAverage: 14.2,
+      totalCredits: 30,
+      validatedCredits: 28,
+      juryDecision: 'ADMIS',
+      published: true,
+      modules: [
+        {
+          id: 'mod-soins-inf',
+          name: 'Soins Infirmiers',
+          code: 'SI-300',
+          category: 'Formation Clinique',
+          totalCredits: 12,
+          coefficient: 4,
+          finalGrade: 15.2,
+          validated: true,
+          sequentialExam: {
+            id: 'seq-si',
+            grade: 14.5,
+            maxGrade: 20,
+            date: '2024-12-15',
+            published: true
+          },
+          ues: [
+            {
+              id: 'ue-soins-fund',
+              name: 'Soins Fondamentaux',
+              code: 'UE 4.1',
+              credits: 6,
+              validated: true,
+              ccGrade: {
+                id: 'cc-fund',
+                grade: 16.0,
+                maxGrade: 20,
+                date: '2024-11-20',
+                published: true
+              }
+            },
+            {
+              id: 'ue-hygiene',
+              name: 'Hygiène et Prévention',
+              code: 'UE 2.10',
+              credits: 6,
+              validated: true,
+              ccGrade: {
+                id: 'cc-hygiene',
+                grade: 14.5,
+                maxGrade: 20,
+                date: '2024-11-25',
+                published: true
+              }
+            }
+          ]
+        },
+        {
+          id: 'mod-pharma',
+          name: 'Pharmacologie',
+          code: 'PHARM-300',
+          category: 'Sciences Biomédicales',
+          totalCredits: 8,
+          coefficient: 3,
+          finalGrade: 13.8,
+          validated: true,
+          sequentialExam: {
+            id: 'seq-pharm',
+            grade: 13.2,
+            maxGrade: 20,
+            date: '2024-12-10',
+            published: true
+          },
+          ues: [
+            {
+              id: 'ue-pharma-gen',
+              name: 'Pharmacologie Générale',
+              code: 'UE 2.11',
+              credits: 4,
+              validated: true,
+              ccGrade: {
+                id: 'cc-pharma',
+                grade: 14.0,
+                maxGrade: 20,
+                date: '2024-11-10',
+                published: true
+              }
+            },
+            {
+              id: 'ue-therap',
+              name: 'Thérapeutiques',
+              code: 'UE 2.12',
+              credits: 4,
+              validated: true,
+              ccGrade: {
+                id: 'cc-therap',
+                grade: 13.5,
+                maxGrade: 20,
+                date: '2024-11-15',
+                published: true
+              }
+            }
+          ]
+        },
+        {
+          id: 'mod-patho',
+          name: 'Pathologie',
+          code: 'PATH-300',
+          category: 'Sciences Biomédicales',
+          totalCredits: 10,
+          coefficient: 3,
+          finalGrade: 14.0,
+          validated: true,
+          sequentialExam: {
+            id: 'seq-path',
+            grade: 13.5,
+            maxGrade: 20,
+            date: '2024-12-12',
+            published: true
+          },
+          ues: [
+            {
+              id: 'ue-anat',
+              name: 'Anatomie Pathologique',
+              code: 'UE 2.2',
+              credits: 5,
+              validated: true,
+              ccGrade: {
+                id: 'cc-anat',
+                grade: 14.5,
+                maxGrade: 20,
+                date: '2024-11-05',
+                published: true
+              }
+            },
+            {
+              id: 'ue-physio-path',
+              name: 'Physiopathologie',
+              code: 'UE 2.3',
+              credits: 5,
+              validated: true,
+              ccGrade: {
+                id: 'cc-physio',
+                grade: 13.5,
+                maxGrade: 20,
+                date: '2024-11-12',
+                published: true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'inf-l2-s2',
+      name: 'Formation Infirmier L2',
+      level: 'Licence 2',
+      semester: 'Semestre 2',
+      period: 'Jan 2024 - Jun 2024',
+      generalAverage: 13.5,
+      totalCredits: 30,
+      validatedCredits: 30,
+      juryDecision: 'ADMIS',
+      published: true,
+      modules: [
+        {
+          id: 'mod-bio-fund',
+          name: 'Biologie Fondamentale',
+          code: 'BIO-200',
+          category: 'Sciences Biomédicales',
+          totalCredits: 15,
+          coefficient: 4,
+          finalGrade: 13.2,
+          validated: true,
+          sequentialExam: {
+            id: 'seq-bio',
+            grade: 13.0,
+            maxGrade: 20,
+            date: '2024-06-10',
+            published: true
+          },
+          ues: [
+            {
+              id: 'ue-bio-cell',
+              name: 'Biologie Cellulaire',
+              code: 'UE 2.1',
+              credits: 7,
+              validated: true,
+              ccGrade: {
+                id: 'cc-cell',
+                grade: 13.5,
+                maxGrade: 20,
+                date: '2024-05-15',
+                published: true
+              }
+            },
+            {
+              id: 'ue-microbi',
+              name: 'Microbiologie',
+              code: 'UE 2.4',
+              credits: 8,
+              validated: true,
+              ccGrade: {
+                id: 'cc-micro',
+                grade: 12.8,
+                maxGrade: 20,
+                date: '2024-05-20',
+                published: true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ];
+
+  const currentCurriculum = curriculums.find(c => c.id === selectedCurriculum);
+
+  const toggleModule = (moduleId: string) => {
+    const newExpanded = new Set(expandedModules);
+    if (newExpanded.has(moduleId)) {
+      newExpanded.delete(moduleId);
+    } else {
+      newExpanded.add(moduleId);
+    }
+    setExpandedModules(newExpanded);
+  };
+
+  const getGradeColor = (grade: number | null | undefined) => {
+    if (grade === null || grade === undefined) return 'text-gray-400';
+    if (grade >= 16) return 'text-emerald-600 font-semibold';
+    if (grade >= 14) return 'text-blue-600 font-semibold';
+    if (grade >= 10) return 'text-amber-600 font-semibold';
+    return 'text-red-600 font-semibold';
+  };
+
+  const getValidationBadge = (validated: boolean | null) => {
+    if (validated === true) {
+      return <Badge variant="outline" className="text-emerald-600 border-emerald-200"><CheckCircle className="w-3 h-3 mr-1" />Validé</Badge>;
+    }
+    if (validated === false) {
+      return <Badge variant="outline" className="text-red-600 border-red-200"><XCircle className="w-3 h-3 mr-1" />Non validé</Badge>;
+    }
+    return <Badge variant="outline" className="text-gray-500"><Clock className="w-3 h-3 mr-1" />En attente</Badge>;
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'Formation Clinique':
+        return 'bg-blue-50 border-blue-200 text-blue-700';
+      case 'Sciences Biomédicales':
+        return 'bg-purple-50 border-purple-200 text-purple-700';
+      case 'Sciences Humaines':
+        return 'bg-green-50 border-green-200 text-green-700';
       default:
-        return <Clock className="h-4 w-4" />;
+        return 'bg-gray-50 border-gray-200 text-gray-700';
     }
   };
 
   return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">
-              Administration
-            </h2>
-            <p className="text-muted-foreground">
-              Configuration système et paramètres administratifs
-            </p>
-          </div>
-
-          <div className="flex space-x-2">
-            <Button variant="outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Actualiser
-            </Button>
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Exporter logs
-            </Button>
-            <Button>
-              <Settings className="h-4 w-4 mr-2" />
-              Configuration
-            </Button>
-          </div>
-        </div>
-
-        {/* System Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {systemStats.map((stat, index) => (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                {getStatusIcon(stat.status)}
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Tabs */}
-        <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
-            <TabsTrigger value="config">Configuration</TabsTrigger>
-            <TabsTrigger value="permissions">Permissions</TabsTrigger>
-            <TabsTrigger value="backup">Sauvegardes</TabsTrigger>
-            <TabsTrigger value="logs">Logs d'audit</TabsTrigger>
-            <TabsTrigger value="security">Sécurité</TabsTrigger>
-          </TabsList>
-
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Activity className="h-5 w-5" />
-                    <span>Activité système</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Connexions aujourd'hui</span>
-                      <span className="font-bold">1,247</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Documents créés</span>
-                      <span className="font-bold">89</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Notifications envoyées</span>
-                      <span className="font-bold">156</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Erreurs système</span>
-                      <span className="font-bold text-red-600">3</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Monitor className="h-5 w-5" />
-                    <span>Performance</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>CPU</span>
-                        <span>68%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full"
-                          style={{ width: "68%" }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Mémoire</span>
-                        <span>72%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-green-600 h-2 rounded-full"
-                          style={{ width: "72%" }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Disque</span>
-                        <span>45%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-yellow-600 h-2 rounded-full"
-                          style={{ width: "45%" }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Configuration Tab */}
-          <TabsContent value="config" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configuration système</CardTitle>
-                <CardDescription>
-                  Paramètres généraux de l'application
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {systemConfig.map((config) => (
-                    <div
-                      key={config.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div>
-                        <div className="font-medium">{config.setting}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {config.category}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-sm font-medium">
-                          {config.value}
-                        </div>
-                        {config.editable && (
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Permissions Tab */}
-          <TabsContent value="permissions" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Matrice des permissions</CardTitle>
-                <CardDescription>
-                  Gestion des accès par rôle et module
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Module</TableHead>
-                      <TableHead>Administrateur</TableHead>
-                      <TableHead>RH</TableHead>
-                      <TableHead>Scolarité</TableHead>
-                      <TableHead>Enseignant</TableHead>
-                      <TableHead>Étudiant</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {permissions.map((perm) => (
-                      <TableRow key={perm.id}>
-                        <TableCell className="font-medium">
-                          {perm.module}
-                        </TableCell>
-                        <TableCell>
-                          {perm.administrateur ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {perm.rh ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {perm.scolarite ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {perm.enseignant ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {perm.etudiant ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Backup Tab */}
-          <TabsContent value="backup" className="space-y-4">
-            <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Info étudiant */}
+            <div className="flex items-center space-x-3">
+              <GraduationCap className="w-6 h-6 sm:w-7 sm:h-7" />
               <div>
-                <h3 className="text-lg font-medium">Sauvegardes</h3>
-                <p className="text-sm text-muted-foreground">
-                  Gestion des sauvegardes système
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
+                  Relevé de Notes
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  {studentInfo.name} • {studentInfo.program}
                 </p>
               </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Nouvelle sauvegarde
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center space-x-3">
+              <Button size="sm" variant="info" className="w-full sm:w-auto">
+                <Download className="w-4 h-4 mr-2" />
+                Télécharger
               </Button>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Historique des sauvegardes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Taille</TableHead>
-                      <TableHead>Durée</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {backupHistory.map((backup) => (
-                      <TableRow key={backup.id}>
-                        <TableCell>{backup.date}</TableCell>
-                        <TableCell>{backup.type}</TableCell>
-                        <TableCell>{backup.taille}</TableCell>
-                        <TableCell>{backup.duree}</TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <Badge
-                              variant="secondary"
-                              className={getStatusColor(backup.statut)}
-                            >
-                              {backup.statut}
-                            </Badge>
-                            {backup.erreur && (
-                              <div className="text-xs text-red-600">
-                                {backup.erreur}
+      <div className="p-4 sm:p-6">
+        {/* Vue d'ensemble */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          {/* Moyenne générale */}
+          <Card>
+            <CardContent className="p-4 sm:p-6">
+              <div className="text-center">
+                <div
+                  className={`text-2xl sm:text-3xl font-bold ${getGradeColor(
+                    currentCurriculum?.generalAverage
+                  )}`}
+                >
+                  {currentCurriculum?.generalAverage
+                    ? `${currentCurriculum.generalAverage.toFixed(1)}/20`
+                    : "N/A"}
+                </div>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  Moyenne Générale
+                </p>
+                <Progress
+                  value={
+                    currentCurriculum?.generalAverage
+                      ? (currentCurriculum.generalAverage / 20) * 100
+                      : 0
+                  }
+                  className="mt-2"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Crédits */}
+          <Card>
+            <CardContent className="p-4 sm:p-6">
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  {currentCurriculum?.validatedCredits || 0}/
+                  {currentCurriculum?.totalCredits || 0}
+                </div>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  Crédits ECTS
+                </p>
+                <Progress
+                  value={
+                    currentCurriculum
+                      ? (currentCurriculum.validatedCredits /
+                          currentCurriculum.totalCredits) *
+                        100
+                      : 0
+                  }
+                  className="mt-2"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Décision */}
+          <Card>
+            <CardContent className="p-4 sm:p-6">
+              <div className="text-center">
+                <div className="flex justify-center mb-2">
+                  {currentCurriculum?.juryDecision === "ADMIS" && (
+                    <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 text-green-600" />
+                  )}
+                  {currentCurriculum?.juryDecision === "REFUSE" && (
+                    <XCircle className="w-7 h-7 sm:w-8 sm:h-8 text-red-600" />
+                  )}
+                  {currentCurriculum?.juryDecision === "EN_COURS" && (
+                    <Clock className="w-7 h-7 sm:w-8 sm:h-8 text-blue-600" />
+                  )}
+                </div>
+                <div className="font-semibold text-gray-900 text-sm sm:text-base">
+                  {currentCurriculum?.juryDecision === "ADMIS"
+                    ? "ADMIS(E)"
+                    : currentCurriculum?.juryDecision === "REFUSE"
+                    ? "REFUSÉ(E)"
+                    : "EN COURS"}
+                </div>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  Décision du Jury
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Navigation */}
+        <Tabs value={selectedCurriculum} onValueChange={setSelectedCurriculum}>
+          <TabsList className="w-full">
+            {curriculums.map((curriculum) => (
+              <TabsTrigger
+                key={curriculum.id}
+                value={curriculum.id}
+                className="flex flex-col text-xs sm:text-sm"
+              >
+                <div className="font-medium">{curriculum.semester}</div>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {curriculums.map((curriculum) => (
+            <TabsContent key={curriculum.id} value={curriculum.id}>
+              <div className="space-y-4">
+                {curriculum.modules.map((module) => (
+                  <Card key={module.id}>
+                    <Collapsible
+                      open={expandedModules.has(module.id)}
+                      onOpenChange={() => toggleModule(module.id)}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <CardHeader className="cursor-pointer hover:bg-gray-50">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center space-x-3">
+                              {expandedModules.has(module.id) ? (
+                                <ChevronDown className="w-5 h-5" />
+                              ) : (
+                                <ChevronRight className="w-5 h-5" />
+                              )}
+                              <div>
+                                <div className="flex flex-wrap items-center space-x-2">
+                                  <CardTitle className="text-base sm:text-lg">
+                                    {module.name}
+                                  </CardTitle>
+                                  <Badge className={getCategoryColor(module.category)}>
+                                    {module.category}
+                                  </Badge>
+                                </div>
+                                <CardDescription className="text-xs sm:text-sm">
+                                  {module.code} • {module.totalCredits} crédits
+                                </CardDescription>
                               </div>
-                            )}
+                            </div>
+                            <div className="flex items-center space-x-4">
+                              <div className="text-right">
+                                <div
+                                  className={`text-lg sm:text-xl font-bold ${getGradeColor(
+                                    module.finalGrade
+                                  )}`}
+                                >
+                                  {module.finalGrade
+                                    ? `${module.finalGrade.toFixed(1)}/20`
+                                    : "N/A"}
+                                </div>
+                              </div>
+                              {getValidationBadge(module.validated)}
+                            </div>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Download className="mr-2 h-4 w-4" />
-                                Télécharger
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <RefreshCw className="mr-2 h-4 w-4" />
-                                Restaurer
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Supprimer
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                        </CardHeader>
+                      </CollapsibleTrigger>
 
-          {/* Logs Tab */}
-          <TabsContent value="logs" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Logs d'audit</span>
-                  <div className="flex space-x-2">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Rechercher dans les logs..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-8 w-64"
-                      />
-                    </div>
-                  </div>
-                </CardTitle>
-                <CardDescription>
-                  Traçabilité des actions administratives
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date/Heure</TableHead>
-                      <TableHead>Utilisateur</TableHead>
-                      <TableHead>Action</TableHead>
-                      <TableHead>Ressource</TableHead>
-                      <TableHead>IP</TableHead>
-                      <TableHead>Statut</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {auditLogs.map((log) => (
-                      <TableRow key={log.id}>
-                        <TableCell className="font-mono text-sm">
-                          {log.date}
-                        </TableCell>
-                        <TableCell>{log.utilisateur}</TableCell>
-                        <TableCell>{log.action}</TableCell>
-                        <TableCell>{log.ressource}</TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {log.ip}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="secondary"
-                            className={getStatusColor(log.statut)}
-                          >
-                            {log.statut}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                      <CollapsibleContent>
+                        <CardContent className="space-y-6">
+                          {/* Examen séquentiel */}
+                          <div>
+                            <h4 className="font-medium mb-3 flex items-center text-sm sm:text-base">
+                              <FileText className="w-4 h-4 mr-2" />
+                              Examen Séquentiel
+                            </h4>
+                            <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                              <div className="flex flex-wrap justify-between items-center gap-2">
+                                <div>
+                                  <span className="text-xs sm:text-sm text-gray-600">
+                                    {new Date(
+                                      module.sequentialExam.date
+                                    ).toLocaleDateString("fr-FR")}
+                                  </span>
+                                  {module.sequentialExam.published ? (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-green-600 border-green-200 ml-2"
+                                    >
+                                      Publié
+                                    </Badge>
+                                  ) : (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-gray-500 ml-2"
+                                    >
+                                      En attente
+                                    </Badge>
+                                  )}
+                                </div>
+                                <span
+                                  className={`text-base sm:text-lg font-semibold ${getGradeColor(
+                                    module.sequentialExam.grade
+                                  )}`}
+                                >
+                                  {module.sequentialExam.grade !== null
+                                    ? `${module.sequentialExam.grade}/${module.sequentialExam.maxGrade}`
+                                    : "N/A"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
 
-          {/* Security Tab */}
-          <TabsContent value="security" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Shield className="h-5 w-5" />
-                    <span>Paramètres de sécurité</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">Authentification 2FA</div>
-                        <div className="text-sm text-muted-foreground">
-                          Obligatoire pour les admins
-                        </div>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">Verrouillage auto</div>
-                        <div className="text-sm text-muted-foreground">
-                          Après 3 tentatives
-                        </div>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">Logs d'audit</div>
-                        <div className="text-sm text-muted-foreground">
-                          Enregistrement complet
-                        </div>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                          <Separator />
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <AlertTriangle className="h-5 w-5" />
-                    <span>Alertes sécurité</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                      <div>
-                        <div className="font-medium text-red-800">
-                          Tentatives de connexion suspectes
-                        </div>
-                        <div className="text-sm text-red-600">
-                          3 tentatives depuis 203.45.67.89
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <Lock className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                      <div>
-                        <div className="font-medium text-yellow-800">
-                          Certificat SSL expire bientôt
-                        </div>
-                        <div className="text-sm text-yellow-600">
-                          Expiration dans 15 jours
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <RefreshCw className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                          {/* UE et CC */}
+                          <div>
+                            <h4 className="font-medium mb-3 sm:mb-4 flex items-center text-sm sm:text-base">
+                              <BookOpen className="w-4 h-4 mr-2" />
+                              Unités d&apos;Enseignement (UE)
+                            </h4>
+                            <div className="space-y-3">
+                              {module.ues.map((ue) => (
+                                <div
+                                  key={ue.id}
+                                  className="flex flex-wrap items-center justify-between p-3 sm:p-4 bg-white border border-gray-200 rounded-lg gap-2"
+                                >
+                                  <div className="flex-1">
+                                    <div className="flex items-center space-x-2">
+                                      <h5 className="font-medium text-sm sm:text-base">
+                                        {ue.name}
+                                      </h5>
+                                      {getValidationBadge(ue.validated)}
+                                    </div>
+                                    <p className="text-xs sm:text-sm text-gray-600">
+                                      {ue.code} • {ue.credits} crédits
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center space-x-4">
+                                    <div className="text-xs sm:text-sm text-gray-500">
+                                      CC:{" "}
+                                      {new Date(
+                                        ue.ccGrade.date
+                                      ).toLocaleDateString("fr-FR")}
+                                    </div>
+                                    <span
+                                      className={`text-sm sm:text-lg font-semibold ${getGradeColor(
+                                        ue.ccGrade.grade
+                                      )}`}
+                                    >
+                                      {ue.ccGrade.grade !== null
+                                        ? `${ue.ccGrade.grade}/${ue.ccGrade.maxGrade}`
+                                        : "N/A"}
+                                    </span>
+                                    {ue.ccGrade.published ? (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-green-600 border-green-200"
+                                      >
+                                        Publié
+                                      </Badge>
+                                    ) : (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-gray-500"
+                                      >
+                                        En attente
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
+    </div>
+
   );
-}
+};
+
+export default HealthStudentPortal;

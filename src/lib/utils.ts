@@ -8,6 +8,32 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+    
+export const getMonthRange = () => {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), 1)
+  .toISOString()
+  .split("T")[0];
+  const end = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+  .toISOString()
+  .split("T")[0];
+  return { start, end };
+};
+
+export const getWeekRange = () => {
+  const today = new Date();
+  const day = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Ajuste la date pour le lundi de la semaine
+
+  const startOfWeek = new Date(today.setDate(diff));
+  const endOfWeek = new Date(today.setDate(diff + 6));
+
+  const start = startOfWeek.toISOString().split("T")[0];
+  const end = endOfWeek.toISOString().split("T")[0];
+
+  return { start, end };
+};
+
 
 export function getExtension(filename: string): string {
   const parts = filename.split('.');
@@ -97,6 +123,7 @@ export const getStatusColor = (status: string): string => {
     case "APPROUVE":
     case "RENTED":
     case "ACTIVE":
+    case "TERMINATED":
     case "PAID":
     case "ACTIF":
       return "bg-green-100 text-green-600 dark:bg-gray-700/20 dark:text-green-400";
@@ -108,6 +135,7 @@ export const getStatusColor = (status: string): string => {
     // Converti
     case "CONVERTI":
     case "CONVERTED":
+    case "COMPLETED":
     case "PLANNED":
       return "bg-blue-100 text-blue-600 dark:bg-gray-700/20 dark:text-blue-400";
 

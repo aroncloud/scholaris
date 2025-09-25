@@ -13,7 +13,7 @@ export async function createEvaluation(evaluation: ICreateEvaluation) {
     const token = session.accessToken;
 
     const response = await axios.post(
-      `${process.env.GRADE_WORKER_ENDPOINT}/api/evaluations`,
+      `${process.env.GRADE_WORKER_ENDPOINT}/api/evaluations/generate`,
       { ...evaluation },
       {
         headers: {
@@ -64,6 +64,40 @@ export async function getEvaluationListForCurriculum(curriculum_code: string) {
   }
 }
 
+
+export async function getListModulesEvaluationsForCurriculum(
+  curriculum_code: string,
+  schedule_code: string
+) {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.get(
+      `${process.env.GRADE_WORKER_ENDPOINT}/api/evaluations/for-curriculum/${curriculum_code}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          schedule_code, // sera automatiquement ajouté comme ?schedule_code=xxx
+        },
+      }
+    );
+
+    return {
+      code: "success",
+      error: null,
+      data: response.data,
+    };
+  } catch (error: unknown) {
+    console.log("-->getListModulesEvaluationsForCurriculum.error");
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
+}
+
+
 export async function getEvaluationListForTeacher(teacher_code: string) {
     try {
         const session = await verifySession();
@@ -89,3 +123,4 @@ export async function getEvaluationListForTeacher(teacher_code: string) {
     return errResult;
   }
 }
+

@@ -40,6 +40,16 @@ type Address = {
   Country: string;
   Street: string;
 }
+export interface IUserSession {
+  user_code: string;
+  user_name: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  gender: "MALE" | "FEMALE";
+  phone_number: string;
+}
+
 
 export type SessionPayload = {
   accessToken: string;
@@ -47,6 +57,7 @@ export type SessionPayload = {
   email: string;
   roles: string[];
   expiresAt: Date;
+  user: IUserSession;
 }
 
 

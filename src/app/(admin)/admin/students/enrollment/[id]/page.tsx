@@ -211,7 +211,7 @@ const ApplicationDetailPage: React.FC = () => {
     <div className="min-h-screen">
       <div className="mx-auto space-y-6">
         {/* Header section */}
-        <div className="bg-white border-b border-gray-200 -mx-6 -mt-6 px-6 py-4">
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="sm" onClick={handleBack} className="hover:bg-gray-100">

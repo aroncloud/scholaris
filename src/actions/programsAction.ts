@@ -772,29 +772,3 @@ export async function getUEListPerCurriculum(curriculumId: string){
     }
 }
 
-
-export async function getListModulesEvaluationsForCurriculum (curriculum_code: string) {
-    try {
-        const session = await verifySession();
-        
-        const token = session.accessToken;
-        
-
-        const response = await axios.get(`${process.env.GRADE_WORKER_ENDPOINT}/api/evaluations/for-curriculum/${curriculum_code}/modules`,{
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-        });
-        console.log('-->result', response.data);
-        
-        return {
-            code: 'success',
-            error: null,
-            data: response.data
-        }
-    } catch (error: unknown) {
-        console.log('-->getListModulesEvaluationsForCurriculum.error')
-        const errResult = actionErrorHandler(error);
-        return errResult;
-    }
-}

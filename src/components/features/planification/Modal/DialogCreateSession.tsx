@@ -106,7 +106,9 @@ export function DialogCreateSession({
         if(selectedUE) {
             setValue('session_title', UEList.find(ue => ue.course_unit_code === selectedUE)?.course_unit_name ?? '')
         }
-    }, [selectedUE, setValue]);
+    }, [UEList, selectedUE, setValue]);
+    
+    
     useEffect(() => {
         if(selectedCurriculum && selectedAcademicYear) {
             fetchListAcademicYearsSchedulesForCurriculum(selectedCurriculum, selectedAcademicYear);
@@ -121,8 +123,8 @@ export function DialogCreateSession({
         const result = await onSave(data);
         if (!result) return;
         if (result) {
-        reset();
-        onOpenChange(false);
+            reset();
+            onOpenChange(false);
         }
     };
 
@@ -223,16 +225,16 @@ export function DialogCreateSession({
                     control={control}
                     render={({ field }) => (
                         <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
-                        <SelectTrigger className={errors.academic_year_code ? "border-red-500 w-full" : "w-full"}>
-                            <SelectValue placeholder="Sélectionner l'année académique" />
-                        </SelectTrigger>
-                        <SelectContent className="w-full">
-                            {academicYears.map((acy) => (
-                            <SelectItem key={acy.academic_year_code} value={acy.academic_year_code}>
-                                {acy.start_date.split('-')[0]} / {acy.end_date.split('-')[0]}
-                            </SelectItem>
-                            ))}
-                        </SelectContent>
+                            <SelectTrigger className={errors.academic_year_code ? "border-red-500 w-full" : "w-full"}>
+                                <SelectValue placeholder="Sélectionner l'année académique" />
+                            </SelectTrigger>
+                            <SelectContent className="w-full">
+                                {academicYears.map((acy) => (
+                                <SelectItem key={acy.academic_year_code} value={acy.academic_year_code}>
+                                    {acy.start_date.split('-')[0]} / {acy.end_date.split('-')[0]}
+                                </SelectItem>
+                                ))}
+                            </SelectContent>
                         </Select>
                     )}
                 />
@@ -246,16 +248,16 @@ export function DialogCreateSession({
                     control={control}
                     render={({ field }) => (
                         <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting || scheduleList.length == 0}>
-                        <SelectTrigger className={errors.schedule_code ? "border-red-500 w-full" : "w-full"}>
-                            <SelectValue placeholder="Sélectionner une séquence" />
-                        </SelectTrigger>
-                        <SelectContent className="w-full">
-                            {scheduleList.map((ays) => (
-                                <SelectItem key={ays.schedule_code} value={ays.schedule_code}>
-                                    {ays.sequence_name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
+                            <SelectTrigger className={errors.schedule_code ? "border-red-500 w-full" : "w-full"}>
+                                <SelectValue placeholder="Sélectionner une séquence" />
+                            </SelectTrigger>
+                            <SelectContent className="w-full">
+                                {scheduleList.map((ays) => (
+                                    <SelectItem key={ays.schedule_code} value={ays.schedule_code}>
+                                        {ays.sequence_name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
                         </Select>
                     )}
                 />

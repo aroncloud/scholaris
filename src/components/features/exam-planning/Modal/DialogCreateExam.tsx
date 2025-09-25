@@ -25,8 +25,8 @@ import { useFactorizedProgramStore } from "@/store/programStore";
 import { useAcademicYearSchedules } from "@/hooks/feature/planifincation/useAcademicYearSchedules";
 import { useCallback, useEffect, useState } from "react";
 import { ICreateEvaluation } from "@/types/examTypes";
-import { IGetModulePerCurriculum } from "@/types/programTypes";
-import { getModuleListPerCurriculum } from "@/actions/programsAction";
+import { IGetModulePerCurriculum, IGetUECurriculum } from "@/types/programTypes";
+import { getListAcademicYearsSchedulesForCurriculum, getModuleListPerCurriculum, getUEListPerCurriculum } from "@/actions/programsAction";
 import { showToast } from "@/components/ui/showToast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
@@ -34,27 +34,31 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
+import { IGetAcademicYearsSchedulesForCurriculum } from "@/types/planificationType";
 
 interface DialogCreateEvaluationProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (data: ICreateEvaluation) => Promise<boolean>;
-  examType?: "CC" | "EXAM_SEQ";
   curriculum_code?: string;
+  academic_year_code?: string;
 }
 
 export default function DialogCreateExam({
   open,
   onOpenChange,
   onSave,
-  examType,
-  curriculum_code
+  curriculum_code,
+  academic_year_code,
 }: DialogCreateEvaluationProps) {
-  const { factorizedPrograms } = useFactorizedProgramStore();
-  const { academicYearSchedule, loading } = useAcademicYearSchedules();
-  const { } = useAcademicYearStore();
+  const [ueList, setUEList] = useState<IGetUECurriculum[]>([]);
+  const [scheduleList, setScheduleList] = useState<IGetAcademicYearsSchedulesForCurriculum[]>([]);
 
   const [moduleList, setModuleList] = useState<IGetModulePerCurriculum[]>([]);
+  const { factorizedPrograms } = useFactorizedProgramStore();
+  const { academicYears, getCurrentAcademicYear } = useAcademicYearStore();
+  const { } = useAcademicYearStore();
+
 
   const {
     register,
@@ -65,61 +69,48 @@ export default function DialogCreateExam({
     formState: { errors, isSubmitting },
   } = useForm<ICreateEvaluation>({
     defaultValues: {
-      target_code: "",
-      target_level: examType === "CC" ? "COURSE_UNIT" : "MODULE",
+      target_level: "COURSE_UNIT" ,
       schedule_code: "",
-      evaluation_type_code: examType,
+      evaluation_type_code: "CC",
       title: "",
-      evaluation_date: "",
-      max_score: 20,
-      coefficient: 1,
-      status: "DRAFT",
+      status_code: "READY_FOR_GRADING",
       curriculum_code: curriculum_code ?? "",
+      deadline: "",
+      academic_year_code: "",
     },
   });
 
   // Watchers
   const selectedCurriculum = useWatch({ control, name: "curriculum_code" });
+  const selectedAcademicYear = useWatch({ control, name: "academic_year_code" });
   const evaluationType = useWatch({ control, name: "evaluation_type_code" });
 
-  // const fetchCurrentSemesters = useCallback(async () => {
-  //   console.log('-->academicYears', academicYears);
-  //   const currentYear = academicYears.find(acy => acy.status_code === 'IN_PROGRESS');
-  //   console.log('-->currentYear', currentYear);
-  //   console.log('-->academicYears', academicYears);
-  //   if (currentYear) {
-  //     await refresh(currentYear.academic_year_code);
-  //   }
-  // }, [academicYears, refresh]);
 
-  // Récupération schedule selon année
-  // useEffect(() => {
-  //   // fetchCurrentSemesters();
-  // }, [fetchCurrentSemesters]);
-
-  // Récupération UE
+  // Récupération des curriculum
   const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
-  const ueList: any[] = [];
 
-  // Récupération module quand EXAM_SEQ
   useEffect(() => {
-    if (evaluationType === "EXAM_SEQ" && selectedCurriculum) {
-      const fetchModules = async () => {
-        const result = await getModuleListPerCurriculum(selectedCurriculum);
-        if (result.code === "success") {
-          setModuleList(result.data.body);
-        } else {
-          showToast({
-            variant: "error-solid",
-            message: "Erreur lors de la récupération des modules",
-            description: result.code,
-            position: "top-center",
-          });
-        }
-      };
-      fetchModules();
+    if(academic_year_code){
+      setValue("academic_year_code", academic_year_code);
     }
-  }, [evaluationType, selectedCurriculum]);
+  }, [academic_year_code, setValue]);
+
+
+  useEffect(() => {
+    if(curriculum_code){
+      setValue("curriculum_code", curriculum_code);
+    }
+  }, [curriculum_code, setValue]);
+
+
+  useEffect(() => {
+    if(selectedCurriculum && selectedAcademicYear){
+      fetchListAcademicYearsSchedulesForCurriculum(selectedCurriculum, selectedAcademicYear);
+    }
+  }, [setValue, selectedAcademicYear, selectedCurriculum]);
+
+
+
 
   // Fixer target_level selon type
   useEffect(() => {
@@ -132,14 +123,15 @@ export default function DialogCreateExam({
     }
   }, [evaluationType, setValue]);
 
-  const onSubmit = async (data: ICreateEvaluation) => {
-    const title = data.evaluation_type_code === "CC" ?
-        ueList.find(ue => ue.course_unit_code === data.target_code)?.course_unit_name :
-        moduleList.find(m => m.module_code === data.target_code)?.module_name;
 
-    console.log('-->title', title)
-    const result = await onSave({...data, title: title ?? data.target_code});
+
+  const onSubmit = async (data: ICreateEvaluation) => {
+    console.log('-->data', data)
+    const title = data.evaluation_type_code + ' ' + data.curriculum_code;
+
+    const result = await onSave({...data, title });
     if (!result) return;
+
     reset();
     onOpenChange(false);
   };
@@ -149,6 +141,13 @@ export default function DialogCreateExam({
     reset();
     onOpenChange(false);
   };
+
+
+
+  const fetchListAcademicYearsSchedulesForCurriculum = async (curriculum_code: string, academic_year_code: string) => {
+    const result = await getListAcademicYearsSchedulesForCurriculum(curriculum_code, academic_year_code);
+    setScheduleList(result.data.body)
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
@@ -161,6 +160,32 @@ export default function DialogCreateExam({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+          {/* Année académique */}
+          <div className="space-y-1 col-span-2">
+            <Label>Année académique</Label>
+            <Controller
+              name="academic_year_code"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value || undefined}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner l'année académique" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {academicYears.map((acy) => (
+                      <SelectItem key={acy.academic_year_code} value={acy.academic_year_code}>
+                        {acy.start_date.split("-")[0]} / {acy.end_date.split("-")[0]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
           {/* Curriculum */}
           <div className="space-y-1 col-span-2">
             <Label>Curriculum</Label>
@@ -174,7 +199,7 @@ export default function DialogCreateExam({
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Sélectionner un curriculum" />
                     </SelectTrigger>
-                    <SelectContent className="w-full">
+                    <SelectContent>
                       {curriculumList.map((c) => (
                         <SelectItem key={c.curriculum_code} value={c.curriculum_code}>
                           {c.curriculum_name}
@@ -182,177 +207,87 @@ export default function DialogCreateExam({
                       ))}
                     </SelectContent>
                   </Select>
-                  {fieldState.error && (
-                    <p className="text-red-600 text-sm">{fieldState.error.message}</p>
-                  )}
+                  {fieldState.error && <p className="text-red-600 text-sm">{fieldState.error.message}</p>}
                 </>
+              )}
+            />
+          </div>
+
+
+          {/* Schedule */}
+          <div className="space-y-1">
+            <Label>Programme / Séquence</Label>
+            <Controller
+              name="schedule_code"
+              control={control}
+              rules={{ required: "Séquence requise" }}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner une séquence" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {scheduleList.map((s) => (
+                      <SelectItem key={s.schedule_code} value={s.schedule_code}>
+                        {s.sequence_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             />
           </div>
 
           {/* Type d’évaluation */}
-          <div className="space-y-1 col-span-2">
-            <Label>Type d&apos;évaluation</Label>
+          <div className="space-y-1">
+            <Label>Type d’évaluation</Label>
             <Controller
               name="evaluation_type_code"
               control={control}
               rules={{ required: "Type requis" }}
-              render={({ field, fieldState }) => (
-                <>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner un type" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full">
-                      <SelectItem value="CC">Contrôle Continu</SelectItem>
-                      <SelectItem value="EXAM_SEQ">Examen de Séquence</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {fieldState.error && (
-                    <p className="text-red-600 text-sm">{fieldState.error.message}</p>
-                  )}
-                </>
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner un type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CC">Contrôle Continu</SelectItem>
+                    <SelectItem value="EXAM_SEQ">Examen de Séquence</SelectItem>
+                  </SelectContent>
+                </Select>
               )}
             />
           </div>
 
-          {/* Target code (UE ou Module) */}
-          {evaluationType === "CC" && (
-            <div className="space-y-1 col-span-2">
-              <Label>Unité d&apos;enseignement</Label>
-              <Controller
-                name="target_code"
-                control={control}
-                rules={{ required: "UE requise" }}
-                render={({ field, fieldState }) => (
-                  <>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={!selectedCurriculum}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Sélectionner une UE" />
-                      </SelectTrigger>
-                      <SelectContent className="w-full">
-                        {ueList.map((ue: any) => (
-                          <SelectItem key={ue.course_unit_code} value={ue.course_unit_code}>
-                            {ue.course_unit_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {fieldState.error && <p className="text-red-600 text-sm">{fieldState.error.message}</p>}
-                  </>
-                )}
-              />
-            </div>
-          )}
 
-          {evaluationType === "EXAM_SEQ" && (
-            <div className="space-y-1 col-span-2">
-              <Label>Module</Label>
-              <Controller
-                name="target_code"
-                control={control}
-                rules={{ required: "Module requis" }}
-                render={({ field, fieldState }) => (
-                  <>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={!selectedCurriculum}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Sélectionner un module" />
-                      </SelectTrigger>
-                      <SelectContent className="w-full">
-                        {moduleList.map((m) => (
-                          <SelectItem key={m.module_code} value={m.module_code}>
-                            {m.module_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {fieldState.error && <p className="text-red-600 text-sm">{fieldState.error.message}</p>}
-                  </>
-                )}
-              />
-            </div>
-          )}
-
-          {/* Schedule */}
-          <div className="space-y-1 col-span-2">
-            <Label>Semestre/Trimestre</Label>
+          {/* Deadline */}
+          <div className="col-span-2 space-y-1">
+            <Label>Date limite de depot des notes</Label>
             <Controller
-              name="schedule_code"
+              name="deadline"
               control={control}
-              rules={{ required: "Séquence requise" }}
-              render={({ field, fieldState }) => (
-                <>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={loading}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner une séquence" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full">
-                      {academicYearSchedule.map((ays) => (
-                        <SelectItem key={ays.schedule_code} value={ays.schedule_code}>
-                          {ays.sequence_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {fieldState.error && <p className="text-red-600 text-sm">{fieldState.error.message}</p>}
-                </>
+              rules={{ required: "Date limite requise" }}
+              render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? format(new Date(field.value), "dd/MM/yyyy") : <span>Sélectionner une date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
+                    />
+                  </PopoverContent>
+                </Popover>
               )}
             />
-          </div>
-
-          {/* Date */}
-          <div className="space-y-1 col-span-2">
-            <Label>Date</Label>
-            <Controller
-              name="evaluation_date"
-              control={control}
-              rules={{ required: "Date requise" }}
-              render={({ field, fieldState }) => (
-                <>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
-                        disabled={isSubmitting}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? format(new Date(field.value), "dd/MM/yyyy") : <span>Sélectionner une date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
-                        disabled={isSubmitting}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {fieldState.error && <p className="text-red-600 text-sm">{fieldState.error.message}</p>}
-                </>
-              )}
-            />
-          </div>
-
-          {/* Max Score */}
-          <div className="space-y-1">
-            <Label>Note maximale</Label>
-            <Input
-              type="number"
-              {...register("max_score", { required: "Note requise", valueAsNumber: true })}
-            />
-            {errors.max_score && <p className="text-red-600 text-sm">{errors.max_score.message}</p>}
-          </div>
-
-          {/* Coefficient */}
-          <div className="space-y-1">
-            <Label>Coefficient</Label>
-            <Input
-              type="number"
-              {...register("coefficient", { required: "Coefficient requis", valueAsNumber: true })}
-            />
-            {errors.coefficient && <p className="text-red-600 text-sm">{errors.coefficient.message}</p>}
           </div>
 
           {/* Footer */}
@@ -365,6 +300,7 @@ export default function DialogCreateExam({
             </Button>
           </DialogFooter>
         </form>
+
       </DialogContent>
     </Dialog>
   );

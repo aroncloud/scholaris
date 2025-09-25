@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { v4 as uuiv4 } from "uuid";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent, TabsContents } from '@/components/animate-ui/components/animate/tabs';
 import {
   Download,
   Upload,
@@ -51,7 +51,7 @@ export default function ProgramsPage() {
   
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl p-6">
       {/* Header */}
       <div className="flex flex-col gap-4 w-full">
         {/* Texte et boutons en responsive */}
@@ -108,32 +108,35 @@ export default function ProgramsPage() {
           </TabsTrigger>
           <TabsTrigger value="maquettes">Maquettes pédagogiques</TabsTrigger>
         </TabsList>
+          <TabsContents className="">
+            {/* Filieres Tab */}
+            {loading ? (
+              <SkeletonFilieresTab />
+            ) : (
+              <TabsContent value="program" className="space-y-4">
+                <FilieresTab
+                  programList={programs}
+                  setIsCreateProgramOpen={setIsCreateProgramOpen}
+                  isCreateProgramOpen={isCreateProgramOpen}
+                  isExportModalOpen={isExportModalOpen}
+                  setIExportModalOpen={setIsExportModalOpen}
+                  isImportModalOpen={isImportModalOpen}
+                  setIsImportModalOpen={setIsImportModalOpen}
+                  isDataLoading={loading}
+                  refresh={refresh}
+                />
+              </TabsContent>
+            )}
 
-        {/* Filieres Tab */}
-        {loading ? (
-          <SkeletonFilieresTab />
-        ) : (
-          <FilieresTab
-            programList={programs}
-            setIsCreateProgramOpen={setIsCreateProgramOpen}
-            isCreateProgramOpen={isCreateProgramOpen}
-            isExportModalOpen={isExportModalOpen}
-            setIExportModalOpen={setIsExportModalOpen}
-            isImportModalOpen={isImportModalOpen}
-            setIsImportModalOpen={setIsImportModalOpen}
-            isDataLoading={loading}
-            refresh={refresh}
-          />
-        )}
+            {/* Maquettes Tab */}
+            {!loading && <TabsContent value="maquettes" className="space-y-4"><MaquettesTab curriculumList={curriculumList} refresh={refresh} /></TabsContent>}
 
-        {/* Maquettes Tab */}
-        {!loading && <MaquettesTab curriculumList={curriculumList} refresh={refresh} />}
+            {/* Modules Tab */}
+            
 
-        {/* Modules Tab */}
-        
-
-        {/* Calendrier Tab */}
-        {!loading && <CalendrierTab />}
+            {/* Calendrier Tab */}
+            {!loading && <TabsContent value="academic_year" className="space-y-4"><CalendrierTab /></TabsContent>}
+          </TabsContents>
       </Tabs>
     </div>
   );

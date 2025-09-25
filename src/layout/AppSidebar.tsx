@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { ChevronDownIcon, HorizontaLDots } from "../icons/index";
-import {  BookOpen, GraduationCap, LayoutDashboard, FileText, Users, UserSquare, School, Calendar, Calendar1, Settings, Award, DollarSign, ClipboardList } from "lucide-react";
+import {  BookOpen, GraduationCap, LayoutDashboard, Users, UserSquare, Calendar, Award, DollarSign, ClipboardList, FileText } from "lucide-react";
 import { useMemo } from "react";
 import { useUserStore } from "@/store/useAuthStore";
 
@@ -59,47 +59,49 @@ const navItems: NavItem[] = [
     path: "/admin/students",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
   },
-  // {
-  //   icon: <BookOpen className="w-5 h-5" />,
-  //   name: "Gestion des Cours",
-  //   path: "/admin/cours",
-  //   authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
-  // },
   {
-    icon: <FileText className="w-5 h-5" />,
-    name: "Saisir les notes",
-    path: "/admin/grades-entry",
+    icon: <BookOpen className="w-5 h-5" />,
+    name: "Mes cours",
+    path: "/teacher/cours",
     authorizedRoles: ["TEACHER"],
-  },
-  {
-    icon: <School className="w-5 h-5" />,
-    name: "Salles de classes",
-    path: "/admin/classroom",
+  },{
+    icon: <BookOpen className="w-5 h-5" />,
+    name: "Absences",
+    path: "/admin/absences",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
   },
   {
     icon: <Calendar className="w-5 h-5" />,
-    name: "Planification des Cours",
-    path: "/admin/planification",
-    authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
-  },
-  {
-    icon: <Calendar1 className="w-5 h-5" />,
-    name: "Planification des Évaluations",
-    path: "/admin/exam-planning",
-    authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
-  },
-  {
-    icon: <Settings className="w-5 h-5" />,
-    name: "Règles de Calcul",
-    path: "/admin/exam-config",
-    authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
+    name: "Planing & Ressources",
+    authorizedRoles: ["ADMIN_SUPER", "FINANCE"],
+    subItems: [
+      {
+        name: "Planification des Cours",
+        path: "/admin/planification",
+        authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
+      },
+      {
+        name: "Planification des Évaluations",
+        path: "/admin/exam-planning",
+        authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
+      },
+      {
+        name: "Salles de classes",
+        path: "/admin/classroom",
+        authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
+      },
+      {
+        name: "Règles de Calcul",
+        path: "/admin/exam-config",
+        authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
+      }
+    ],
   },
   {
     icon: <Award className="w-5 h-5" />,
     name: "Gestion des notes",
-    path: "/admin/grade-management",
-    authorizedRoles: ["TEACHER"],
+    path: "/teacher/grade-management",
+    authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
   },
   {
     icon: <DollarSign className="w-5 h-5" />,
@@ -129,11 +131,29 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    icon: <FileText className="w-5 h-5" />,
+    name: "Saisir les notes",
+    path: "/teacher/grades-entry",
+    authorizedRoles: ["TEACHER"],
+  },
+  {
+    icon: <ClipboardList className="w-5 h-5" />,
+    name: "Notes",
+    path: "/student/grades",
+    authorizedRoles: ["STUDENT"],
+  },
+  {
+    icon: <ClipboardList className="w-5 h-5" />,
+    name: "Profile",
+    path: "/student/profile",
+    authorizedRoles: ["STUDENT"],
+  },
+  {
     icon: <ClipboardList className="w-5 h-5" />,
     name: "Mes Absences",
     path: "/student/my-absences",
     authorizedRoles: ["STUDENT"],
-  },
+  }
 ];
 
 
@@ -221,104 +241,7 @@ const AppSidebar: React.FC = () => {
     setOpenSubmenu((prev) => (prev?.index === index ? null : { index }));
   };
 
-  // const renderMenuItems = (items: NavItem[]) => (
-  //   <ul className="flex flex-col gap-4">
-  //     {items.map((nav, index) => (
-  //       <li key={nav.name}>
-  //         {nav.subItems ? (
-  //           <button
-  //             onClick={() => handleSubmenuToggle(index)}
-  //             className={`menu-item group ${
-  //               openSubmenu?.index === index
-  //                 ? "menu-item-active"
-  //                 : "menu-item-inactive"
-  //             } cursor-pointer ${
-  //               !isExpanded && !isHovered
-  //                 ? "lg:justify-center"
-  //                 : "lg:justify-start"
-  //             }`}
-  //           >
-  //             <span
-  //               className={`${
-  //                 openSubmenu?.index === index
-  //                   ? "menu-item-icon-active"
-  //                   : "menu-item-icon-inactive"
-  //               }`}
-  //             >
-  //               {nav.icon}
-  //             </span>
-  //             {(isExpanded || isHovered || isMobileOpen) && (
-  //               <span className="menu-item-text">{nav.name}</span>
-  //             )}
-  //             {(isExpanded || isHovered || isMobileOpen) && (
-  //               <ChevronDownIcon
-  //                 className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-  //                   openSubmenu?.index === index
-  //                     ? "rotate-180 text-brand-500"
-  //                     : ""
-  //                 }`}
-  //               />
-  //             )}
-  //           </button>
-  //         ) : (
-  //           nav.path && (
-  //             <Link
-  //               href={nav.path}
-  //               className={`menu-item group ${
-  //                 isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-  //               }`}
-  //             >
-  //               <span
-  //                 className={`${
-  //                   isActive(nav.path)
-  //                     ? "menu-item-icon-active"
-  //                     : "menu-item-icon-inactive"
-  //                 }`}
-  //               >
-  //                 {nav.icon}
-  //               </span>
-  //               {(isExpanded || isHovered || isMobileOpen) && (
-  //                 <span className="menu-item-text">{nav.name}</span>
-  //               )}
-  //             </Link>
-  //           )
-  //         )}
-
-  //         {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
-  //           <div
-  //             ref={(el) => {
-  //               subMenuRefs.current[`${index}`] = el;
-  //             }}
-  //             className="overflow-hidden transition-all duration-300"
-  //             style={{
-  //               height:
-  //                 openSubmenu?.index === index
-  //                   ? `${subMenuHeight[`${index}`]}px`
-  //                   : "0px",
-  //             }}
-  //           >
-  //             <ul className="mt-2 space-y-1 ml-9">
-  //               {nav.subItems.map((subItem) => (
-  //                 <li key={subItem.name}>
-  //                   <Link
-  //                     href={subItem.path}
-  //                     className={`menu-dropdown-item ${
-  //                       isActive(subItem.path)
-  //                         ? "menu-dropdown-item-active"
-  //                         : "menu-dropdown-item-inactive"
-  //                     }`}
-  //                   >
-  //                     {subItem.name}
-  //                   </Link>
-  //                 </li>
-  //               ))}
-  //             </ul>
-  //           </div>
-  //         )}
-  //       </li>
-  //     ))}
-  //   </ul>
-  // );
+  
 
    
 
@@ -474,7 +397,6 @@ const AppSidebar: React.FC = () => {
               >
                 {isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots />}
               </h2>
-              {/* ✅ On rend uniquement les menus filtrés */}
               {renderMenuItems(filteredNavItems)}
             </div>
           </div>

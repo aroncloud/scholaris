@@ -1,777 +1,536 @@
 'use client'
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react/no-unescaped-entities */
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Building2,
-  Settings,
-  Shield,
-  Database,
-  Users,
-  Key,
-  Bell,
-  Mail,
-  Server,
-  Monitor,
-  HardDrive,
-  Activity,
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { 
+  User,
+  CreditCard, 
+  Calendar, 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Edit3, 
+  Download, 
   AlertTriangle,
   CheckCircle,
   Clock,
-  Download,
-  Upload,
-  RefreshCw,
-  Power,
-  Wifi,
-  Search,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Plus,
-  Eye,
-  Lock,
-  Unlock,
-} from "lucide-react";
+  TrendingUp,
+  GraduationCap,
+  Wallet,
+  DollarSign,
+  BookOpen,
+  Award
+} from 'lucide-react';
 
-const systemStats = [
-  {
-    title: "Utilisation serveur",
-    value: "68%",
-    status: "normal",
-    description: "CPU et mémoire",
-  },
-  {
-    title: "Base de données",
-    value: "2.4 GB",
-    status: "normal",
-    description: "Espace utilisé",
-  },
-  {
-    title: "Utilisateurs connectés",
-    value: "247",
-    status: "normal",
-    description: "Sessions actives",
-  },
-  {
-    title: "Temps de réponse",
-    value: "89ms",
-    status: "excellent",
-    description: "Moyenne 24h",
-  },
-];
+const StudentProfileDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('overview');
 
-const systemConfig = [
-  {
-    id: 1,
-    category: "Général",
-    setting: "Nom de l'établissement",
-    value: "Université de Sciences de la Santé",
-    type: "text",
-    editable: true,
-  },
-  {
-    id: 2,
-    category: "Général",
-    setting: "Année académique courante",
-    value: "2023-2024",
-    type: "select",
-    editable: true,
-  },
-  {
-    id: 3,
-    category: "Sécurité",
-    setting: "Durée session (minutes)",
-    value: "120",
-    type: "number",
-    editable: true,
-  },
-  {
-    id: 4,
-    category: "Sécurité",
-    setting: "Authentification 2FA",
-    value: "Activé",
-    type: "toggle",
-    editable: true,
-  },
-  {
-    id: 5,
-    category: "Email",
-    setting: "Serveur SMTP",
-    value: "smtp.univ.fr",
-    type: "text",
-    editable: true,
-  },
-  {
-    id: 6,
-    category: "Email",
-    setting: "Notifications automatiques",
-    value: "Activé",
-    type: "toggle",
-    editable: true,
-  },
-];
-
-const backupHistory = [
-  {
-    id: 1,
-    date: "2024-01-20 02:00",
-    type: "Complète",
-    taille: "124 MB",
-    statut: "Succès",
-    duree: "12 min",
-  },
-  {
-    id: 2,
-    date: "2024-01-19 02:00",
-    type: "Incrémentale",
-    taille: "23 MB",
-    statut: "Succès",
-    duree: "3 min",
-  },
-  {
-    id: 3,
-    date: "2024-01-18 02:00",
-    type: "Incrémentale",
-    taille: "31 MB",
-    statut: "Erreur",
-    duree: "5 min",
-    erreur: "Espace insuffisant",
-  },
-];
-
-const auditLogs = [
-  {
-    id: 1,
-    date: "2024-01-20 14:30",
-    utilisateur: "admin@univ.fr",
-    action: "Modification configuration",
-    ressource: "Paramètres système",
-    ip: "192.168.1.10",
-    statut: "Succès",
-  },
-  {
-    id: 2,
-    date: "2024-01-20 10:15",
-    utilisateur: "marie.dupont@rh.univ.fr",
-    action: "Création utilisateur",
-    ressource: "Profil enseignant",
-    ip: "192.168.1.25",
-    statut: "Succès",
-  },
-  {
-    id: 3,
-    date: "2024-01-20 09:45",
-    utilisateur: "inconnu",
-    action: "Tentative connexion",
-    ressource: "Interface admin",
-    ip: "203.45.67.89",
-    statut: "Échec",
-  },
-];
-
-const permissions = [
-  {
-    id: 1,
-    module: "Gestion des utilisateurs",
-    administrateur: true,
-    rh: true,
-    scolarite: false,
-    enseignant: false,
-    etudiant: false,
-  },
-  {
-    id: 2,
-    module: "Programmes académiques",
-    administrateur: true,
-    rh: false,
-    scolarite: true,
-    enseignant: false,
-    etudiant: false,
-  },
-  {
-    id: 3,
-    module: "Gestion des notes",
-    administrateur: true,
-    rh: false,
-    scolarite: true,
-    enseignant: true,
-    etudiant: false,
-  },
-  {
-    id: 4,
-    module: "Consultation dossier",
-    administrateur: true,
-    rh: true,
-    scolarite: true,
-    enseignant: false,
-    etudiant: true,
-  },
-];
-
-export default function AdminPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
-  const [selectedConfig, setSelectedConfig] = useState(null);
-
-  const getStatusColor = (statut: string) => {
-    switch (statut) {
-      case "Succès":
-      case "normal":
-      case "Activé":
-        return "bg-green-100 text-green-800";
-      case "Erreur":
-      case "Échec":
-        return "bg-red-100 text-red-800";
-      case "excellent":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  // Données du profil étudiant
+  const studentProfile = {
+    personal: {
+      name: 'Marie DUBOIS',
+      studentId: '2024-INF-001',
+      photo: '/api/placeholder/150/150',
+      dateOfBirth: '1999-03-15',
+      placeOfBirth: 'Yaoundé, Cameroun',
+      nationality: 'Camerounaise',
+      address: 'Quartier Nlongkak, Yaoundé',
+      phone: '+237 6XX XXX XXX',
+      email: 'marie.dubois@student.edu',
+      emergencyContact: {
+        name: 'Paul DUBOIS',
+        relationship: 'Père',
+        phone: '+237 6XX XXX XXX'
+      }
+    },
+    academic: {
+      program: 'Formation Infirmier',
+      specialization: 'Soins Généraux',
+      currentLevel: 'Licence 2',
+      currentSemester: 'Semestre 3',
+      academicYear: '2024-2025',
+      startDate: '2023-09-01',
+      expectedGraduation: '2026-06-30',
+      status: 'ACTIVE',
+      advisor: 'Dr. NGONO Marie Claire'
+    },
+    financial: {
+      totalFees: 850000, // FCFA
+      paidAmount: 650000,
+      remainingBalance: 200000,
+      nextPaymentDue: '2025-01-15',
+      paymentPlan: 'Trimestriel',
+      scholarship: {
+        amount: 200000,
+        sponsor: 'Bourse d\'Excellence Gouvernementale',
+        status: 'ACTIVE'
+      },
+      transactions: [
+        {
+          id: 'TXN-001',
+          date: '2024-09-15',
+          description: 'Frais de scolarité S3',
+          amount: 425000,
+          type: 'PAYMENT',
+          status: 'COMPLETED'
+        },
+        {
+          id: 'TXN-002',
+          date: '2024-09-20',
+          description: 'Bourse gouvernementale',
+          amount: -200000,
+          type: 'CREDIT',
+          status: 'COMPLETED'
+        },
+        {
+          id: 'TXN-003',
+          date: '2024-12-10',
+          description: 'Frais examens',
+          amount: 25000,
+          type: 'PAYMENT',
+          status: 'COMPLETED'
+        }
+      ]
+    },
+    academics: {
+      currentGPA: 14.2,
+      totalCredits: 90,
+      completedCredits: 82,
+      remainingCredits: 8,
+      semesters: [
+        { name: 'Semestre 1', gpa: 13.5, credits: 30, status: 'COMPLETED' },
+        { name: 'Semestre 2', gpa: 13.8, credits: 30, status: 'COMPLETED' },
+        { name: 'Semestre 3', gpa: 14.2, credits: 22, status: 'IN_PROGRESS' }
+      ]
     }
   };
 
-  const getStatusIcon = (statut: string) => {
-    switch (statut) {
-      case "Succès":
-      case "normal":
-      case "excellent":
-        return <CheckCircle className="h-4 w-4" />;
-      case "Erreur":
-      case "Échec":
-        return <AlertTriangle className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'XAF',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount).replace('XAF', 'FCFA');
+  };
+
+  const getPaymentStatus = () => {
+    const { remainingBalance, nextPaymentDue } = studentProfile.financial;
+    const dueDate = new Date(nextPaymentDue);
+    const today = new Date();
+    const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+
+    if (remainingBalance === 0) {
+      return { status: 'paid', color: 'text-green-600', icon: CheckCircle, message: 'Paiements à jour' };
+    } else if (daysUntilDue < 0) {
+      return { status: 'overdue', color: 'text-red-600', icon: AlertTriangle, message: 'Paiement en retard' };
+    } else if (daysUntilDue <= 7) {
+      return { status: 'due', color: 'text-yellow-600', icon: Clock, message: `Échéance dans ${daysUntilDue} jours` };
+    } else {
+      return { status: 'upcoming', color: 'text-blue-600', icon: Calendar, message: `Prochaine échéance: ${daysUntilDue} jours` };
     }
   };
+
+  const paymentStatus = getPaymentStatus();
+  const PaymentIcon = paymentStatus.icon;
 
   return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">
-              Administration
-            </h2>
-            <p className="text-muted-foreground">
-              Configuration système et paramètres administratifs
-            </p>
-          </div>
-
-          <div className="flex space-x-2">
-            <Button variant="outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Actualiser
-            </Button>
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Exporter logs
-            </Button>
-            <Button>
-              <Settings className="h-4 w-4 mr-2" />
-              Configuration
-            </Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div>
+          <div className="py-4 px-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <User className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">{studentProfile.personal.name}</h1>
+                  <p className="text-sm text-gray-600">{studentProfile.personal.studentId} • {studentProfile.academic.program}</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <Badge variant="outline" className="text-green-600 border-green-200">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      {studentProfile.academic.status}
+                    </Badge>
+                    <Badge variant="secondary">
+                      {studentProfile.academic.currentLevel}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Button variant="outline" size="sm">
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Modifier
+                </Button>
+                <Button size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  Certificat
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* System Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {systemStats.map((stat, index) => (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                {getStatusIcon(stat.status)}
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <GraduationCap className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Moyenne Générale</p>
+                  <p className="text-2xl font-bold text-blue-600">{studentProfile.academics.currentGPA}/20</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <BookOpen className="w-5 h-5 text-green-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Crédits Validés</p>
+                  <p className="text-2xl font-bold text-green-600">{studentProfile.academics.completedCredits}/{studentProfile.academics.totalCredits}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <Wallet className="w-5 h-5 text-purple-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Solde Scolarité</p>
+                  <p className="text-2xl font-bold text-purple-600">{formatCurrency(studentProfile.financial.remainingBalance)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className={`p-2 rounded-lg ${paymentStatus.status === 'paid' ? 'bg-green-100' : paymentStatus.status === 'overdue' ? 'bg-red-100' : 'bg-yellow-100'}`}>
+                  <PaymentIcon className={`w-5 h-5 ${paymentStatus.color}`} />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Statut Paiement</p>
+                  <p className={`text-sm font-semibold ${paymentStatus.color}`}>{paymentStatus.message}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
-            <TabsTrigger value="config">Configuration</TabsTrigger>
-            <TabsTrigger value="permissions">Permissions</TabsTrigger>
-            <TabsTrigger value="backup">Sauvegardes</TabsTrigger>
-            <TabsTrigger value="logs">Logs d'audit</TabsTrigger>
-            <TabsTrigger value="security">Sécurité</TabsTrigger>
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Vue d&apos;ensemble</TabsTrigger>
+            <TabsTrigger value="personal">Profil</TabsTrigger>
+            <TabsTrigger value="academic">Académique</TabsTrigger>
+            <TabsTrigger value="financial">Financier</TabsTrigger>
           </TabsList>
 
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+          {/* Vue d'ensemble */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Progression académique */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Activity className="h-5 w-5" />
-                    <span>Activité système</span>
+                  <CardTitle className="flex items-center">
+                    <TrendingUp className="w-5 h-5 mr-2" />
+                    Progression Académique
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Connexions aujourd'hui</span>
-                      <span className="font-bold">1,247</span>
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Crédits complétés</span>
+                        <span>{studentProfile.academics.completedCredits}/{studentProfile.academics.totalCredits}</span>
+                      </div>
+                      <Progress value={(studentProfile.academics.completedCredits / studentProfile.academics.totalCredits) * 100} />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Documents créés</span>
-                      <span className="font-bold">89</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Notifications envoyées</span>
-                      <span className="font-bold">156</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Erreurs système</span>
-                      <span className="font-bold text-red-600">3</span>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      {studentProfile.academics.semesters.map((semester, index) => (
+                        <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                          <div className="font-medium text-sm">{semester.name}</div>
+                          <div className="text-lg font-bold text-blue-600">{semester.gpa}/20</div>
+                          <Badge variant={semester.status === 'COMPLETED' ? 'default' : 'secondary'} className="text-xs">
+                            {semester.status === 'COMPLETED' ? 'Terminé' : 'En cours'}
+                          </Badge>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Situation financière */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Monitor className="h-5 w-5" />
-                    <span>Performance</span>
+                  <CardTitle className="flex items-center">
+                    <DollarSign className="w-5 h-5 mr-2" />
+                    Situation Financière
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>CPU</span>
-                        <span>68%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full"
-                          style={{ width: "68%" }}
-                        ></div>
-                      </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Frais totaux</span>
+                      <span className="font-semibold">{formatCurrency(studentProfile.financial.totalFees)}</span>
                     </div>
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Mémoire</span>
-                        <span>72%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-green-600 h-2 rounded-full"
-                          style={{ width: "72%" }}
-                        ></div>
-                      </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Montant payé</span>
+                      <span className="font-semibold text-green-600">{formatCurrency(studentProfile.financial.paidAmount)}</span>
                     </div>
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Disque</span>
-                        <span>45%</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Solde restant</span>
+                      <span className="font-semibold text-red-600">{formatCurrency(studentProfile.financial.remainingBalance)}</span>
+                    </div>
+                    <Separator />
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Award className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium">Bourse active</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-yellow-600 h-2 rounded-full"
-                          style={{ width: "45%" }}
-                        ></div>
-                      </div>
+                      <div className="text-sm text-gray-600 mt-1">{studentProfile.financial.scholarship.sponsor}</div>
+                      <div className="text-lg font-bold text-blue-600">{formatCurrency(studentProfile.financial.scholarship.amount)}</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
 
-          {/* Configuration Tab */}
-          <TabsContent value="config" className="space-y-4">
+            {/* Prochaines échéances */}
             <Card>
               <CardHeader>
-                <CardTitle>Configuration système</CardTitle>
-                <CardDescription>
-                  Paramètres généraux de l'application
-                </CardDescription>
+                <CardTitle>Prochaines Échéances</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {systemConfig.map((config) => (
-                    <div
-                      key={config.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
+                  <div className="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Calendar className="w-5 h-5 text-yellow-600" />
                       <div>
-                        <div className="font-medium">{config.setting}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {config.category}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-sm font-medium">
-                          {config.value}
-                        </div>
-                        {config.editable && (
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <div className="font-medium">Paiement Scolarité</div>
+                        <div className="text-sm text-gray-600">Échéance: {new Date(studentProfile.financial.nextPaymentDue).toLocaleDateString('fr-FR')}</div>
                       </div>
                     </div>
-                  ))}
+                    <div className="text-right">
+                      <div className="font-bold text-yellow-600">{formatCurrency(studentProfile.financial.remainingBalance)}</div>
+                      <Button size="sm" className="mt-2">Payer maintenant</Button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Permissions Tab */}
-          <TabsContent value="permissions" className="space-y-4">
+          {/* Profil Personnel */}
+          <TabsContent value="personal">
             <Card>
               <CardHeader>
-                <CardTitle>Matrice des permissions</CardTitle>
-                <CardDescription>
-                  Gestion des accès par rôle et module
-                </CardDescription>
+                <CardTitle>Informations Personnelles</CardTitle>
+                <CardDescription>Vos données personnelles et contacts</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Module</TableHead>
-                      <TableHead>Administrateur</TableHead>
-                      <TableHead>RH</TableHead>
-                      <TableHead>Scolarité</TableHead>
-                      <TableHead>Enseignant</TableHead>
-                      <TableHead>Étudiant</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {permissions.map((perm) => (
-                      <TableRow key={perm.id}>
-                        <TableCell className="font-medium">
-                          {perm.module}
-                        </TableCell>
-                        <TableCell>
-                          {perm.administrateur ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {perm.rh ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {perm.scolarite ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {perm.enseignant ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {perm.etudiant ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <div className="h-4 w-4" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Backup Tab */}
-          <TabsContent value="backup" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-medium">Sauvegardes</h3>
-                <p className="text-sm text-muted-foreground">
-                  Gestion des sauvegardes système
-                </p>
-              </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Nouvelle sauvegarde
-              </Button>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Historique des sauvegardes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Taille</TableHead>
-                      <TableHead>Durée</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {backupHistory.map((backup) => (
-                      <TableRow key={backup.id}>
-                        <TableCell>{backup.date}</TableCell>
-                        <TableCell>{backup.type}</TableCell>
-                        <TableCell>{backup.taille}</TableCell>
-                        <TableCell>{backup.duree}</TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <Badge
-                              variant="secondary"
-                              className={getStatusColor(backup.statut)}
-                            >
-                              {backup.statut}
-                            </Badge>
-                            {backup.erreur && (
-                              <div className="text-xs text-red-600">
-                                {backup.erreur}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Download className="mr-2 h-4 w-4" />
-                                Télécharger
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <RefreshCw className="mr-2 h-4 w-4" />
-                                Restaurer
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Supprimer
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Logs Tab */}
-          <TabsContent value="logs" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Logs d'audit</span>
-                  <div className="flex space-x-2">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Rechercher dans les logs..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-8 w-64"
-                      />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Nom complet</label>
+                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Date de naissance</label>
+                      <p className="mt-1 text-sm text-gray-900">{new Date(studentProfile.personal.dateOfBirth).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Lieu de naissance</label>
+                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.placeOfBirth}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Nationalité</label>
+                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.nationality}</p>
                     </div>
                   </div>
-                </CardTitle>
-                <CardDescription>
-                  Traçabilité des actions administratives
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date/Heure</TableHead>
-                      <TableHead>Utilisateur</TableHead>
-                      <TableHead>Action</TableHead>
-                      <TableHead>Ressource</TableHead>
-                      <TableHead>IP</TableHead>
-                      <TableHead>Statut</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {auditLogs.map((log) => (
-                      <TableRow key={log.id}>
-                        <TableCell className="font-mono text-sm">
-                          {log.date}
-                        </TableCell>
-                        <TableCell>{log.utilisateur}</TableCell>
-                        <TableCell>{log.action}</TableCell>
-                        <TableCell>{log.ressource}</TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {log.ip}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="secondary"
-                            className={getStatusColor(log.statut)}
-                          >
-                            {log.statut}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Adresse</label>
+                      <p className="mt-1 text-sm text-gray-900 flex items-center">
+                        <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                        {studentProfile.personal.address}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Téléphone</label>
+                      <p className="mt-1 text-sm text-gray-900 flex items-center">
+                        <Phone className="w-4 h-4 mr-2 text-gray-400" />
+                        {studentProfile.personal.phone}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Email</label>
+                      <p className="mt-1 text-sm text-gray-900 flex items-center">
+                        <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                        {studentProfile.personal.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <Separator className="my-6" />
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">Contact d&apos;urgence</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Nom</label>
+                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.emergencyContact.name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Lien de parenté</label>
+                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.emergencyContact.relationship}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Téléphone</label>
+                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.emergencyContact.phone}</p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Security Tab */}
-          <TabsContent value="security" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+          {/* Informations Académiques */}
+          <TabsContent value="academic">
+            <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Shield className="h-5 w-5" />
-                    <span>Paramètres de sécurité</span>
-                  </CardTitle>
+                  <CardTitle>Parcours Académique</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
                       <div>
-                        <div className="font-medium">Authentification 2FA</div>
-                        <div className="text-sm text-muted-foreground">
-                          Obligatoire pour les admins
-                        </div>
+                        <label className="text-sm font-medium text-gray-600">Programme d&apos;études</label>
+                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.program}</p>
                       </div>
-                      <Switch defaultChecked />
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Spécialisation</label>
+                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.specialization}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Niveau actuel</label>
+                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.currentLevel}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Conseiller pédagogique</label>
+                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.advisor}</p>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="space-y-4">
                       <div>
-                        <div className="font-medium">Verrouillage auto</div>
-                        <div className="text-sm text-muted-foreground">
-                          Après 3 tentatives
-                        </div>
+                        <label className="text-sm font-medium text-gray-600">Année académique</label>
+                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.academicYear}</p>
                       </div>
-                      <Switch defaultChecked />
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Date de début</label>
+                        <p className="mt-1 text-sm text-gray-900">{new Date(studentProfile.academic.startDate).toLocaleDateString('fr-FR')}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Diplômation prévue</label>
+                        <p className="mt-1 text-sm text-gray-900">{new Date(studentProfile.academic.expectedGraduation).toLocaleDateString('fr-FR')}</p>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">Logs d'audit</div>
-                        <div className="text-sm text-muted-foreground">
-                          Enregistrement complet
-                        </div>
-                      </div>
-                      <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Informations Financières */}
+          <TabsContent value="financial">
+            <div className="space-y-6">
+              {/* Résumé financier */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Résumé Financier</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{formatCurrency(studentProfile.financial.totalFees)}</div>
+                      <div className="text-sm text-gray-600">Frais totaux</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{formatCurrency(studentProfile.financial.paidAmount)}</div>
+                      <div className="text-sm text-gray-600">Montant payé</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                      <div className="text-2xl font-bold text-red-600">{formatCurrency(studentProfile.financial.remainingBalance)}</div>
+                      <div className="text-sm text-gray-600">Solde restant</div>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Progress value={(studentProfile.financial.paidAmount / studentProfile.financial.totalFees) * 100} className="h-2" />
+                    <div className="flex justify-between text-sm text-gray-600 mt-2">
+                      <span>0%</span>
+                      <span>{Math.round((studentProfile.financial.paidAmount / studentProfile.financial.totalFees) * 100)}% payé</span>
+                      <span>100%</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Historique des transactions */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <AlertTriangle className="h-5 w-5" />
-                    <span>Alertes sécurité</span>
-                  </CardTitle>
+                  <CardTitle>Historique des Transactions</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                      <div>
-                        <div className="font-medium text-red-800">
-                          Tentatives de connexion suspectes
+                    {studentProfile.financial.transactions.map((transaction) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className={`p-2 rounded-full ${transaction.type === 'PAYMENT' ? 'bg-red-100' : 'bg-green-100'}`}>
+                            {transaction.type === 'PAYMENT' ? (
+                              <CreditCard className={`w-4 h-4 ${transaction.type === 'PAYMENT' ? 'text-red-600' : 'text-green-600'}`} />
+                            ) : (
+                              <DollarSign className="w-4 h-4 text-green-600" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-medium">{transaction.description}</div>
+                            <div className="text-sm text-gray-600">{new Date(transaction.date).toLocaleDateString('fr-FR')}</div>
+                          </div>
                         </div>
-                        <div className="text-sm text-red-600">
-                          3 tentatives depuis 203.45.67.89
+                        <div className="text-right">
+                          <div className={`font-semibold ${transaction.type === 'PAYMENT' ? 'text-red-600' : 'text-green-600'}`}>
+                            {transaction.type === 'PAYMENT' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
+                          </div>
+                          <Badge variant={transaction.status === 'COMPLETED' ? 'default' : 'secondary'}>
+                            {transaction.status === 'COMPLETED' ? 'Terminé' : 'En attente'}
+                          </Badge>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">
-                        <Lock className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                      <div>
-                        <div className="font-medium text-yellow-800">
-                          Certificat SSL expire bientôt
-                        </div>
-                        <div className="text-sm text-yellow-600">
-                          Expiration dans 15 jours
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <RefreshCw className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -779,5 +538,8 @@ export default function AdminPage() {
           </TabsContent>
         </Tabs>
       </div>
+    </div>
   );
-}
+};
+
+export default StudentProfileDashboard;
