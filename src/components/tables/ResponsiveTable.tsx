@@ -113,7 +113,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
           
           // Special handling for profiles array search
           if (key === 'profiles' && Array.isArray(value)) {
-            return value.some(profile => {
+            return value.some((profile: any) => {
               const roleName = profile.role_title || getTranslatedRoleName(profile.role_code, locale);
               return roleName.toLowerCase().includes(searchTerm.toLowerCase());
             });

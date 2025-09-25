@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -21,10 +21,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2, Shield, UserCheck, UserX, X } from "lucide-react";
-import { IUserList, ICreateUser } from "@/types/staffType";
+import { IUserList } from "@/types/staffType";
 import { getRoleColor, getStatusColor } from "@/lib/utils";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import RoleActionForm from "@/components/custom-ui/modal/modalrole";
 
@@ -47,23 +46,13 @@ type Props = {
 };
 
 export default function UserSection({ userList }: Props) {
-  const router = useRouter();
   const [users, setUsers] = useState<IUserList[]>(userList);
-  const [selectedUser, setSelectedUser] = useState<IUserList | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const [roleModal, setRoleModal] = useState<{ user: IUserList | null; open: boolean }>({
     user: null,
     open: false,
   });
 
-  const filteredUsers = useMemo(() => {
-    const lowered = searchTerm.toLowerCase();
-    return users.filter(
-      user =>
-        (user.first_name + " " + user.last_name).toLowerCase().includes(lowered) ||
-        user.email.toLowerCase().includes(lowered)
-    );
-  }, [users, searchTerm]);
+
 
   const userColumns: TableColumn<IUserList>[] = useMemo(() => [
     {
@@ -194,9 +183,9 @@ export default function UserSection({ userList }: Props) {
                               });
                             });
                           }
-                          if (result.action === "remove" && result.profileCodes?.length) {
+                          if (result.action === "remove" && Array.isArray(result.profileCodes) && result.profileCodes.length) {
                             updatedProfiles = updatedProfiles.filter(
-                              p => !result.profileCodes.includes(p.profile_code)
+                              p => !result.profileCodes!.includes(p.profile_code)
                             );
                           }
                           return { ...u, profiles: updatedProfiles };
@@ -217,18 +206,15 @@ export default function UserSection({ userList }: Props) {
     <TabsContent value="users" className="space-y-4">
       <Card className="rounded-2xl shadow-lg">
         <CardHeader>
-          <CardTitle>Utilisateurs ({filteredUsers.length})</CardTitle>
+          <CardTitle>Utilisateurs ({users.length})</CardTitle>
           <CardDescription>Liste de tous les utilisateurs du système</CardDescription>
         </CardHeader>
         <CardContent className="px-4 md:px-6">
           <ResponsiveTable
             columns={userColumns}
-            data={filteredUsers}
+            data={users}
             searchKey={["first_name", "last_name", "email"]}
             paginate={10}
-            rowIdKey="userId"
-            selectedRowId={selectedUser?.userId}
-            onRowSelect={setSelectedUser}
           />
         </CardContent>
       </Card>

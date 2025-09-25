@@ -27,49 +27,6 @@ import RoleAndPermission from "@/components/features/users/RoleAndPermission";
 import ModalUser from "@/components/modal/users/ModalUser";
 import ModaleDesactivateDeleteUser from "@/components/modal/users/ModaleDesactivateDeleteUser";
 
-// Local constants
-const userRoleList = [
-  { label: 'Enseignant', value: 'TEACHER' },
-  { label: 'Coordonnateur', value: 'COORDINATOR' },
-];
-
-// Sample role data for the RoleAndPermission component
-const sampleRoles = [
-  {
-    name: 'Administrateur',
-    description: 'Accès complet à toutes les fonctionnalités du système',
-    users: 3,
-    permissions: [
-      'Gestion des utilisateurs',
-      'Gestion des rôles',
-      'Configuration du système',
-      'Rapports avancés'
-    ]
-  },
-  {
-    name: 'Enseignant',
-    description: 'Accès aux fonctionnalités pédagogiques',
-    users: 25,
-    permissions: [
-      'Gestion des cours',
-      'Saisie des notes',
-      'Communication avec les étudiants',
-      'Accès aux emplois du temps'
-    ]
-  },
-  {
-    name: 'Étudiant',
-    description: 'Accès aux fonctionnalités étudiantes',
-    users: 350,
-    permissions: [
-      'Consultation des notes',
-      'Inscription aux cours',
-      'Accès aux ressources pédagogiques',
-      'Consultation des emplois du temps'
-    ]
-  }
-];
-
 // Component
 export default function UsersPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -248,12 +205,6 @@ export default function UsersPage() {
         ) : (
           <UserSection
             userList={userList}
-            userRoleList={userRoleList}
-            setAction={setAction}
-            setUserFormData={setUserFormData}
-            setIsCancelUserDialogOpen={setIsCancelUserDialogOpen}
-            setIsEditDialogOpen={setIsEditDialogOpen}
-            setSelectedUser={setSelectedUser}
           />
         )}
 
@@ -267,12 +218,12 @@ export default function UsersPage() {
                 </p>
               </div>
             </div>
-            <RoleAndPermission roles={sampleRoles} />
+            {/* <RoleAndPermission roles={sampleRoles} /> */}
           </div>
         </TabsContent>
       </Tabs>
 
-      <ModalUser
+      {/* <ModalUser
         isOpen={isEditDialogOpen}
         onClose={() => {
           setIsEditDialogOpen(false);
@@ -283,7 +234,7 @@ export default function UsersPage() {
         action={action === 'UPDATE' ? 'UPDATE' : 'CREATE'}
         roles={userRoleList}
         onSave={handleSaveUserInfo}
-      />
+      /> */}
 
       <ModaleDesactivateDeleteUser
         isOpen={isCancelUserDialogOpen}
