@@ -27,6 +27,7 @@ import RoleAndPermission from "@/components/features/users/RoleAndPermission";
 import ModalUser from "@/components/modal/users/ModalUser";
 import ModaleDesactivateDeleteUser from "@/components/modal/users/ModaleDesactivateDeleteUser";
 
+// Local constants
 const userRoleList = [
   { label: 'Enseignant', value: 'TEACHER' },
   { label: 'Coordonnateur', value: 'COORDINATOR' },
@@ -84,6 +85,7 @@ export default function UsersPage() {
     try {
       setLoading(true);
       const result = await getUserList();
+      console.log('User list result:', result); // Debug log
       if (result.code === 'success') {
         if (result.data?.body?.length > 0) {
           const users = result.data.body.filter((user: IUserList) => 
@@ -235,9 +237,9 @@ export default function UsersPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="users" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="users">Utilisateurs</TabsTrigger>
+      <Tabs defaultValue="users" className="space-y-6 ">
+        <TabsList className="flex w-250">
+          <TabsTrigger value="users" className="w-full">Utilisateurs</TabsTrigger>
           <TabsTrigger value="roles">Rôles et permissions</TabsTrigger>
         </TabsList>
 
@@ -264,9 +266,6 @@ export default function UsersPage() {
                   Gérez les rôles et leurs permissions dans le système
                 </p>
               </div>
-              <Button variant="outline">
-                <UserPlus className="h-4 w-4 mr-2" /> Créer un rôle
-              </Button>
             </div>
             <RoleAndPermission roles={sampleRoles} />
           </div>

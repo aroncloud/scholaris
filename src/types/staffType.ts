@@ -93,6 +93,7 @@ export interface IUserProfile {
 }
 
 export interface IUserList {
+  userId: string  ;            // added id property for user identifier
   user_code: string;
   first_name: string;
   last_name: string;
