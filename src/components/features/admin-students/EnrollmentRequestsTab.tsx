@@ -33,6 +33,8 @@ import {
   Eye,
   AlertTriangle,
   CheckCircle,
+  Download,
+  Upload,
 } from "lucide-react";
 import { IEnrollmentRequest } from "@/types/staffType";
 import { getStatusColor, formatDateToText } from "@/lib/utils";
@@ -57,7 +59,6 @@ const EnrollmentRequests = ({
   filterStatut,
   setFilterStatut,
   searchTerm,
-  setSearchTerm,
   handleApproveRequest,
   onCreateEnrollment,
 }: MyComponentProps) => {
@@ -203,42 +204,53 @@ const EnrollmentRequests = ({
         <CardHeader className="space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full">
             <div>
-              <CardTitle>Demandes d'inscription</CardTitle>
+              <CardTitle>Demandes d&apos;inscription</CardTitle>
               <CardDescription>
-                Traitement des nouvelles demandes d'inscription
+                Traitement des nouvelles demandes d&apos;inscription
               </CardDescription>
             </div>
-            <div className="mt-4 md:mt-0">
-              <Button
-                onClick={onCreateEnrollment}
-                variant="info"
-                className="w-full md:w-auto"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nouvelle demande
-              </Button>
-            </div>
           </div>
+            <div className="flex justify-between items-center">
+              <div>
+                <Select value={filterStatut} onValueChange={setFilterStatut}>
+                  <SelectTrigger className="w-full md:w-48">
+                    <SelectValue placeholder="Filtrer par statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filterOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="mt-4 md:mt-0 space-x-3">
+                <Button
+                  onClick={onCreateEnrollment}
+                  variant="info"
+                  className="w-full md:w-auto"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouvelle demande
+                </Button>         
+                <Button variant="outline" className="text-sm w-full sm:w-fit flex-1 sm:flex-none">
+                  <Download className="h-4 w-4 mr-2" />
+                  Exporter
+                </Button>
+                <Button variant="outline" className="text-sm w-full sm:w-fit flex-1 sm:flex-none">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Importer
+                </Button>
+              </div>
+            </div>
         </CardHeader>
         <CardContent>
           {/* Status filter dropdown */}
-          <div className="flex justify-end mb-4">
-            <Select value={filterStatut} onValueChange={setFilterStatut}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filtrer par statut" />
-              </SelectTrigger>
-              <SelectContent>
-                {filterOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          
 
           {/* ResponsiveTable */}
-          <div className="border border-gray-200 rounded-lg">
+          <div>
             <div className="w-full overflow-x-auto">
               <ResponsiveTable
                 columns={columns}

@@ -203,7 +203,7 @@ const ApplicationDetailPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen p-6">
       <div className="mx-auto space-y-6">
         {/* Header section */}
         <div className="bg-white border-b border-gray-200 px-6 py-4">

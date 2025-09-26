@@ -12,7 +12,7 @@ import {
 import { ICreateSession, IGetSchedule } from "@/types/planificationType";
 import { CALENDAR_COLORS } from "@/constant";
 import { format } from "date-fns";
-import { DialogCreateSession } from "../Modal/DialogCreateSession";
+import DialogCreateSession from "../Modal/DialogCreateSession";
 import { cancelSession, createSession, updateSession } from "@/actions/planificationAction";
 import { showToast } from "@/components/ui/showToast";
 import { DialogUpdateSession } from "../Modal/DialogUpdateSession";

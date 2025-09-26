@@ -149,94 +149,6 @@ const mockEnrollmentRequests: IEnrollmentRequest[] = [
   },
 ];
 
-const mockCurrentStudents: IStudent[] = [
-  {
-    id: "1",
-    numeroEtudiant: "ETU2024001",
-    nom: "Dupont",
-    prenom: "Marie",
-    email: "marie.dupont@etud.univ.fr",
-    telephone: "+33123456780",
-    filiere: "Pharmacie",
-    niveau: "Année 1",
-    statut: "actif",
-    moyenne: 15.2,
-    absences: 2,
-    retards: 1,
-    dateInscription: "2023-09-01",
-    statutFinancier: "a_jour",
-    montantDu: 0,
-  },
-  {
-    id: "2",
-    numeroEtudiant: "ETU2024002",
-    nom: "Martin",
-    prenom: "Jean",
-    email: "jean.martin@etud.univ.fr",
-    telephone: "+33123456781",
-    filiere: "Médecine",
-    niveau: "Année 2",
-    statut: "actif",
-    moyenne: 12.8,
-    absences: 5,
-    retards: 3,
-    dateInscription: "2022-09-01",
-    statutFinancier: "en_retard",
-    montantDu: 500,
-  },
-  {
-    id: "3",
-    numeroEtudiant: "ETU2024003",
-    nom: "Bernard",
-    prenom: "Sophie",
-    email: "sophie.bernard@etud.univ.fr",
-    telephone: "+33123456782",
-    filiere: "Dentaire",
-    niveau: "Année 3",
-    statut: "suspendu",
-    moyenne: 8.5,
-    absences: 12,
-    retards: 8,
-    dateInscription: "2021-09-01",
-    statutFinancier: "en_retard",
-    montantDu: 1200,
-  },
-];
-
-const mockGraduatedStudents: IStudent[] = [
-  {
-    id: "4",
-    numeroEtudiant: "ETU2023015",
-    nom: "Leroy",
-    prenom: "Anne",
-    email: "anne.leroy@alumni.univ.fr",
-    filiere: "Pharmacie",
-    niveau: "Diplômée",
-    promotion: "2023",
-    dateInscription: "2019-09-01",
-    dateObtention: "2023-07-15",
-    mention: "Assez bien",
-    moyenneFinale: 13.8,
-    statut: "diplome",
-  },
-  {
-    id: "5",
-    numeroEtudiant: "ETU2023020",
-    nom: "Petit",
-    prenom: "Paul",
-    email: "paul.petit@alumni.univ.fr",
-    filiere: "Médecine",
-    niveau: "Diplômé",
-    promotion: "2023",
-    dateInscription: "2017-09-01",
-    dateObtention: "2023-07-10",
-    mention: "Bien",
-    moyenneFinale: 15.2,
-    statut: "diplome",
-  },
-];
-
-
 
 
 
@@ -450,11 +362,9 @@ export default function StudentsPage() {
 
 
   return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         {/* Header */}
         <Header
-          enrollmentRequests={enrollmentRequests}
-          setIsCreateStudentOpen={setIsStudentModalOpen}
         />
 
         {/* Main Content */}
