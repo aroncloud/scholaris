@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 import { formatDateToText, getStatusColor } from '@/lib/utils';
 import { useParams } from 'next/navigation';
@@ -71,7 +70,7 @@ const ApplicationDetailPage: React.FC = () => {
       console.log('-->result', result)
       if(result.code === 'success') {
         showToast({
-          variant: "success",
+          variant: "success-solid",
           message: 'Succès',
           description: 'Candidature approuvée avec succès',
           position: 'top-center',
@@ -83,7 +82,6 @@ const ApplicationDetailPage: React.FC = () => {
         variant: "error-solid",
         message: 'Erreur',
         description: 'Erreur lors de l\'approbation',
-        position: 'top-center',
       });
     } finally {
       setProcessing(false);
@@ -96,10 +94,9 @@ const ApplicationDetailPage: React.FC = () => {
       const result = await reviewStudentApplication(applicationCode, 'REJECTED', rejectionReason);
       if(result.code === 'success'){
         showToast({
-          variant: "default",
+          variant: "success-solid",
           message: 'Succès',
           description: 'Candidature rejetée',
-          position: 'top-center',
         });
       }
         
@@ -110,7 +107,6 @@ const ApplicationDetailPage: React.FC = () => {
         variant: "error-solid",
         message: 'Erreur',
         description: 'Erreur lors du rejet',
-        position: 'top-center',
       });
     } finally {
       setProcessing(false);
@@ -124,10 +120,9 @@ const ApplicationDetailPage: React.FC = () => {
       console.log('-->handleConverted.result', result);
       if(result.code === 'success') {
         showToast({
-          variant: "default",
+          variant: "success-solid", // ← change from "default" to "success"
           message: 'Succès',
           description: 'Candidature convertie en étudiant avec succès',
-          position: 'top-center',
         });
       }
       await loadApplicationDetails();
@@ -136,12 +131,12 @@ const ApplicationDetailPage: React.FC = () => {
         variant: "error-solid",
         message: 'Erreur',
         description: 'Erreur lors de la conversion',
-        position: 'top-center',
       });
     } finally {
       setConverting(false);
     }
-  };
+};
+
 
 
 

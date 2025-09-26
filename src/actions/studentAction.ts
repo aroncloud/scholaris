@@ -146,3 +146,30 @@ export async function convertStudentApplication(applicationCode: string) {
         return errResult;
     }
 }
+
+export async function getStudentDetails(userCode: string) {
+    console.log('-->getStudentDetails', userCode);
+    try {
+        const session = await verifySession();
+        const token = session.accessToken;
+        
+        const response = await axios.get(`https://student-worker-dev.scholaris-sys.workers.dev/api/students/${userCode}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        console.log('-->getStudentDetails.result', response.data);
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        };
+    } catch (error: unknown) {
+        console.error('-->getStudentDetails.error', error);
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}

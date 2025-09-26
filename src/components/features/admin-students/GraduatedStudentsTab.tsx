@@ -91,7 +91,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "@bprogress/next/app";
 import { IEnrollmentRequest, IListStudent, IStudent } from "@/types/staffType";
-import Header from "./Header";
+import Header from "./HeaderSection";
 import { getMentionColor } from "@/lib/utils";
 import { getUserList } from "@/actions/programsAction";
 

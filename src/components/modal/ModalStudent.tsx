@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Dispatch, SetStateAction } from "react";
-import GenericModal from "./GenericModal";
+import GenericModal from "@/components/modal/GenericModal";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {

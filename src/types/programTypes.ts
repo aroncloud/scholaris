@@ -239,3 +239,75 @@ export interface ICreateCurriculum {
   "curriculum_name": string,
   "status_code": string
 }
+
+
+export interface IEnrollmentHistory {
+  enrollment_code: string;
+  student_user_code: string;
+  academic_year_code: string;
+  curriculum_code: string;
+  status_code: string;
+  enrollment_date: string;
+  notes: string;
+  academic_year: {
+    academic_year_code: string;
+    year_code: string;
+    start_date: string;
+    end_date: string;
+    status_code: string;
+  };
+  cirriculum: {
+    curriculum_code: string;
+    curriculum_name: string;
+    study_level: string;
+    program_code: string;
+    program_name: string;
+  };
+}
+
+// export interface IEnrollmentHistoryResponse {
+//   code: string;
+//   message: string;
+//   exit: string;
+//   body: IEnrollmentHistory[];
+// }
+export interface IEnrollmentResponse {
+  code: string;
+  message: string;
+  exit: string;
+  body: IEnrollmentHistory[];
+}
+
+
+export interface IStudentDetail {
+  user_code: string;
+  curriculum_code: string;
+  student_number: string;
+  status_code: string;
+  enrollment_date: string;
+  education_level_code: string;
+  financial_status: string;
+  academic_year_code: string;
+  notes: string;
+  cirriculum: {
+    curriculum_code: string;
+    curriculum_name: string;
+    study_level: string;
+    program_code: string;
+    program_name: string;
+  };
+}
+
+export interface IStudentDetailResponse {
+  code: string;
+  message: string;
+  exit: string;
+  body: IStudentDetail;
+}
+
+export interface ICreateEnrollment {
+  academic_year_code: string;
+  curriculum_code: string;
+  notes?: string;
+//   status_code?: string;
+}
