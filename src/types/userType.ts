@@ -63,3 +63,10 @@ export interface IGetApplicationDetail {
   relatives: IRelative[];
   documents: IDocument[];
 }
+
+export type Role = {
+  name: string;
+  description: string;
+  users: number;
+  permissions: string[];
+};

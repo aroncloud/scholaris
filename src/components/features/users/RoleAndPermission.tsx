@@ -1,57 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
-
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield } from "lucide-react";
-import { getFullRoles } from "@/actions/roleandpermision/getFullRole";
+import { Role } from "@/types/userType";
 
-type Role = {
-  name: string;
-  description: string;
-  users: number;
-  permissions: string[];
-};
+interface MyProps {
+  roles: Role[];
+  loading: boolean;
+}
 
-const RoleAndPermission = () => {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const cached = sessionStorage.getItem("roles");
-        if (cached) {
-          setRoles(JSON.parse(cached));
-          setLoading(false);
-          return;
-        }
-
-        const result = await getFullRoles();
-        if (result.code === "success" && Array.isArray(result.data)) {
-          const mappedRoles: Role[] = result.data.map((role) => ({
-            name: role.title,
-            description: role.description,
-            users: role.user_count,
-            permissions: role.permissions.map((p) => p.permission_title),
-          }));
-          setRoles(mappedRoles);
-          sessionStorage.setItem("roles", JSON.stringify(mappedRoles));
-        } else {
-          setError(result.error || "Failed to fetch roles");
-        }
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch roles");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRoles();
-  }, []);
+const RoleAndPermission = ({loading, roles}: MyProps) => {
 
   if (loading)
     return (
@@ -60,8 +19,7 @@ const RoleAndPermission = () => {
       </div>
     );
 
-  if (error) return <p className="text-red-500">{error}</p>;
-  if (roles.length === 0) return <p>No roles found.</p>;
+
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

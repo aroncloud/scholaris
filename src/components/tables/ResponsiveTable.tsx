@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, ListCollapse } from "lucide-react";
+import { Search, ListCollapse, Inbox } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -34,6 +34,7 @@ interface DataTableProps<T> {
   showMore?: ShowMoreOption;
   onRowClick?: (row: T) => void;
   locale?: "fr" | "en";
+  isLoading?: boolean;
 }
 
 // Role translations
@@ -92,6 +93,37 @@ const renderProfiles = (profiles: any[], locale: "fr" | "en") => {
   );
 };
 
+// Skeleton Row Component
+const SkeletonRow = ({ columnsCount }: { columnsCount: number }) => (
+  <TableRow className="animate-pulse">
+    {Array.from({ length: columnsCount }).map((_, index) => (
+      <TableCell 
+        key={index} 
+        className={`px-4 py-4 ${index < columnsCount - 1 ? 'border-r border-gray-200' : ''}`}
+      >
+        <div className="h-4 bg-gray-200 rounded w-full"></div>
+      </TableCell>
+    ))}
+  </TableRow>
+);
+
+// Empty State Component
+const EmptyState = ({ locale }: { locale: "fr" | "en" }) => (
+  <div className="flex flex-col items-center justify-center py-12 px-4">
+    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+      <Inbox className="w-8 h-8 text-gray-400" />
+    </div>
+    <h3 className="text-lg font-medium text-gray-900 mb-2">
+      {locale === "fr" ? "Aucune donnée disponible" : "No data available"}
+    </h3>
+    <p className="text-gray-500 text-center max-w-sm">
+      {locale === "fr" 
+        ? "Il n'y a actuellement aucune donnée à afficher dans ce tableau." 
+        : "There is currently no data to display in this table."}
+    </p>
+  </div>
+);
+
 export const ResponsiveTable = <T extends Record<string, any>>({
   columns,
   data,
@@ -100,6 +132,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
   showMore,
   onRowClick,
   locale = "fr",
+  isLoading = false,
 }: DataTableProps<T>) => {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -198,6 +231,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
+            disabled={isLoading}
           />
         </div>
       )}
@@ -211,20 +245,46 @@ export const ResponsiveTable = <T extends Record<string, any>>({
                   key={uuidv4()}
                   className={`px-4 py-2 text-left ${index < enhancedColumns.length - 1 ? 'border-r border-gray-200' : ''}`}
                 >
-                  {col.label}
+                  {isLoading ? (
+                    <div className="h-4 bg-gray-300 rounded w-20 animate-pulse"></div>
+                  ) : (
+                    col.label
+                  )}
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            {paginatedData.length === 0 ? (
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: paginate || 5 }).map((_, index) => (
+                <SkeletonRow key={index} columnsCount={enhancedColumns.length} />
+              ))
+            ) : paginatedData.length === 0 && data.length === 0 ? (
+              // Empty state when no data at all
               <TableRow>
-                <TableCell colSpan={enhancedColumns.length} className="text-center py-4 text-gray-500">
-                  {locale === "fr" ? "Aucun résultat trouvé" : "No results found"}
+                <TableCell colSpan={enhancedColumns.length} className="p-0">
+                  <EmptyState locale={locale} />
+                </TableCell>
+              </TableRow>
+            ) : paginatedData.length === 0 ? (
+              // No results found after search/filter
+              <TableRow>
+                <TableCell colSpan={enhancedColumns.length} className="text-center py-8 text-gray-500">
+                  <div className="flex flex-col items-center">
+                    <Search className="w-8 h-8 text-gray-400 mb-2" />
+                    <p className="font-medium">
+                      {locale === "fr" ? "Aucun résultat trouvé" : "No results found"}
+                    </p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      {locale === "fr" ? "Essayez de modifier votre recherche" : "Try adjusting your search"}
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
+              // Actual data
               paginatedData.map((row, rowIndex) => (
                 <TableRow
                   key={uuidv4()}
@@ -246,7 +306,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
         </Table>
       </div>
 
-      {paginate && totalPages > 1 && (
+      {!isLoading && paginate && totalPages > 1 && (
         <div className="flex justify-center items-center gap-2 mb-4">
           <Button 
             size="sm" 
@@ -270,7 +330,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
         </div>
       )}
 
-      {showMore && !paginate && (
+      {!isLoading && showMore && !paginate && (
         <div className="text-center pt-4">
           <a href={showMore.url} className="flex justify-center items-center gap-2 text-blue-600 hover:underline">
             {showMore.label || (locale === "fr" ? "Voir plus" : "Show more")} <ListCollapse size={20} />
