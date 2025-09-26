@@ -182,7 +182,7 @@ export default function CoursePlanningTab() {
 
 
   return (
-    <Card className="w-full">
+    <Card className="w-full p-6">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-gray-800">
           Calendriers de séquences

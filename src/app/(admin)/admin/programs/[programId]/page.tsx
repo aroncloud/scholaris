@@ -298,7 +298,7 @@ export default function EnrollmentDetailPage() {
     const groupedSchedules = groupSchedulesByAcademicYear(academicYearsSchedulesForCurriculumList);
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background p-6">
             <div className="space-y-4 sm:space-y-6">
                 {/* Header */}
                 <div className="bg-white border-b">

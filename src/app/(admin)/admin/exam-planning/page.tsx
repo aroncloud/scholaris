@@ -256,7 +256,7 @@ export default function Page () {
     };
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
+        <div className="container mx-auto p-6 space-y-6  p-6">
             {/* En-tête */}
             <div className="flex flex-col gap-4 w-full">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-3">

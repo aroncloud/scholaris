@@ -74,7 +74,7 @@ const UESelection: React.FC<UESelectionProps> = ({ onSelect, className = '' }) =
 
   return (
     <div className={className}>
-      <div className="relative mb-6">
+      <div className="relative mb-6 p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <Button

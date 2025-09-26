@@ -44,7 +44,7 @@ export default function TeachersPage() {
 
   
   return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         {/* Header */}<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div className="mb-4 md:mb-0">
           <h2 className="text-3xl font-bold tracking-tight">

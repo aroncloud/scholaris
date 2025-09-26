@@ -159,7 +159,7 @@ const ApplicationDetailPage: React.FC = () => {
   // Affichage du loader pendant le chargement
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <LoadingSpinner size={48} message="Chargement du contenu ..." />
       </div>
     );

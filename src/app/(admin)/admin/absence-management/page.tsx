@@ -388,7 +388,7 @@ export default function AbsenceManagementPage() {
   const nouveauxJustificatifs = absencesData.filter(a => a.statut === "en_attente").length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>

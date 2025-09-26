@@ -121,7 +121,7 @@ const UserDetailPage = () => {
   const canDeactivate = () => userData.status_code === 'ACTIVE';
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen p-6">
       <div className="mx-auto space-y-6">
         {/* Header section */}
         <div className="bg-white border-b border-gray-200 -mx-6 -mt-6 px-6 py-4">

@@ -241,7 +241,7 @@ export default function SessionDetailPage() {
   const hasStudents = studentList.length > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-6 py-5">

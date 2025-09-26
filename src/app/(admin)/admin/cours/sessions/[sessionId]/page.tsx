@@ -304,7 +304,7 @@ export default function SessionDetailPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background p-6">
         <div className="container mx-auto p-4 sm:p-6">
           <Card>
             <CardContent className="flex flex-col items-center justify-center h-64 text-center">
@@ -329,7 +329,7 @@ export default function SessionDetailPage() {
   const absentCount = students.length - presentCount;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background p-6">
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="bg-white border-b">

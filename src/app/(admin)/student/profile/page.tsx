@@ -139,7 +139,7 @@ const StudentProfileDashboard: React.FC = () => {
   const PaymentIcon = paymentStatus.icon;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div>
