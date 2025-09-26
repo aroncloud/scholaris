@@ -34,7 +34,7 @@ export default function UserDropdown() {
   // ✅ Build fullname safely
   const firstName = (user as any)?.firstname || "";
   const lastName = (user as any)?.lastname || "";
-  const fullName = firstName && lastName ? `${firstName} ${lastName}` : user.profile || "Utilisateur";
+  const fullName = firstName && lastName ? `${firstName} ${lastName}` : user.roles[0] || "Utilisateur";
 
   return (
     <div className="relative">

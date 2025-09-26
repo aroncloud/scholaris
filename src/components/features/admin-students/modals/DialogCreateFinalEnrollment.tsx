@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -9,7 +10,6 @@ import { showToast } from '@/components/ui/showToast';
 import { IGetAcademicYears } from '@/types/planificationType';
 import { ICreateCurriculum } from '@/types/programTypes';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -50,7 +50,6 @@ export function DialogCreateFinalEnrollment({
   onClose,
   studentCode,
   curriculumCode,
-  programName = '',
   onSuccess,
   onEnrollmentSuccess,
   onCurriculumChange,
@@ -63,7 +62,7 @@ export function DialogCreateFinalEnrollment({
   const [curriculums, setCurriculums] = useState<CurriculumOption[]>([]);
   const [loadingCurriculums, setLoadingCurriculums] = useState(false);
 
-  const { control, handleSubmit, reset, setValue, formState: { errors }, watch } = useForm<EnrollmentFormData>({
+  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<EnrollmentFormData>({
     defaultValues: { 
       academic_year_code: 'ay-2024-2025',
       curriculum_code: curriculumCode || '', 
@@ -71,8 +70,6 @@ export function DialogCreateFinalEnrollment({
     },
   });
 
-  // Watch the form values
-  const formValues = watch();
 
   const handleCurriculumChange = (value: string) => {
     setValue('curriculum_code', value, { shouldValidate: true });

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server'
 
 import { verifySession } from "@/lib/session";
@@ -5,7 +6,7 @@ import { ICreateStudent } from "@/types/staffType";
 import { ICreateEnrollment } from "@/types/programTypes"
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE, IEnrollmentHistory, IEnrollmentResponse } from "@/types/programTypes";
+import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE, IEnrollmentResponse } from "@/types/programTypes";
 
 export interface IReenrollmentPrerequisites {
   isEligible: boolean;

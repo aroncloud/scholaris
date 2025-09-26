@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
 import axios from "axios";
@@ -5,10 +6,6 @@ import { decrypt } from "@/lib/session";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-interface SessionPayload {
-  accessToken: string;
-  // add other fields if needed
-}
 
 type ApiResponse<T = any> = {
   code: "success" | "error";
@@ -60,6 +57,7 @@ export async function assignRole(userCode: string, roleCode: string): Promise<Ap
 
 export async function removeRole(userCode: string, roleCode: string, profile_code: string): Promise<ApiResponse> {
   try {
+    console.log("Removing role:", { userCode, roleCode, profile_code });
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("session")?.value;
     if (!sessionCookie) throw new Error("No session cookie found");

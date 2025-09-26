@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react/no-unescaped-entities */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -62,7 +64,7 @@ const UserDetailPage = () => {
     router.push('/admin/users');
   };
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = (timestamp: number) => {
     if (!timestamp) return 'Non renseigné';
     return new Date(timestamp * 1000).toLocaleDateString('fr-FR', {
       year: 'numeric',
@@ -73,7 +75,7 @@ const UserDetailPage = () => {
     });
   };
 
-  const getStatusColor = (statusCode) => {
+  const getStatusColor = (statusCode: string) => {
     switch (statusCode) {
       case 'ACTIVE':
         return 'bg-green-100 text-green-800 border-green-200';
@@ -86,7 +88,7 @@ const UserDetailPage = () => {
     }
   };
 
-  const getStatusLabel = (statusCode) => {
+  const getStatusLabel = (statusCode: string) => {
     switch (statusCode) {
       case 'ACTIVE':
         return 'Actif';
@@ -109,7 +111,7 @@ const UserDetailPage = () => {
       console.log("Désactivation de l'utilisateur");
       setDeactivateDialogOpen(false);
     } catch (error) {
-      console.error('Erreur lors de la désactivation');
+      console.error('Erreur lors de la désactivation', error);
     } finally {
       setProcessing(false);
     }
@@ -364,7 +366,7 @@ const UserDetailPage = () => {
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Dernière connexion</dt>
-                <dd className="mt-1 text-sm text-gray-900">{formatTimestamp(userData.last_login_at)}</dd>
+                <dd className="mt-1 text-sm text-gray-900">{userData.last_login_at && formatTimestamp(userData.last_login_at)}</dd>
               </div>
             </div>
           </CardContent>

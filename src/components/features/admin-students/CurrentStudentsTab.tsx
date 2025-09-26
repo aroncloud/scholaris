@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { Dispatch, SetStateAction, useEffect, useState, useMemo } from "react";
@@ -12,109 +13,10 @@ import { ICreateStudent, IListStudent } from "@/types/staffType";
 import { useStudentStore } from "@/store/studentStore";
 import { useFactorizedProgramStore } from "@/store/programStore";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
-import { IFactorizedProgram } from "@/types/programTypes";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 // ---------------- FILTERS ----------------
-const StudentFilters = React.memo(({
-  filterProgram,
-  setFilterProgram,
-  filterLevel,
-  setFilterLevel,
-  filterStatus,
-  setFilterStatus,
-  factorizedPrograms,
-}: {
-  filterProgram: string;
-  setFilterProgram: (value: string) => void;
-  filterLevel: string;
-  setFilterLevel: (value: string) => void;
-  filterStatus: string;
-  setFilterStatus: (value: string) => void;
-  factorizedPrograms: IFactorizedProgram[];
-}) => {
 
-  const programOptions = useMemo(() => {
-    const uniquePrograms = Array.from(new Set(factorizedPrograms.map(p => p.program.program_name)));
-    return uniquePrograms.map(p => ({ value: p, label: p }));
-  }, [factorizedPrograms]);
-
-  const filteredLevels = useMemo(() => {
-    if (filterProgram === "all") return [];
-    const program = factorizedPrograms.find(p => p.program.program_name === filterProgram);
-    return program?.curriculums || [];
-  }, [filterProgram, factorizedPrograms]);
-
-  return (
-    <div className="flex flex-wrap gap-4 mb-4 items-center">
-      <div className="flex-1 min-w-0">
-        <Select value={filterProgram} onValueChange={setFilterProgram}>
-          <SelectTrigger className="w-full min-w-0">
-            <SelectValue placeholder="Programme" />
-          </SelectTrigger>
-          <SelectContent className="w-full min-w-0">
-            <SelectItem value="all">Tous les programmes</SelectItem>
-            {programOptions.map(p => (
-              <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <Select 
-          value={filterLevel} 
-          onValueChange={setFilterLevel} 
-          disabled={filterProgram === "all"}
-        >
-          <SelectTrigger className="w-full min-w-0">
-            <SelectValue placeholder={
-              filterProgram === "all" ? "Sélectionnez d'abord un programme" :
-              filteredLevels.length > 0 ? "Sélectionnez un curriculum" :
-              "Aucun curriculum disponible"
-            } />
-          </SelectTrigger>
-          <SelectContent className="w-full min-w-0">
-            <SelectItem value="all">Tous les curriculums</SelectItem>
-            {filteredLevels.length > 0 ? (
-              filteredLevels.map(c => (
-                <SelectItem key={c.curriculum_code} value={c.curriculum_code}>{c.curriculum_name}</SelectItem>
-              ))
-            ) : (
-              <SelectItem value="no-levels" disabled>Aucun curriculum disponible</SelectItem>
-            )}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full min-w-0">
-            <SelectValue placeholder="Statut" />
-          </SelectTrigger>
-          <SelectContent className="w-full min-w-0">
-            <SelectItem value="all">Tous les statuts</SelectItem>
-            <SelectItem value="ENROLLED">Inscrit</SelectItem>
-            <SelectItem value="ACTIVE">Actif</SelectItem>
-            <SelectItem value="PENDING">En attente</SelectItem>
-            <SelectItem value="SUSPENDED">Suspendu</SelectItem>
-            <SelectItem value="GRADUATED">Diplômé</SelectItem>
-            <SelectItem value="WITHDRAWN">Retiré</SelectItem>
-            <SelectItem value="TRANSFERRED">Transféré</SelectItem>
-            {/* <SelectItem value="DISMISSED">Exclu</SelectItem> */}
-            {/* <SelectItem value="GRADUATION_PENDING">En attente de diplôme</SelectItem> */}
-            {/* <SelectItem value="ALUMNI">Ancien élève</SelectItem> */}
-            {/* <SelectItem value="ON_LEAVE">En congé</SelectItem> */}
-            {/* <SelectItem value="PROBATION">En probation</SelectItem> */}
-            {/* <SelectItem value="REPEATER">Répétiteur</SelectItem> */}
-            {/* <SelectItem value="DROPPED_OUT">Abandon</SelectItem> */}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  );
-});
 
 // ---------------- BADGES ----------------
 const getStatusBadge = (status: string) => {
@@ -170,7 +72,6 @@ const CurrentStudents = ({
   setIsStudentDialogOpen,
   setStudentToDelete,
   setDeleteDialogOpen,
-  setIsRequestDialogOpen,
   studentList: initialStudentList,
   setAction,
 }: CurrentStudentsProps) => {
@@ -180,7 +81,7 @@ const CurrentStudents = ({
   const [filterStatus, setFilterStatus] = useState("all");
   const { factorizedPrograms, fetchPrograms } = useFactorizedProgramStore();
   const router = useRouter();
-  const { studentStatuses, updateStudentStatuses } = useStudentStore();
+  const { updateStudentStatuses } = useStudentStore();
 
   useEffect(() => {
     if (!initialStudentList.length) return;
@@ -307,12 +208,12 @@ const CurrentStudents = ({
           </Button>
         </CardHeader>
         <CardContent className="overflow-visible">
-          <StudentFilters 
+          {/* <StudentFilters 
             filterProgram={filterProgram} setFilterProgram={setFilterProgram}
             filterLevel={filterLevel} setFilterLevel={setFilterLevel}
             filterStatus={filterStatus} setFilterStatus={setFilterStatus}
             factorizedPrograms={factorizedPrograms}
-          />
+          /> */}
           <ResponsiveTable<IListStudent>
             columns={columns}
             data={filteredStudents}

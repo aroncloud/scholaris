@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // services/roleService.ts
 import { assignRole, removeRole } from "./assignerRole";
 import { showToast } from "@/components/ui/showToast";
@@ -61,6 +62,7 @@ export async function fetchRoles(locale: keyof typeof roleTranslations): Promise
 
     return [];
   } catch (err) {
+    console.error("Error fetching roles:", err);
     showToast({
       variant: "error-solid",
       message: locale === "fr" ? "Erreur lors du chargement des rôles" : "Error loading roles",

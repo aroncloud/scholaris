@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
 import {
@@ -134,7 +134,7 @@ export default function SessionDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   // Données simulées - à remplacer par vos appels d'API
-  const mockSessionDetail: ISessionDetail = {
+  const mockSessionDetail = useMemo<ISessionDetail>(() => ({
     session_id: sessionId,
     session_code: "MATH101-A1-S001",
     course_name: "Mathématiques 101",
@@ -149,9 +149,9 @@ export default function SessionDetailPage() {
     total_students: 28,
     attendance_done: false,
     created_at: "2025-09-15T10:00:00Z"
-  };
+  }), [sessionId]);
 
-  const mockStudents: IStudent[] = [
+  const mockStudents = useMemo<IStudent[]>(() => [
     {
       student_id: "1",
       matricule: "ETU001",
@@ -197,7 +197,7 @@ export default function SessionDetailPage() {
       is_present: true,
       total_absences: 1
     }
-  ];
+  ], []);
 
   const loadSessionDetails = useCallback(async () => {
     setIsLoading(true);
@@ -227,7 +227,7 @@ export default function SessionDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId, router]);
+  }, [mockSessionDetail, mockStudents, router]);
 
   const handleStudentToggle = (studentId: string) => {
     if (session?.attendance_done) return;

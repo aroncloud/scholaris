@@ -163,7 +163,7 @@ export default function AnnualEnrollmentPage() {
     } finally {
       setHistoryLoading(false);
     }
-  }, []);
+  }, [student]);
 
   // Check re-enrollment eligibility
   const checkReenrollmentEligibility = useCallback(async (studentCode: string) => {
@@ -271,7 +271,7 @@ export default function AnnualEnrollmentPage() {
     } finally {
       setLoading(false);
     }
-  }, [params.id, router]);
+  }, [checkReenrollmentEligibility, loadEnrollmentHistory, params.id, router]);
 
   useEffect(() => {
     loadStudent();

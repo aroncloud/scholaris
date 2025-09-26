@@ -1,6 +1,6 @@
 'use client'
 
-import React, { ReactNode } from "react";
+import React from "react";
 
 type Permission = {
   permission_code: string;
