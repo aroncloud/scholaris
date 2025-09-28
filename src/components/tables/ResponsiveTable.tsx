@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Search, ListCollapse, Inbox } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
@@ -14,6 +14,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface TableColumn<T> {
   key: string;
@@ -26,6 +33,11 @@ interface ShowMoreOption {
   url: string;
 }
 
+interface FilterOption {
+  key: string;
+  values: { label: string; value: string }[];
+}
+
 interface DataTableProps<T> {
   columns: TableColumn<T>[];
   data: T[];
@@ -35,71 +47,16 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
   locale?: "fr" | "en";
   isLoading?: boolean;
+  filters?: FilterOption[];
 }
 
-// Role translations
-const roleTranslations = {
-  en: {
-    ADMIN_SUPER: "Super Administrator",
-    ADMIN_HR: "HR Administrator", 
-    ADMIN_ACADEMIC: "Academic Administrator",
-    FINANCE: "Finance",
-    DEPT_HEAD: "Department Head",
-    TEACHER: "Teacher",
-    STUDENT: "Student",
-    STAFF: "Staff",
-  },
-  fr: {
-    ADMIN_SUPER: "Super Administrateur",
-    ADMIN_HR: "Administrateur RH",
-    ADMIN_ACADEMIC: "Administrateur Académique",
-    FINANCE: "Comptable / Service Financier",
-    DEPT_HEAD: "Chef de Département",
-    TEACHER: "Enseignant",
-    STUDENT: "Étudiant",
-    STAFF: "Personnel / Collaborateur",
-  },
-};
 
-// Helper function to get translated role name
-const getTranslatedRoleName = (roleCode: string, locale: "fr" | "en") => {
-  return roleTranslations[locale][roleCode as keyof typeof roleTranslations.en] || roleCode;
-};
-
-// Helper function to render profiles/roles
-const renderProfiles = (profiles: any[], locale: "fr" | "en") => {
-  if (!Array.isArray(profiles) || profiles.length === 0) {
-    return <span className="text-gray-400 italic">Aucun rôle</span>;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-1">
-      {profiles.map((profile, index) => {
-        // Handle both role_title (from backend) and role_code
-        const displayName = profile.role_title && locale === "fr" 
-          ? profile.role_title 
-          : getTranslatedRoleName(profile.role_code, locale);
-          
-        return (
-          <span
-            key={profile.profile_code || index}
-            className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
-          >
-            {displayName}
-          </span>
-        );
-      })}
-    </div>
-  );
-};
-
-// Skeleton Row Component
 const SkeletonRow = ({ columnsCount }: { columnsCount: number }) => (
   <TableRow className="animate-pulse">
     {Array.from({ length: columnsCount }).map((_, index) => (
-      <TableCell 
-        key={index} 
-        className={`px-4 py-4 ${index < columnsCount - 1 ? 'border-r border-gray-200' : ''}`}
+      <TableCell
+        key={index}
+        className={`px-4 py-4 ${index < columnsCount - 1 ? "border-r border-gray-200" : ""}`}
       >
         <div className="h-4 bg-gray-200 rounded w-full"></div>
       </TableCell>
@@ -107,7 +64,7 @@ const SkeletonRow = ({ columnsCount }: { columnsCount: number }) => (
   </TableRow>
 );
 
-// Empty State Component
+
 const EmptyState = ({ locale }: { locale: "fr" | "en" }) => (
   <div className="flex flex-col items-center justify-center py-12 px-4">
     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -117,12 +74,37 @@ const EmptyState = ({ locale }: { locale: "fr" | "en" }) => (
       {locale === "fr" ? "Aucune donnée disponible" : "No data available"}
     </h3>
     <p className="text-gray-500 text-center max-w-sm">
-      {locale === "fr" 
-        ? "Il n'y a actuellement aucune donnée à afficher dans ce tableau." 
+      {locale === "fr"
+        ? "Il n'y a actuellement aucune donnée à afficher dans ce tableau."
         : "There is currently no data to display in this table."}
     </p>
   </div>
 );
+
+/**
+ * Helper générique : récupère la valeur d'un objet via une clé pouvant être en "dot notation".
+ * Retourne une chaîne lisible pour la recherche / filtrage.
+ */
+const getValueByKey = (obj: any, key: string) => {
+  if (!obj) return "";
+  const parts = key.split(".");
+  let value: any = obj;
+  for (const part of parts) {
+    if (value == null) return "";
+    value = value[part];
+  }
+  if (value == null) return "";
+  if (Array.isArray(value)) {
+    // Si tableau de primitives
+    if (value.every((v) => typeof v !== "object")) return value.join(", ");
+    // Si tableau d'objets -> concaténation de leurs valeurs
+    return value.map((v) => (typeof v === "object" ? Object.values(v).join(" ") : String(v))).join(" | ");
+  }
+  if (typeof value === "object") {
+    return Object.values(value).join(" ");
+  }
+  return String(value);
+};
 
 export const ResponsiveTable = <T extends Record<string, any>>({
   columns,
@@ -133,98 +115,58 @@ export const ResponsiveTable = <T extends Record<string, any>>({
   onRowClick,
   locale = "fr",
   isLoading = false,
+  filters = [],
 }: DataTableProps<T>) => {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
 
-  // Filtering with support for nested profile search
-  const filteredData = searchKey && searchTerm
-    ? data.filter((row) => {
-        const keys = Array.isArray(searchKey) ? searchKey : [searchKey];
-        return keys.some((key) => {
-          const value = row[key];
-          
-          // Special handling for profiles array search
-          if (key === 'profiles' && Array.isArray(value)) {
-            return value.some((profile: any) => {
-              const roleName = profile.role_title || getTranslatedRoleName(profile.role_code, locale);
-              return roleName.toLowerCase().includes(searchTerm.toLowerCase());
-            });
-          }
-          
-          return value?.toString().toLowerCase().includes(searchTerm.toLowerCase());
-        });
-      })
-    : data;
+  // Filtrage (search + selects)
+  const filteredData = data.filter((row) => {
+    // ----- Search
+    let matchesSearch = true;
+    if (searchTerm) {
+      const keys = searchKey ? (Array.isArray(searchKey) ? searchKey : [searchKey]) : columns.map((c) => c.key);
+      const term = searchTerm.toString().toLowerCase();
+      matchesSearch = keys.some((k) => {
+        const str = getValueByKey(row, String(k)).toLowerCase();
+        return str.includes(term);
+      });
+    }
 
-  useEffect(() => setPage(1), [searchTerm]);
+    if (!matchesSearch) return false;
+
+    // ----- Filters selects
+    for (const f of filters) {
+      const sel = selectedFilters[f.key];
+      if (sel && sel !== "") {
+        const valStr = getValueByKey(row, f.key).toLowerCase();
+        if (!valStr.includes(String(sel).toLowerCase())) return false;
+      }
+    }
+
+    return true;
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, selectedFilters]);
 
   const startIndex = paginate ? (page - 1) * paginate : 0;
   const endIndex = paginate ? startIndex + paginate : filteredData.length;
   const paginatedData = filteredData.slice(startIndex, endIndex);
-  const totalPages = paginate ? Math.ceil(filteredData.length / paginate) : 1;
+  const totalPages = paginate ? Math.max(1, Math.ceil(filteredData.length / paginate)) : 1;
 
-  // Enhanced columns with specialized rendering
-  const enhancedColumns = columns.map((col) => {
-    // Handle profiles column
-    if (col.key === "profiles" || col.key === "roles") {
-      return {
-        ...col,
-        render: (profiles: any[]) => renderProfiles(profiles, locale),
-      };
-    }
-    
-    // Handle single role column (if you have one)
-    if (col.key === "role") {
-      return {
-        ...col,
-        render: (value: string) => getTranslatedRoleName(value, locale),
-      };
-    }
-    
-    // Handle status translations
-    if (col.key === "status_code") {
-      return {
-        ...col,
-        render: (value: string) => {
-          const statusTranslations = {
-            fr: {
-              ACTIVE: "Actif",
-              SUSPENDED: "Suspendu",
-              INACTIVE: "Inactif",
-            },
-            en: {
-              ACTIVE: "Active",
-              SUSPENDED: "Suspended", 
-              INACTIVE: "Inactive",
-            }
-          };
-          
-          const translatedStatus = statusTranslations[locale][value as keyof typeof statusTranslations.en] || value;
-          
-          // Add color styling based on status
-          const statusColors = {
-            ACTIVE: "bg-green-100 text-green-800",
-            SUSPENDED: "bg-red-100 text-red-800", 
-            INACTIVE: "bg-gray-100 text-gray-800",
-          };
-          
-          return (
-            <span className={`inline-block px-2 py-1 rounded-full text-xs ${statusColors[value as keyof typeof statusColors] || "bg-gray-100 text-gray-800"}`}>
-              {translatedStatus}
-            </span>
-          );
-        },
-      };
-    }
-    
-    return col;
-  });
+  // Enhanced columns (laisser la possibilité d'un render personnalisé fourni par l'utilisateur)
+  const enhancedColumns = columns;
+
+  const anyFilterActive = Object.values(selectedFilters).some((v) => v && v !== "");
 
   return (
     <div className="w-full space-y-4">
-      {searchKey && (
-        <div className="relative w-full">
+      {/* Barre recherche + filtres */}
+      <div className="flex flex-wrap gap-4 items-center">
+        <div className="relative w-full md:w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={locale === "fr" ? "Rechercher..." : "Search..."}
@@ -234,8 +176,54 @@ export const ResponsiveTable = <T extends Record<string, any>>({
             disabled={isLoading}
           />
         </div>
-      )}
 
+        {filters.map((filter) => (
+          <div key={filter.key} className="w-full md:w-48">
+            <Select
+              value={selectedFilters[filter.key] ?? ""}
+              onValueChange={(value) =>
+                setSelectedFilters((prev) => ({
+                  ...prev,
+                  [filter.key]: value,
+                }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    locale === "fr"
+                      ? `Filtrer par ${filter.key}`
+                      : `Filter by ${filter.key}`
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">{locale === "fr" ? "Tous" : "All"}</SelectItem>
+                {filter.values.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ))}
+
+        {/* Reset filters */}
+        {anyFilterActive && (
+          <div className="ml-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setSelectedFilters({})}
+            >
+              {locale === "fr" ? "Réinitialiser les filtres" : "Reset filters"}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Tableau */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">
         <Table className="min-w-full">
           <TableHeader className="bg-gray-100">
@@ -243,7 +231,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
               {enhancedColumns.map((col, index) => (
                 <TableHead
                   key={uuidv4()}
-                  className={`px-4 py-2 text-left ${index < enhancedColumns.length - 1 ? 'border-r border-gray-200' : ''}`}
+                  className={`px-4 py-2 text-left ${index < enhancedColumns.length - 1 ? "border-r border-gray-200" : ""}`}
                 >
                   {isLoading ? (
                     <div className="h-4 bg-gray-300 rounded w-20 animate-pulse"></div>
@@ -257,19 +245,16 @@ export const ResponsiveTable = <T extends Record<string, any>>({
 
           <TableBody>
             {isLoading ? (
-              // Loading skeleton
               Array.from({ length: paginate || 5 }).map((_, index) => (
                 <SkeletonRow key={index} columnsCount={enhancedColumns.length} />
               ))
             ) : paginatedData.length === 0 && data.length === 0 ? (
-              // Empty state when no data at all
               <TableRow>
                 <TableCell colSpan={enhancedColumns.length} className="p-0">
                   <EmptyState locale={locale} />
                 </TableCell>
               </TableRow>
             ) : paginatedData.length === 0 ? (
-              // No results found after search/filter
               <TableRow>
                 <TableCell colSpan={enhancedColumns.length} className="text-center py-8 text-gray-500">
                   <div className="flex flex-col items-center">
@@ -284,19 +269,18 @@ export const ResponsiveTable = <T extends Record<string, any>>({
                 </TableCell>
               </TableRow>
             ) : (
-              // Actual data
               paginatedData.map((row, rowIndex) => (
                 <TableRow
                   key={uuidv4()}
-                  className={`hover:bg-gray-50 cursor-pointer ${rowIndex < paginatedData.length - 1 ? 'border-b border-gray-200' : ''}`}
+                  className={`hover:bg-gray-50 cursor-pointer ${rowIndex < paginatedData.length - 1 ? "border-b border-gray-200" : ""}`}
                   onClick={() => onRowClick?.(row)}
                 >
                   {enhancedColumns.map((col, colIndex) => (
                     <TableCell
                       key={uuidv4()}
-                      className={`px-4 py-2 ${colIndex < enhancedColumns.length - 1 ? 'border-r border-gray-200' : ''}`}
+                      className={`px-4 py-2 ${colIndex < enhancedColumns.length - 1 ? "border-r border-gray-200" : ""}`}
                     >
-                      {col.render ? col.render(row[col.key], row) : row[col.key]}
+                      {col.render ? col.render(getValueByKey(row, col.key), row) : getValueByKey(row, col.key)}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -306,30 +290,22 @@ export const ResponsiveTable = <T extends Record<string, any>>({
         </Table>
       </div>
 
+      {/* Pagination */}
       {!isLoading && paginate && totalPages > 1 && (
         <div className="flex justify-center items-center gap-2 mb-4">
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={() => setPage((p) => Math.max(p - 1, 1))} 
-            disabled={page === 1}
-          >
+          <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1}>
             {locale === "fr" ? "Précédent" : "Previous"}
           </Button>
           <span className="text-gray-700 px-4">
             {locale === "fr" ? `Page ${page} sur ${totalPages}` : `Page ${page} of ${totalPages}`}
           </span>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={() => setPage((p) => Math.min(p + 1, totalPages))} 
-            disabled={page === totalPages}
-          >
+          <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.min(p + 1, totalPages))} disabled={page === totalPages}>
             {locale === "fr" ? "Suivant" : "Next"}
           </Button>
         </div>
       )}
 
+      {/* ShowMore link */}
       {!isLoading && showMore && !paginate && (
         <div className="text-center pt-4">
           <a href={showMore.url} className="flex justify-center items-center gap-2 text-blue-600 hover:underline">

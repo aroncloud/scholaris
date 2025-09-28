@@ -51,7 +51,7 @@ export default function AdminLayout({
 
           {/* Contenu avec marge dynamique */}
           <main className={`transition-all duration-300 ease-in-out pt-20 ${mainContentMargin}`}>
-            <div className="mx-auto max-w-(--breakpoint-2xl) pt-2">
+            <div className="mx-auto pt-2">
               {children}
             </div>
           </main>

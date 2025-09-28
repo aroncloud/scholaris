@@ -1082,4 +1082,52 @@ export async function getUEListPerCurriculum(curriculumId: string){
         return errResult;
     }
 }
+export async function getUEListForTeacher(teacher_user_code: string){
+  try {
+      const session = await verifySession();
+      
+      const token = session.accessToken;
+      
+
+      const response = await axios.get(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units/for-teacher/${teacher_user_code}`,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+      });
+      console.log('-->result', response.data);
+      
+      return {
+          code: 'success',
+          error: null,
+          data: response.data
+      }
+  } catch (error: unknown) {
+      console.log('-->getUEListForTeacher.error')
+      const errResult = actionErrorHandler(error);
+      return errResult;
+  }
+}
+export async function assignATeacherToACourseUnit(course_unit_code: string, teacher_user_code: string) {
+  try {
+    const session = await verifySession();
+    
+    const token = session.accessToken;
+    
+    const response = await axios.patch(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units/${course_unit_code}/assign-teacher`,
+      {teacher_user_code: teacher_user_code},
+      {headers: {Authorization: `Bearer ${token}`}}
+    );
+    
+    console.log('-->result', response);
+    
+    return {
+      code: 'success',
+      error: null,
+      data: response.data
+    }
+  } catch (error: unknown) {
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
+}
 

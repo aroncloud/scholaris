@@ -14,10 +14,10 @@ import { ResponsiveTable, TableColumn } from '@/components/tables/ResponsiveTabl
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { showToast } from '@/components/ui/showToast';
-import { getStatusColor } from '@/lib/utils';
-import { useAcademicYearStore } from '@/store/useAcademicYearStore';
-import { getListAcademicYearsSchedulesForCurriculum } from '@/actions/programsAction';
-import { IGetAcademicYearsSchedulesForCurriculum } from '@/types/planificationType';
+import { getStatusColor, getWeekRange } from '@/lib/utils';
+import { useUserStore } from '@/store/useAuthStore';
+import { getTeacherSchedule } from '@/actions/planificationAction';
+import { IGetSchedule } from '@/types/planificationType';
 
 const ScoreInput: React.FC<{
   student: IStudentEvaluationInfo;
@@ -85,26 +85,20 @@ const ScoreInput: React.FC<{
 const Page = () => {
     const [selectedCurriculum, setSelectedCurriculum] = useState<string>('');
     const [selectedExam, setSelectedExam] = useState<string>('');
-    const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('');
-    const [selectedSchedule, setSelectedSchedule] = useState<string>('');
     const [examSheet, setExamSheet] = useState<EvaluationSheet | undefined>(undefined);
     const [isLoadingExamDetail, setIsLoadingExamDetail] = useState<boolean>(false);
+    const [teacherSessions, setTeacherSessions] = useState<IGetSchedule[]>([]);
     const [isSaving, setIsSaving] = useState<boolean>(false);
-    const [scheduleList, setScheduleList] = useState<IGetAcademicYearsSchedulesForCurriculum[]>([]);
 
     const [modifiedStudents, setModifiedStudents] = useState<Set<string>>(new Set());
     const [studentGrades, setStudentGrades] = useState<Map<string, number>>(new Map());
 
     const { factorizedPrograms } = useFactorizedProgramStore();
-    const { examList, fetchtEvaluationsForSchedule, isLoadingExam } = useEvaluationData();
-    const { academicYears } = useAcademicYearStore();
+    const { examList, fetchEvaluationForTeacher, isLoadingExam } = useEvaluationData();
+    const { user } = useUserStore();
 
     const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
 
-    const fetchListAcademicYearsSchedulesForCurriculum = async (curriculum_code: string, academic_year_code: string) => {
-        const result = await getListAcademicYearsSchedulesForCurriculum(curriculum_code, academic_year_code);
-        setScheduleList(result.data.body)
-    }
     const updateStudentScore = useCallback((userCode: string, score: number) => {
         setStudentGrades(prev => new Map(prev.set(userCode, score)));
         setModifiedStudents(prev => new Set(prev).add(userCode));
@@ -189,21 +183,50 @@ const Page = () => {
     }, [selectedExam]);
 
     useEffect(() => {
-        if(selectedCurriculum && selectedAcademicYear) {
-            fetchListAcademicYearsSchedulesForCurriculum(selectedCurriculum, selectedAcademicYear);
-        }
-    }, [selectedCurriculum, selectedAcademicYear]);
-
-    useEffect(() => {
-        if(selectedCurriculum && selectedSchedule) {
-            fetchtEvaluationsForSchedule(selectedSchedule);
-        }
-    }, [selectedCurriculum, selectedSchedule, fetchtEvaluationsForSchedule]);
+        if(!user) return
+        
+        fetchEvaluationForTeacher(user.user.user_code, selectedExam);
+    }, [user, fetchEvaluationForTeacher, selectedExam]);
 
     useEffect(() => {
         getEvaluationInfo();
     }, [getEvaluationInfo, selectedExam]);
 
+    const getTeacherSessions = useCallback(async () => {
+        if (user) {
+        //   setLoading(true);
+        try {
+            const { start, end } = getWeekRange();
+            const result = await getTeacherSchedule(
+            user.user.user_code,
+            start,
+            end
+            );
+            if (result.code === "success") {
+            setTeacherSessions(result.data.body || []);
+            } else {
+            showToast({
+                variant: "error-solid",
+                message: "Erreur lors de la récupération des données",
+                description:
+                "Une erreur est survenue lors de la récupération des données. Veuillez réessayer ultérieurement.",
+                position: "top-center",
+            });
+            }
+            console.log("-->getTeacherSessions.result", result);
+        } catch (error) {
+            showToast({
+            variant: "error-solid",
+            message: "Erreur inattendue",
+            description:
+                "Impossible de charger vos séances pour le moment. Veuillez réessayer.",
+            position: "top-center",
+            });
+        } finally {
+            // setLoading(false);
+        }
+        }
+    }, [user]);
     const createColumns = (): TableColumn<IStudentEvaluationInfo>[] => {
         if (!examSheet) return [];
 
@@ -268,6 +291,11 @@ const Page = () => {
         ];
     };
 
+    useEffect(() => {
+        getTeacherSessions();
+    }, [getTeacherSessions]);
+    
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
@@ -308,57 +336,23 @@ const Page = () => {
                 {/* Selection Panel */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <BookOpen className="w-4 h-4 inline mr-2" />
-                                Année académique
-                            </label>
-                            <Combobox
-                                options={academicYears.map(ay => ({ 
-                                    value: ay.academic_year_code, 
-                                    label: `${ay.start_date.split('-')[0]} - ${ay.end_date.split('-')[0]}`
-                                }))}
-                                value={selectedAcademicYear}
-                                onChange={setSelectedAcademicYear}
-                                placeholder="Sélectionner une année académique"
-                                className='py-5'
-                            />
-                        </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <BookOpen className="w-4 h-4 inline mr-2" />
-                                Curriculum
+                                <Calendar className="w-4 h-4 inline mr-2" />
+                                Cours
                             </label>
                             <Combobox
-                                options={curriculumList.map(curriculum => ({ 
-                                    value: curriculum.curriculum_code, 
-                                    label: curriculum.curriculum_name
+                                options={teacherSessions.map(tsch => ({ 
+                                    value: tsch.course_unit_code, 
+                                    label: tsch.session_title
                                 }))}
-                                value={selectedCurriculum}
-                                onChange={setSelectedCurriculum}
-                                placeholder="Sélectionner un cours"
+                                value={selectedExam}
+                                onChange={setSelectedExam}
+                                placeholder={isLoadingExam ? "Chargement des données ..." : "Sélectionner une évaluation"}
                                 className='py-5'
                             />
                         </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <BookOpen className="w-4 h-4 inline mr-2" />
-                                Trimestre/Semestre
-                            </label>
-                            <Combobox
-                                options={scheduleList.map(sch => ({ 
-                                    value: sch.schedule_code, 
-                                    label: sch.sequence_name
-                                }))}
-                                value={selectedSchedule}
-                                onChange={setSelectedSchedule}
-                                placeholder="Sélectionner un cours"
-                                className='py-5'
-                            />
-                        </div>
-
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 <Calendar className="w-4 h-4 inline mr-2" />

@@ -59,7 +59,7 @@ export default function DialogManageUserRole({
   // Handle save action
   const handleSave = () => {
     if (user) {
-      onSave(user.userId, selectedRoles);
+      onSave(user.user_code, selectedRoles);
     }
   };
 

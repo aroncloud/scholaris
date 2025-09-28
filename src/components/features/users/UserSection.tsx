@@ -1,17 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { useState, useMemo } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -21,14 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Shield, UserCheck, UserX, X } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Shield, UserCheck, UserX } from "lucide-react";
 import { Role } from "@/types/userType";
 import { getRoleColor, getStatusColor } from "@/lib/utils";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 import Link from "next/link";
-import { useUserData } from "@/hooks/feature/users/useUserData";
 import { IUserList } from "@/types/staffType";
 import DialogManageUserRole from "./Modal/DialogManageUserRole";
+import ContentLayout from "@/layout/ContentLayout";
 
 interface MyProps {
   userList: IUserList[];
@@ -115,7 +106,7 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
               <Link
-                href={`/admin/users/${user.userId ?? "userdetail"}`}
+                href={`/admin/users/${user.user_code}`}
                 className="flex items-center cursor-pointer"
               >
                 <Edit className="mr-2 h-4 w-4" /> Plus de détail
@@ -152,21 +143,21 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
 
   return (
     <>
-      <Card className="rounded-2xl shadow-lg">
-        <CardHeader>
-          <CardTitle>Utilisateurs ({userList.length})</CardTitle>
-          <CardDescription>Liste de tous les utilisateurs du système</CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 md:px-6">
-          <ResponsiveTable
-            columns={userColumns}
-            data={userList}
-            searchKey={["first_name", "last_name", "email"]}
-            paginate={10}
-            isLoading={loading}
-          />
-        </CardContent>
-      </Card>
+      <ContentLayout
+        title={`Utilisateurs (${userList.length})`}
+        description="Liste de tous les utilisateurs du système"
+        actions
+      >
+
+        <ResponsiveTable
+          columns={userColumns}
+          data={userList}
+          searchKey={["first_name", "last_name", "email"]}
+          paginate={10}
+          isLoading={loading}
+        />
+      </ContentLayout>
+
 
       {/* Role Management Modal */}
       <DialogManageUserRole

@@ -110,6 +110,30 @@ export interface ICreateUE {
   lab_tutorial_hours: number;
 }
 
+export interface IGetUEForTeacher {
+  course_unit_code: string;
+  module_code: string;
+  teacher_user_code: string;
+  course_unit_name: string;
+  internal_code: string;
+  lecture_hours: number;
+  lab_tutorial_hours: number | null;
+  coefficient: number;
+  is_mandatory: number;
+  is_module_coordinator: number; 
+  status_code: string;
+  max_score: number;
+  curriculum_code: string;
+  program_code: string;
+  study_level: string;
+  curriculum_name: string;
+  created_at: string; 
+  sequence_code: string;
+  sequence_name: string;
+  sequence_number: string; 
+  description: string | null;
+}
+
 export interface IGetUEPerModule {
   course_unit_code: string;
   module_code: string;

@@ -100,7 +100,7 @@ export default function ProgramsPage() {
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="program" className="space-y-4">
+      <Tabs defaultValue="maquettes" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="academic_year">Années académiques</TabsTrigger>
           <TabsTrigger value="program">

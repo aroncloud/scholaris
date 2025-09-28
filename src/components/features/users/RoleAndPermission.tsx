@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield } from "lucide-react";
 import { Role } from "@/types/userType";
+import ContentLayout from "@/layout/ContentLayout";
 
 interface MyProps {
   roles: Role[];
@@ -22,39 +23,48 @@ const RoleAndPermission = ({loading, roles}: MyProps) => {
 
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {roles.map((role) => (
-        <Card key={role.name} className="flex flex-col justify-between h-full">
-          <div>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>{role.name}</span>
-                <Badge variant="secondary">{role.users} utilisateurs</Badge>
-              </CardTitle>
-              <CardDescription>{role.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">Permissions :</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  {role.permissions.map((permission) => (
-                    <li key={permission} className="flex items-center">
-                      <div className="h-1.5 w-1.5 bg-primary rounded-full mr-2" />
-                      {permission}
-                    </li>
-                  ))}
-                </ul>
+    <div>
+      <ContentLayout
+        title={`Gestion des rôles`}
+        description="Gérez les rôles et leurs permissions dans le système"
+        actions
+      >
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {roles.map((role) => (
+            <Card key={role.name} className="flex flex-col justify-between h-full">
+              <div>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{role.name}</span>
+                    <Badge variant="secondary">{role.users} utilisateurs</Badge>
+                  </CardTitle>
+                  <CardDescription>{role.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">Permissions :</h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {role.permissions.map((permission) => (
+                        <li key={permission} className="flex items-center">
+                          <div className="h-1.5 w-1.5 bg-primary rounded-full mr-2" />
+                          {permission}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
               </div>
-            </CardContent>
-          </div>
-          <div className="p-4 pt-0">
-            <Button variant="outline" className="w-full">
-              <Shield className="h-4 w-4 mr-2" />
-              Gérer les permissions
-            </Button>
-          </div>
-        </Card>
-      ))}
+              <div className="p-4 pt-0">
+                <Button variant="outline" className="w-full">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Gérer les permissions
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+      </ContentLayout>
     </div>
   );
 };

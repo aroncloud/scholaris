@@ -17,7 +17,9 @@ import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
 import { getStatusColor } from "@/lib/utils";
 import { DialogUpdateUE } from "../Modal/DialogUpdateUE";
 import { showToast } from "@/components/ui/showToast";
-import { updateUE } from "@/actions/programsAction";
+import { assignATeacherToACourseUnit, updateUE } from "@/actions/programsAction";
+import { useTeacherStore } from "@/store/useTeacherStore";
+import { DialogAssignUEToTeacher } from "../Modal/DialogAssignUEToTeacher";
 
 type UETableProps = {
   ues: IGetUEPerModule[];
@@ -28,6 +30,9 @@ type UETableProps = {
 const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
   const [selectedUE, setSelectedUE] = useState<ICreateUE | null>(null);
   const [isUpdateUEDialogOpen, setIsUpdateUEDialogOpen] = useState(false);
+  const [isAssignTeacherDialogOpen, setIsAssignTeacherDialogOpen] = useState(false);
+  const { teacherList } = useTeacherStore();
+
   if (!ues || ues.length === 0) {
     return (
       <div className="text-sm text-muted-foreground p-3 border rounded-md">
@@ -36,6 +41,8 @@ const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
     );
   }
 
+
+  console.log("Teacher List from Store:", teacherList);
   
   
   const handleUpdateUE = async (ue: ICreateUE) => {
@@ -63,6 +70,28 @@ const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
 
     return true;
   };
+
+  const assignTeacher = async (ueCode: string, teacherCode: string): Promise<void> => {
+    const result = await assignATeacherToACourseUnit(ueCode, teacherCode);
+    console.log("Assign Teacher to UE result:", result);
+    if(result.code === 'success') {
+      showToast({
+        variant: "success-solid",
+        message: 'Assignation effecué avec succès',
+        description: `L'UE ${ues.find(u => u.course_unit_code === ueCode)?.course_unit_name} a été assignée à l'enseignant ${teacherList.find(t => t.user_code === teacherCode)?.first_name} ${teacherList.find(t => t.user_code === teacherCode)?.last_name}.`,
+        position: 'top-center',
+      });
+    } else {
+      showToast({ 
+        variant: "error-solid",
+        message: "Impossible de créer la salle de classe",
+        description:result.error ?? "Une erreur est survenue, essayez encore ou veuillez contacter l'administrateur",
+        position: 'top-center',
+      });
+    }
+    return;
+  };
+
 
   return (
     <div className="rounded-md border mb-2">
@@ -136,6 +165,13 @@ const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
                       <Edit className="mr-2 h-4 w-4" />
                       Modifier
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      setSelectedUE(ue);
+                      setIsAssignTeacherDialogOpen(true);
+                    }}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Assigner un enseignant
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-red-600" onClick={() => {}}>
                       <Trash2 className="mr-2 h-4 w-4" />
@@ -156,6 +192,14 @@ const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
         open={isUpdateUEDialogOpen}
         moduleCode={selectedUE.module_code}
         onSave={handleUpdateUE}
+      />}
+      
+      {(selectedUE && isAssignTeacherDialogOpen) && <DialogAssignUEToTeacher
+        ue={ues.find(u => u.course_unit_code === selectedUE.course_unit_code)!}
+        teacherList={teacherList}
+        onAssignTeacher={assignTeacher}
+        onOpenChange={setIsAssignTeacherDialogOpen}
+        open={isAssignTeacherDialogOpen}
       />}
     </div>
   );
