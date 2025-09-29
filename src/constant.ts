@@ -2,7 +2,7 @@ import { ApplicationStatus, PlanificationStatus } from "./types/teacherTypes";
 
 export type gender = 'FEMALE' | 'MALE';
 export type ACTION = 'CREATE' | 'UPDATE' | 'DELETE' | 'DESACTIVATE' | 'ACTIVATE';
-export const maritalStatus = [
+export const MARITAl_STATUS = [
   { label: "Célibataire", value: "SINGLE" },
   { label: "Marié(e)", value: "MARRIED" },
   { label: "Divorcé(e)", value: "DIVORCED" },

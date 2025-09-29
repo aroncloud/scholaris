@@ -18,6 +18,8 @@ import { useEffect } from "react";
 import { IGetUserDetail, IUpdateUserForm } from "@/types/staffType";
 import { Combobox } from "@/components/ui/Combobox";
 import { useConfigStore } from "@/lib/store/configStore";
+import { DatePicker } from "@/components/DatePicker";
+import { MARITAl_STATUS } from "@/constant";
 
 
 interface DialogUpdateUserProps {
@@ -28,24 +30,6 @@ interface DialogUpdateUserProps {
   loading?: boolean;
 }
 
-// Options pour les ethnies (à adapter selon vos données)
-const ETHNICITY_OPTIONS = [
-  { value: "BAKWERI", label: "Bakweri" },
-  { value: "BAMILEKE", label: "Bamiléké" },
-  { value: "BASSA", label: "Bassa" },
-  { value: "DOUALA", label: "Douala" },
-  { value: "FULANI", label: "Fulani" },
-  { value: "OTHER", label: "Autre" },
-];
-
-// Options pour les pays (à étendre selon vos besoins)
-const COUNTRY_OPTIONS = [
-  { value: "Cameroon", label: "Cameroun" },
-  { value: "France", label: "France" },
-  { value: "Nigeria", label: "Nigeria" },
-  { value: "Chad", label: "Tchad" },
-  { value: "Central African Republic", label: "République Centrafricaine" },
-];
 
 export function DialogUpdateUser({
   open,
@@ -55,7 +39,8 @@ export function DialogUpdateUser({
   loading = false,
 }: DialogUpdateUserProps) {
     
-    const {  } = useConfigStore();
+    const { getEthnicities } = useConfigStore();
+    const ethnies = getEthnicities();
     const {
         register,
         handleSubmit,
@@ -65,23 +50,31 @@ export function DialogUpdateUser({
         setValue,
     } = useForm<IUpdateUserForm>({
         defaultValues: {
+        email: "",
+        first_name: "",
         last_name: "",
         phone_number: "",
         other_email: "",
         other_phone: "",
-        country: "",
+        country: "Cameroon",
         city: "",
         address_details: "",
         avatar_url: "",
         place_of_birth: "",
         date_of_birth: "",
         ethnicity_code: "",
+        marital_status_code: "",
+        cni_number: "",
+        cni_issue_date: "",
+        cni_issue_location: "",
         },
     });
 
     useEffect(() => {
         console.log("userData changed:", userData);
         if (open && userData) {
+        setValue("email", userData.email || "");
+        setValue("first_name", userData.first_name || "");
         setValue("last_name", userData.last_name || "");
         setValue("phone_number", userData.phone_number || "");
         setValue("other_email", userData.other_email || "");
@@ -91,14 +84,32 @@ export function DialogUpdateUser({
         setValue("address_details", userData.address_details || "");
         setValue("avatar_url", userData.avatar_url || "");
         setValue("place_of_birth", userData.place_of_birth || "");
-        // Convertir le timestamp en date ISO si nécessaire
+        
+        // Convertir date_of_birth (timestamp ou string) en format ISO date
         if (userData.date_of_birth) {
-            // const date = new Date(userData.date_of_birth * 1000);
-            // setValue("date_of_birth", date.toISOString().split('T')[0]);>
+            const dateOfBirth = typeof userData.date_of_birth === 'number' 
+                ? new Date(userData.date_of_birth * 1000).toISOString().split('T')[0]
+                : userData.date_of_birth;
+            setValue("date_of_birth", dateOfBirth);
         } else {
             setValue("date_of_birth", "");
         }
+        
         setValue("ethnicity_code", userData.ethnicity_code || "");
+        setValue("marital_status_code", userData.marital_status_code || "");
+        setValue("cni_number", userData.cni_number || "");
+        
+        // Convertir cni_issue_date (timestamp ou string) en format ISO date
+        if (userData.cni_issue_date) {
+            const cniIssueDate = typeof userData.cni_issue_date === 'number' 
+                ? new Date(userData.cni_issue_date * 1000).toISOString().split('T')[0]
+                : userData.cni_issue_date;
+            setValue("cni_issue_date", cniIssueDate);
+        } else {
+            setValue("cni_issue_date", "");
+        }
+        
+        setValue("cni_issue_location", userData.cni_issue_location || "");
         }
     }, [open, userData, setValue]);
 
@@ -133,13 +144,50 @@ export function DialogUpdateUser({
                 <CardTitle className="text-base">Informations personnelles</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Email principal */}
+                <div className="space-y-1 md:col-span-2">
+                    <Label htmlFor="email">Email principal</Label>
+                    <Input
+                    id="email"
+                    type="email"
+                    {...register("email", {
+                        pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: "Format d'email invalide"
+                        }
+                    })}
+                    disabled={isSubmitting || loading}
+                    className={errors.email ? "border-red-500" : ""}
+                    placeholder="email@exemple.com"
+                    />
+                    {errors.email && (
+                    <p className="text-red-600 text-sm">{errors.email.message}</p>
+                    )}
+                </div>
+
+                {/* Prénom */}
+                <div className="space-y-1">
+                    <Label htmlFor="first_name">Prénom</Label>
+                    <Input
+                    id="first_name"
+                    {...register("first_name", { 
+                        minLength: { value: 2, message: "Le prénom doit contenir au moins 2 caractères" }
+                    })}
+                    disabled={isSubmitting || loading}
+                    className={errors.first_name ? "border-red-500" : ""}
+                    placeholder="Entrez le prénom"
+                    />
+                    {errors.first_name && (
+                    <p className="text-red-600 text-sm">{errors.first_name.message}</p>
+                    )}
+                </div>
+
                 {/* Nom de famille */}
                 <div className="space-y-1">
-                    <Label htmlFor="last_name">Nom de famille *</Label>
+                    <Label htmlFor="last_name">Nom de famille</Label>
                     <Input
                     id="last_name"
                     {...register("last_name", { 
-                        required: "Le nom de famille est requis",
                         minLength: { value: 2, message: "Le nom doit contenir au moins 2 caractères" }
                     })}
                     disabled={isSubmitting || loading}
@@ -164,17 +212,29 @@ export function DialogUpdateUser({
 
                 {/* Date de naissance */}
                 <div className="space-y-1">
-                    <Label htmlFor="date_of_birth">Date de naissance</Label>
-                    <Input
-                    id="date_of_birth"
-                    type="date"
-                    {...register("date_of_birth")}
-                    disabled={isSubmitting || loading}
-                    className={errors.date_of_birth ? "border-red-500" : ""}
-                    />
-                    {errors.date_of_birth && (
+                <Label htmlFor="date_of_birth">Date de naissance</Label>
+                <Controller
+                    name="date_of_birth"
+                    control={control}
+                    render={({ field }) => {
+                        const valueAsDate = field.value ? new Date(field.value) : undefined
+
+                        return (
+                            <DatePicker
+                            label=""
+                            defaultDate={valueAsDate}
+                            minDate={new Date(1900, 0, 1)}
+                            maxDate={new Date()}
+                            onChange={(date) => {
+                                field.onChange(date ? date.toISOString().split("T")[0] : "")
+                            }}
+                            />
+                        )
+                    }}
+                />
+                {errors.date_of_birth && (
                     <p className="text-red-600 text-sm">{errors.date_of_birth.message}</p>
-                    )}
+                )}
                 </div>
 
                 {/* Ethnie */}
@@ -185,9 +245,9 @@ export function DialogUpdateUser({
                     control={control}
                     render={({ field }) => (
                         <Combobox
-                            options={ETHNICITY_OPTIONS.map(eth => ({ 
-                                value: eth.value, 
-                                label: eth.label
+                            options={ethnies.map(eth => ({ 
+                                value: eth.ethnicity_code, 
+                                label: eth.ethnicity_name
                             }))}
                             value={field.value}
                             onChange={field.onChange}
@@ -196,6 +256,78 @@ export function DialogUpdateUser({
                         />
                     )}
                     />
+                </div>
+
+                {/* Statut marital */}
+                <div className="space-y-1">
+                    <Label htmlFor="marital_status_code">Statut marital</Label>
+                    <Controller
+                    name="marital_status_code"
+                    control={control}
+                    render={({ field }) => (
+                        <Combobox
+                            options={MARITAl_STATUS}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Sélectionner le statut"
+                            className='py-5'
+                        />
+                    )}
+                    />
+                </div>
+                </CardContent>
+            </Card>
+
+            {/* Pièce d'identité (CNI) */}
+            <Card>
+                <CardHeader className="pb-3">
+                <CardTitle className="text-base">Carte Nationale d&apos;Identité</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Numéro CNI */}
+                <div className="space-y-1">
+                    <Label htmlFor="cni_number">Numéro CNI</Label>
+                    <Input
+                    id="cni_number"
+                    {...register("cni_number")}
+                    disabled={isSubmitting || loading}
+                    placeholder="Ex: 123456789"
+                    />
+                </div>
+
+                {/* Lieu de délivrance */}
+                <div className="space-y-1">
+                    <Label htmlFor="cni_issue_location">Lieu de délivrance</Label>
+                    <Input
+                    id="cni_issue_location"
+                    {...register("cni_issue_location")}
+                    disabled={isSubmitting || loading}
+                    placeholder="Ex: Yaoundé"
+                    />
+                </div>
+
+                {/* Date de délivrance */}
+                <div className="space-y-1 md:col-span-2">
+                <Label htmlFor="cni_issue_date">Date de délivrance</Label>
+                <Controller
+                    name="cni_issue_date"
+                    control={control}
+                    render={({ field }) => {
+                        const valueAsDate = field.value ? new Date(field.value) : undefined
+
+                        return (
+                            <DatePicker
+                            label=""
+                            defaultDate={valueAsDate}
+                            minDate={new Date(1900, 0, 1)}
+                            maxDate={new Date()}
+                            onChange={(date) => {
+                                field.onChange(date ? date.toISOString().split("T")[0] : "")
+                            }}
+                            />
+                        )
+                    }}
+                />
                 </div>
                 </CardContent>
             </Card>
@@ -278,21 +410,11 @@ export function DialogUpdateUser({
                 {/* Pays */}
                 <div className="space-y-1">
                     <Label htmlFor="country">Pays</Label>
-                    <Controller
-                    name="country"
-                    control={control}
-                    render={({ field }) => (
-                        <Combobox
-                            options={COUNTRY_OPTIONS.map(cnt => ({ 
-                                value: cnt.value, 
-                                label: cnt.label
-                            }))}
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="Sélectionner un pays"
-                            className='py-5'
-                        />
-                    )}
+                    <Input
+                    id="country"
+                    {...register("country")}
+                    disabled={isSubmitting || loading}
+                    placeholder="Ex: Cameroun"
                     />
                 </div>
 

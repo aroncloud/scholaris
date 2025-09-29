@@ -441,7 +441,7 @@ export async function updateUser(user: IUpdateUserForm, user_code: string) {
     const token = session.accessToken;
 
     const response = await axios.put(
-      `${process.env.TIMETABLE_WORKER_ENDPOINT}/api/users/${user_code}`,
+      `${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}`,
       { ...user },
       {
         headers: {

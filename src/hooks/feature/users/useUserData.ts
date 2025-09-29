@@ -28,17 +28,16 @@ export function useUserData() {
         setUserList(result.data.body ?? []);
       } else {
         setError(result.error ?? "Erreur inconnue");
-        toast("Erreur de récupération des utilisateurs", { description: result.error });
       }
     } catch (err) {
       setError("Erreur réseau");
-      toast("Erreur de récupération des utilisateurs", { description: "Erreur réseau" });
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const fetchUserDetail = async (user_code: string) => {
+  const fetchUserDetail = useCallback(
+  async (user_code: string) => {
     setLoading(true);
     const result = await getUserDetail(user_code);
     console.log("fetchUserDetail result:", result);
@@ -54,7 +53,9 @@ export function useUserData() {
       });
     }
     setLoading(false)
-  }
+  },
+  [setLoading, setUserDetail, setError]
+);
 
   useEffect(() => {
     fetchUserList();
@@ -67,6 +68,12 @@ export function useUserData() {
       return { success: true };
     } else {
       toast("Erreur lors de la création de l'utilisateur", { description: result.error });
+      showToast({
+        variant: "error-solid",
+        message: "Erreur lors de la création de l'utilisateur",
+        description: result.error ?? "Une erreur est survenue lors de la cré utilisateur.",
+        position: 'top-center',
+      });
       return { success: false, error: result.error };
     }
   };
@@ -77,7 +84,6 @@ export function useUserData() {
       await fetchUserList();
       return { success: true };
     } else {
-      toast("Erreur lors de la mise à jour de l'utilisateur", { description: result.error });
       return { success: false, error: result.error };
     }
   };

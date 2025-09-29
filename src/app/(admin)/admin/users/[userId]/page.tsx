@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  ArrowLeft, User, Mail, MapPin, Calendar, Shield, XCircle, Edit, MoreVertical, Trash2
+  ArrowLeft, User, Mail, MapPin, Shield, XCircle, Edit, Trash2
 } from 'lucide-react';
 import {
   Card, CardContent, CardHeader, CardTitle,
@@ -12,21 +11,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserData } from '@/hooks/feature/users/useUserData';
 import { getStatusColor } from '@/lib/utils';
 import { DialogUpdateUser } from '@/components/features/users/Modal/DialogUpdateUser';
 import { IUpdateUserForm } from '@/types/staffType';
+import { showToast } from '@/components/ui/showToast';
+import { ConfirmActionDialog } from '@/components/ConfirmActionDialog';
+import PageHeader from '@/layout/PageHeader';
 
 const UserDetailPage = () => {
   const params = useParams();
@@ -51,7 +43,7 @@ const UserDetailPage = () => {
     if (userId) {
       fetchUserDetail(userId);
     }
-  }, [userId]);
+  }, [fetchUserDetail, userId]);
 
   const handleBack = () => {
     router.push('/admin/users');
@@ -69,11 +61,22 @@ const UserDetailPage = () => {
       const result = await handleDesactivateUser(userDetail.user_code);
       if (result.success) {
         setDeactivateDialogOpen(false);
-        // Refresh user data
         await fetchUserDetail(userId);
+        showToast({
+          variant: "success-solid",
+          message: 'Utilisateur désactivé',
+          description: 'L\'utilisateur a été désactivé avec succès.',
+          position: 'top-center',
+        });
       }
     } catch (error) {
       console.error('Error deactivating user:', error);
+      showToast({
+        variant: "error-solid",
+        message: 'Erreur',
+        description: 'Impossible de désactiver l\'utilisateur.',
+        position: 'top-center',
+      });
     } finally {
       setProcessing(false);
     }
@@ -87,27 +90,28 @@ const UserDetailPage = () => {
       const result = await handleDeleteUser(userDetail.user_code);
       if (result.success) {
         setDeleteDialogOpen(false);
+        showToast({
+          variant: "success-solid",
+          message: 'Utilisateur supprimé',
+          description: 'L\'utilisateur a été supprimé définitivement.',
+          position: 'top-center',
+        });
         router.push('/admin/users');
       }
     } catch (error) {
       console.error('Error deleting user:', error);
+      showToast({
+        variant: "error-solid",
+        message: 'Erreur',
+        description: 'Impossible de supprimer l\'utilisateur.',
+        position: 'top-center',
+      });
     } finally {
       setProcessing(false);
     }
   };
 
 
-  const canEdit = () => {
-    return userDetail && userDetail.status_code === 'ACTIVE';
-  };
-
-  const canDeactivate = () => {
-    return userDetail && userDetail.status_code === 'ACTIVE';
-  };
-
-  const canDelete = () => {
-    return userDetail && userDetail.status_code === 'INACTIVE';
-  };
 
   const formatTimestamp = (timestamp: number | null) => {
     if (!timestamp) return 'Non disponible';
@@ -123,25 +127,40 @@ const UserDetailPage = () => {
   const updateUser = async (data: IUpdateUserForm) => {
     console.log('Update data received:', data);
 
-    return false
     if(userDetail){
       const result = await handleUpdateUser(data, userDetail.user_code);
       console.log('Update result:', result);
       if(result.success) {
-        
+        showToast({
+          variant: "success-solid",
+          message: 'Mise à jour effectuée avec succès',
+          description: `Les données sur l'utilisateur ${data.last_name} ont été mise à jour avec succès.`,
+          position: 'top-center',
+        });
+        await fetchUserDetail(userId);
+        return true
+      } else {
+        showToast({
+          variant: "error-solid",
+          message: "Impossible de mettre à jour l'utilisateur",
+          description: result.error ?? "Une erreur est survenue, essayez encore ou veuillez contacter l'administrateur",
+          position: 'top-center',
+        });
+        return false
       }
-      return false
     } else {
+      setUpdateDialogOpen(false);
       return true
     }
   }
 
+  // Afficher le skeleton pendant le chargement
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50/50 p-6">
-        <div className="mx-auto max-w-7xl space-y-6">
+        <div className="mx-auto space-y-6">
           {/* Header Skeleton */}
-          <div className="bg-white border-b border-gray-200 -mx-6 -mt-6 px-6 py-4">
+          <div className="bg-white border-b border-gray-200 -mx-6 -mt-6 px-6 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-8 w-24" />
@@ -180,7 +199,8 @@ const UserDetailPage = () => {
     );
   }
 
-  if (!userDetail && loading == false) {
+  // Afficher le message d'erreur uniquement si le chargement est terminé et qu'il n'y a pas de données
+  if (!userDetail) {
     return (
       <div className="min-h-screen bg-gray-50/50 p-6 flex items-center justify-center">
         <div className="text-center">
@@ -196,108 +216,41 @@ const UserDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-6">
-      {userDetail &&
-        <div className="mx-auto max-w-7xl space-y-6">
-          {/* Header section */}
-          <div className="bg-white border-b border-gray-200 -mx-6 -mt-6 px-6 py-4">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              {/* Partie gauche */}
-              <div className="flex items-center flex-wrap gap-3 min-w-0 flex-1">
-                <Button variant="ghost" size="sm" onClick={handleBack} className="hover:bg-gray-100 shrink-0">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Utilisateurs
-                </Button>
-                
-                <Separator orientation="vertical" className="h-6 shrink-0" />
-                
-                <div className="min-w-0">
-                  <h1 className="text-2xl font-semibold text-gray-900 truncate">
-                    {userDetail.first_name} {userDetail.last_name}
-                  </h1>
-                </div>
-                
-                <Separator orientation="vertical" className="h-6 shrink-0" />
-                
-                <div className="flex items-center space-x-3 shrink-0">
-                  <Badge className={getStatusColor(userDetail.status_code)}>
-                    {userDetail.status_code}
-                  </Badge>
-                  {userDetail.is_verified === 1 && (
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                      Vérifié
-                    </Badge>
-                  )}
-                </div>
-              </div>
+    <div className="min-h-screen bg-gray-50/50">
+      <div className="mx-auto space-y-6">
+        {/* Header section */}
+        <PageHeader
+          title={`${userDetail.first_name} ${userDetail.last_name}`}
+          backLabel='Utilisateurs'
+          backUrl='/admin/users'
+          status={<Badge className={getStatusColor(userDetail.status_code)}>{userDetail.status_code}</Badge>}
+        >
 
-              {/* Partie droite */}
-              <div className="flex items-center space-x-3 shrink-0">
-                {canEdit() && (
-                  <Button onClick={handleEdit} variant="outline" className="shrink-0">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Modifier
-                  </Button>
-                )}
+          <div className="flex items-center space-x-3 shrink-0">
+            <Button onClick={handleEdit} variant="outline-info" className="shrink-0">
+              <Edit className="h-4 w-4 mr-2" />
+              Modifier
+            </Button>
 
-                {canDeactivate() && (
-                  <Dialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 shrink-0">
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Désactiver
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Désactiver l&apos;utilisateur</DialogTitle>
-                        <DialogDescription>
-                          Êtes-vous sûr de vouloir désactiver cet utilisateur ? Cette action peut être annulée ultérieurement.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setDeactivateDialogOpen(false)} disabled={processing}>
-                          Annuler
-                        </Button>
-                        <Button
-                          onClick={handleDeactivate}
-                          disabled={processing}
-                          className="bg-red-600 hover:bg-red-700 text-white"
-                        >
-                          {processing ? 'Traitement...' : 'Confirmer la désactivation'}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                )}
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="shrink-0">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEdit} disabled={!canEdit()}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Modifier
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    {canDelete() && (
-                      <DropdownMenuItem 
-                        onClick={() => setDeleteDialogOpen(true)}
-                        className="text-red-600 focus:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Supprimer définitivement
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
+            <Button 
+              variant={userDetail.status_code === 'ACTIVE' ? 'outline-danger' : 'outline-success'}
+              onClick={() => setDeactivateDialogOpen(true)}
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              {userDetail.status_code === 'ACTIVE' ? 'Désactiver' : 'Activer'}
+            </Button>
+            
+            <Button 
+              onClick={() => setDeleteDialogOpen(true)} 
+              variant="danger" 
+              className="shrink-0"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Supprimer
+            </Button>
           </div>
-
+        </PageHeader>
+        <div className='p-6'>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Informations personnelles */}
             <Card className="border-0 shadow-sm">
@@ -437,77 +390,35 @@ const UserDetailPage = () => {
               </CardContent>
             </Card>
           </div>
-
-          {/* Informations système */}
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
-                <Calendar className="h-5 w-5 mr-2 text-gray-600" />
-                Informations système
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Nom d&apos;utilisateur</dt>
-                  <dd className="mt-1 text-sm text-gray-900 font-mono">{userDetail.user_name}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Code utilisateur</dt>
-                  <dd className="mt-1 text-sm text-gray-900 font-mono">{userDetail.user_code || 'Non renseigné'}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Statut</dt>
-                  <dd className="mt-1">
-                    <Badge className={getStatusColor(userDetail.status_code)}>
-                      {userDetail.status_code}
-                    </Badge>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Date de création</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{formatTimestamp(userDetail.created_at)}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Dernière mise à jour</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{formatTimestamp(userDetail.updated_at)}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Dernière connexion</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {userDetail.last_login_at ? formatTimestamp(userDetail.last_login_at) : 'Jamais connecté'}
-                  </dd>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Dialog de suppression */}
-          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Supprimer définitivement l&apos;utilisateur</DialogTitle>
-                <DialogDescription>
-                  Cette action est irréversible. Tous les données associées à cet utilisateur seront définitivement supprimées.
-                  Êtes-vous absolument sûr ?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={processing}>
-                  Annuler
-                </Button>
-                <Button
-                  onClick={handleDelete}
-                  disabled={processing}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  {processing ? 'Suppression...' : 'Supprimer définitivement'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </div>
-      }
+      </div>
+
+      {/* Dialogs génériques */}
+      <ConfirmActionDialog
+        open={deactivateDialogOpen}
+        onOpenChange={setDeactivateDialogOpen}
+        onConfirm={handleDeactivate}
+        title="Désactiver l'utilisateur"
+        description="Êtes-vous sûr de vouloir désactiver cet utilisateur ? Cette action peut être annulée ultérieurement."
+        confirmLabel="Désactiver"
+        cancelLabel="Annuler"
+        variant="warning"
+        loading={processing}
+        loadingText="Désactivation..."
+      />
+
+      <ConfirmActionDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDelete}
+        title="Supprimer définitivement l'utilisateur"
+        description="Cette action est irréversible. Toutes les données associées à cet utilisateur seront définitivement supprimées. Êtes-vous absolument sûr ?"
+        confirmLabel="Supprimer définitivement"
+        cancelLabel="Annuler"
+        variant="danger"
+        loading={processing}
+        loadingText="Suppression..."
+      />
 
       <DialogUpdateUser 
         open={updateDialogOpen}

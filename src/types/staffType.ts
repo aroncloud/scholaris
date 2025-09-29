@@ -333,17 +333,23 @@ export interface IGetUserDetail {
 }
 
 export interface IUpdateUserForm {
-  last_name: string;
-  phone_number: string;
-  other_email: string;
-  other_phone: string;
-  country: string;
-  city: string;
-  address_details: string;
-  avatar_url: string;
-  place_of_birth: string;
-  date_of_birth: string;
-  ethnicity_code: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+  other_email?: string;
+  other_phone?: string;
+  country?: string;
+  city?: string;
+  address_details?: string;
+  avatar_url?: string;
+  place_of_birth?: string;
+  date_of_birth?: string;
+  ethnicity_code?: string;
+  marital_status_code?: string;
+  cni_number?: string;
+  cni_issue_date?: string;
+  cni_issue_location?: string;
 }
 
 export interface IUserPermission {
