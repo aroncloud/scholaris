@@ -290,6 +290,62 @@ export interface IUser {
   createdAt?: string;
 }
 
+export interface IGetUserDetail {
+    // Informations d'identification
+    user_code: string;
+    user_name: string;
+    email: string;
+    
+    // Informations personnelles de base
+    first_name: string;
+    last_name: string;
+    gender: 'MALE' | 'FEMALE' | 'OTHER' | string; // Utilisation d'une union pour le genre
+    phone_number: string | null;
+    other_email: string | null;
+    other_phone: string | null;
+    
+    // Informations de localisation (peuvent être null)
+    country: string | null;
+    city: string | null;
+    street: string | null;
+    address_details: string | null;
+    
+    // État et vérification
+    status_code: 'ACTIVE' | 'INACTIVE' | string; // Utilisation d'une union pour le statut
+    is_verified: 0 | 1; // 0 pour non vérifié, 1 pour vérifié
+    avatar_url: string | null;
+    
+    // Informations biographiques étendues
+    place_of_birth: string | null;
+    date_of_birth: number | null; // Assumant que c'est un timestamp ou un format de date
+    ethnicity_code: string | null;
+    marital_status_code: string | null;
+    
+    // Informations d'identité (CNI - Carte Nationale d'Identité)
+    cni_number: string | null;
+    cni_issue_date: number | null; // Assumant un timestamp
+    cni_issue_location: string | null;
+    
+    // Horodatages (timestamps en secondes)
+    created_at: number;
+    updated_at: number;
+    last_login_at: number | null;
+}
+
+export interface IUpdateUserForm {
+  last_name: string;
+  phone_number: string;
+  other_email: string;
+  other_phone: string;
+  country: string;
+  city: string;
+  address_details: string;
+  avatar_url: string;
+  place_of_birth: string;
+  date_of_birth: string;
+  ethnicity_code: string;
+}
+
 export interface IUserPermission {
   "Code": string,
   "Title": string,

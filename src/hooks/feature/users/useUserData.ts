@@ -7,13 +7,16 @@ import {
   createUser,
   deactivateUser,
   deleteUser,
+  getUserDetail,
   getUserList,
   updateUser,
 } from "@/actions/userAction";
-import { ICreateUser, IUserList } from "@/types/staffType";
+import { ICreateUser, IGetUserDetail, IUpdateUserForm, IUserList } from "@/types/staffType";
+import { showToast } from "@/components/ui/showToast";
 
 export function useUserData() {
   const [userList, setUserList] = useState<IUserList[]>([]);
+  const [userDetail, setUserDetail] = useState<IGetUserDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,6 +38,24 @@ export function useUserData() {
     }
   }, []);
 
+  const fetchUserDetail = async (user_code: string) => {
+    setLoading(true);
+    const result = await getUserDetail(user_code);
+    console.log("fetchUserDetail result:", result);
+    if (result.code === "success") {
+      setUserDetail(result.data.body ?? []);
+    } else {
+      setError(result.error ?? "Erreur inconnue");
+      showToast({
+        variant: "error-solid",
+        message: "Erreur lors du chargement",
+        description: result.error ?? "Une erreur est survenue lors du chargement des données utilisateur.",
+        position: 'top-center',
+      });
+    }
+    setLoading(false)
+  }
+
   useEffect(() => {
     fetchUserList();
   }, [fetchUserList]);
@@ -50,8 +71,8 @@ export function useUserData() {
     }
   };
 
-  const handleUpdateUser = async (payload: ICreateUser) => {
-    const result = await updateUser(payload);
+  const handleUpdateUser = async (payload: IUpdateUserForm, user_code: string) => {
+    const result = await updateUser(payload, user_code);
     if (result.code === "success") {
       await fetchUserList();
       return { success: true };
@@ -92,5 +113,7 @@ export function useUserData() {
     handleUpdateUser,
     handleDeleteUser,
     handleDesactivateUser,
+    fetchUserDetail,
+    userDetail
   };
 }

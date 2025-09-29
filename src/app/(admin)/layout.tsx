@@ -1,6 +1,8 @@
 "use client";
 
+import { getConfig } from "@/actions/utilitiesActions";
 import { useSidebar } from "@/context/SidebarContext";
+import { useInitConfigs } from "@/hooks/useInitConfigs";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
@@ -22,6 +24,7 @@ export default function AdminLayout({
   const {fetchClassrooms} = useClassroomStore();
   const {fetchAcademicYears} = useAcademicYearStore();
   const { user } = useUserStore();
+  const { initConfigs } = useInitConfigs();
 
   // On calcule la marge du contenu en fonction de la sidebar
   const mainContentMargin = isMobileOpen
@@ -35,9 +38,10 @@ export default function AdminLayout({
       fetchTeacher();
       fetchClassrooms();
       fetchAcademicYears();
+      initConfigs(getConfig);
     }
     fetchPrograms();
-  }, [fetchPrograms, fetchTeacher, fetchClassrooms, fetchAcademicYears, user?.roles]);
+  }, [fetchPrograms, fetchTeacher, fetchClassrooms, fetchAcademicYears, user?.roles, initConfigs]);
 
   return (
     <div className="min-h-screen xl:flex">

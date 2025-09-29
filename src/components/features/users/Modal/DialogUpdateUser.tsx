@@ -1,0 +1,375 @@
+"use client";
+
+import { useForm, Controller } from "react-hook-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect } from "react";
+import { IGetUserDetail, IUpdateUserForm } from "@/types/staffType";
+import { Combobox } from "@/components/ui/Combobox";
+import { useConfigStore } from "@/lib/store/configStore";
+
+
+interface DialogUpdateUserProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (data: IUpdateUserForm) => Promise<boolean>;
+  userData: IGetUserDetail | null;
+  loading?: boolean;
+}
+
+// Options pour les ethnies (à adapter selon vos données)
+const ETHNICITY_OPTIONS = [
+  { value: "BAKWERI", label: "Bakweri" },
+  { value: "BAMILEKE", label: "Bamiléké" },
+  { value: "BASSA", label: "Bassa" },
+  { value: "DOUALA", label: "Douala" },
+  { value: "FULANI", label: "Fulani" },
+  { value: "OTHER", label: "Autre" },
+];
+
+// Options pour les pays (à étendre selon vos besoins)
+const COUNTRY_OPTIONS = [
+  { value: "Cameroon", label: "Cameroun" },
+  { value: "France", label: "France" },
+  { value: "Nigeria", label: "Nigeria" },
+  { value: "Chad", label: "Tchad" },
+  { value: "Central African Republic", label: "République Centrafricaine" },
+];
+
+export function DialogUpdateUser({
+  open,
+  onOpenChange,
+  onSave,
+  userData,
+  loading = false,
+}: DialogUpdateUserProps) {
+    
+    const {  } = useConfigStore();
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        formState: { errors, isSubmitting },
+        setValue,
+    } = useForm<IUpdateUserForm>({
+        defaultValues: {
+        last_name: "",
+        phone_number: "",
+        other_email: "",
+        other_phone: "",
+        country: "",
+        city: "",
+        address_details: "",
+        avatar_url: "",
+        place_of_birth: "",
+        date_of_birth: "",
+        ethnicity_code: "",
+        },
+    });
+
+    useEffect(() => {
+        console.log("userData changed:", userData);
+        if (open && userData) {
+        setValue("last_name", userData.last_name || "");
+        setValue("phone_number", userData.phone_number || "");
+        setValue("other_email", userData.other_email || "");
+        setValue("other_phone", userData.other_phone || "");
+        setValue("country", userData.country || "");
+        setValue("city", userData.city || "");
+        setValue("address_details", userData.address_details || "");
+        setValue("avatar_url", userData.avatar_url || "");
+        setValue("place_of_birth", userData.place_of_birth || "");
+        // Convertir le timestamp en date ISO si nécessaire
+        if (userData.date_of_birth) {
+            // const date = new Date(userData.date_of_birth * 1000);
+            // setValue("date_of_birth", date.toISOString().split('T')[0]);>
+        } else {
+            setValue("date_of_birth", "");
+        }
+        setValue("ethnicity_code", userData.ethnicity_code || "");
+        }
+    }, [open, userData, setValue]);
+
+    const handleCancel = () => {
+        if (isSubmitting) return;
+        reset();
+        onOpenChange(false);
+    };
+
+    const handleSubmitForm = async (data: IUpdateUserForm) => {
+        const result = await onSave(data);
+        if (result) {
+        reset();
+        onOpenChange(false);
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={handleCancel}>
+        <DialogContent className="max-w-5xl md:max-w-2xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+            <DialogTitle>Mettre à jour l&apos;utilisateur</DialogTitle>
+            <DialogDescription>
+                Modifiez les informations personnelles de {userData?.first_name} {userData?.last_name}
+            </DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-6">
+            {/* Informations personnelles */}
+            <Card>
+                <CardHeader className="pb-3">
+                <CardTitle className="text-base">Informations personnelles</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Nom de famille */}
+                <div className="space-y-1">
+                    <Label htmlFor="last_name">Nom de famille *</Label>
+                    <Input
+                    id="last_name"
+                    {...register("last_name", { 
+                        required: "Le nom de famille est requis",
+                        minLength: { value: 2, message: "Le nom doit contenir au moins 2 caractères" }
+                    })}
+                    disabled={isSubmitting || loading}
+                    className={errors.last_name ? "border-red-500" : ""}
+                    placeholder="Entrez le nom de famille"
+                    />
+                    {errors.last_name && (
+                    <p className="text-red-600 text-sm">{errors.last_name.message}</p>
+                    )}
+                </div>
+
+                {/* Lieu de naissance */}
+                <div className="space-y-1">
+                    <Label htmlFor="place_of_birth">Lieu de naissance</Label>
+                    <Input
+                    id="place_of_birth"
+                    {...register("place_of_birth")}
+                    disabled={isSubmitting || loading}
+                    placeholder="Ex: Douala"
+                    />
+                </div>
+
+                {/* Date de naissance */}
+                <div className="space-y-1">
+                    <Label htmlFor="date_of_birth">Date de naissance</Label>
+                    <Input
+                    id="date_of_birth"
+                    type="date"
+                    {...register("date_of_birth")}
+                    disabled={isSubmitting || loading}
+                    className={errors.date_of_birth ? "border-red-500" : ""}
+                    />
+                    {errors.date_of_birth && (
+                    <p className="text-red-600 text-sm">{errors.date_of_birth.message}</p>
+                    )}
+                </div>
+
+                {/* Ethnie */}
+                <div className="space-y-1">
+                    <Label htmlFor="ethnicity_code">Ethnie</Label>
+                    <Controller
+                    name="ethnicity_code"
+                    control={control}
+                    render={({ field }) => (
+                        <Combobox
+                            options={ETHNICITY_OPTIONS.map(eth => ({ 
+                                value: eth.value, 
+                                label: eth.label
+                            }))}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Sélectionner une ethnie"
+                            className='py-5'
+                        />
+                    )}
+                    />
+                </div>
+                </CardContent>
+            </Card>
+
+            {/* Coordonnées */}
+            <Card>
+                <CardHeader className="pb-3">
+                <CardTitle className="text-base">Coordonnées</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Téléphone principal */}
+                <div className="space-y-1">
+                    <Label htmlFor="phone_number">Téléphone principal</Label>
+                    <Input
+                    id="phone_number"
+                    {...register("phone_number", {
+                        pattern: {
+                        value: /^[+]?[\d\s\-()]+$/,
+                        message: "Format de téléphone invalide"
+                        }
+                    })}
+                    disabled={isSubmitting || loading}
+                    className={errors.phone_number ? "border-red-500" : ""}
+                    placeholder="Ex: +237 6XX XX XX XX"
+                    />
+                    {errors.phone_number && (
+                    <p className="text-red-600 text-sm">{errors.phone_number.message}</p>
+                    )}
+                </div>
+
+                {/* Téléphone secondaire */}
+                <div className="space-y-1">
+                    <Label htmlFor="other_phone">Téléphone secondaire</Label>
+                    <Input
+                    id="other_phone"
+                    {...register("other_phone", {
+                        pattern: {
+                        value: /^[+]?[\d\s\-()]+$/,
+                        message: "Format de téléphone invalide"
+                        }
+                    })}
+                    disabled={isSubmitting || loading}
+                    className={errors.other_phone ? "border-red-500" : ""}
+                    placeholder="Ex: +237 6XX XX XX XX"
+                    />
+                    {errors.other_phone && (
+                    <p className="text-red-600 text-sm">{errors.other_phone.message}</p>
+                    )}
+                </div>
+
+                {/* Email secondaire */}
+                <div className="space-y-1 md:col-span-2">
+                    <Label htmlFor="other_email">Email secondaire</Label>
+                    <Input
+                    id="other_email"
+                    type="email"
+                    {...register("other_email", {
+                        pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: "Format d'email invalide"
+                        }
+                    })}
+                    disabled={isSubmitting || loading}
+                    className={errors.other_email ? "border-red-500" : ""}
+                    placeholder="email.secondaire@exemple.com"
+                    />
+                    {errors.other_email && (
+                    <p className="text-red-600 text-sm">{errors.other_email.message}</p>
+                    )}
+                </div>
+                </CardContent>
+            </Card>
+
+            {/* Adresse */}
+            <Card>
+                <CardHeader className="pb-3">
+                <CardTitle className="text-base">Adresse</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Pays */}
+                <div className="space-y-1">
+                    <Label htmlFor="country">Pays</Label>
+                    <Controller
+                    name="country"
+                    control={control}
+                    render={({ field }) => (
+                        <Combobox
+                            options={COUNTRY_OPTIONS.map(cnt => ({ 
+                                value: cnt.value, 
+                                label: cnt.label
+                            }))}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Sélectionner un pays"
+                            className='py-5'
+                        />
+                    )}
+                    />
+                </div>
+
+                {/* Ville */}
+                <div className="space-y-1">
+                    <Label htmlFor="city">Ville</Label>
+                    <Input
+                    id="city"
+                    {...register("city")}
+                    disabled={isSubmitting || loading}
+                    placeholder="Ex: Yaoundé"
+                    />
+                </div>
+
+                {/* Détails de l'adresse */}
+                <div className="space-y-1 md:col-span-2">
+                    <Label htmlFor="address_details">Détails de l&apos;adresse</Label>
+                    <Textarea
+                    id="address_details"
+                    {...register("address_details")}
+                    disabled={isSubmitting || loading}
+                    placeholder="Ex: 1234 Nom de la rue, Quartier"
+                    rows={3}
+                    />
+                </div>
+                </CardContent>
+            </Card>
+
+            {/* Autres informations */}
+            <Card>
+                <CardHeader className="pb-3">
+                <CardTitle className="text-base">Autres informations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                {/* URL Avatar */}
+                <div className="space-y-1">
+                    <Label htmlFor="avatar_url">URL de l&apos;avatar</Label>
+                    <Input
+                    id="avatar_url"
+                    type="url"
+                    {...register("avatar_url", {
+                        pattern: {
+                        value: /^https?:\/\/.+\..+/,
+                        message: "URL invalide"
+                        }
+                    })}
+                    disabled={isSubmitting || loading}
+                    className={errors.avatar_url ? "border-red-500" : ""}
+                    placeholder="https://exemple.com/chemin/vers/avatar.jpg"
+                    />
+                    {errors.avatar_url && (
+                    <p className="text-red-600 text-sm">{errors.avatar_url.message}</p>
+                    )}
+                </div>
+                </CardContent>
+            </Card>
+
+            <DialogFooter className="flex justify-between gap-2">
+                <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting || loading}
+                >
+                Annuler
+                </Button>
+                <Button
+                type="submit"
+                variant={'info'}
+                disabled={isSubmitting || loading}
+                className="min-w-[120px]"
+                >
+                {isSubmitting ? "Mise à jour..." : "Mettre à jour"}
+                </Button>
+            </DialogFooter>
+            </form>
+        </DialogContent>
+        </Dialog>
+    );
+}
