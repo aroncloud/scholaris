@@ -12,15 +12,17 @@ import UserSection from "@/components/features/users/UserSection";
 import RoleAndPermission from "@/components/features/users/RoleAndPermission";
 import { useUserData } from "@/hooks/feature/users/useUserData";
 import { useRoleData } from "@/hooks/feature/users/usePermissionData";
-import { USER_ROLES } from "@/constant";
 import PageHeader from "@/layout/PageHeader";
 
 // Component
 export default function UsersPage() {
-  const { loading, userList } = useUserData();
+  const { loading, userList, fetchUserList } = useUserData();
   const { loadingRole, roles } = useRoleData()
   const pageTitle = "Gestion des utilisateurs";
   const pageDescription = "Gérez les utilisateurs, rôles et permissions du système";
+
+  
+
 
   return (
     <div>
@@ -55,9 +57,10 @@ export default function UsersPage() {
         <TabsContents>
           <TabsContent value="users" className="space-y-4">
             <UserSection
+              fetchUserList={fetchUserList}
               userList={
                 userList.filter((user: IUserList) => 
-                user.profiles?.some(profile => profile.role_code !== USER_ROLES.STUDENT.toString())
+                user.profiles?.some(profile => profile.role_code !== "STUDENT")
               )} 
               loading={loading}
               roles={roles}
@@ -69,7 +72,7 @@ export default function UsersPage() {
           </TabsContent>
         </TabsContents>
       </Tabs>
-      
+    
     </div>
   );
 }

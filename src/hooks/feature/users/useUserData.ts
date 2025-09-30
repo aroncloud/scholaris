@@ -67,7 +67,6 @@ export function useUserData() {
       await fetchUserList();
       return { success: true };
     } else {
-      toast("Erreur lors de la création de l'utilisateur", { description: result.error });
       showToast({
         variant: "error-solid",
         message: "Erreur lors de la création de l'utilisateur",
@@ -94,7 +93,12 @@ export function useUserData() {
       await fetchUserList();
       return { success: true };
     } else {
-      toast("Erreur lors de la suppression de l'utilisateur", { description: result.error });
+      showToast({
+        variant: "error-solid",
+        message: "Erreur lors de la création de l'utilisateur",
+        description: result.error ?? "Une erreur est survenue lors de la suppréssion utilisateur.",
+        position: 'top-center',
+      });
       return { success: false, error: result.error };
     }
   };
@@ -106,6 +110,12 @@ export function useUserData() {
       return { success: true };
     } else {
       toast("Erreur lors de la désactivation de l'utilisateur", { description: result.error });
+      showToast({
+        variant: "error-solid",
+        message: "Erreur lors de la création de l'utilisateur",
+        description: result.error ?? "Une erreur est survenue lors de la désactivation utilisateur.",
+        position: 'top-center',
+      });
       return { success: false, error: result.error };
     }
   };

@@ -108,36 +108,38 @@ export const getStatusColor = (status: string): string => {
     // Brouillon
     case "DRAFT":
     case "DRAFTING":
-      return "font-semibold bg-gray-100 text-gray-600 dark:bg-gray-700/20 dark:text-gray-400";
+      return "bg-gray-100 text-gray-600 dark:bg-gray-700/20 dark:text-gray-400";
 
     // En attente
     case "PENDING":
     case "PENDING_APPROVAL":
-    case "EN ATTENTE":
     case "EN_ATTENTE":
-      return "font-semibold bg-yellow-100 text-yellow-600 dark:bg-gray-700/20 dark:text-yellow-400";
+      return "bg-yellow-100 text-yellow-600 dark:bg-gray-700/20 dark:text-yellow-400";
 
-    // Actif ou approuvé
+    // Actif ou approuvé (succès, payé, inscrit)
     case "APPROVED":
-    case "APPROUVE":
-    case "RENTED":
     case "ACTIVE":
+    case "ENROLLED":
     case "TERMINATED":
     case "PAID":
     case "ACTIF":
-      return "font-semibold bg-green-100 text-green-600 dark:bg-gray-700/20 dark:text-green-400";
+      return "bg-green-100 text-green-600 dark:bg-gray-700/20 dark:text-green-400";
 
-    // Disponible
-    case "AVAILABLE":
-      return "font-semibold bg-blue-100 text-blue-600 dark:bg-gray-700/20 dark:text-blue-400";
-
-    // Converti
-    case "CONVERTI":
+    // Progression / partiellement atteint
     case "CONVERTED":
     case "COMPLETED":
-      return "font-semibold bg-blue-100 text-blue-600 dark:bg-gray-700/20 dark:text-blue-400";
+    case "GRADUATED":
+    case "AVAILABLE":
+    case "PROMOTED":
+    case "TRANSFERRED":
+    case "PARTIALLY_PAID":
+      return "bg-blue-100 text-blue-600 dark:bg-gray-700/20 dark:text-blue-400";
 
-    // Annulé, rejeté, inactif
+    // Statut spécial / exception
+    case "EXEMPTED":
+      return "bg-purple-100 text-purple-800 dark:bg-gray-700/20 dark:text-purple-400";
+
+    // Annulé, rejeté, inactif, en échec
     case "CANCELED":
     case "CANCEL":
     case "REJECTED":
@@ -145,47 +147,57 @@ export const getStatusColor = (status: string): string => {
     case "UNPAID":
     case "INACTIVE":
     case "INACTIF":
+    case "WITHDRAWN":
     case "SUSPENDED":
-      return "font-semibold bg-red-100 text-red-600 dark:bg-gray-700/20 dark:text-red-400";
+    case "REPEATER":
+    case "DROPPED_OUT":
+    case "OVERDUE":
+      return "bg-red-100 text-red-600 dark:bg-gray-700/20 dark:text-red-400";
+
+    // Remboursé / neutre
+    case "REFUNDED":
+      return "bg-gray-200 text-gray-800 dark:bg-gray-700/20 dark:text-gray-300";
 
     // Fallback
     default:
-      return "font-semibold bg-gray-100 text-gray-600 dark:bg-gray-700/20 dark:text-gray-400";
+      return "bg-gray-100 text-gray-600 dark:bg-gray-700/20 dark:text-gray-400";
   }
 };
+
+
 
 export const getRoleColor = (role: string): string => {
   switch (role.toUpperCase()) {
     case "ADMINISTRATOR": // Administrateur
-      return "font-semibold bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100";
+      return "bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100";
 
     case "REGISTRAR": // Scolarité
-      return "font-semibold bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100";
+      return "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100";
 
     case "HR": // RH
-      return "font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100";
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100";
 
     case "TEACHER": // Enseignant
-      return "font-semibold bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100";
+      return "bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100";
 
     case "STUDENT": // Étudiant
-      return "font-semibold bg-pink-100 text-pink-800 dark:bg-pink-700 dark:text-pink-100";
+      return "bg-pink-100 text-pink-800 dark:bg-pink-700 dark:text-pink-100";
 
     default:
-      return "font-semibold bg-gray-200 text-gray-800 dark:bg-gray-700/20 dark:text-gray-100";
+      return "bg-gray-200 text-gray-800 dark:bg-gray-700/20 dark:text-gray-100";
   }
 };
 
 export const getMentionColor = (mention: string) => {
   switch (mention.toUpperCase()) {
     case "EXCELLENT":
-      return "font-semibold bg-green-100 text-green-800";
+      return "bg-green-100 text-green-800";
     case "GOOD":
-      return "font-semibold bg-blue-100 text-blue-800";
+      return "bg-blue-100 text-blue-800";
     case "FAIR":
-      return "font-semibold bg-yellow-100 text-yellow-800";
+      return "bg-yellow-100 text-yellow-800";
     default:
-      return "font-semibold bg-gray-100 text-gray-800";
+      return "bg-gray-100 text-gray-800";
   }
 };
 

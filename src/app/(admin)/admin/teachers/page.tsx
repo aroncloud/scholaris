@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsContents, TabsList, TabsTrigger } from '@/components/animate-ui/components/animate/tabs'
 import {
   Download,
   Upload,
@@ -11,9 +12,8 @@ import {
 
 import TeacherTab from "@/components/features/teachers/TeacherTab";
 import ApplicantTab from "@/components/features/teachers/ApplicationsTab";
-import StatCard from "@/components/cards/StatCard";
-import { v4 as uuidv4 } from "uuid";
 import { useTeacherData } from "@/hooks/feature/teachers/useTeacherData";
+import PageHeader from "@/layout/PageHeader";
 
 const statsData= [
   {
@@ -44,17 +44,11 @@ export default function TeachersPage() {
 
   
   return (
-      <div className="space-y-6">
-        {/* Header */}<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div className="mb-4 md:mb-0">
-          <h2 className="text-3xl font-bold tracking-tight">
-            Gestion des Enseignants
-          </h2>
-          <p className="text-muted-foreground">
-            Gestion du personnel enseignant et des candidatures
-          </p>
-        </div>
-
+    <>
+      <PageHeader
+        title="Gestion des Enseignants"
+        description="Gestion du personnel enseignant et des candidatures"
+      >
         <div className="flex flex-col md:flex-row md:space-x-2 space-y-2 md:space-y-0 w-full md:w-auto">
           <Button className="w-full md:w-auto" variant="outline">
             <Download className="h-4 w-4 mr-2" />
@@ -69,10 +63,10 @@ export default function TeachersPage() {
             Nouvel enseignant
           </Button>
         </div>
-      </div>
-
+      </PageHeader>
+      <div className="space-y-6 p-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {statsData.map((stat) => (
             <StatCard
               key={uuidv4()}
@@ -81,7 +75,7 @@ export default function TeachersPage() {
               description={stat.description}
             />
           ))}
-        </div>
+        </div> */}
 
 
         {/* Main Content */}
@@ -94,26 +88,32 @@ export default function TeachersPage() {
               Candidatures ({applications.length})
             </TabsTrigger>
           </TabsList>
+          <TabsContents>
+            {/* Teachers Tab */}
+            <TabsContent value="enseignants" className="space-y-4">
+              <TeacherTab 
+                teachers={teachers}
+                setIsCreateTeacherOpen={setIsCreateTeacherOpen}
+                isCreateTeacherOpen={isCreateTeacherOpen}
+                isExportModalOpen={isExportModalOpen}
+                setIExportModalOpen={setIsExportModalOpen}
+                isImportModalOpen={isImportModalOpen}
+                setIsImportModalOpen={setIsImportModalOpen}
+                isDataLoading={loading}
+                refresh={refresh}
+              />
+            </TabsContent>
 
-          {/* Teachers Tab */}
-          <TeacherTab 
-            teachers={teachers}
-            setIsCreateTeacherOpen={setIsCreateTeacherOpen}
-            isCreateTeacherOpen={isCreateTeacherOpen}
-            isExportModalOpen={isExportModalOpen}
-            setIExportModalOpen={setIsExportModalOpen}
-            isImportModalOpen={isImportModalOpen}
-            setIsImportModalOpen={setIsImportModalOpen}
-            isDataLoading={loading}
-            refresh={refresh}
-          />
-
-          {/* Applications Tab */}
-          <ApplicantTab
-            applicants={applications}
-            isDataLoading={loading}
-          />
+            {/* Applications Tab */}
+            <TabsContent value="candidatures" className="space-y-4">
+              <ApplicantTab
+                applicants={applications}
+                isDataLoading={loading}
+              />
+            </TabsContent>
+          </TabsContents>
         </Tabs>
       </div>
+    </>  
   );
 }

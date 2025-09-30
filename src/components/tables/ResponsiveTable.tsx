@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Search, ListCollapse, Inbox } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import autoAnimate from '@formkit/auto-animate'
 import { v4 as uuidv4 } from "uuid";
 import {
   Table,
@@ -51,12 +53,13 @@ interface DataTableProps<T> {
 }
 
 
+
 const SkeletonRow = ({ columnsCount }: { columnsCount: number }) => (
   <TableRow className="animate-pulse">
     {Array.from({ length: columnsCount }).map((_, index) => (
       <TableCell
         key={index}
-        className={`px-4 py-4 ${index < columnsCount - 1 ? "border-r border-gray-200" : ""}`}
+        className={`px-4 py-4 ${index < columnsCount - 1 ? "border-r border-gray-100" : ""}`}
       >
         <div className="h-4 bg-gray-200 rounded w-full"></div>
       </TableCell>
@@ -121,6 +124,12 @@ export const ResponsiveTable = <T extends Record<string, any>>({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
 
+  // const tableBodyRef = useRef(null);
+  // useEffect(() => {
+  //   if (tableBodyRef.current) {
+  //     autoAnimate(tableBodyRef.current, { duration: 300 });
+  //   }
+  // }, []);
   // Filtrage (search + selects)
   const filteredData = data.filter((row) => {
     // ----- Search
@@ -224,14 +233,14 @@ export const ResponsiveTable = <T extends Record<string, any>>({
       </div>
 
       {/* Tableau */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="border border-gray-100 rounded-lg overflow-hidden">
         <Table className="min-w-full">
           <TableHeader className="bg-gray-100">
             <TableRow>
               {enhancedColumns.map((col, index) => (
                 <TableHead
                   key={uuidv4()}
-                  className={`px-4 py-2 text-left ${index < enhancedColumns.length - 1 ? "border-r border-gray-200" : ""}`}
+                  className={`px-4 py-2 text-left ${index < enhancedColumns.length - 1 ? "border-r border-gray-100" : ""}`}
                 >
                   {isLoading ? (
                     <div className="h-4 bg-gray-300 rounded w-20 animate-pulse"></div>
@@ -272,13 +281,13 @@ export const ResponsiveTable = <T extends Record<string, any>>({
               paginatedData.map((row, rowIndex) => (
                 <TableRow
                   key={uuidv4()}
-                  className={`hover:bg-gray-50 cursor-pointer ${rowIndex < paginatedData.length - 1 ? "border-b border-gray-200" : ""}`}
+                  className={`hover:bg-gray-50 cursor-pointer ${rowIndex < paginatedData.length - 1 ? "border-b border-gray-100" : ""}`}
                   onClick={() => onRowClick?.(row)}
                 >
                   {enhancedColumns.map((col, colIndex) => (
                     <TableCell
                       key={uuidv4()}
-                      className={`px-4 py-2 ${colIndex < enhancedColumns.length - 1 ? "border-r border-gray-200" : ""}`}
+                      className={`px-4 py-2 ${colIndex < enhancedColumns.length - 1 ? "border-r border-gray-100" : ""}`}
                     >
                       {col.render ? col.render(getValueByKey(row, col.key), row) : getValueByKey(row, col.key)}
                     </TableCell>
@@ -308,7 +317,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
       {/* ShowMore link */}
       {!isLoading && showMore && !paginate && (
         <div className="text-center pt-4">
-          <a href={showMore.url} className="flex justify-center items-center gap-2 text-blue-600 hover:underline">
+          <a href={showMore.url} className="flex justify-center items-center gap-2 text-gray-600 hover:underline">
             {showMore.label || (locale === "fr" ? "Voir plus" : "Show more")} <ListCollapse size={20} />
           </a>
         </div>

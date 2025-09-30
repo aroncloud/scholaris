@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { v4 as uuidv4 } from 'uuid';
@@ -7,6 +8,7 @@ import {
   Clock,
 } from "lucide-react";
 import StatCard from "@/components/cards/StatCard";
+import PageHeader from '@/layout/PageHeader';
 
 
 const Header = () => {
@@ -28,19 +30,15 @@ const Header = () => {
   return (
     <>
       {/* Header */}
-      <div className="flex flex-col gap-4 w-full">
-        <div className="w-full">
-          <h2 className="text-2xl sm:text-3xl font-medium tracking-tight w-full">
-            Gestion des Étudiants
-          </h2>
-          <p className="text-muted-foreground text-sm sm:text-base w-full">
-            Gestion des inscriptions, étudiants actuels et diplômés
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title='Gestion des Étudiants'
+        description='Gestion des inscriptions, étudiants actuels et diplômés'
+      >
+
+      </PageHeader>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {/* <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {StatsCardList.map((card) => (
           <StatCard
             key={uuidv4()}
@@ -50,7 +48,7 @@ const Header = () => {
             icon={card.icon}
           />
         ))}
-      </div>
+      </div> */}
     </>
   );
 };

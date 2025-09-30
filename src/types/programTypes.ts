@@ -265,7 +265,7 @@ export interface ICreateCurriculum {
 }
 
 
-export interface IEnrollmentHistory {
+export interface IGetEnrollmentHistory {
   enrollment_code: string;
   student_user_code: string;
   academic_year_code: string;
@@ -289,17 +289,17 @@ export interface IEnrollmentHistory {
   };
 }
 
-// export interface IEnrollmentHistoryResponse {
+// export interface IGetEnrollmentHistoryResponse {
 //   code: string;
 //   message: string;
 //   exit: string;
-//   body: IEnrollmentHistory[];
+//   body: IGetEnrollmentHistory[];
 // }
 export interface IEnrollmentResponse {
   code: string;
   message: string;
   exit: string;
-  body: IEnrollmentHistory[];
+  body: IGetEnrollmentHistory[];
 }
 
 

@@ -20,22 +20,35 @@ import Link from "next/link";
 import { IUserList } from "@/types/staffType";
 import DialogManageUserRole from "./Modal/DialogManageUserRole";
 import ContentLayout from "@/layout/ContentLayout";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { useUserData } from "@/hooks/feature/users/useUserData";
+import { showToast } from "@/components/ui/showToast";
 
 interface MyProps {
   userList: IUserList[];
   loading: boolean;
   roles: Role[];
   onUpdateUserRoles?: (userId: string, selectedRoles: string[]) => Promise<void>;
+  fetchUserList: () => Promise<void>
 }
 
-export default function UserSection({ loading, userList, roles, onUpdateUserRoles }: MyProps) {
+export default function UserSection({ loading, userList, roles, onUpdateUserRoles, fetchUserList }: MyProps) {
   const [roleModal, setRoleModal] = useState<{ user: IUserList | null; open: boolean }>({
     user: null,
     open: false,
   });
   const [isUpdatingRoles, setIsUpdatingRoles] = useState(false);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [selectedUser, setSelectedUser] = useState("")
 
-  // Handle role update
+  const {
+    handleDesactivateUser,
+    handleDeleteUser,
+  } = useUserData();
+
+
   const handleSaveRoles = async (userId: string, selectedRoles: string[]) => {
     if (!onUpdateUserRoles) return;
     
@@ -122,7 +135,10 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              setDeactivateDialogOpen(true)
+              setSelectedUser(user.user_code)}
+              }>
               {user.status_code === "ACTIVE" ? (
                 <><UserX className="mr-2 h-4 w-4" /> Désactiver</>
               ) : (
@@ -132,7 +148,10 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem className="text-red-600">
+            <DropdownMenuItem className="text-red-600" onClick={() => {
+              setSelectedUser(user.user_code)
+              setDeleteDialogOpen(true)
+            }}>
               <Trash2 className="mr-2 h-4 w-4" /> Supprimer
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -140,6 +159,63 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
       ),
     },
   ], []);
+
+
+  const handleDeactivate = async () => {
+    
+    setProcessing(true);
+    try {
+      const result = await handleDesactivateUser(selectedUser);
+      if (result.success) {
+        setDeactivateDialogOpen(false);
+        showToast({
+          variant: "success-solid",
+          message: 'Utilisateur désactivé',
+          description: 'L\'utilisateur a été désactivé avec succès.',
+          position: 'top-center',
+        });
+        fetchUserList();
+      }
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+      showToast({
+        variant: "error-solid",
+        message: 'Erreur',
+        description: 'Impossible de désactiver l\'utilisateur.',
+        position: 'top-center',
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    
+    setProcessing(true);
+    try {
+      const result = await handleDeleteUser(selectedUser);
+      if (result.success) {
+        setDeleteDialogOpen(false);
+        showToast({
+          variant: "success-solid",
+          message: 'Utilisateur supprimé',
+          description: 'L\'utilisateur a été supprimé définitivement.',
+          position: 'top-center',
+        });
+        fetchUserList();
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      showToast({
+        variant: "error-solid",
+        message: 'Erreur',
+        description: 'Impossible de supprimer l\'utilisateur.',
+        position: 'top-center',
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   return (
     <>
@@ -167,6 +243,32 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
         availableRoles={roles}
         onSave={handleSaveRoles}
         loading={isUpdatingRoles}
+      />
+
+      <ConfirmActionDialog
+        open={deactivateDialogOpen}
+        onOpenChange={setDeactivateDialogOpen}
+        onConfirm={handleDeactivate}
+        title="Désactiver l'utilisateur"
+        description="Êtes-vous sûr de vouloir désactiver cet utilisateur ? Cette action peut être annulée ultérieurement."
+        confirmLabel="Désactiver"
+        cancelLabel="Annuler"
+        variant="warning"
+        loading={processing}
+        loadingText="Désactivation..."
+      />
+
+      <ConfirmActionDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDelete}
+        title="Supprimer définitivement l'utilisateur"
+        description="Cette action est irréversible. Toutes les données associées à cet utilisateur seront définitivement supprimées. Êtes-vous absolument sûr ?"
+        confirmLabel="Supprimer définitivement"
+        cancelLabel="Annuler"
+        variant="danger"
+        loading={processing}
+        loadingText="Suppression..."
       />
     </>
   );

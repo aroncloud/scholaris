@@ -63,7 +63,7 @@ const PageHeader = ({
 
     return (
         <div className="bg-white border-b border-gray-200">
-            <div className="mx-auto px-6 py-4">
+            <div className="mx-auto px-6 py-5">
                 <div className="flex items-center justify-between flex-wrap gap-3">
                     {/* Partie gauche avec bouton retour optionnel */}
                     <div className="flex items-center flex-wrap gap-3 min-w-0 flex-1">
@@ -83,13 +83,15 @@ const PageHeader = ({
                         )}
                         
                         <div className="min-w-0 flex gap-4 flex-nowrap items-center">
-                            <h1 className="text-2xl font-semibold text-gray-900 truncate">
-                                {title}
-                            </h1>
+                            <div className='flex flex-col'>
+                                <h1 className="text-2xl font-semibold text-gray-900 truncate">
+                                    {title}
+                                </h1>
+                                {description && (
+                                    <p className="text-sm text-gray-500 mt-1">{description}</p>
+                                )}
+                            </div>
                             {status && <div className="shrink-0">{status}</div>}
-                            {description && (
-                                <p className="text-sm text-gray-600 mt-1">{description}</p>
-                            )}
                         </div>
                     </div>
 

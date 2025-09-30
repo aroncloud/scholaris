@@ -262,9 +262,9 @@ export function DialogUpdateUser({
                 <div className="space-y-1">
                     <Label htmlFor="marital_status_code">Statut marital</Label>
                     <Controller
-                    name="marital_status_code"
-                    control={control}
-                    render={({ field }) => (
+                        name="marital_status_code"
+                        control={control}
+                        render={({ field }) => (
                         <Combobox
                             options={MARITAl_STATUS}
                             value={field.value}

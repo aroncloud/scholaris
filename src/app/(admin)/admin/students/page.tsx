@@ -1,54 +1,8 @@
 'use client'
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/no-unescaped-entities */
 import { useCallback, useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableHead,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,109 +12,25 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  GraduationCap,
-  Users,
-  BookOpen,
-  FileText,
-  Download,
-  Upload,
-  Search,
-  Filter,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Plus,
-  Eye,
-  UserPlus,
-  Calendar,
-  Award,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Mail,
-  Phone,
-  MapPin,
-  UserCheck,
-  UserX,
-  Lock,
-  Unlock,
-  DollarSign,
-  Bell,
-  MessageSquare,
-} from "lucide-react";
-import { IEnrollmentRequest, IStudent, ICreateStudent, IListStudent } from "@/types/staffType";
+import { ICreateStudent, IListStudent, IGetEnrollmentRequest } from "@/types/staffType";
 import Header from "../../../../components/features/admin-students/HeaderSection";
 import EnrollmentRequests from "../../../../components/features/admin-students/EnrollmentRequestsTab";
 import CurrentStudents from "../../../../components/features/admin-students/CurrentStudentsTab";
-import GenericModal from "@/components/modal/GenericModal";
 import { createUser, getUserList, updateUser } from "@/actions/programsAction";
-import { getStudentApplication, getStudentApplicationList } from "@/actions/studentAction";
+import { getStudentApplicationList } from "@/actions/studentAction";
 import { student_statuses } from "@/constant";
 import { showToast } from "@/components/ui/showToast";
 import ModalStudent from "@/components/modal/ModalStudent";
 import CreateEnrollmentDialog from "@/components/features/admin-students/modals/DialogCreateEnrollmentRequest";
-import { useRouter } from "@bprogress/next/app";
-
-
-
-
-
-
-const mockEnrollmentRequests: IEnrollmentRequest[] = [
-  {
-    id: "1",
-    nom: "Martin",
-    prenom: "Sophie",
-    email: "sophie.martin@email.com",
-    telephone: "+33123456789",
-    filiere: "Médecine",
-    niveau: "Année 1",
-    datedemande: "2024-01-15",
-    statut: "en_attente",
-    documents: ["Baccalauréat", "Certificat médical", "Photo d'identité"],
-  },
-  {
-    id: "2",
-    nom: "Durand",
-    prenom: "Pierre",
-    email: "pierre.durand@email.com",
-    telephone: "+33123456790",
-    filiere: "Pharmacie",
-    niveau: "Année 1",
-    datedemande: "2024-01-12",
-    statut: "approuve",
-    documents: ["Baccalauréat", "Certificat médical"],
-  },
-  {
-    id: "3",
-    nom: "Bernard",
-    prenom: "Claire",
-    email: "claire.bernard@email.com",
-    telephone: "+33123456791",
-    filiere: "Dentaire",
-    niveau: "Année 1",
-    datedemande: "2024-01-10",
-    statut: "rejete",
-    documents: ["Baccalauréat"],
-    commentaire: "Documents manquants",
-  },
-];
-
-
+import { DialogCreateStudent } from "@/components/features/students/modal/DialogCreateStudent";
 
 
 export default function StudentsPage() {
-  const router = useRouter();
-  const [enrollmentRequests, setEnrollmentRequests] = useState<
-    IEnrollmentRequest[]
-  >([]);
+  const [enrollmentRequests, setEnrollmentRequests] = useState<IGetEnrollmentRequest[]>([]);
   const [studentList, setStudentList] = useState<IListStudent[]>([])
-  const [selectedStudent, setSelectedStudent] = useState<IListStudent | null>(null);
-  const [selectedRequest, setSelectedRequest] = useState<IEnrollmentRequest | null>(null);
-  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+  const [loadingStudentList, setLoadingStudentList] = useState(false);
+  const [loadingApplicationList, setLoadingApplicationList] = useState(false);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [sturentFormData, setStudentFormData] = useState<Partial<ICreateStudent>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -175,12 +45,11 @@ export default function StudentsPage() {
 
   const loadEnrollmentRequests = useCallback(async () => {
     try {
+      setLoadingApplicationList(true);
       const result = await getStudentApplicationList();
-      console.log('-->result', result)
+      console.log('-->loadEnrollmentRequests.result', result)
       if(result.code === 'success') {
-        const transformedData = transformApplicationData(result.data.body || []);
-        console.log('transformedData-->', transformedData)
-        setEnrollmentRequests(transformedData);
+        setEnrollmentRequests(result.data.body);
       } else {
         console.error('Error loading enrollment requests:', result.error);
         showToast({
@@ -196,6 +65,8 @@ export default function StudentsPage() {
         message: 'Erreur',
         description: "Une erreur s'est produite lors du chargement des demandes.",
       });
+    } finally {
+      setLoadingApplicationList(false)
     }
   }, []);
   
@@ -206,143 +77,141 @@ export default function StudentsPage() {
 
 
 
-  const graduatedStudents = studentList.filter((student) => {
-    return student_statuses[student.status_code as keyof typeof student_statuses] === student_statuses.GRADUATED;
-  });
 
   const currentStudents = studentList.filter((student) => {
     return student_statuses[student.status_code as keyof typeof student_statuses] != student_statuses.GRADUATED;
   });
   
 
-  const handleSaveStudentInfo = async () => {
-    try {
-      if (action === "CREATE") {
-        const payload = {
-          ...sturentFormData,
-        } as ICreateStudent;
-
-        const result = await createUser(payload);
-        console.log('result-->', result);
-        
-        if (result.code === 'success') {
-          showToast({
-            variant: 'success-solid',
-            message: 'Succès',
-            description: 'Étudiant créé avec succès',
-          });
-          await init();
-          setIsStudentModalOpen(false);
-          setStudentFormData({});
-        } else {
-          showToast({
-            variant: 'error-solid',
-            message: 'Erreur',
-            description: result.error || "Erreur lors de la création de l'étudiant",
-          });
-        }
-      } else {
-        const payload = {
-          ...sturentFormData,
-        } as ICreateStudent;
-
-        const result = await updateUser(payload);
-        console.log('result-->', result);
-        
-        if (result.code === 'success') {
-          showToast({
-            variant: 'success-solid',
-            message: 'Succès',
-            description: 'Étudiant mis à jour avec succès',
-          });
-          await init();
-          setIsStudentModalOpen(false);
-          setAction('CREATE');
-          setStudentFormData({});
-        } else {
-          showToast({
-            variant: 'error-solid',
-            message: 'Erreur',
-            description: result.error || "Erreur lors de la mise à jour de l'étudiant",
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error in handleSaveStudentInfo:', error);
+  const handleCreateStudent = async (data: ICreateStudent) => {
+    const result = await createUser(data);
+    
+    if (result.code === 'success') {
+      showToast({
+        variant: 'success-solid',
+        message: 'Succès',
+        description: 'Étudiant créé avec succès',
+      });
+      await init();
+      setIsStudentModalOpen(false);
+    } else {
       showToast({
         variant: 'error-solid',
         message: 'Erreur',
-        description: 'Une erreur inattendue est survenue',
+        description: result.error || "Erreur lors de la création de l'étudiant",
       });
     }
+    // try {
+    //   if (action === "CREATE") {
+    //     const payload = {
+    //       ...sturentFormData,
+    //     } as ICreateStudent;
 
-    // setCurrentStudents([...currentStudents, newStudent]);
-    // toast({
-    //   title: "Étudiant créé",
-    //   description: "Le nouvel étudiant a été créé avec succès.",
-    // });
-    // setIsStudentModalOpen(false);
-    // setStudentFormData({});
+    //     const result = await createUser(payload);
+    //     console.log('result-->', result);
+        
+    //     if (result.code === 'success') {
+    //       showToast({
+    //         variant: 'success-solid',
+    //         message: 'Succès',
+    //         description: 'Étudiant créé avec succès',
+    //       });
+    //       await init();
+    //       setIsStudentModalOpen(false);
+    //       setStudentFormData({});
+    //     } else {
+    //       showToast({
+    //         variant: 'error-solid',
+    //         message: 'Erreur',
+    //         description: result.error || "Erreur lors de la création de l'étudiant",
+    //       });
+    //     }
+    //   } else {
+    //     const payload = {
+    //       ...sturentFormData,
+    //     } as ICreateStudent;
+
+    //     const result = await updateUser(payload);
+    //     console.log('result-->', result);
+        
+    //     if (result.code === 'success') {
+    //       showToast({
+    //         variant: 'success-solid',
+    //         message: 'Succès',
+    //         description: 'Étudiant mis à jour avec succès',
+    //       });
+    //       await init();
+    //       setIsStudentModalOpen(false);
+    //       setAction('CREATE');
+    //       setStudentFormData({});
+    //     } else {
+    //       showToast({
+    //         variant: 'error-solid',
+    //         message: 'Erreur',
+    //         description: result.error || "Erreur lors de la mise à jour de l'étudiant",
+    //       });
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error('Error in handleCreateStudent:', error);
+    //   showToast({
+    //     variant: 'error-solid',
+    //     message: 'Erreur',
+    //     description: 'Une erreur inattendue est survenue',
+    //   });
+    // }
+
+    return false
+  };
+
+  const handleUpdateStudent = async (data: ICreateStudent) => {
+    const payload = {
+      ...sturentFormData,
+    } as ICreateStudent;
+
+    const result = await updateUser(payload);
+    console.log('result-->', result);
+    
+    if (result.code === 'success') {
+      showToast({
+        variant: 'success-solid',
+        message: 'Succès',
+        description: 'Étudiant mis à jour avec succès',
+      });
+      await init();
+      setIsStudentModalOpen(false);
+      setAction('CREATE');
+      setStudentFormData({});
+    } else {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: result.error || "Erreur lors de la mise à jour de l'étudiant",
+      });
+    }
+    
+
+    return false
   };
 
   const init = async () => {
+    setLoadingStudentList(true)
     const result = await getUserList();
     if(result.code == 'success') {
         setStudentList(result.data.body);
     } 
     console.log('getUserList.result', result)
+    setLoadingStudentList(false)
   }
 
-  const transformApplicationData = (apiData: any[]): IEnrollmentRequest[] => {
-    return apiData.map((app: any) => ({
-      id: app.application_code,
-      nom: app.last_name,
-      prenom: app.first_name,
-      email: app.email,
-      telephone: app.phone_number,
-      filiere: app.cirriculum?.curriculum_name || 'N/A',
-      niveau: app.cirriculum?.study_level || 'N/A',
-      datedemande: app.submitted_at || new Date().toISOString().split('T')[0],
-      statut: app.application_status_code,
-      documents: ['Documents non disponibles'], 
-      commentaire: app.rejection_reason || undefined
-    }));
-  };
 
-  const handleViewApplicationDetails = async (applicationCode: string) => {
-    try {
-      const result = await getStudentApplication(applicationCode);
-      if (result.code === 'success') {
-        console.log('Application details:', result.data);
-        // Ici vous pouvez ouvrir un modal avec les détails ou naviguer vers une page dédiée
-        showToast({
-          variant: 'success-solid',
-          message: 'Détails chargés',
-          description: "Les détails de la demande ont été récupérés avec succès.",
-        });
-      } else {
-        showToast({
-          variant: 'error-solid',
-          message: 'Erreur',
-          description: "Impossible de récupérer les détails de la demande.",
-        });
-      }
-    } catch (error) {
-      console.error('Error loading application details:', error);
-      showToast({
-        variant: 'error-solid',
-        message: 'Erreur',
-        description: "Une erreur s'est produite lors du chargement des détails.",
-      });
-    }
-  }
 
   const handleApproveRequest = (requestId: string) => {
-    setEnrollmentRequests((requests) =>
-      requests.map((req) =>
-        req.id === requestId ? { ...req, statut: "approuve" as const } : req,
-      ),
-    );
+    // setEnrollmentRequests((requests) =>
+    //   requests.map((req) =>
+    //     req.id === requestId ? { ...req, statut: "approuve" as const } : req,
+    //   ),
+    // );
     showToast({
       variant: 'success-solid',
       message: 'Demande approuvée',
@@ -362,12 +231,11 @@ export default function StudentsPage() {
 
 
   return (
+    <>
+      
+      {/* Header */}
+      <Header />
       <div className="space-y-6 p-6">
-        {/* Header */}
-        <Header
-        />
-
-        {/* Main Content */}
         <Tabs defaultValue="etudiants" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="etudiants">
@@ -377,46 +245,41 @@ export default function StudentsPage() {
               Demandes d'inscription ({enrollmentRequests.length})
             </TabsTrigger>
           </TabsList>
+            {/* Current Students Tab */}
+            <TabsContent value="etudiants" className="space-y-4">
+              <CurrentStudents
+                setAction={setAction}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+                setIsStudentDialogOpen={setIsStudentModalOpen}
+                setFormData={setStudentFormData}
+                setStudentToDelete={setStudentToDelete}
+                studentList={currentStudents}
+                loading={loadingStudentList}
+              />
+            </TabsContent>
 
-          {/* Current Students Tab */}
-          <CurrentStudents
-            setAction={setAction}
-            setDeleteDialogOpen={setDeleteDialogOpen}
-            setIsStudentDialogOpen={setIsStudentModalOpen}
-            setSelectedStudent={setSelectedStudent}
-            setFormData={setStudentFormData}
-            setStudentToDelete={setStudentToDelete}
-            setIsRequestDialogOpen={setIsRequestDialogOpen}
-            studentList={currentStudents}
-          />
-
-          {/* Enrollment Requests Tab */}
-          <EnrollmentRequests
-            enrollmentRequests={enrollmentRequests}
-            filterStatut={filterStatut}
-            handleApproveRequest={handleApproveRequest}
-            searchTerm={searchTerm}
-            setFilterStatut={setFilterStatut}
-            setIsRequestDialogOpen={setIsRequestDialogOpen}
-            setSearchTerm={setSearchTerm}
-            setSelectedRequest={setSelectedRequest}
-            onCreateEnrollment={handleCreateEnrollment}
-          />
-
-          {/* Graduated Students Tab */}
-          
+            {/* Enrollment Requests Tab */}
+            <TabsContent value="inscriptions" className="space-y-4">
+              <EnrollmentRequests
+                enrollmentRequests={enrollmentRequests}
+                filterStatut={filterStatut}
+                handleApproveRequest={handleApproveRequest}
+                searchTerm={searchTerm}
+                setFilterStatut={setFilterStatut}
+                setSearchTerm={setSearchTerm}
+                onCreateEnrollment={handleCreateEnrollment}
+                loading={loadingApplicationList}
+              />
+            </TabsContent>
         </Tabs>
 
         
 
         {/* Create IStudent Dialog */}
-        <ModalStudent
+        <DialogCreateStudent
+          onSave={handleCreateStudent}
           open={isStudentModalOpen}
           onOpenChange={setIsStudentModalOpen}
-          formData={sturentFormData}
-          setFormData={setStudentFormData}
-          onConfirm={handleSaveStudentInfo}
-          action={action}
         />
 
 
@@ -463,5 +326,6 @@ export default function StudentsPage() {
         />
 
       </div>
+    </>
   );
 }
