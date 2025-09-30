@@ -64,39 +64,49 @@ export interface IGetApplicationDetail {
   documents: IDocument[];
 }
 
-export interface IGetUserDetail {
-  application_code: string;
+
+interface IStudentCurriculum {
   curriculum_code: string;
-  first_name: string;
-  last_name: string;
-  date_of_birth: string;
-  place_of_birth: string;
-  email: string;
-  gender: string;
-  region_code: string | null;
-  department_code: string | null;
-  arrondissement_code: string | null;
-  village: string;
+  curriculum_name: string;
+  study_level: string;
+  program_code: string;
+  program_name: string;
+}
+
+export interface IGetStudentDetail {
+  user_code: string;
+  curriculum_code: string;
+  student_number: string;
+  status_code: string;
+  enrollment_date: string;
   education_level_code: string;
-  ethnicity_code: string | null;
-  marital_status_code: string | null;
+  financial_status: string;
+  academic_year_code: string;
+  user_name: string;
+  email: string;
+  first_name: string;
+  gender: string;
+  last_name: string;
+  other_email: string | null;
+  other_phone: string | null;
+  phone_number: string;
   country: string | null;
   city: string | null;
   street: string | null;
   address_details: string | null;
-  cni_number: string;
-  cni_issue_date: string;
-  cni_issue_location: string;
-  application_status_code: string;
-  submitted_at: string;
-  processed_at: string;
-  rejection_reason: string;
-  phone_number: string;
-  converted_to_user_code: string;
-  processed_user_code: string;
-  cirriculum: ICurriculum;
-  relatives: IRelative[];
-  documents: IDocument[];
+  avatar_url: string | null;
+  place_of_birth: string | null;
+  date_of_birth: string | null;
+  ethnicity_code: string | null;
+  marital_status_code: string | null;
+  cni_number: string | null;
+  cni_issue_date: string | null;
+  cni_issue_location: string | null;
+  is_verified: number;
+  created_at: number;
+  updated_at: number;
+  last_login_at: number;
+  cirriculum: IStudentCurriculum;
 }
 
 export type Role = {

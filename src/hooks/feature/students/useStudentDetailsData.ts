@@ -3,10 +3,10 @@ import { useRouter } from 'next/navigation';
 import { useEnrollmentHistory } from './useEnrollmentHistory';
 import { getStudentDetails } from '@/actions/studentAction';
 import { showToast } from '@/components/ui/showToast';
-import { IGetUserDetail } from '@/types/userType';
+import { IGetStudentDetail } from '@/types/userType';
 
 export const useStudentDetails = (studentId: string) => {
-    const [student, setStudent] = useState<IGetUserDetail | null>(null);
+    const [student, setStudent] = useState<IGetStudentDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     
     const { history, isLoadingHistory: isHistoryLoading, fetchHistory } = useEnrollmentHistory();
