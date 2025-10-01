@@ -79,13 +79,10 @@ export default function SignInForm() {
               control={control}
               rules={{
                 required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Enter a valid email",
-                },
+                
               }}
               render={({ field }) => (
-                <Input {...field} placeholder="info@gmail.com" type="email" error={!!errors.username?.message} />
+                <Input {...field} placeholder="info@gmail.com"  error={!!errors.username?.message} />
               )}
             />
           </div>
