@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import React, { useCallback, useEffect, useState } from 'react';
-import { BookOpen, Calendar, CheckCircle, Save, Download } from 'lucide-react';
+import { Calendar, CheckCircle, Save, Download } from 'lucide-react';
 import { Combobox } from '@/components/ui/Combobox';
-import { useFactorizedProgramStore } from '@/store/programStore';
 import { useEvaluationData } from '@/hooks/feature/exam/useEvaluationData';
 import { getEvaluationSheet, submitGrades } from '@/actions/examAction';
 import { EvaluationSheet, IStudentEvaluationInfo } from '@/types/examTypes';
@@ -83,7 +83,6 @@ const ScoreInput: React.FC<{
 };
 
 const Page = () => {
-    const [selectedCurriculum, setSelectedCurriculum] = useState<string>('');
     const [selectedExam, setSelectedExam] = useState<string>('');
     const [examSheet, setExamSheet] = useState<EvaluationSheet | undefined>(undefined);
     const [isLoadingExamDetail, setIsLoadingExamDetail] = useState<boolean>(false);
@@ -93,11 +92,9 @@ const Page = () => {
     const [modifiedStudents, setModifiedStudents] = useState<Set<string>>(new Set());
     const [studentGrades, setStudentGrades] = useState<Map<string, number>>(new Map());
 
-    const { factorizedPrograms } = useFactorizedProgramStore();
     const { examList, fetchEvaluationForTeacher, isLoadingExam } = useEvaluationData();
     const { user } = useUserStore();
 
-    const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
 
     const updateStudentScore = useCallback((userCode: string, score: number) => {
         setStudentGrades(prev => new Map(prev.set(userCode, score)));
@@ -371,7 +368,7 @@ const Page = () => {
                         </div>
                     </div>
 
-                    {selectedCurriculum && selectedExam && examSheet?.evaluation&& examSheet?.students  && (
+                    {selectedExam && examSheet?.evaluation&& examSheet?.students  && (
                         <div className="mt-6 p-4 bg-blue-50 rounded-md border border-blue-200">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">

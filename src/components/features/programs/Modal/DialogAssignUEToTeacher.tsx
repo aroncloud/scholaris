@@ -24,8 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Search, 
   User, 
-  BookOpen, 
-  Clock, 
+  BookOpen,
   Award,
   X,
   Check
