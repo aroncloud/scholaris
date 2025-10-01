@@ -13,7 +13,7 @@ export async function initiateStudentApplication(applicationData: IInitiateStude
         
         const token = session.accessToken;
         
-        const response = await axios.post(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/admin/student-applications/initiate`, {
+        const response = await axios.post(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/dashboard/admin/student-applications/initiate`, {
             ...applicationData
         }, {
             headers: {
@@ -41,7 +41,7 @@ export async function getStudentApplication(applicationCode: string) {
         const session = await verifySession();
         
         const token = session.accessToken;
-        const response = await axios.get(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/admin/student-applications/${applicationCode}`, {
+        const response = await axios.get(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/dashboard/admin/student-applications/${applicationCode}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export async function getStudentApplicationList() {
         
         const token = session.accessToken;
         
-        const response = await axios.get(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/admin/student-applications`, {
+        const response = await axios.get(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/dashboard/admin/student-applications`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export async function reviewStudentApplication(applicationCode: string, status: 
             requestBody.reason = rejectionReason;
         }
         
-        const response = await axios.post(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/admin/student-applications/${applicationCode}/review`, requestBody, {
+        const response = await axios.post(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/dashboard/admin/student-applications/${applicationCode}/review`, requestBody, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ export async function convertStudentApplication(applicationCode: string) {
         
         const token = session.accessToken;
         
-        const response = await axios.post(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/admin/student-applications/${applicationCode}/convert`, {}, {
+        const response = await axios.post(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/dashboard/admin/student-applications/${applicationCode}/convert`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',

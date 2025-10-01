@@ -45,7 +45,7 @@ const UserDetailPage = () => {
   }, [fetchUserDetail, userId]);
 
   const handleBack = () => {
-    router.push('/admin/users');
+    router.push('/dashboard/admin/users');
   };
 
   const handleEdit = () => {
@@ -95,7 +95,7 @@ const UserDetailPage = () => {
           description: 'L\'utilisateur a été supprimé définitivement.',
           position: 'top-center',
         });
-        router.push('/admin/users');
+        router.push('/dashboard/admin/users');
       }
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -183,7 +183,7 @@ const UserDetailPage = () => {
         <PageHeader
           title={`${userDetail.first_name} ${userDetail.last_name}`}
           backLabel='Utilisateurs'
-          backUrl='/admin/users'
+          backUrl='/dashboard/admin/users'
           status={<Badge className={getStatusColor(userDetail.status_code)}>{userDetail.status_code}</Badge>}
         >
 

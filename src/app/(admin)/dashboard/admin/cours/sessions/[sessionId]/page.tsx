@@ -223,7 +223,7 @@ export default function SessionDetailPage() {
         description: "Une erreur est survenue lors du chargement des détails de la session",
         position: 'top-center',
       });
-      router.push("/admin/sessions");
+      router.push("/dashboard/dashboard/admin/sessions");
     } finally {
       setIsLoading(false);
     }
@@ -291,7 +291,7 @@ export default function SessionDetailPage() {
   };
 
   const handleGoBack = () => {
-    router.push("/admin/sessions");
+    router.push("/dashboard/admin/sessions");
   };
 
   useEffect(() => {

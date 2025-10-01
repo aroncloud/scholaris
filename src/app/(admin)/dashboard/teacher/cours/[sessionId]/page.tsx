@@ -219,7 +219,7 @@ export default function SessionDetailPage() {
   }
 
   const handleGoBack = () => {
-    router.push("/teacher/cours");
+    router.push("/dashboard/teacher/cours");
   };
 
 

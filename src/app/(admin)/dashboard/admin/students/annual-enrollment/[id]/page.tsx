@@ -44,7 +44,7 @@ export default function StudentDetailPage() {
   }
 
   const handleBack = () => {
-    router.push('/admin/students');
+    router.push('/dashboard/admin/students');
   };
 
   if (!student) {
@@ -80,7 +80,7 @@ export default function StudentDetailPage() {
         backLabel='Etudiants'
         title={`${student.first_name} ${student.last_name}`}
         description={`Inscrit le ${formatDateToText(student.enrollment_date)}`}
-        backUrl='/admin/students'
+        backUrl='/dashboard/admin/students'
         status={
           <Badge className={getStatusColor(student.status_code ?? "N/A")}>
             {student.status_code ?? "N/A"}

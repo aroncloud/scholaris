@@ -102,7 +102,7 @@ const EnrollmentRequests = ({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/admin/students/enrollment/${row.application_code}`);
+                router.push(`/dashboard/admin/students/enrollment/${row.application_code}`);
               }}
             >
               <Eye className="mr-2 h-4 w-4" /> Voir détails
@@ -172,7 +172,7 @@ const EnrollmentRequests = ({
           data={enrollmentRequests}
           searchKey={['first_name', 'last_name', 'email']}
           onRowClick={(row: IGetEnrollmentRequest ) => {
-            router.push(`/admin/students/enrollment/${row.application_code}`);
+            router.push(`/dashboard/admin/students/enrollment/${row.application_code}`);
           }}
           isLoading={loading}
           paginate={15}

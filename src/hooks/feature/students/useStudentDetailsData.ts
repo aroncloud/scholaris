@@ -32,12 +32,12 @@ export const useStudentDetails = (studentId: string) => {
                     message: 'Erreur',
                     description: "Impossible de charger les détails de l'étudiant.",
                 });
-                router.push('/admin/students');
+                router.push('/dashboard/admin/students');
             }
         } catch (error) {
             console.error('Error loading student:', error);
             showToast({ variant: 'error-solid', message: 'Erreur', description: 'Une erreur est survenue.' });
-            router.push('/admin/students');
+            router.push('/dashboard/admin/students');
         } finally {
             setIsLoading(false);
         }

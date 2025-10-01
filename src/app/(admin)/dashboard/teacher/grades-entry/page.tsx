@@ -32,7 +32,7 @@ const UESelection: React.FC<UESelectionProps> = ({ onSelect, className = '' }) =
   const [ue, setUe] = useState('');
   
   const handleBack = () => {
-    router.push('/admin/grades-entry?tab=matieres');
+    router.push('/dashboard/admin/grades-entry?tab=matieres');
   };
 
   const filieres = [
@@ -301,7 +301,7 @@ function GradesEntryPage() {
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => router.push('/admin/grades-entry?tab=saisie-ue')}
+            onClick={() => router.push('/dashboard/admin/grades-entry?tab=saisie-ue')}
             className="hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
           >
             <Plus className="h-4 w-4 mr-2" />

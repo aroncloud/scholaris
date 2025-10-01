@@ -9,13 +9,13 @@ import {
   Upload,
   Plus,
 } from "lucide-react";
-import FilieresTab from "../../../../components/features/programs/FilieresTab";
-import MaquettesTab from "../../../../components/features/programs/MaquettesTab";
-import CalendrierTab from "../../../../components/features/programs/CalendrierTab";
 import SkeletonFilieresTab from "@/components/features/skeleton/SkeletonFilieresTab";
 import { useProgramData } from "@/hooks/feature/programs/useProgramData";
 // import StatCard from "@/components/cards/StatCard";
 import PageHeader from "@/layout/PageHeader";
+import FilieresTab from "@/components/features/programs/FilieresTab";
+import MaquettesTab from "@/components/features/programs/MaquettesTab";
+import CalendrierTab from "@/components/features/programs/CalendrierTab";
 
 // const stats = [
 //   {

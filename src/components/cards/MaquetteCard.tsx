@@ -371,7 +371,7 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => {
-                        router.push(`/admin/programs/${curriculum.curriculum_code}`)
+                        router.push(`/dashboard/admin/programs/${curriculum.curriculum_code}`)
                       }}>
                         <Eye className="mr-2 h-5 w-5" />
                         Detail

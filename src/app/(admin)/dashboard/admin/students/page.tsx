@@ -14,9 +14,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ICreateStudent, IListStudent, IGetEnrollmentRequest } from "@/types/staffType";
-import Header from "../../../../components/features/admin-students/HeaderSection";
-import EnrollmentRequests from "../../../../components/features/admin-students/EnrollmentRequestsTab";
-import CurrentStudents from "../../../../components/features/admin-students/CurrentStudentsTab";
 import { createUser, getUserList, updateUser } from "@/actions/programsAction";
 import { getStudentApplicationList } from "@/actions/studentAction";
 import { student_statuses } from "@/constant";
@@ -24,6 +21,9 @@ import { showToast } from "@/components/ui/showToast";
 import ModalStudent from "@/components/modal/ModalStudent";
 import CreateEnrollmentDialog from "@/components/features/admin-students/modals/DialogCreateEnrollmentRequest";
 import { DialogCreateStudent } from "@/components/features/students/modal/DialogCreateStudent";
+import CurrentStudents from "@/components/features/admin-students/CurrentStudentsTab";
+import Header from "@/components/features/admin-students/HeaderSection";
+import EnrollmentRequests from "@/components/features/admin-students/EnrollmentRequestsTab";
 
 
 export default function StudentsPage() {

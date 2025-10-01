@@ -34,7 +34,7 @@ const CurrentStudents = ({
   loading
 }: CurrentStudentsProps) => {
   const router = useRouter();
-  const handleViewStudentDetails = (id: string) => router.push(`/admin/students/annual-enrollment/${id}`);
+  const handleViewStudentDetails = (id: string) => router.push(`/dashboard/admin/students/annual-enrollment/${id}`);
 
   const columns: TableColumn<IListStudent>[] = [
     { key: "student", label: "Étudiant", render: (_, row) => (

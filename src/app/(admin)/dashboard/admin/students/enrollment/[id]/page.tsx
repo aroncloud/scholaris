@@ -62,7 +62,7 @@ const ApplicationDetailPage: React.FC = () => {
   }, [applicationCode, loadApplicationDetails]);
 
   const handleBack = () => {
-    router.push('/admin/students');
+    router.push('/dashboard/admin/students');
   };
 
   const handleApprove = async () => {
@@ -209,7 +209,7 @@ const ApplicationDetailPage: React.FC = () => {
         backLabel='Candidatures'
         title={`Détail de la Candidature`}
         description={`${applicationData.application_code} • Soumise le ${formatDateToText(applicationData.submitted_at)}`}
-        backUrl='/admin/students'
+        backUrl='/dashboard/admin/students'
         status={
           <Badge className={getStatusColor(applicationData.application_status_code)}>
             {applicationData.application_status_code}

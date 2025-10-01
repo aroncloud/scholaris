@@ -119,7 +119,7 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
               <Link
-                href={`/admin/users/${user.user_code}`}
+                href={`/dashboard/admin/users/${user.user_code}`}
                 className="flex items-center cursor-pointer"
               >
                 <Edit className="mr-2 h-4 w-4" /> Plus de détail

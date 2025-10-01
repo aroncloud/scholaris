@@ -219,7 +219,7 @@ export default function EnrollmentDetailPage() {
                     description:result.error ?? "Une erreur est survenue lors du chargement des détails, essayez encore ou veuillez contacter l'administrateur",
                     position: 'top-center',
                 });
-                router.push("/admin/programs");
+                router.push("/dashboard/admin/programs");
             }
         } catch (error) {
             showToast({
@@ -234,8 +234,8 @@ export default function EnrollmentDetailPage() {
     }, [programCode, router]);
 
     const handleGoBack = () => {
-        console.log('Navigation vers /admin/programs');
-        router.push("/admin/programs");
+        console.log('Navigation vers /dashboard/admin/programs');
+        router.push("/dashboard/admin/programs");
     }
 
     const handleDeactivate = () => {
@@ -303,7 +303,7 @@ export default function EnrollmentDetailPage() {
             <PageHeader
                 title={curriculum.curriculum_name}
                 backLabel="Maquettes"
-                backUrl="/admin/programs"
+                backUrl="/dashboard/admin/programs"
                 loading={isLoading}
                 status={
                     <Badge className={getStatusColor(curriculum.status_code)} variant="secondary">

@@ -355,7 +355,7 @@ scholaris/src/hooks/feature/cours/
 └── useCoursData.ts                    # Main hook implementation
 
 Updated Components:
-├── app/(admin)/admin/cours/page.tsx   # Main dashboard page
+├── app/(admin)/dashboard/admin/cours/page.tsx   # Main dashboard page
 ├── components/features/courses/
 │   ├── CourseDetailsModal.tsx         # Course details modal
 │   └── CourseEditModal.tsx            # Course edit modal

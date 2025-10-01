@@ -54,11 +54,11 @@ export default function SignInForm() {
       });
 
       if(roles.includes("STUDENT")) {
-        router.push('/student');
+        router.push('/dashboard/student');
       } else if(roles.includes("TEACHER")) {
-        router.push('/teacher');
+        router.push('/dashboard/teacher');
       } else {
-        router.push('/admin');
+        router.push('/dashboard/admin');
       }
     } else {
       setLoginError(result.error);
