@@ -14,7 +14,7 @@ export async function checkReenrollmentPrerequisites(studentCode: string) {
     const session = await verifySession();
     const token = session.accessToken;
 
-    const apiUrl = `${process.env.STUDENT_ROLE_ENDPOINT}/api/students/${studentCode}/reenrollment-prerequisites`;
+    const apiUrl = `${process.env.STUDENT_AIM_WORKER_ENDPOINT}/api/students/${studentCode}/reenrollment-prerequisites`;
 
     const response = await axios.get(apiUrl, {
       headers: {
@@ -42,7 +42,7 @@ export async function getStudentEnrollmentHistory(studentCode: string) {
     const session = await verifySession();
     const token = session.accessToken;
 
-    const apiUrl = `${process.env.STUDENT_ROLE_ENDPOINT}/api/students/${studentCode}/enrollments`;
+    const apiUrl = `${process.env.STUDENT_AIM_WORKER_ENDPOINT}/api/students/${studentCode}/enrollments`;
 
     const response = await axios.get(apiUrl, {
       headers: {

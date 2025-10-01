@@ -32,7 +32,7 @@ export async function assignRole(userCode: string, roleCode: string): Promise<Ap
     if (!token) throw new Error("No access token found in session");
 
     const response = await axios.post(
-      `${process.env.ROLE_ENDPOINT}/api/users/${userCode}/role`,
+      `${process.env.AIM_WORKER_ENDPOINT}/api/users/${userCode}/role`,
       { role_code: roleCode },
       {
         headers: {
@@ -67,7 +67,7 @@ export async function removeRole(userCode: string, roleCode: string, profile_cod
 
     if (!roleCode) throw new Error("Missing role code for removal");
 
-    const url = `${process.env.ROLE_ENDPOINT}/api/users/${userCode}/role`;
+    const url = `${process.env.AIM_WORKER_ENDPOINT}/api/users/${userCode}/role`;
 
     const response = await axios.delete(url, {
       headers: {
@@ -98,7 +98,7 @@ export async function GET(request: Request) {
   try {
     const token = request.headers.get("authorization") || "";
 
-    const response = await axios.get(`${process.env.ROLE_ENDPOINT}/api/roles`, {
+    const response = await axios.get(`${process.env.AIM_WORKER_ENDPOINT}/api/roles`, {
       headers: { Authorization: token },
     });
 
@@ -131,7 +131,7 @@ export async function GET_full_role(request: Request) {
       );
     }
 
-    const response = await axios.get(`${process.env.ROLE_ENDPOINT}/api/roles/full`, {
+    const response = await axios.get(`${process.env.AIM_WORKER_ENDPOINT}/api/roles/full`, {
       headers: { Authorization: token },
     });
 
