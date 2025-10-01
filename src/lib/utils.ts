@@ -113,31 +113,33 @@ export const getStatusColor = (status: string): string => {
     // En attente
     case "PENDING":
     case "PENDING_APPROVAL":
-    case "EN ATTENTE":
     case "EN_ATTENTE":
       return "bg-yellow-100 text-yellow-600 dark:bg-gray-700/20 dark:text-yellow-400";
 
-    // Actif ou approuvé
+    // Actif ou approuvé (succès, payé, inscrit)
     case "APPROVED":
-    case "APPROUVE":
-    case "RENTED":
     case "ACTIVE":
+    case "ENROLLED":
     case "TERMINATED":
     case "PAID":
     case "ACTIF":
       return "bg-green-100 text-green-600 dark:bg-gray-700/20 dark:text-green-400";
 
-    // Disponible
-    case "AVAILABLE":
-      return "bg-blue-100 text-blue-600 dark:bg-gray-700/20 dark:text-blue-400";
-
-    // Converti
-    case "CONVERTI":
+    // Progression / partiellement atteint
     case "CONVERTED":
     case "COMPLETED":
+    case "GRADUATED":
+    case "AVAILABLE":
+    case "PROMOTED":
+    case "TRANSFERRED":
+    case "PARTIALLY_PAID":
       return "bg-blue-100 text-blue-600 dark:bg-gray-700/20 dark:text-blue-400";
 
-    // Annulé, rejeté, inactif
+    // Statut spécial / exception
+    case "EXEMPTED":
+      return "bg-purple-100 text-purple-800 dark:bg-gray-700/20 dark:text-purple-400";
+
+    // Annulé, rejeté, inactif, en échec
     case "CANCELED":
     case "CANCEL":
     case "REJECTED":
@@ -145,14 +147,24 @@ export const getStatusColor = (status: string): string => {
     case "UNPAID":
     case "INACTIVE":
     case "INACTIF":
+    case "WITHDRAWN":
     case "SUSPENDED":
+    case "REPEATER":
+    case "DROPPED_OUT":
+    case "OVERDUE":
       return "bg-red-100 text-red-600 dark:bg-gray-700/20 dark:text-red-400";
+
+    // Remboursé / neutre
+    case "REFUNDED":
+      return "bg-gray-200 text-gray-800 dark:bg-gray-700/20 dark:text-gray-300";
 
     // Fallback
     default:
       return "bg-gray-100 text-gray-600 dark:bg-gray-700/20 dark:text-gray-400";
   }
 };
+
+
 
 export const getRoleColor = (role: string): string => {
   switch (role.toUpperCase()) {

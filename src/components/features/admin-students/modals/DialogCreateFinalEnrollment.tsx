@@ -5,10 +5,9 @@ import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useAcademicYearStore } from '@/store/useAcademicYearStore';
 import { useStudentStore } from '@/store/studentStore';
-import { createEnrollment, getCurriculumList } from '@/actions/programsAction';
+import { createEnrollment } from '@/actions/programsAction';
 import { showToast } from '@/components/ui/showToast';
 import { IGetAcademicYears } from '@/types/planificationType';
-import { ICreateCurriculum } from '@/types/programTypes';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,6 +20,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/Combobox';
+import { useFactorizedProgramStore } from '@/store/programStore';
 interface DialogCreateFinalEnrollmentProps {
   isOpen: boolean;
   onClose: () => void;
@@ -40,10 +41,6 @@ type EnrollmentFormData = {
   notes: string;
 };
 
-interface CurriculumOption {
-  value: string;
-  label: string;
-}
 
 export function DialogCreateFinalEnrollment({
   isOpen,
@@ -52,15 +49,14 @@ export function DialogCreateFinalEnrollment({
   curriculumCode,
   onSuccess,
   onEnrollmentSuccess,
-  onCurriculumChange,
   onAcademicYearChange,
 }: DialogCreateFinalEnrollmentProps) {
   const { academicYears, fetchAcademicYears } = useAcademicYearStore();
   const updateStudentStatus = useStudentStore(state => state.updateStudentStatus);
   const [submitting, setSubmitting] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
-  const [curriculums, setCurriculums] = useState<CurriculumOption[]>([]);
-  const [loadingCurriculums, setLoadingCurriculums] = useState(false);
+  const { factorizedPrograms } = useFactorizedProgramStore();
+  const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
 
   const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<EnrollmentFormData>({
     defaultValues: { 
@@ -71,12 +67,7 @@ export function DialogCreateFinalEnrollment({
   });
 
 
-  const handleCurriculumChange = (value: string) => {
-    setValue('curriculum_code', value, { shouldValidate: true });
-    if (onCurriculumChange) {
-      onCurriculumChange(value);
-    }
-  };
+
 
   const handleAcademicYearChange = (value: string) => {
     setValue('academic_year_code', value, { shouldValidate: true });
@@ -85,58 +76,6 @@ export function DialogCreateFinalEnrollment({
     }
   };
 
-  useEffect(() => {
-    const fetchCurriculums = async () => {
-      try {
-        setLoadingCurriculums(true);
-        const result = await getCurriculumList();
-        console.log('Curriculum list response:', result); // Debug log
-        
-        if (result.code === 'success' && result.data) {
-          // Check if result.data has a body property, if not use result.data directly
-          const curriculumData = result.data.body || result.data;
-          
-          // Ensure curriculumData is an array before mapping
-          if (Array.isArray(curriculumData)) {
-            const curriculumOptions = curriculumData.map((curriculum: ICreateCurriculum) => ({
-              value: curriculum.curriculum_code,
-              label: curriculum.curriculum_name || curriculum.curriculum_code
-            }));
-            setCurriculums(curriculumOptions);
-          } else if (typeof curriculumData === 'object' && curriculumData !== null) {
-            // Handle case where data is a single object instead of an array
-            const curriculumOptions = [{
-              value: curriculumData.curriculum_code,
-              label: curriculumData.curriculum_name || curriculumData.curriculum_code
-            }];
-            setCurriculums(curriculumOptions);
-          } else {
-            console.error('Unexpected curriculum data format:', curriculumData);
-            showToast({ variant: 'error-solid', message: 'Format de données de curriculum inattendu' });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching curriculums:', error);
-        showToast({ variant: 'error-solid', message: 'Erreur lors du chargement des curriculums' });
-      } finally {
-        setLoadingCurriculums(false);
-      }
-    };
-
-    if (isOpen) {
-      fetchCurriculums();
-      if (curriculumCode) {
-        reset({ 
-          // academic_year_code: '', 
-          academic_year_code: 'ay-2024-2025', 
-          curriculum_code: curriculumCode, 
-          notes: '' 
-        });
-        setValue('curriculum_code', curriculumCode, { shouldValidate: true });
-      }
-      setEnrolled(false);
-    }
-  }, [isOpen, curriculumCode, reset, setValue]);
 
   useEffect(() => {
     if (isOpen) {
@@ -264,27 +203,19 @@ export function DialogCreateFinalEnrollment({
             <Controller
               name="curriculum_code"
               control={control}
-              rules={{ required: 'Le curriculum est requis' }}
               render={({ field }) => (
-                <Select 
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    handleCurriculumChange(value);
-                  }} 
+              <Combobox
+                  options={curriculumList.map(item => {
+                    return {
+                      value: item.curriculum_code,
+                      label: `${item.curriculum_name}`
+                    }
+                  })}
                   value={field.value}
-                  disabled={submitting || enrolled || loadingCurriculums}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={loadingCurriculums ? "Chargement des curriculums..." : "Sélectionner un curriculum"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {curriculums.map((curriculum) => (
-                      <SelectItem key={curriculum.value} value={curriculum.value}>
-                        {curriculum.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={field.onChange}
+                  placeholder="Sélectionner le statut"
+                  className='py-5'
+              />
               )}
             />
             {errors.curriculum_code && (

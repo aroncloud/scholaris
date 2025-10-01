@@ -64,9 +64,101 @@ export interface IGetApplicationDetail {
   documents: IDocument[];
 }
 
+
+interface IStudentCurriculum {
+  curriculum_code: string;
+  curriculum_name: string;
+  study_level: string;
+  program_code: string;
+  program_name: string;
+}
+
+export interface IGetStudentDetail {
+  user_code: string;
+  curriculum_code: string;
+  student_number: string;
+  status_code: string;
+  enrollment_date: string;
+  education_level_code: string;
+  financial_status: string;
+  academic_year_code: string;
+  user_name: string;
+  email: string;
+  first_name: string;
+  gender: string;
+  last_name: string;
+  other_email: string | null;
+  other_phone: string | null;
+  phone_number: string;
+  country: string | null;
+  city: string | null;
+  street: string | null;
+  address_details: string | null;
+  avatar_url: string | null;
+  place_of_birth: string | null;
+  date_of_birth: string | null;
+  ethnicity_code: string | null;
+  marital_status_code: string | null;
+  cni_number: string | null;
+  cni_issue_date: string | null;
+  cni_issue_location: string | null;
+  is_verified: number;
+  created_at: number;
+  updated_at: number;
+  last_login_at: number;
+  cirriculum: IStudentCurriculum;
+}
+
 export type Role = {
   name: string;
   description: string;
   users: number;
   permissions: string[];
 };
+
+
+export interface EnrollmentHistory {
+  enrollment_code: string;
+  student_user_code: string;
+  academic_year_code: string;
+  curriculum_code: string;
+  status_code: string;
+  enrollment_date: string;
+  notes: string;
+  financial_status?: string;
+  academic_year?: {
+    academic_year_code: string;
+    year_code: string;
+    start_date: string;
+    end_date: string;
+    status_code: string;
+  };
+  cirriculum?: {
+    curriculum_code: string;
+    curriculum_name: string;
+    study_level: string;
+    program_code: string;
+    program_name: string;
+  };
+  curriculum_name?: string;
+  program_name?: string;
+  program_code?: string;
+  study_level?: string;
+}
+
+export interface ReenrollmentEligibility {
+  isEligible: boolean;
+  message: string;
+  loading: boolean;
+  error: string | null;
+  lastEnrollment?: {
+    academic_year_code: string;
+    curriculum_code: string;
+    status: string;
+  };
+  requirements: {
+    hasOutstandingFees: boolean;
+    hasCompletedPreviousYear: boolean;
+    isAccountActive: boolean;
+  };
+}

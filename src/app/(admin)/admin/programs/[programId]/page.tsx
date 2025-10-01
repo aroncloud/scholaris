@@ -365,7 +365,7 @@ export default function EnrollmentDetailPage() {
                                 <FileText className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                                 Informations générales
                                 </CardTitle>
-                                <CardDescription className="text-sm">
+                                <CardDescription className="otf">
                                 Détails du curriculum et informations administratives
                                 </CardDescription>
                             </CardHeader>
@@ -376,8 +376,8 @@ export default function EnrollmentDetailPage() {
                                     <div className="flex items-center gap-3">
                                         <Code className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                         <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">Code Curriculum</p>
-                                        <p className="text-sm text-gray-600 mt-0.5">
+                                        <p className="otf font-medium text-gray-900">Code Curriculum</p>
+                                        <p className="otf text-gray-600 mt-0.5">
                                             {curriculum.curriculum_code}
                                         </p>
                                         </div>
@@ -386,8 +386,8 @@ export default function EnrollmentDetailPage() {
                                     <div className="flex items-center gap-3">
                                         <BookOpen className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                         <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">Code Programme</p>
-                                        <p className="text-sm text-gray-600 mt-0.5">
+                                        <p className="otf font-medium text-gray-900">Code Programme</p>
+                                        <p className="otf text-gray-600 mt-0.5">
                                             {curriculum.program_code}
                                         </p>
                                         </div>
@@ -399,8 +399,8 @@ export default function EnrollmentDetailPage() {
                                     <div className="flex items-center gap-3">
                                         <GraduationCap className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                         <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">Niveau d'études</p>
-                                        <p className="text-sm text-gray-600 mt-0.5">
+                                        <p className="otf font-medium text-gray-900">Niveau d'études</p>
+                                        <p className="otf text-gray-600 mt-0.5">
                                             {curriculum.study_level}
                                         </p>
                                         </div>
@@ -409,8 +409,8 @@ export default function EnrollmentDetailPage() {
                                     <div className="flex items-center gap-3">
                                         <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                         <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">Date de création</p>
-                                        <p className="text-sm text-gray-600 mt-0.5">
+                                        <p className="otf font-medium text-gray-900">Date de création</p>
+                                        <p className="otf text-gray-600 mt-0.5">
                                             {formatDateToText(curriculum.created_at)}
                                         </p>
                                         </div>
@@ -422,13 +422,13 @@ export default function EnrollmentDetailPage() {
                                 <div className="border-t border-gray-100 mt-6 pt-4">
                                     <div className="flex items-center gap-3">
                                     <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                        <span className="text-sm font-semibold text-blue-600">
+                                        <span className="otf font-semibold text-blue-600">
                                         {sequenceList.length}
                                         </span>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-900">Séquences</p>
-                                        <p className="text-xs text-gray-500">Nombre total de séquence</p>
+                                        <p className="otf font-medium text-gray-900">Séquences</p>
+                                        <p className="text-sm text-gray-500">Nombre total de séquence</p>
                                     </div>
                                     </div>
                                 </div>
@@ -444,7 +444,7 @@ export default function EnrollmentDetailPage() {
                                             <ListOrdered className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                                             Horaires Académiques
                                         </CardTitle>
-                                        <CardDescription className="text-sm mt-1">
+                                        <CardDescription className="otf mt-1">
                                             Historique des séquences anuelles associées à ce curriculum
                                         </CardDescription>
                                     </div>
@@ -479,7 +479,7 @@ export default function EnrollmentDetailPage() {
                                                                 <CardTitle className="text-lg font-semibold text-gray-900">
                                                                     {academicYear.academic_year_name}
                                                                 </CardTitle>
-                                                                <CardDescription className="text-sm text-gray-500 mt-1">
+                                                                <CardDescription className="otf text-gray-500 mt-1">
                                                                     {formatDateToText(academicYear.academic_year_start)} - {formatDateToText(academicYear.academic_year_end)}
                                                                 </CardDescription>
                                                             </div>
@@ -509,12 +509,12 @@ export default function EnrollmentDetailPage() {
                                                                 {schedulesForYear.map((sequence) => (
                                                                     <div 
                                                                         key={uuidv4()} 
-                                                                        className="flex justify-between items-center py-1.5 text-sm hover:bg-gray-50 rounded px-2 -mx-2 transition-colors"
+                                                                        className="flex justify-between items-center py-1.5 otf hover:bg-gray-50 rounded px-2 -mx-2 transition-colors"
                                                                     >
                                                                         <span className="font-medium text-gray-800">
                                                                             {sequence.sequence_name}
                                                                         </span>
-                                                                        <span className="text-gray-500 text-xs sm:text-sm">
+                                                                        <span className="text-gray-500 text-sm sm:otf">
                                                                             {formatDateToText(sequence.start_date)} - {formatDateToText(sequence.end_date)}
                                                                         </span>
                                                                     </div>

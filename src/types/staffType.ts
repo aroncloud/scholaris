@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ILoginForm {
   username: string,
   password: string,
@@ -15,6 +16,46 @@ export interface IEnrollmentRequest {
   statut: "en_attente" | "approuve" | "rejete";
   documents: string[];
   commentaire?: string;
+}
+
+export interface IGetEnrollmentRequest {
+  application_code: string;
+  curriculum_code: string;
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;
+  place_of_birth: string;
+  email: string;
+  gender: string;
+  region_code: string | null;
+  department_code: string | null;
+  arrondissement_code: string | null;
+  village: string;
+  education_level_code: string;
+  ethnicity_code: string | null;
+  marital_status_code: string | null;
+  country: string | null;
+  city: string | null;
+  street: string | null;
+  address_details: string | null;
+  cni_number: string;
+  cni_issue_date: string;
+  cni_issue_location: string;
+  application_status_code: string;
+  submitted_at: string;
+  processed_at: string;
+  rejection_reason: string;
+  application_data: any | null;
+  phone_number: string;
+  converted_to_user_code: string;
+  processed_user_code: string;
+  cirriculum: {
+    curriculum_code: string;
+    curriculum_name: string;
+    study_level: string;
+    program_code: string;
+    program_name: string;
+  };
 }
 
 export interface IStudent {
@@ -83,7 +124,7 @@ export interface IListStudent {
   student_number: string;
   curriculum_code: string;
   status_code: string;
-  financial_status?: 'PAID' | 'PENDING' | 'PARTIALLY_PAID' | 'OVERDUE' | 'EXEMPTED' | 'UNPAID' | 'REFUNDED';
+  financial_status?: 'PAID' | 'PENDING' | 'PARTIALLY_PAID' | 'OVERDUE' | 'EXEMPTED' | 'UNPAID' | 'REFUNDED' | string;
   cirriculum: ICurriculum;
 }
 
@@ -93,8 +134,7 @@ export interface IUserProfile {
   role_title: string;
 }
 
-export interface IUserList {
-  userId: string  ;            // added id property for user identifier
+export interface IUserList {           // added id property for user identifier
   user_code: string;
   first_name: string;
   last_name: string;
@@ -289,6 +329,68 @@ export interface IUser {
   NIU: string;
   permissions?: string []
   createdAt?: string;
+}
+
+export interface IGetUserDetail {
+    // Informations d'identification
+    user_code: string;
+    user_name: string;
+    email: string;
+    
+    // Informations personnelles de base
+    first_name: string;
+    last_name: string;
+    gender: 'MALE' | 'FEMALE' | 'OTHER' | string; // Utilisation d'une union pour le genre
+    phone_number: string | null;
+    other_email: string | null;
+    other_phone: string | null;
+    
+    // Informations de localisation (peuvent être null)
+    country: string | null;
+    city: string | null;
+    street: string | null;
+    address_details: string | null;
+    
+    // État et vérification
+    status_code: 'ACTIVE' | 'INACTIVE' | string; // Utilisation d'une union pour le statut
+    is_verified: 0 | 1; // 0 pour non vérifié, 1 pour vérifié
+    avatar_url: string | null;
+    
+    // Informations biographiques étendues
+    place_of_birth: string | null;
+    date_of_birth: number | null; // Assumant que c'est un timestamp ou un format de date
+    ethnicity_code: string | null;
+    marital_status_code: string | null;
+    
+    // Informations d'identité (CNI - Carte Nationale d'Identité)
+    cni_number: string | null;
+    cni_issue_date: number | null; // Assumant un timestamp
+    cni_issue_location: string | null;
+    
+    // Horodatages (timestamps en secondes)
+    created_at: number;
+    updated_at: number;
+    last_login_at: number | null;
+}
+
+export interface IUpdateUserForm {
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+  other_email?: string;
+  other_phone?: string;
+  country?: string;
+  city?: string;
+  address_details?: string;
+  avatar_url?: string;
+  place_of_birth?: string;
+  date_of_birth?: string;
+  ethnicity_code?: string;
+  marital_status_code?: string;
+  cni_number?: string;
+  cni_issue_date?: string;
+  cni_issue_location?: string;
 }
 
 export interface IUserPermission {

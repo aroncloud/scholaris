@@ -23,7 +23,7 @@ import { FormErrors } from "@/hooks/useAdmissionForm";
 import { FileUploadProps, FormData } from "@/types/requestSubmissionTypes";
 import { IConfig, ICountryMap } from "@/types/utilitiesTypes";
 import { regroupLocation } from "@/lib/utils";
-import { maritalStatus } from "@/constant";
+import { MARITAl_STATUS } from "@/constant";
 import { IFactorizedProgram } from "@/types/programTypes";
 
 interface FormSectionProps {
@@ -352,7 +352,7 @@ export const AdditionalInfoForm: React.FC<StepFormProps> = ({
                       <SelectValue placeholder="Sélectionnez" />
                   </SelectTrigger>
                   <SelectContent>
-                    {maritalStatus.map((status) => (
+                    {MARITAl_STATUS.map((status) => (
                       <SelectItem key={status.value} value={status.value}>
                         {status.label}
                       </SelectItem>

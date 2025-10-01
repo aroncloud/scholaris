@@ -19,12 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { showToast } from "@/components/ui/showToast";
 
 import { initiateStudentApplication } from "@/actions/studentAction";
 import { useFactorizedProgramStore } from '@/store/programStore';
 import { IInitiateStudentApplication } from "@/types/staffType";
+import { Combobox } from '@/components/ui/Combobox';
 
 interface CreateEnrollmentDialogProps {
   open: boolean;
@@ -47,6 +48,7 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
     handleSubmit,
     setValue,
     reset,
+    control,
     formState: { errors },
   } = useForm<IInitiateStudentApplication>({
     defaultValues: {
@@ -183,28 +185,25 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
           <div >
             <div>
               <Label htmlFor="curriculum_code">Curriculum *</Label>
-              <Select
-                onValueChange={(value) => setValue("curriculum_code", value)}
-              >
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder={curriculumList.length == 0 ? "Chargement..." : "Sélectionner un curriculum"}/>
-                </SelectTrigger>
-                <SelectContent className='w-full'>
-                  {curriculumList.map((curriculum) => (
-                    <SelectItem
-                      key={curriculum.curriculum_code}
-                      value={curriculum.curriculum_code}
-                      className="whitespace-normal break-words"
-                    >
-                      <div className="flex flex-col w-full">
-                        <span className="font-medium truncate">
-                          {curriculum.curriculum_name} ({curriculum.study_level})
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                  name="curriculum_code"
+                  control={control}
+                  render={({ field }) => (
+                  <Combobox
+                      options={curriculumList.map(item => {
+                        return {
+                          value: item.curriculum_code,
+                          label: `${item.curriculum_name}`
+                        }
+                      })}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Sélectionner le statut"
+                      className='py-5'
+                  />
+                )}
+              />
+              
               {errors.curriculum_code && <p className="text-red-500 text-sm">{errors.curriculum_code.message}</p>}
             </div>
           </div>

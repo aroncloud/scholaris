@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server'
 
 import { verifySession } from "@/lib/session";
@@ -6,248 +5,62 @@ import { ICreateStudent } from "@/types/staffType";
 import { ICreateEnrollment } from "@/types/programTypes"
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE, IEnrollmentResponse } from "@/types/programTypes";
-
-export interface IReenrollmentPrerequisites {
-  isEligible: boolean;
-  message: string;
-  lastEnrollment?: {
-    academic_year_code: string;
-    curriculum_code: string;
-    status: string;
-  };
-  requirements: {
-    hasOutstandingFees: boolean;
-    hasCompletedPreviousYear: boolean;
-    isAccountActive: boolean;
-  };
-}
-
-export type ReenrollmentResponse = 
-  | { 
-      code: 'success';
-      data: IReenrollmentPrerequisites;
-      error: null;
-    }
-  | {
-      code: 'error';
-      data: null | IReenrollmentPrerequisites;
-      error: string;
-    };
+import { ICreateCurriculum, ICreateDomain, ICreateModule, ICreateProgram, ICreateSemester, ICreateUE } from "@/types/programTypes";
 
 
 export async function checkReenrollmentPrerequisites(studentCode: string) {
   try {
-    console.log(`[checkReenrollmentPrerequisites] Checking re-enrollment prerequisites for student: ${studentCode}`);
-    
-    if (!studentCode) {
-      console.error('No student code provided to checkReenrollmentPrerequisites');
-      return {
-        code: 'error' as const,
-        data: null,
-        error: 'No student code provided',
-      };
-    }
 
     const session = await verifySession();
-    if (!session?.accessToken) {
-      console.error('No access token available');
-      return {
-        code: 'error' as const,
-        data: null,
-        error: 'Authentication required',
-      };
-    }
-
     const token = session.accessToken;
-    const apiUrl = `${process.env.AIM_WORKER_ENDPOINT}/api/students/${studentCode}/reenrollment-prerequisites`;
-    
-    console.log(`[checkReenrollmentPrerequisites] Calling API: ${apiUrl}`);
-    
-    const response = await axios.get<IReenrollmentPrerequisites>(apiUrl, {
+
+    const apiUrl = `${process.env.STUDENT_ROLE_ENDPOINT}/api/students/${studentCode}/reenrollment-prerequisites`;
+
+    const response = await axios.get(apiUrl, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'X-API-Key': process.env.PUBLIC_API_KEY || '',
       },
       timeout: 10000,
-      validateStatus: () => true, // Don't throw for any status code
     });
 
-    console.log(`[checkReenrollmentPrerequisites] API response status: ${response.status}`, response.data);
-    
-    if (response.status === 200) {
-      return {
-        code: 'success' as const,
-        data: response.data,
-        error: null,
-      };
-    }
-    
-    // Handle 403 - Forbidden (e.g., outstanding debts)
-    if (response.status === 403) {
-      return {
-        code: 'error' as const,
-        data: {
-          isEligible: false,
-          message: response.data?.message || 'Re-enrollment not allowed',
-          requirements: {
-            hasOutstandingFees: true,
-            hasCompletedPreviousYear: false,
-            isAccountActive: true
-          }
-        },
-        error: response.data?.message || 'Re-enrollment not allowed',
-      };
-    }
-    
-    // Handle 404 - Not Found (e.g., no previous enrollment)
-    if (response.status === 404) {
-      return {
-        code: 'error' as const,
-        data: {
-          isEligible: false,
-          message: 'No previous enrollment found or student not eligible for re-enrollment',
-          requirements: {
-            hasOutstandingFees: false,
-            hasCompletedPreviousYear: false,
-            isAccountActive: false
-          }
-        },
-        error: 'No previous enrollment found or student not eligible for re-enrollment',
-      };
-    }
-    
-    // Handle other error status codes
-    const errorMessage = response.data?.message || `API returned status ${response.status}`;
-    console.error(`[checkReenrollmentPrerequisites] API error: ${errorMessage}`);
     return {
-      code: 'error' as const,
-      data: null,
-      error: errorMessage,
+      code: 'success' as const,
+      data: response.data,
+      error: null,
     };
-    
-  } catch (error: any) {
-    console.error('Error in checkReenrollmentPrerequisites:', {
-      message: error.message,
-      code: error.code,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-    
-    return {
-      code: 'error' as const,
-      data: null,
-      error: error.message || 'An error occurred while checking re-enrollment prerequisites',
-    };
+  } catch (error: unknown) {
+    console.log('-->checkReenrollmentPrerequisites.error')
+    const errResult = actionErrorHandler(error);
+    return errResult;
   }
 }
 
 export async function getStudentEnrollmentHistory(studentCode: string) {
   try {
-    console.log(`[getStudentEnrollmentHistory] Fetching enrollment history for student: ${studentCode}`);
-    
-    if (!studentCode) {
-      console.error('No student code provided to getStudentEnrollmentHistory');
-      return {
-        code: 'error' as const,
-        data: [],
-        error: 'No student code provided',
-      };
-    }
 
     const session = await verifySession();
-    if (!session?.accessToken) {
-      console.error('No access token available');
-      return {
-        code: 'error' as const,
-        data: [],
-        error: 'Authentication required',
-      };
-    }
-
     const token = session.accessToken;
-    const apiUrl = `${process.env.AIM_WORKER_ENDPOINT}/api/students/${studentCode}/enrollments`;
-    
-    console.log(`[getStudentEnrollmentHistory] Calling API: ${apiUrl}`);
-    
-    const response = await axios.get<IEnrollmentResponse>(apiUrl, {
+
+    const apiUrl = `${process.env.STUDENT_ROLE_ENDPOINT}/api/students/${studentCode}/enrollments`;
+
+    const response = await axios.get(apiUrl, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'X-API-Key': process.env.PUBLIC_API_KEY || '',
       },
-      timeout: 10000, // 10 seconds timeout
-      validateStatus: (status) => status < 500, // Don't throw for 404
+      timeout: 10000,
     });
 
-    console.log(`[getStudentEnrollmentHistory] API response status: ${response.status}`, response.data);
-    
-    // Handle 404 - No enrollments found (not necessarily an error)
-    if (response.status === 404) {
-      console.log(`[getStudentEnrollmentHistory] No enrollments found for student ${studentCode}`);
-      return {
-        code: 'success' as const,
-        data: [],
-        error: null,
-      };
-    }
-
-    // Handle other error status codes
-    if (response.status >= 400) {
-      const errorMessage = response.data?.message || `API returned status ${response.status}`;
-      console.error(`[getStudentEnrollmentHistory] API error: ${errorMessage}`);
-      return {
-        code: 'error' as const,
-        data: [],
-        error: errorMessage,
-      };
-    }
-    
-    // Handle successful response
-    if (response.data && response.data.code === '200') {
-      return {
-        code: 'success' as const,
-        data: response.data.body || [],
-        error: null,
-      };
-    }
-    
-    // Handle unexpected response format
-    console.error('Unexpected API response format:', response.data);
     return {
-      code: 'error' as const,
-      data: [],
-      error: 'Unexpected API response format',
+      code: 'success' as const,
+      data: response.data?.body || [],
+      error: null,
     };
-    
-  } catch (error: any) {
-    console.error('Error in getStudentEnrollmentHistory:', {
-      message: error.message,
-      code: error.code,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-    
-    // Handle network errors
-    if (error.code === 'ECONNABORTED') {
-      return {
-        code: 'error' as const,
-        data: [],
-        error: 'Request timed out. Please try again.',
-      };
-    }
-    
-    // Handle other errors
-    const errorMessage = error.response?.data?.message || 
-                        error.message || 
-                        'Failed to fetch enrollment history';
-    
-    return {
-      code: 'error' as const,
-      data: [],
-      error: errorMessage,
-    };
+  } catch (error: unknown) {
+    console.log('-->getStudentEnrollmentHistory.error')
+    const errResult = actionErrorHandler(error);
+    return errResult
   }
 }
 
@@ -1081,5 +894,53 @@ export async function getUEListPerCurriculum(curriculumId: string){
         const errResult = actionErrorHandler(error);
         return errResult;
     }
+}
+export async function getUEListForTeacher(teacher_user_code: string){
+  try {
+      const session = await verifySession();
+      
+      const token = session.accessToken;
+      
+
+      const response = await axios.get(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units/for-teacher/${teacher_user_code}`,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+      });
+      console.log('-->result', response.data);
+      
+      return {
+          code: 'success',
+          error: null,
+          data: response.data
+      }
+  } catch (error: unknown) {
+      console.log('-->getUEListForTeacher.error')
+      const errResult = actionErrorHandler(error);
+      return errResult;
+  }
+}
+export async function assignATeacherToACourseUnit(course_unit_code: string, teacher_user_code: string) {
+  try {
+    const session = await verifySession();
+    
+    const token = session.accessToken;
+    
+    const response = await axios.patch(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units/${course_unit_code}/assign-teacher`,
+      {teacher_user_code: teacher_user_code},
+      {headers: {Authorization: `Bearer ${token}`}}
+    );
+    
+    console.log('-->result', response);
+    
+    return {
+      code: 'success',
+      error: null,
+      data: response.data
+    }
+  } catch (error: unknown) {
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
 }
 

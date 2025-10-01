@@ -101,6 +101,12 @@ const navItems: NavItem[] = [
     icon: <Award className="w-5 h-5" />,
     name: "Gestion des notes",
     path: "/teacher/grade-management",
+    authorizedRoles: ["TEACHER"],
+  },
+  {
+    icon: <Award className="w-5 h-5" />,
+    name: "Gestion des notes",
+    path: "/admin/grade-management",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
   },
   {

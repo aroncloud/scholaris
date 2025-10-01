@@ -16,6 +16,8 @@ import { showToast } from '@/components/ui/showToast';
 import { convertStudentApplication, getStudentApplication, reviewStudentApplication } from '@/actions/studentAction';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { IGetApplicationDetail } from '@/types/userType';
+import PageHeader from '@/layout/PageHeader';
+import BoxedSkeleton from '@/components/Skeletons/BoxedSkeleton';
 
 const ApplicationDetailPage: React.FC = () => {
   const params = useParams();
@@ -159,9 +161,7 @@ const ApplicationDetailPage: React.FC = () => {
   // Affichage du loader pendant le chargement
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <LoadingSpinner size={48} message="Chargement du contenu ..." />
-      </div>
+      <BoxedSkeleton />
     );
   }
 
@@ -203,99 +203,85 @@ const ApplicationDetailPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="mx-auto space-y-6">
-        {/* Header section */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={handleBack} className="hover:bg-gray-100">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Candidatures
-              </Button>
-              <Separator orientation="vertical" className="h-6" />
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  Détail de la Candidature
-                </h1>
-                <p className="text-sm text-gray-600 mt-1">
-                  {applicationData.application_code} • Soumise le {formatDateToText(applicationData.submitted_at)}
-                </p>
-              </div>
-              <Separator orientation="vertical" className="h-6" />
-              <div>
-                <Badge className={getStatusColor(applicationData.application_status_code)}>
-                  {applicationData.application_status_code}
-                </Badge>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              {/* Action buttons */}
-              <div className="flex items-center justify-end space-x-3">
-                {canApprove() && (
-                  <Button 
-                    onClick={handleApprove}
-                    disabled={processing}
-                    variant={'success'}
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Approuver
-                  </Button>
-                )}
-                
-                {canReject() && (
-                  <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="danger">
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Rejeter
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Rejeter la candidature</DialogTitle>
-                        <DialogDescription>
-                          Veuillez indiquer la raison du rejet. Cette action est irréversible.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <Textarea
-                          placeholder="Raison du rejet..."
-                          value={rejectionReason}
-                          onChange={(e) => setRejectionReason(e.target.value)}
-                          className="min-h-[100px]"
-                        />
-                      </div>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
-                          Annuler
-                        </Button>
-                        <Button 
-                          onClick={handleReject}
-                          disabled={processing || !rejectionReason.trim()}
-                          className="bg-red-600 hover:bg-red-700 text-white"
-                        >
-                          Confirmer le rejet
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                )}
+    <div className="min-h-screen">
+      {/* Header section */}
+      <PageHeader
+        backLabel='Candidatures'
+        title={`Détail de la Candidature`}
+        description={`${applicationData.application_code} • Soumise le ${formatDateToText(applicationData.submitted_at)}`}
+        backUrl='/admin/students'
+        status={
+          <Badge className={getStatusColor(applicationData.application_status_code)}>
+            {applicationData.application_status_code}
+          </Badge>
+        }
+      >
 
-                {canConvert() && (
-                  <Button 
-                    onClick={handleConvert}
-                    disabled={converting}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    {converting ? 'Conversion...' : 'Convertir en Étudiant'}
+        <div className="flex items-center justify-end space-x-3">
+          {canApprove() && (
+            <Button 
+              onClick={handleApprove}
+              disabled={processing}
+              variant={'success'}
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Approuver
+            </Button>
+          )}
+          
+          {canReject() && (
+            <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="danger">
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Rejeter
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Rejeter la candidature</DialogTitle>
+                  <DialogDescription>
+                    Veuillez indiquer la raison du rejet. Cette action est irréversible.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="Raison du rejet..."
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+                    Annuler
                   </Button>
-                )}
-              </div>
-            </div>
-          </div>
+                  <Button 
+                    onClick={handleReject}
+                    disabled={processing || !rejectionReason.trim()}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Confirmer le rejet
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {canConvert() && (
+            <Button 
+              onClick={handleConvert}
+              disabled={converting}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              {converting ? 'Conversion...' : 'Convertir en Étudiant'}
+            </Button>
+          )}
         </div>
+      </PageHeader>
+
+      <div className="mx-auto space-y-6 p-6">
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Informations personnelles */}

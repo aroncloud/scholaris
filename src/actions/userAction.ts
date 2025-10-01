@@ -4,7 +4,7 @@
 import { verifySession } from "@/lib/session";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { ICreateUser } from "@/types/staffType";
+import { ICreateUser, IUpdateUserForm } from "@/types/staffType";
 
 
 
@@ -347,6 +347,42 @@ export async function getUserList(limit = 100, offset = 0) {
 }
 
 
+export async function getUserDetail(user_code: string) {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+    
+    if (!process.env.AIM_WORKER_ENDPOINT) {
+      console.error('AIM_WORKER_ENDPOINT is not defined');
+      throw new Error('Server configuration error: Missing API endpoint');
+    }
+
+    const url = `${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}`;
+    console.log('API URL:', url);
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    return {
+      code: 'success',
+      error: null,
+      data: response.data,
+    };
+    
+  } catch (error: any) {
+    
+    const errResult = actionErrorHandler(error);
+    return {
+      ...errResult,
+      data: null
+    };
+  }
+}
+
 export async function deactivateUser (userCode: string) {
     console.log('-->deactivateUser', userCode)
     try {
@@ -397,79 +433,34 @@ export async function deleteUser (userCode: string) {
     }
 }
 
-export async function updateUser(user: ICreateUser) {
-    console.log('-->updateUser input:', JSON.stringify(user, null, 2));
-    
-    try {
-        const session = await verifySession();
-        const token = session.accessToken;
 
-        // Prepare the update payload according to backend expectations
-        const payload = {
-            // Required fields
-            user_code: user.user_code,
-            email: user.email,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            gender: user.gender,
-            phone_number: user.phone_number,
-            
-            // Optional fields
-            ...(user.staff_number && { staff_number: user.staff_number }),
-            ...(user.job_title && { job_title: user.job_title }),
-            ...(user.department && { department: user.department }),
-            ...(user.hiring_date && { hiring_date: user.hiring_date }),
-            ...(user.salary !== undefined && { salary: user.salary }),
-            
-            // Include profiles if provided
-            ...(user.profiles && { profiles: user.profiles })
-        };
+export async function updateUser(user: IUpdateUserForm, user_code: string) {
+  
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
 
-        console.log('Sending update payload:', JSON.stringify(payload, null, 2));
-        
-        const response = await axios.put(
-            `${process.env.AIM_WORKER_ENDPOINT}/api/users/update`,
-            payload,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                validateStatus: (status) => status < 500, // Don't throw for 4xx errors
-            }
-        );
-        console.log('-->result', response);
-        
-        if (response.status < 200 || response.status >= 300) {
-          console.error('Error updating user:', {
-            status: response.status,
-            data: response.data,
-            request: {
-              url: `${process.env.AIM_WORKER_ENDPOINT}/api/users/enroll-existing`,
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token?.substring(0, 10)}...`
-              },
-              data: payload
-            }
-          });
-          
-          return {
-            code: 'error',
-            error: response.data?.message || `Failed to update user: ${response.statusText}`,
-            data: null
-          };
-        }
+    const response = await axios.put(
+      `${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}`,
+      { ...user },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-        // Success case
-        return {
-          code: 'success',
-          error: null,
-          data: response.data
-        };
-    } catch (error: unknown) {
-        const errResult = actionErrorHandler(error);
-        return errResult;
-    }
+    console.log("-->updateClassroom.result", response.data);
+
+    return {
+      code: "success",
+      error: null,
+      data: response.data,
+    };
+  } catch (error: unknown) {
+    console.log("-->updateClassroom.error");
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
 }
