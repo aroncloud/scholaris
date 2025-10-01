@@ -9,7 +9,7 @@ interface AcademicYearStoreState {
   academicYears: IGetAcademicYears[];
   loading: boolean;
   error: string | null;
-  selectedAcademicYear: string | null; // ✅ new field
+  selectedAcademicYear: string | null;
 
   setAcademicYears: (data: IGetAcademicYears[]) => void;
   addAcademicYear: (data: IGetAcademicYears) => void;
@@ -20,7 +20,6 @@ interface AcademicYearStoreState {
   fetchAcademicYears: () => Promise<void>;
   refreshAcademicYears: () => Promise<void>;
 
-  // ✅ new actions
   setSelectedAcademicYear: (yearCode: string) => void;
   clearSelectedAcademicYear: () => void;
 }
@@ -31,7 +30,7 @@ export const useAcademicYearStore = create<AcademicYearStoreState>()(
       academicYears: [],
       loading: false,
       error: null,
-      selectedAcademicYear: null, // ✅ initial state
+      selectedAcademicYear: null,
 
       setAcademicYears: (data) => set({ academicYears: data }),
       addAcademicYear: (data) =>

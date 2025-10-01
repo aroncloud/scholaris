@@ -193,26 +193,13 @@ export const DialogAssignUEToTeacher: React.FC<DialogAssignUEToTeacherProps> = (
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       
-      <DialogContent className="max-w-7xl md:min-w-3xl max-h-[80vh] overflow-hidden">
+      <DialogContent className="max-w-7xl md:min-w-3xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <BookOpen className="w-5 h-5" />
             <span>Affecter un enseignant à l&apos;UE</span>
           </DialogTitle>
           <DialogDescription>
-            {/* <div className="space-y-2">
-              <div className="font-medium">{ue.course_unit_name}</div>
-              <div className="text-sm text-gray-600 flex items-center space-x-4">
-                <span>Code: {ue.internal_code}</span>
-                <span>•</span>
-                <span className="flex items-center space-x-1">
-                  <Clock className="w-3 h-3" />
-                  <span>{ue.lecture_hours}h CM + {ue.lab_tutorial_hours}h TD/TP</span>
-                </span>
-                <span>•</span>
-                <span>Coeff: {ue.coefficient}</span>
-              </div>
-            </div> */}
           </DialogDescription>
         </DialogHeader>
 

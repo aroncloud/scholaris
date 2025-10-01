@@ -4,7 +4,6 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 
-// Import des composants UI (assurez-vous que les chemins sont corrects)
 import {
   Card,
   CardContent,
@@ -20,35 +19,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-  } from "@/components/ui/dialog";
-  import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-  } from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";// Mettez le bon chemin vers votre composant
+} from "@/components/ui/select";
 
-// Import des icônes
 import {
   FileText,
   Filter,
@@ -74,25 +61,21 @@ import { useAcademicYearStore } from "@/store/useAcademicYearStore";
 import { IGetAbsencesListRequest, IGetAcademicYearsSchedulesForCurriculum, IGetJustificationDetail } from "@/types/planificationType";
 import { useFactorizedProgramStore } from "@/store/programStore";
 import { getListAcademicYearsSchedulesForCurriculum } from "@/actions/programsAction";
-import { IGetStudentAbsence } from "@/types/absenceTypes"; // Utilisation du type exact
+import { IGetStudentAbsence } from "@/types/absenceTypes";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 export default function AdminAbsenceDashboard() {
-  // États pour les filtres et les données
   const [selectedCurriculum, setSelectedCurriculum] = useState<string | undefined>(undefined);
-  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string | undefined>(undefined);
   const [selectedSchedule, setSelectedSchedule] = useState<string | undefined>(undefined);
   const [scheduleList, setScheduleList] = useState<IGetAcademicYearsSchedulesForCurriculum[]>([]);
   const { factorizedPrograms } = useFactorizedProgramStore();
   const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
   const [isLoadingData, setIsLoadingData] = useState(false);
-  const { academicYears } = useAcademicYearStore();
+  const { academicYears, selectedAcademicYear, setSelectedAcademicYear } = useAcademicYearStore();
   const [absences, setAbsences] = useState<IGetStudentAbsence[]>([]);
 
-  // États pour la gestion des modales
   const [selectedAbsence, setSelectedAbsence] = useState<IGetStudentAbsence | null>(null);
   const [selectedJustification, setSelectedJustification] = useState<IGetJustificationDetail | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -291,16 +274,6 @@ export default function AdminAbsenceDashboard() {
                 Filtres
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Select value={selectedAcademicYear} onValueChange={setSelectedAcademicYear}>
-                  <SelectTrigger className="w-full"><SelectValue placeholder="Année académique" /></SelectTrigger>
-                  <SelectContent className="w-full">
-                    {academicYears.map((acy) => (
-                      <SelectItem key={acy.academic_year_code} value={acy.academic_year_code}>
-                        {acy.start_date.split('-')[0]} / {acy.end_date.split('-')[0]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 <Select value={selectedCurriculum} onValueChange={setSelectedCurriculum}>
                   <SelectTrigger className="w-full"><SelectValue placeholder="Curriculum" /></SelectTrigger>
                   <SelectContent className="w-full">
@@ -347,62 +320,7 @@ export default function AdminAbsenceDashboard() {
         </Card>
       </div>
 
-      {/* --- Modales --- */}
-      {/* {selectedAbsence && (
-        <>
-          <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Détails de l'absence</DialogTitle>
-                <DialogDescription>
-                  Informations complètes sur l'absence de {selectedAbsence.first_name} {selectedAbsence.last_name}.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-2 py-4 ">
-                <p><strong>Étudiant :</strong> {selectedAbsence.first_name} {selectedAbsence.last_name} ({selectedAbsence.student_number})</p>
-                <p><strong>Cours :</strong> {selectedAbsence.course_unit_name}</p>
-                <p><strong>Séance :</strong> {selectedAbsence.session_title}</p>
-                <p><strong>Date :</strong> {formatDateToText(selectedAbsence.recorded_at)}</p>
-                <p><strong>Heure de début :</strong> {selectedAbsence.start_time}</p>
-                <p><strong>Statut actuel :</strong> <Badge variant={absenceColumns.find(c => c.key === 'status_code')?.render?.(selectedAbsence.status_code, selectedAbsence) ? "default" : "outline"}>{selectedAbsence.status_code}</Badge></p>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDetailModalOpen(false)}>Fermer</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          <AlertDialog open={isApproveModalOpen} onOpenChange={setIsApproveModalOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Confirmer l'approbation</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Voulez-vous vraiment approuver cette absence pour {selectedAbsence.first_name} {selectedAbsence.last_name} ?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmApprove}>Approuver</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <AlertDialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Confirmer le rejet</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Voulez-vous vraiment rejeter cette absence pour {selectedAbsence.first_name} {selectedAbsence.last_name} ? Cette action est irréversible.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmReject} className="bg-red-600 hover:bg-red-700">Rejeter</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </>
-      )} */}
+    
 
       {
         (selectedAbsence && selectedJustification) && 
@@ -457,28 +375,7 @@ export default function AdminAbsenceDashboard() {
                       </div>
                     </div>
 
-                    {/* <div>
-                      <Label className=" font-medium text-gray-700">Explication détaillée</Label>
-                      <div className="mt-1 p-3 bg-white border rounded-md ">
-                        {selectedAbsence?.justification_details}
-                      </div>
-                    </div> */}
-
-                    {/* Commentaire précédent si revu */}
-                    {/* {selectedAbsence?.reviewer_comment && (
-                      <div className={`p-3 rounded-md  ${
-                        selectedAbsence.justification_status === 'APPROVED'
-                          ? 'bg-green-50 border-green-200 text-green-800'
-                          : 'bg-red-50 border-red-200 text-red-800'
-                      }`}>
-                        <div className="font-medium mb-1">
-                          Commentaire précédent ({selectedAbsence.reviewer_name}):
-                        </div>
-                        {selectedAbsence.reviewer_comment}
-                      </div>
-                    )} */}
                   </div>
-                {/* // )} */}
 
                 {/* Formulaire de traitement pour les justifications en attente */}
                 {/* {selectedAbsence?.status_code === 'PENDING' && ( */}

@@ -31,6 +31,7 @@ import { showToast } from "@/components/ui/showToast";
 import { createProgram, updateProgram } from "@/actions/programsAction";
 import DialogUpdateProgram from "./Modal/DialogUpdateProgram";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
+import ContentLayout from "@/layout/ContentLayout";
 
 type MyComponentProps = {
   programList: IFactorizedProgram[];
@@ -44,12 +45,7 @@ type MyComponentProps = {
   refresh: () => void;
 };
 
-const statusOptions = [
-  { value: "ALL", label: "Tous les statuts" },
-  { value: "actif", label: "Actif" },
-  { value: "suspendu", label: "Suspendu" },
-  { value: "archive", label: "Archivé" }
-];
+
 
 
 
@@ -59,21 +55,9 @@ const FilieresTab = ({
   refresh,
   setIsCreateProgramOpen,
 }: MyComponentProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatut, setFilterStatut] = useState("ALL");
   const [selectedProgram, setSelectedProgram] = useState<ICreateProgram | null>(null);
   const [isEditProgramOpen, setIsEditProgramOpen] = useState(false);
 
-  const filteredFilieres = useMemo(() => {
-    console.log("program", programList);
-    return programList.filter((filiere) => {
-      const matchesSearch =
-        filiere.program.program_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        filiere.program.description.toLowerCase().includes(searchTerm.toLowerCase());
-        
-    return matchesSearch;
-    });
-  }, [programList, searchTerm]);
 
   const handleCreateProgram = async (program: ICreateProgram) => {
     const response = await createProgram(program);
@@ -136,7 +120,7 @@ const FilieresTab = ({
       label: "Durée",
       render: (_, filiere) => (
         <div className="flex items-center space-x-1">
-          <Clock className="h-4 w-4 text-muted-foreground" />
+          <Clock className="h-4 w-4 text-muted-foreground mb-1" />
           <span>{filiere.curriculums.length} ans</span>
         </div>
       ),
@@ -203,32 +187,18 @@ const FilieresTab = ({
   
   return (
     <div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Filières d&apos;études</CardTitle>
-          <CardDescription>Gestion des programmes de formation</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-between items-center mb-4">
-            <Select value={filterStatut} onValueChange={setFilterStatut}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filtrer par statut" />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      <ContentLayout
+        title={`Filières d'études`}
+        description="Gestion des programmes de formation"
+      >
 
-          <ResponsiveTable
-            columns={filiereColumns}
-            data={filteredFilieres.map(fil => ({...fil, program_code: fil.program.program_code}))}
-            paginate={20}
-          />
-        </CardContent>
-      </Card>
+        <ResponsiveTable
+          columns={filiereColumns}
+          data={programList.map(fil => ({...fil, program_code: fil.program.program_code}))}
+          paginate={20}
+        />
+      </ContentLayout>
+
 
 
 

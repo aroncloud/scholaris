@@ -60,7 +60,7 @@ export default function UsersPage() {
               fetchUserList={fetchUserList}
               userList={
                 userList.filter((user: IUserList) => 
-                user.profiles?.some(profile => profile.role_code !== "STUDENT")
+                user.profiles?.some(profile => profile.role_code != "STUDENT")
               )} 
               loading={loading}
               roles={roles}

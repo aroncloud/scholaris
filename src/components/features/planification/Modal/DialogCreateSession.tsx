@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ICreateSession, IGetAcademicYearsSchedulesForCurriculum } from "@/types/planificationType";
-import { DateTimePicker } from "@/components/ui/DateTimePicker";
 import { useFactorizedProgramStore } from "@/store/programStore";
 import { useTeacherStore } from "@/store/useTeacherStore";
 import { useClassroomStore } from "@/store/useClassroomStore";
@@ -28,6 +27,7 @@ import { useAcademicYearStore } from "@/store/useAcademicYearStore";
 import { useEffect, useState } from "react";
 import { getListAcademicYearsSchedulesForCurriculum, getUEListPerCurriculum } from "@/actions/programsAction";
 import { IGetUECurriculum } from "@/types/programTypes";
+import { DateTimePicker } from "@/components/ui/DateTimePicker";
 
 interface DialogCreateSessionProps {
   open: boolean;
@@ -47,7 +47,7 @@ export function DialogCreateSession({
     const { factorizedPrograms } = useFactorizedProgramStore();
     const { teacherList } = useTeacherStore();
     const { classrooms } = useClassroomStore();
-    const { academicYears, getCurrentAcademicYear } = useAcademicYearStore();
+    const { getCurrentAcademicYear} = useAcademicYearStore();
     const currentAcademicYear = getCurrentAcademicYear();
     const {
         register,
@@ -146,8 +146,8 @@ export function DialogCreateSession({
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+        <DialogContent className="max-w-3xl md:min-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="border-b pb-2 mb-2">
                 <DialogTitle>Créer une nouvelle session</DialogTitle>
                 <DialogDescription>
                     Remplissez les informations de la session
@@ -220,24 +220,7 @@ export function DialogCreateSession({
             {/* Année académique */}
             <div className="space-y-1">
                 <Label>Année académique</Label>
-                <Controller
-                    name="academic_year_code"
-                    control={control}
-                    render={({ field }) => (
-                        <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
-                            <SelectTrigger className={errors.academic_year_code ? "border-red-500 w-full" : "w-full"}>
-                                <SelectValue placeholder="Sélectionner l'année académique" />
-                            </SelectTrigger>
-                            <SelectContent className="w-full">
-                                {academicYears.map((acy) => (
-                                <SelectItem key={acy.academic_year_code} value={acy.academic_year_code}>
-                                    {acy.start_date.split('-')[0]} / {acy.end_date.split('-')[0]}
-                                </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                />
+                <Input type="text" disabled value={currentAcademicYear?.year_code ?? ""}/>
             </div>
 
             {/* Schedule code */}
@@ -330,28 +313,28 @@ export function DialogCreateSession({
             <div className="space-y-1 col-span-2">
                 <Label>Début de la session</Label>
                 <Controller
-                control={control}
-                name="start_time"
-                rules={{ required: "Heure de début requise" }}
-                render={({ field }) => {
-                    const [date, time] = field.value
-                    ? [new Date(field.value), field.value.split("T")[1]]
-                    : [undefined, "10:30:00"];
-                    return (
-                    <DateTimePicker
-                        date={date}
-                        time={time}
-                        onDateChange={(d) => {
-                        if (!d) return;
-                        field.onChange(`${d.toISOString().split("T")[0]}T${time || "00:00:00"}`);
-                        }}
-                        onTimeChange={(t) => {
-                        if (!date) return;
-                        field.onChange(`${date.toISOString().split("T")[0]}T${t}`);
-                        }}
-                    />
-                    );
-                }}
+                    control={control}
+                    name="start_time"
+                    rules={{ required: "Heure de début requise" }}
+                    render={({ field }) => {
+                        const [date, time] = field.value
+                        ? [new Date(field.value), field.value.split("T")[1]]
+                        : [undefined, "10:30:00"];
+                        return (
+                        <DateTimePicker
+                            date={date}
+                            time={time}
+                            onDateChange={(d) => {
+                            if (!d) return;
+                            field.onChange(`${d.toISOString().split("T")[0]}T${time || "00:00:00"}`);
+                            }}
+                            onTimeChange={(t) => {
+                            if (!date) return;
+                            field.onChange(`${date.toISOString().split("T")[0]}T${t}`);
+                            }}
+                        />
+                        );
+                    }}
                 />
                 {errors.start_time && <p className="text-red-600 text-sm">{errors.start_time.message}</p>}
             </div>
@@ -388,10 +371,10 @@ export function DialogCreateSession({
             {/* Footer */}
             <DialogFooter className="col-span-2">
                 <Button variant="outline" type="button" onClick={handleCancel} disabled={isSubmitting}>
-                Annuler
+                    Annuler
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Création..." : "Créer la session"}
+                <Button type="submit" disabled={isSubmitting} variant={"info"}>
+                    {isSubmitting ? "Création..." : "Créer la session"}
                 </Button>
             </DialogFooter>
             </form>

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 interface ContentLayoutProps {
   /** Titre principal du layout */
-  title: string;
+  title?: string;
   /** Description optionnelle sous le titre */
   description?: string;
   /** Actions à afficher dans le header (boutons, etc.) */
@@ -34,23 +34,23 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
   return (
     <div className={cn("", className)}>
       <Card className={cn("w-full", cardClassName)}>
-        <CardHeader className={cn(
+        {title || description || actions && <CardHeader className={cn(
           "flex flex-row items-center justify-between space-y-0 pb-6",
           headerClassName
         )}>
-          <div className="space-y-1 flex-1">
+          {title && <div className="space-y-1 flex-1">
             <h1 className="text-xl font-bold tracking-tight">{title}</h1>
             {description && (
               <p className="text-sm text-muted-foreground">{description}</p>
             )}
-          </div>
+          </div>}
           
           {actions && (
             <div className="flex items-center gap-2 ml-6">
               {actions}
             </div>
           )}
-        </CardHeader>
+        </CardHeader>}
 
         <CardContent className={cn("pt-0", contentClassName)}>
           {children}

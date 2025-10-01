@@ -28,7 +28,7 @@ interface ComboboxProps {
   options: Option[]
   placeholder?: string
   emptyMessage?: string
-  value?: string
+  value?: string | null
   onChange: (value: string) => void
   className?: string
 }

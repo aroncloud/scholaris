@@ -84,7 +84,7 @@ const PageHeader = ({
                         
                         <div className="min-w-0 flex gap-4 flex-nowrap items-center">
                             <div className='flex flex-col'>
-                                <h1 className="text-2xl font-semibold text-gray-900 truncate">
+                                <h1 className="text-xl font-semibold text-gray-900 truncate">
                                     {title}
                                 </h1>
                                 {description && (

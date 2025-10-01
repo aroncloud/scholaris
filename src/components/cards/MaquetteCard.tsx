@@ -421,7 +421,7 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => {}}>
                         <Eye className="mr-2 h-4 w-4" />
-                        Detail
+                        Détail
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => {

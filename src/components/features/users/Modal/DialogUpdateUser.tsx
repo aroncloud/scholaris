@@ -221,13 +221,13 @@ export function DialogUpdateUser({
 
                         return (
                             <DatePicker
-                            label=""
-                            defaultDate={valueAsDate}
-                            minDate={new Date(1900, 0, 1)}
-                            maxDate={new Date()}
-                            onChange={(date) => {
-                                field.onChange(date ? date.toISOString().split("T")[0] : "")
-                            }}
+                                label=""
+                                defaultDate={valueAsDate}
+                                minDate={new Date(1900, 0, 1)}
+                                maxDate={new Date()}
+                                onChange={(date) => {
+                                    field.onChange(date ? date.toISOString().split("T")[0] : "")
+                                }}
                             />
                         )
                     }}

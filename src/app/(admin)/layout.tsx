@@ -22,7 +22,7 @@ export default function AdminLayout({
   const {fetchPrograms} = useFactorizedProgramStore();
   const {fetchTeacher} = useTeacherStore();
   const {fetchClassrooms} = useClassroomStore();
-  const {fetchAcademicYears} = useAcademicYearStore();
+  const {fetchAcademicYears, getCurrentAcademicYear, setSelectedAcademicYear} = useAcademicYearStore();
   const { user } = useUserStore();
   const { initConfigs } = useInitConfigs();
 
@@ -38,10 +38,11 @@ export default function AdminLayout({
       fetchTeacher();
       fetchClassrooms();
       fetchAcademicYears();
+      setSelectedAcademicYear(getCurrentAcademicYear()?.academic_year_code ?? "")
       initConfigs(getConfig);
     }
     fetchPrograms();
-  }, [fetchPrograms, fetchTeacher, fetchClassrooms, fetchAcademicYears, user?.roles, initConfigs]);
+  }, [fetchPrograms, fetchTeacher, fetchClassrooms, fetchAcademicYears, user?.roles, initConfigs, setSelectedAcademicYear, getCurrentAcademicYear]);
 
   return (
     <div className="min-h-screen xl:flex">

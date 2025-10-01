@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -21,12 +20,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFactorizedProgramStore } from "@/store/programStore";
-import { useAcademicYearSchedules } from "@/hooks/feature/planifincation/useAcademicYearSchedules";
-import { useCallback, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { ICreateEvaluation } from "@/types/examTypes";
-import { IGetModulePerCurriculum, IGetUECurriculum } from "@/types/programTypes";
-import { getListAcademicYearsSchedulesForCurriculum, getModuleListPerCurriculum, getUEListPerCurriculum } from "@/actions/programsAction";
-import { showToast } from "@/components/ui/showToast";
+import { getListAcademicYearsSchedulesForCurriculum } from "@/actions/programsAction";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -48,14 +44,11 @@ export default function DialogCreateExam({
   onOpenChange,
   onSave,
   curriculum_code,
-  academic_year_code,
 }: DialogCreateEvaluationProps) {
-  const [ueList, setUEList] = useState<IGetUECurriculum[]>([]);
   const [scheduleList, setScheduleList] = useState<IGetAcademicYearsSchedulesForCurriculum[]>([]);
 
-  const [moduleList, setModuleList] = useState<IGetModulePerCurriculum[]>([]);
   const { factorizedPrograms } = useFactorizedProgramStore();
-  const { academicYears, getCurrentAcademicYear } = useAcademicYearStore();
+  const { selectedAcademicYear } = useAcademicYearStore();
   const { } = useAcademicYearStore();
 
 
@@ -75,24 +68,19 @@ export default function DialogCreateExam({
       status_code: "READY_FOR_GRADING",
       curriculum_code: curriculum_code ?? "",
       deadline: "",
-      academic_year_code: "",
+      academic_year_code: selectedAcademicYear ?? "",
     },
   });
 
   // Watchers
   const selectedCurriculum = useWatch({ control, name: "curriculum_code" });
-  const selectedAcademicYear = useWatch({ control, name: "academic_year_code" });
   const evaluationType = useWatch({ control, name: "evaluation_type_code" });
 
 
   // Récupération des curriculum
   const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
 
-  useEffect(() => {
-    if(academic_year_code){
-      setValue("academic_year_code", academic_year_code);
-    }
-  }, [academic_year_code, setValue]);
+
 
 
   useEffect(() => {
@@ -159,32 +147,6 @@ export default function DialogCreateExam({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-          {/* Année académique */}
-          <div className="space-y-1 col-span-2">
-            <Label>Année académique</Label>
-            <Controller
-              name="academic_year_code"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value || undefined}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Sélectionner l'année académique" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {academicYears.map((acy) => (
-                      <SelectItem key={acy.academic_year_code} value={acy.academic_year_code}>
-                        {acy.start_date.split("-")[0]} / {acy.end_date.split("-")[0]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
           {/* Curriculum */}
           <div className="space-y-1 col-span-2">
             <Label>Curriculum</Label>

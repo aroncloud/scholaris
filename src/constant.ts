@@ -84,7 +84,7 @@ export const USER_TABLE_HEADERS = [
   "Actions",
 ];
 
-export const CALENDAR_COLORS = ["success", "danger", "primary", "warning", "info", "purple", "pink", "teal"];
+export const CALENDAR_COLORS = ["success", "danger", "primary", "warning", "purple", "pink", "teal"];
 
 
 

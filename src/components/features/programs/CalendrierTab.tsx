@@ -164,7 +164,7 @@ const CalendrierTab = () => {
                             </div>
                         </> : <>
 
-                            <div className="overflow-x-auto border rounded-lg">
+                            <div className="overflow-x-auto">
                                 <ResponsiveTable
                                     columns={academicYearColumns}
                                     data={academicYearList}
