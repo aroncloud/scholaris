@@ -1,839 +1,664 @@
-'use client'
-
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+'use client';
+import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Progress
-} from "@/components/ui/progress";
-import {
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  TrendingUp,
-  Upload,
-  RefreshCw,
-  Search,
-  MoreHorizontal,
-  Eye,
-  Plus,
-  FileText,
-  FileUp,
-  Link2,
-  AlertCircle,
-} from "lucide-react";
+import { RefreshCw, Plus, MoreHorizontal, Eye, Search, Check, X } from "lucide-react";
+import { Dialog } from "@/components/ui/dialog";
+import { DialogSubmitJustification } from "@/components/features/student-my-absences/modal/DialogSubmitJustification";
+import { DialogViewDetail } from "@/components/features/student-my-absences/modal/DialogViewDetail";
+import { Absence as AbsenceType, UIAbsence, JustificationFile } from "@/types/studentmyabsencesTypes";
+import { showToast } from "@/components/ui/showToast";
+import { useStudentAbsenceData } from "@/hooks/feature/student-my-absences/useStudentAbsenceData";
+import { format, parseISO } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import dynamic from 'next/dynamic';
+import { verifyClientSession } from '@/lib/client-session';
 
-// Interfaces TypeScript
-interface Absence {
-  id: number;
-  dateAbsence: string;
-  heureDebut: string;
-  heureFin: string;
-  dureeHeures: number;
-  ue: string;
-  cours: string;
-  enseignant: string;
-  type: "cours" | "tp" | "td" | "examen";
-  statut: "non_justifiee" | "justifiee" | "en_attente";
-  justificatifId?: number;
-  motif?: string;
-}
+type Absence = AbsenceType;
 
-interface Justificatif {
-  id: number;
+type SubmitJustificationFn = (data: {
+  absence_codes: string[];
+  reason: string;
   type: string;
-  description: string;
-  fichier: string;
-  dateUpload: string;
-  statut: "en_attente" | "approuve" | "refuse";
-  commentaireAdmin?: string;
-  absencesLiees: number[];
+  files: Array<{
+    file?: File;
+    content_url?: string;
+    name: string;
+  }>;
+}) => Promise<void>;
+
+// Import the AbsenceHistorySection component with skeleton loading
+const AbsenceHistorySection = dynamic<React.ComponentProps<typeof import('@/components/features/student-my-absences/AbsenceHistorySection').AbsenceHistorySection>>(
+  () => import("@/components/features/student-my-absences/AbsenceHistorySection").then(mod => mod.AbsenceHistorySection),
+  {
+    ssr: false,
+    loading: () => <SkeletonMyAbsenceTab />
+  }
+);
+
+// Import the skeleton component
+import { SkeletonMyAbsenceTab } from "@/components/features/student-my-absences/skeleton/SkeletonMyAbsenceTab";
+
+// Error boundary component
+function ErrorFallback() {
+  return <div className="p-4 text-red-600">Erreur lors du chargement du composant</div>;
 }
 
-interface UEStats {
-  ue: string;
-  totalHeures: number;
-  heuresJustifiees: number;
-  heuresNonJustifiees: number;
-  seuilCritique: number;
-  pourcentageAbsence: number;
-}
 
-interface AbsenceStats {
-  title: string;
-  value: string;
-  status: string;
-  description: string;
-  icon: React.ReactNode;
-  trend?: string;
-  trendDirection?: "up" | "down";
-}
 
-// Données mock pour les statistiques
-const absenceStats: AbsenceStats[] = [
-  {
-    title: "Total heures d'absence",
-    value: "24h",
-    status: "warning",
-    description: "Ce semestre",
-    icon: <Clock className="h-4 w-4" />,
-  },
-  {
-    title: "Heures justifiées",
-    value: "18h",
-    status: "excellent",
-    description: "75% du total",
-    icon: <CheckCircle className="h-4 w-4" />,
-  },
-  {
-    title: "En attente de validation",
-    value: "4h",
-    status: "normal",
-    description: "2 justificatifs",
-    icon: <AlertTriangle className="h-4 w-4" />,
-  },
-  {
-    title: "Taux d'assiduité",
-    value: "92%",
-    status: "excellent",
-    description: "Objectif: 85%",
-    icon: <TrendingUp className="h-4 w-4" />,
-  },
-];
-
-// Données mock pour les UE
-const ueStats: UEStats[] = [
-  {
-    ue: "Anatomie Générale",
-    totalHeures: 60,
-    heuresJustifiees: 6,
-    heuresNonJustifiees: 2,
-    seuilCritique: 12,
-    pourcentageAbsence: 13.3
-  },
-  {
-    ue: "Physiologie",
-    totalHeures: 45,
-    heuresJustifiees: 4,
-    heuresNonJustifiees: 0,
-    seuilCritique: 9,
-    pourcentageAbsence: 8.9
-  },
-  {
-    ue: "Pharmacologie",
-    totalHeures: 50,
-    heuresJustifiees: 5,
-    heuresNonJustifiees: 3,
-    seuilCritique: 10,
-    pourcentageAbsence: 16.0
-  },
-  {
-    ue: "Pathologie",
-    totalHeures: 40,
-    heuresJustifiees: 3,
-    heuresNonJustifiees: 1,
-    seuilCritique: 8,
-    pourcentageAbsence: 10.0
+// Helper function to map API status to UI status
+const mapStatusToUI = (status: string) => {
+  if (!status) return 'non_justifiee';
+  
+  const normalizedStatus = status.trim().toUpperCase();
+  
+  switch (normalizedStatus) {
+    case 'JUSTIFIED':
+    case 'APPROVED':
+      return 'justifiee';
+    case 'UNJUSTIFIED':
+      return 'non_justifiee';
+    case 'PENDING':
+    case 'PENDING_REVIEW':
+      return 'en_attente';
+    case 'REJECTED':
+      return 'non_justifiee';
+    default:
+      console.warn('Unknown status:', status);
+      return 'non_justifiee';
   }
-];
+};
 
-// Données mock pour les absences
-const absencesData: Absence[] = [
-  {
-    id: 1,
-    dateAbsence: "2024-01-22",
-    heureDebut: "08:00",
-    heureFin: "10:00",
-    dureeHeures: 2,
-    ue: "Anatomie Générale",
-    cours: "Anatomie du système nerveux",
-    enseignant: "Dr. Assi Marie",
-    type: "cours",
-    statut: "justifiee",
-    justificatifId: 1,
-    motif: "Consultation médicale"
-  },
-  {
-    id: 2,
-    dateAbsence: "2024-01-21",
-    heureDebut: "14:00",
-    heureFin: "16:00",
-    dureeHeures: 2,
-    ue: "Physiologie",
-    cours: "TP Physiologie cardiaque",
-    enseignant: "Prof. Kone David",
-    type: "tp",
-    statut: "en_attente",
-    justificatifId: 2,
-    motif: "Problème familial"
-  },
-  {
-    id: 3,
-    dateAbsence: "2024-01-20",
-    heureDebut: "10:00",
-    heureFin: "12:00",
-    dureeHeures: 2,
-    ue: "Pharmacologie",
-    cours: "Pharmacocinétique",
-    enseignant: "Dr. Traore Fatou",
-    type: "cours",
-    statut: "non_justifiee"
-  },
-  {
-    id: 4,
-    dateAbsence: "2024-01-19",
-    heureDebut: "08:00",
-    heureFin: "12:00",
-    dureeHeures: 4,
-    ue: "Anatomie Générale",
-    cours: "TD Anatomie digestive",
-    enseignant: "Dr. Assi Marie",
-    type: "td",
-    statut: "justifiee",
-    justificatifId: 1,
-    motif: "Consultation médicale"
-  },
-  {
-    id: 5,
-    dateAbsence: "2024-01-18",
-    heureDebut: "14:00",
-    heureFin: "17:00",
-    dureeHeures: 3,
-    ue: "Pathologie",
-    cours: "Pathologie infectieuse",
-    enseignant: "Prof. Bernard Claire",
-    type: "cours",
-    statut: "non_justifiee"
+// Helper function to map API type to UI type
+const mapTypeToUI = (type: string = 'COURSE'): 'cours' | 'tp' | 'td' | 'examen' => {
+  const typeUpper = type.toUpperCase();
+  switch (typeUpper) {
+    case 'COURSE':
+      return 'cours';
+    case 'TP':
+      return 'tp';
+    case 'TD':
+      return 'td';
+    case 'EXAM':
+      return 'examen';
+    default:
+      return 'cours';
   }
-];
+};
 
-// Données mock pour les justificatifs
-const justificatifsData: Justificatif[] = [
-  {
-    id: 1,
-    type: "Certificat médical",
-    description: "Consultation pour grippe saisonnière",
-    fichier: "certificat_medical_janvier.pdf",
-    dateUpload: "2024-01-22",
-    statut: "approuve",
-    commentaireAdmin: "Justificatif valide",
-    absencesLiees: [1, 4]
-  },
-  {
-    id: 2,
-    type: "Justificatif familial",
-    description: "Décès dans la famille proche",
-    fichier: "acte_deces_famille.pdf",
-    dateUpload: "2024-01-21",
-    statut: "en_attente",
-    absencesLiees: [2]
+// Helper function to map absence data to UI format
+const mapAbsenceToUI = (absence: Absence): UIAbsence => {
+  // Map status from API format to UI format
+  const mapApiStatusToUI = (status?: string) => {
+    if (!status) return 'non_justifiee';
+    
+    const normalizedStatus = status.trim().toLowerCase();
+    if (['justified', 'justifiee', 'justifiée'].includes(normalizedStatus)) return 'justifiee';
+    if (['pending', 'en_attente', 'en attente', 'pending_review'].includes(normalizedStatus)) return 'en_attente';
+    return 'non_justifiee'; // Default to non_justifiee for any other status
+  };
+
+  // Extract date and time from startTime
+  const startDate = absence.startTime ? new Date(absence.startTime) : new Date();
+  const endDate = absence.endTime ? new Date(absence.endTime) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default to 1 hour later
+  
+  // Calculate duration in hours
+  const durationHours = absence.duration || 
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
+
+  // Create the base UI absence object
+  const uiAbsence: UIAbsence = {
+    id: parseInt(absence.id) || 0,
+    dateAbsence: startDate.toISOString().split('T')[0],
+    heureDebut: startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    heureFin: endDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    dureeHeures: Math.round(durationHours * 10) / 10, // Round to 1 decimal place
+    ue: absence.course_unit_name || 'UE Inconnue',
+    cours: absence.course_unit_name || 'Cours inconnu',
+    enseignant: absence.teacherName || 'Enseignant inconnu',
+    type: mapTypeToUI(absence.type).toLowerCase() as 'cours' | 'tp' | 'td' | 'examen',
+    statut: mapApiStatusToUI(absence.status || absence.status_code),
+    absence_code: absence.absence_code,
+    status_code: absence.status_code as 'JUSTIFIED' | 'UNJUSTIFIED' | 'PENDING' | 'PENDING_REVIEW' | undefined
+  };
+
+  // Add optional fields if they exist
+  if (absence.justification) {
+    uiAbsence.justificatifId = parseInt(absence.justification.id) || 0;
   }
-];
 
-export default function MyAbsencesPage() {
+  return uiAbsence;
+};
+
+// Helper function to map API status to UI status
+const mapApiStatusToUI = (status: string) => {
+  if (!status) return 'non_justifiee';
+  
+  const normalizedStatus = status.trim().toUpperCase();
+  
+  switch (normalizedStatus) {
+    case 'JUSTIFIED':
+    case 'APPROVED':
+      return 'justifiee';
+    case 'UNJUSTIFIED':
+      return 'non_justifiee';
+    case 'PENDING':
+    case 'PENDING_REVIEW':
+      return 'en_attente';
+    case 'REJECTED':
+    default:
+      return 'non_justifiee';
+  }
+};
+
+// Import the shared utility for generating absence keys
+import { getAbsenceKey } from "@/utils/absenceKeys";
+
+// Define the component props type
+interface MyAbsencesPageProps {}
+
+export default function MyAbsencesPage({}: MyAbsencesPageProps) {
+  // State hooks
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedAbsence, setSelectedAbsence] = useState<Absence | null>(null);
+  const [selectedAbsence, setSelectedAbsence] = useState<UIAbsence | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isSubmitJustificatifOpen, setIsSubmitJustificatifOpen] = useState(false);
-  const [selectedAbsences, setSelectedAbsences] = useState<number[]>([]);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [selectedAbsenceKeys, setSelectedAbsenceKeys] = useState<Set<string>>(new Set());
+  // Add this with your other state hooks
+  const [isSubmittingJustification, setIsSubmittingJustification] = useState(false);
 
-  const getStatutColor = (statut: string) => {
-    switch (statut) {
-      case "justifiee":
-        return "bg-green-100 text-green-800";
-      case "en_attente":
-        return "bg-yellow-100 text-yellow-800";
-      case "non_justifiee":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStatutLabel = (statut: string) => {
-    switch (statut) {
-      case "justifiee":
-        return "Justifiée";
-      case "en_attente":
-        return "En attente";
-      case "non_justifiee":
-        return "Non justifiée";
-      default:
-        return statut;
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "cours":
-        return "bg-blue-100 text-blue-800";
-      case "tp":
-        return "bg-green-100 text-green-800";
-      case "td":
-        return "bg-orange-100 text-orange-800";
-      case "examen":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStatColor = (status: string) => {
-    switch (status) {
-      case "normal":
-        return "text-blue-600";
-      case "warning":
-        return "text-orange-600";
-      case "alert":
-        return "text-red-600";
-      case "excellent":
-        return "text-green-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  const handleViewDetails = (absence: Absence) => {
-    setSelectedAbsence(absence);
-    setIsDetailsDialogOpen(true);
-  };
-
-  const handleSubmitJustificatif = () => {
-    setIsSubmitJustificatifOpen(true);
-  };
-
-  const handleAbsenceSelection = (absenceId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedAbsences([...selectedAbsences, absenceId]);
-    } else {
-      setSelectedAbsences(selectedAbsences.filter(id => id !== absenceId));
-    }
-  };
-
-  const filteredAbsences = absencesData.filter(absence => {
-    const matchesSearch = absence.ue.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         absence.cours.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         absence.enseignant.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
+  // Data fetching
+  const {
+    absences: apiAbsences = [],
+    isLoading,
+    isError,
+    error,
+    refetchAbsences,
+    submitJustification,
+  } = useStudentAbsenceData({
+    searchTerm,
+    filters: {},
+    enabled: true
   });
+  
+  // State to force show skeleton when refreshing
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Handle refresh with loading state
+  const handleRefresh = useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      if (refetchAbsences) {
+        await refetchAbsences();
+      }
+    } catch (error) {
+      console.error('Error refreshing absences:', error);
+    } finally {
+      // Small delay to ensure smooth transition
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  }, [refetchAbsences]);
 
+  // Process absences data
+  const absencesData = useMemo(() => {
+    if (!Array.isArray(apiAbsences)) {
+      console.warn('apiAbsences is not an array:', apiAbsences);
+      return [];
+    }
+    
+    return apiAbsences.map(absence => {
+      try {
+        return mapAbsenceToUI(absence);
+      } catch (err) {
+        console.error('Error mapping absence:', { absence, error: err });
+        return null;
+      }
+    }).filter(Boolean) as UIAbsence[];
+  }, [apiAbsences]);
+
+  // Filter absences based on search term
+  const filteredAbsences = useMemo(() => {
+    return absencesData.filter((absence: UIAbsence) => {
+      if (!searchTerm) return true;
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        (absence.ue?.toLowerCase() || '').includes(searchLower) ||
+        (absence.cours?.toLowerCase() || '').includes(searchLower) ||
+        (absence.dateAbsence?.toLowerCase() || '').includes(searchLower)
+      );
+    });
+  }, [absencesData, searchTerm]);
+
+  // Helper functions
+  const getTypeColor = useCallback((type: string): string => {
+    switch (type) {
+      case 'cours': return 'bg-blue-100 text-blue-800';
+      case 'tp': return 'bg-green-100 text-green-800';
+      case 'td': return 'bg-orange-100 text-orange-800';
+      case 'examen': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  }, []);
+
+  const getStatutColor = useCallback((statut: string): string => {
+    switch (statut) {
+      case 'justifiee': return 'bg-green-100 text-green-800';
+      case 'en_attente': return 'bg-yellow-100 text-yellow-800';
+      case 'non_justifiee': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  }, []);
+
+  const getStatutLabel = useCallback((statut: string): string => {
+    switch (statut) {
+      case 'justifiee': return 'Justifiée';
+      case 'en_attente': return 'En attente';
+      case 'non_justifiee': return 'Non justifiée';
+      default: return statut;
+    }
+  }, []);
+
+  // Handle view details
+ const handleViewDetails = useCallback((absence: Absence | UIAbsence) => {
+  try {
+    // Convert to UIAbsence if it's an Absence
+    const uiAbsence = 'statut' in absence ? absence : mapAbsenceToUI(absence);
+    setSelectedAbsence(uiAbsence);
+    setIsDetailsDialogOpen(true);
+  } catch (error) {
+    console.error('Error viewing absence details:', error);
+  }
+}, [setSelectedAbsence, setIsDetailsDialogOpen]);
+
+  // Handle select absence
+  const handleSelectAbsence = useCallback((absence: Absence | UIAbsence, isSelected: boolean) => {
+    try {
+      const uiAbsence = 'statut' in absence ? absence : mapAbsenceToUI(absence);
+      
+      // Use absence_code as the primary key if available, otherwise fall back to composite key
+      const absenceKey = uiAbsence.absence_code || getAbsenceKey(uiAbsence);
+      
+      if (!absenceKey) {
+        console.error('Could not generate a valid key for absence:', uiAbsence);
+        return;
+      }
+      
+      setSelectedAbsenceKeys(prev => {
+        const newSet = new Set(prev);
+        if (isSelected) {
+          newSet.add(absenceKey);
+        } else {
+          newSet.delete(absenceKey);
+        }
+        console.log('Updated selected absences:', Array.from(newSet));
+        return newSet;
+      });
+    } catch (error) {
+      console.error('Error selecting absence:', { error, absence });
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Impossible de sélectionner cette absence. Veuillez réessayer.'
+      });
+    }
+  }, [setSelectedAbsenceKeys, mapAbsenceToUI]);
+
+  // Get the access token
+  const getAccessToken = useCallback(async () => {
+    const session = await verifyClientSession();
+    return session?.accessToken;
+  }, []);
+
+  // Handle submit justification
+  const handleSubmitJustification = useCallback(async (formData: {
+    type: string;
+    reason?: string;
+    description?: string;
+    file?: File | null;
+    selectedAbsences: string[];
+    absence_codes?: string[];
+    files?: Array<{
+      file: File;
+      name: string;
+      title: string;
+      type_code: string;
+      content_url?: string;
+    }>;
+  }) => {
+    try {
+      setIsSubmittingJustification(true);
+      
+      // Get the access token
+      const token = await getAccessToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Ensure we have absence codes to submit
+      let absenceCodes: string[] = [];
+      
+      // First, check if we have absence_codes in formData
+      if (formData.absence_codes?.length) {
+        absenceCodes = [...formData.absence_codes];
+      } 
+      // Then check selectedAbsences
+      else if (formData.selectedAbsences?.length) {
+        absenceCodes = [...formData.selectedAbsences];
+      } 
+      // Finally, check selectedAbsenceKeys as fallback
+      else if (selectedAbsenceKeys.size > 0) {
+        // Map selectedAbsenceKeys to absence codes
+        const selectedAbsences = Array.from(selectedAbsenceKeys).map(key => {
+          const keyStr = String(key);
+          const abs = absencesData.find(a => {
+            const codeMatch = a.absence_code && a.absence_code.toString() === keyStr;
+            const idMatch = a.id && a.id.toString() === keyStr;
+            return codeMatch || idMatch;
+          });
+          return abs?.absence_code || keyStr;
+        }).filter((code): code is string => Boolean(code));
+        
+        if (selectedAbsences.length > 0) {
+          absenceCodes = [...new Set(selectedAbsences)];
+        }
+      }
+      
+      // If we still don't have any absence codes, throw an error
+      if (absenceCodes.length === 0) {
+        throw new Error('Aucune absence sélectionnée pour la justification');
+      }
+
+      // Prepare files array for submission
+      const filesToSubmit = [];
+      
+      // Add main file if exists
+      if (formData.file) {
+        filesToSubmit.push({
+          file: formData.file,
+          name: formData.file.name,
+          title: formData.file.name,
+          type_code: formData.type.toUpperCase()
+        });
+      }
+      
+      // Add any additional files
+      if (formData.files?.length) {
+        filesToSubmit.push(...formData.files.map(file => ({
+          ...file,
+          type_code: file.type_code || formData.type.toUpperCase()
+        })));
+      }
+
+      if (filesToSubmit.length === 0) {
+        throw new Error('Aucun fichier fourni pour la justification');
+      }
+      
+      // Prepare the submission data
+      const submissionData = {
+        type: formData.type,
+        reason: formData.reason || formData.description || 'Justification soumise',
+        selectedAbsences: Array.from(new Set([...formData.selectedAbsences || [], ...absenceCodes])),
+        absence_codes: absenceCodes,
+        files: filesToSubmit
+      };
+      
+      console.log('Submitting justification with data:', {
+        ...submissionData,
+        files: submissionData.files.map(f => ({
+          ...f,
+          file: f.file ? '[File]' : undefined
+        }))
+      });
+      
+      // Call the API to submit the justification
+      await submitJustification({
+        ...submissionData,
+        token: token
+      });
+
+      // Show success message
+      showToast({
+        variant: 'success-solid',
+        message: 'Justification soumise',
+        description: 'Votre justificatif a été enregistré avec succès.'
+      });
+
+      // Close the dialog and reset state
+      setIsSubmitJustificatifOpen(false);
+      setSelectedAbsenceKeys(new Set());
+      
+      // Refresh the absences list
+      await refetchAbsences();
+      
+    } catch (error) {
+      console.error('Error submitting justification:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue';
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: `Échec de la soumission du justificatif: ${errorMessage}`
+      });
+      throw error;
+    } finally {
+      setIsSubmittingJustification(false);
+    }
+  }, [setIsSubmittingJustification, setIsSubmitJustificatifOpen, setSelectedAbsenceKeys]);
+
+  // Get selected absences based on keys
+  const selectedAbsences = useMemo(() => {
+    if (!absencesData || !selectedAbsenceKeys) return [];
+    
+    return absencesData.filter(absence => {
+      // First try to match by absence_code, then by composite key
+      return (absence.absence_code && selectedAbsenceKeys.has(absence.absence_code)) ||
+             selectedAbsenceKeys.has(getAbsenceKey(absence));
+    });
+  }, [absencesData, selectedAbsenceKeys]);
+
+  // Handle opening the submit justification dialog
+  const handleOpenSubmitJustification = useCallback((absenceId?: number) => {
+    console.log('handleOpenSubmitJustification called with absenceId:', absenceId);
+    console.log('Current selectedAbsenceKeys:', Array.from(selectedAbsenceKeys));
+    
+    // If an absenceId is provided (including 0), update the selectedAbsenceKeys with it
+    if (absenceId !== undefined) {
+      console.log('Looking for absence with ID:', absenceId);
+      const absence = absencesData.find(a => a.id === absenceId);
+      console.log('Found absence:', absence);
+      
+      if (absence) {
+        const absenceKey = absence.absence_code || getAbsenceKey(absence);
+        console.log('Setting selectedAbsenceKeys to:', [absenceKey]);
+        
+        // Update the state and open the modal in the same batch
+        setSelectedAbsenceKeys(new Set([absenceKey]));
+        // Use setTimeout to ensure the state is updated before opening the modal
+        setTimeout(() => {
+          console.log('Opening submit justificatif modal');
+          setIsSubmitJustificatifOpen(true);
+        }, 0);
+        return;
+      } else {
+        console.error('Absence not found with ID:', absenceId);
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
+          description: 'Absence introuvable. Veuillez réessayer.'
+        });
+        return;
+      }
+    }
+    
+    // If no absences are selected, show an error
+    if (selectedAbsenceKeys.size === 0) {
+      console.warn('No absences selected');
+      showToast({
+        variant: 'error-solid',
+        message: 'Sélection requise',
+        description: 'Veuillez sélectionner au moins une absence à justifier'
+      });
+      return;
+    }
+    
+    // Get all selected absences by matching both absence_code and composite key
+    const selectedAbsences = absencesData.filter(absence => {
+      const absenceKey = absence.absence_code || getAbsenceKey(absence);
+      return selectedAbsenceKeys.has(absenceKey);
+    });
+    
+    console.log('Selected absences for submission:', selectedAbsences.map(a => ({
+      id: a.id,
+      absence_code: a.absence_code,
+      status: a.status_code,
+      key: getAbsenceKey(a)
+    })));
+    
+    // Check if we have any selectable absences
+    if (selectedAbsences.length === 0) {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Aucune absence valide sélectionnée. Veuillez réessayer.'
+      });
+      return;
+    }
+    
+    // Check if any of the selected absences can be justified
+    const hasNonJustifiedAbsences = selectedAbsences.some(
+      absence => !absence.status_code || absence.status_code === 'UNJUSTIFIED'
+    );
+    
+    if (!hasNonJustifiedAbsences) {
+      showToast({
+        variant: 'warning',
+        message: 'Absences déjà justifiées',
+        description: 'Toutes les absences sélectionnées sont déjà justifiées ou en attente de validation.'
+      });
+      return;
+    }
+    
+    setIsSubmitJustificatifOpen(true);
+  }, [selectedAbsenceKeys, absencesData]);
+
+  // Helper function to normalize absence keys for comparison
+  const normalizeKey = useCallback((key: string) => {
+    return key ? key.trim().toLowerCase() : '';
+  }, []);
+
+  // Handle select all/deselect all
+  const handleSelectAll = useCallback((checked: boolean) => {
+    if (checked) {
+      const allAbsenceKeys = new Set(absencesData.map(absence => getAbsenceKey(absence)));
+      setSelectedAbsenceKeys(allAbsenceKeys);
+    } else {
+      setSelectedAbsenceKeys(new Set());
+    }
+  }, [absencesData, getAbsenceKey]);
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Mes Absences
-          </h2>
-          <p className="text-muted-foreground">
-            Tableau de bord d&apos;assiduité et gestion de vos justificatifs
-          </p>
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex items-center justify-between bg-white px-6 py-6 shadow-sm">
+        {/* Left side - Title & Subtitle */}
+        <div className="flex flex-col justify-center">
+          <h2 className="text-2xl font-bold text-gray-900">Mes Absences</h2>
+          <p className="text-sm text-gray-500">Historique de vos absences</p>
         </div>
 
-        <div className="flex space-x-2">
-          <Button variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualiser
-          </Button>
-          <Button onClick={handleSubmitJustificatif}>
-            <Plus className="h-4 w-4 mr-2" />
-            Soumettre un justificatif
-          </Button>
-        </div>
+      {/* Right side - Buttons */}
+      <div className="flex items-center space-x-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isLoading || isRefreshing}
+          className="flex items-center"
+        >
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${isLoading || isRefreshing ? 'animate-spin' : ''}`}
+          />
+          {isLoading || isRefreshing ? 'Actualisation...' : 'Actualiser'}
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            setSelectedAbsenceKeys(new Set());
+            setIsSubmitJustificatifOpen(true);
+          }}
+          disabled={isLoading || absencesData.length === 0}
+          className="flex items-center bg-blue-600 text-white hover:bg-blue-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Soumettre un justificatif
+        </Button>
       </div>
+    </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
-          <TabsTrigger value="absences">Historique des absences</TabsTrigger>
-          <TabsTrigger value="justificatifs">Mes justificatifs</TabsTrigger>
-        </TabsList>
 
-        {/* Dashboard Tab */}
-        <TabsContent value="dashboard" className="space-y-6">
-          {/* Absence Stats */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {absenceStats.map((stat, index) => (
-              <Card key={index}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    {stat.title}
-                  </CardTitle>
-                  <div className={getStatColor(stat.status)}>
-                    {stat.icon}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stat.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
 
-          {/* UE Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Décompte d&apos;absences par UE</CardTitle>
-              <CardDescription>
-                Suivi détaillé de vos heures d&apos;absence par unité d&apos;enseignement
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {ueStats.map((ue, index) => (
-                  <div key={index} className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">{ue.ue}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {ue.heuresJustifiees + ue.heuresNonJustifiees}h / {ue.totalHeures}h ({ue.pourcentageAbsence.toFixed(1)}%)
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm">
-                          <span className="text-green-600">{ue.heuresJustifiees}h justifiées</span>
-                          {ue.heuresNonJustifiees > 0 && (
-                            <span className="text-red-600 ml-2">{ue.heuresNonJustifiees}h non justifiées</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Seuil critique: {ue.seuilCritique}h
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span>Progression vers le seuil critique</span>
-                        <span>{((ue.heuresJustifiees + ue.heuresNonJustifiees) / ue.seuilCritique * 100).toFixed(0)}%</span>
-                      </div>
-                      <Progress
-                        value={(ue.heuresJustifiees + ue.heuresNonJustifiees) / ue.seuilCritique * 100}
-                        className="h-2"
-                      />
-                      {((ue.heuresJustifiees + ue.heuresNonJustifiees) / ue.seuilCritique * 100) >= 80 && (
-                        <div className="flex items-center text-red-600 text-xs">
-                          <AlertCircle className="h-3 w-3 mr-1" />
-                          Proche du seuil critique
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Absences Tab */}
-        <TabsContent value="absences" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Historique des Absences</CardTitle>
-                  <CardDescription>
-                    Liste complète de vos absences par chronologie
-                  </CardDescription>
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8 w-64"
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>UE / Cours</TableHead>
-                    <TableHead>Horaires</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Durée</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAbsences.map((absence) => (
-                    <TableRow key={absence.id}>
-                      <TableCell>
-                        <div className="text-sm">
-                          {new Date(absence.dateAbsence).toLocaleDateString('fr-FR')}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{absence.ue}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {absence.cours}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {absence.enseignant}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {absence.heureDebut} - {absence.heureFin}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className={getTypeColor(absence.type)}
-                        >
-                          {absence.type.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm font-medium">
-                          {absence.dureeHeures}h
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className={getStatutColor(absence.statut)}
-                        >
-                          {getStatutLabel(absence.statut)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => handleViewDetails(absence)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            {absence.statut === "non_justifiee" && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={handleSubmitJustificatif}>
-                                  <FileUp className="mr-2 h-4 w-4" />
-                                  Soumettre justificatif
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {absence.justificatifId && (
-                              <DropdownMenuItem>
-                                <Link2 className="mr-2 h-4 w-4" />
-                                Voir justificatif lié
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Justificatifs Tab */}
-        <TabsContent value="justificatifs" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Mes Justificatifs</CardTitle>
-                  <CardDescription>
-                    Liste de tous vos justificatifs soumis et leur statut
-                  </CardDescription>
-                </div>
-                <Button onClick={handleSubmitJustificatif}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouveau justificatif
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {justificatifsData.map((justificatif) => (
-                  <div key={justificatif.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <FileText className="h-4 w-4 text-blue-600" />
-                          <span className="font-medium">{justificatif.type}</span>
-                          <Badge
-                            variant="secondary"
-                            className={getStatutColor(
-                              justificatif.statut === "approuve" ? "justifiee" :
-                              justificatif.statut === "refuse" ? "non_justifiee" : "en_attente"
-                            )}
-                          >
-                            {justificatif.statut === "approuve" ? "Approuvé" :
-                             justificatif.statut === "refuse" ? "Refusé" : "En attente"}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {justificatif.description}
-                        </p>
-                        <div className="text-xs text-muted-foreground">
-                          Soumis le {new Date(justificatif.dateUpload).toLocaleDateString('fr-FR')}
-                        </div>
-                        <div className="text-xs">
-                          <span className="text-muted-foreground">Absences liées: </span>
-                          <span className="font-medium">{justificatif.absencesLiees.length}</span>
-                        </div>
-                        {justificatif.commentaireAdmin && (
-                          <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                            <span className="font-medium">Commentaire: </span>
-                            {justificatif.commentaireAdmin}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-1" />
-                          Voir
-                        </Button>
-                        {justificatif.statut === "en_attente" && (
-                          <Button variant="outline" size="sm">
-                            <Link2 className="h-4 w-4 mr-1" />
-                            Lier
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Absence Details Dialog */}
-      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Détails de l&apos;Absence</DialogTitle>
-            <DialogDescription>
-              Informations complètes sur cette absence
-            </DialogDescription>
-          </DialogHeader>
-          {selectedAbsence && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Date</Label>
-                  <p className="text-sm">{new Date(selectedAbsence.dateAbsence).toLocaleDateString('fr-FR')}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Horaires</Label>
-                  <p className="text-sm">{selectedAbsence.heureDebut} - {selectedAbsence.heureFin}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">UE</Label>
-                  <p className="text-sm">{selectedAbsence.ue}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Type</Label>
-                  <Badge className={getTypeColor(selectedAbsence.type)}>
-                    {selectedAbsence.type.toUpperCase()}
-                  </Badge>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium">Cours</Label>
-                <p className="text-sm">{selectedAbsence.cours}</p>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium">Enseignant</Label>
-                <p className="text-sm">{selectedAbsence.enseignant}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Durée</Label>
-                  <p className="text-sm">{selectedAbsence.dureeHeures} heures</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Statut</Label>
-                  <Badge className={getStatutColor(selectedAbsence.statut)}>
-                    {getStatutLabel(selectedAbsence.statut)}
-                  </Badge>
-                </div>
-              </div>
-
-              {selectedAbsence.motif && (
-                <div>
-                  <Label className="text-sm font-medium">Motif</Label>
-                  <p className="text-sm mt-1 p-3 bg-gray-50 rounded-lg">{selectedAbsence.motif}</p>
-                </div>
-              )}
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
-              Fermer
-            </Button>
-            {selectedAbsence?.statut === "non_justifiee" && (
-              <Button onClick={handleSubmitJustificatif}>
-                <FileUp className="h-4 w-4 mr-2" />
-                Soumettre justificatif
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Submit Justificatif Dialog */}
-      <Dialog open={isSubmitJustificatifOpen} onOpenChange={setIsSubmitJustificatifOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Soumettre un Justificatif</DialogTitle>
-            <DialogDescription>
-              Uploadez votre justificatif et liez-le à vos absences
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="type">Type de justificatif</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner le type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="medical">Certificat médical</SelectItem>
-                  <SelectItem value="famille">Justificatif familial</SelectItem>
-                  <SelectItem value="transport">Problème de transport</SelectItem>
-                  <SelectItem value="stage">Convention de stage</SelectItem>
-                  <SelectItem value="autre">Autre</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="fichier">Fichier justificatif</Label>
-              <div className="mt-1 flex items-center space-x-2">
-                <Input id="fichier" type="file" accept=".pdf,.jpg,.jpeg,.png" />
-                <Button variant="outline">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Parcourir
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Formats acceptés: PDF, JPG, PNG (max 5MB)
-              </p>
-            </div>
-
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Décrivez brièvement le motif de vos absences..."
-                className="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Lier aux absences non justifiées</Label>
-              <div className="mt-2 space-y-2 max-h-48 overflow-y-auto border rounded p-3">
-                {absencesData
-                  .filter(a => a.statut === "non_justifiee")
-                  .map((absence) => (
-                    <div key={absence.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`absence-${absence.id}`}
-                        checked={selectedAbsences.includes(absence.id)}
-                        onCheckedChange={(checked) =>
-                          handleAbsenceSelection(absence.id, checked as boolean)
-                        }
-                      />
-                      <label
-                        htmlFor={`absence-${absence.id}`}
-                        className="text-sm cursor-pointer flex-1"
-                      >
-                        <span className="font-medium">{absence.ue}</span> -
-                        {new Date(absence.dateAbsence).toLocaleDateString('fr-FR')}
-                        ({absence.dureeHeures}h)
-                      </label>
-                    </div>
-                  ))}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Sélectionnez les absences que ce justificatif couvre
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsSubmitJustificatifOpen(false)}>
-              Annuler
-            </Button>
-            <Button disabled={selectedAbsences.length === 0}>
-              <FileUp className="h-4 w-4 mr-2" />
-              Soumettre justificatif
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {isLoading || isRefreshing ? (
+        <SkeletonMyAbsenceTab />
+      ) : isError ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          Une erreur est survenue lors du chargement des absences.
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <AbsenceHistorySection
+          absences={absencesData}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onViewDetails={handleViewDetails}
+          getTypeColor={getTypeColor}
+          getStatutColor={getStatutColor}
+          getStatutLabel={getStatutLabel}
+          onRefresh={refetchAbsences}
+          onSubmitJustificatif={handleOpenSubmitJustification}
+        />
+        </div>
+      )}
+      
+      <DialogSubmitJustification
+        isOpen={isSubmitJustificatifOpen}
+        onOpenChange={setIsSubmitJustificatifOpen}
+        absences={absencesData}
+        selectedAbsences={Array.from(selectedAbsenceKeys)}
+        singleAbsenceMode={selectedAbsenceKeys.size === 1}
+        onAbsenceSelection={(absenceId: string, isSelected: boolean) => {
+          const newSelection = new Set(selectedAbsenceKeys);
+          if (isSelected) {
+            newSelection.add(absenceId);
+          } else {
+            newSelection.delete(absenceId);
+          }
+          setSelectedAbsenceKeys(newSelection);
+        }}
+        onSubmit={async (data) => {
+          try {
+            await handleSubmitJustification({
+              type: data.type,
+              reason: data.reason,
+              file: data.file,
+              files: data.files,
+              selectedAbsences: Array.from(selectedAbsenceKeys),
+              absence_codes: Array.from(selectedAbsenceKeys) // Use the same as selectedAbsences if not provided
+            });
+          } catch (error) {
+            console.error('Error in onSubmit:', error);
+            throw error; // Make sure to re-throw to show error in UI
+          }
+        }}
+        isLoading={isSubmittingJustification}
+      />
+<DialogViewDetail
+        isOpen={isDetailsDialogOpen}
+        onOpenChange={setIsDetailsDialogOpen}
+        absence={selectedAbsence ? ('statut' in selectedAbsence ? selectedAbsence : mapAbsenceToUI(selectedAbsence)) : null}
+        getTypeColor={getTypeColor}
+        getStatutColor={getStatutColor}
+        getStatutLabel={getStatutLabel}
+      />
     </div>
   );
 }

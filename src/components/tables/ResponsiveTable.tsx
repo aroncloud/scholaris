@@ -285,22 +285,27 @@ export const ResponsiveTable = <T extends Record<string, any>>({
               </TableRow>
             ) : (
               // Actual data
-              paginatedData.map((row, rowIndex) => (
-                <TableRow
-                  key={uuidv4()}
-                  className={`hover:bg-gray-50 cursor-pointer ${rowIndex < paginatedData.length - 1 ? 'border-b border-gray-200' : ''}`}
-                  onClick={() => onRowClick?.(row)}
-                >
-                  {enhancedColumns.map((col, colIndex) => (
-                    <TableCell
-                      key={uuidv4()}
-                      className={`px-4 py-2 ${colIndex < enhancedColumns.length - 1 ? 'border-r border-gray-200' : ''}`}
-                    >
-                      {col.render ? col.render(row[col.key], row) : row[col.key]}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              paginatedData.map((row, rowIndex) => {
+                // Use row.id or generate a stable key based on row data
+                const rowKey = row.id || `${rowIndex}-${JSON.stringify(row)}`;
+                
+                return (
+                  <TableRow
+                    key={`row-${rowKey}`}
+                    className={`hover:bg-gray-50 cursor-pointer ${rowIndex < paginatedData.length - 1 ? 'border-b border-gray-200' : ''}`}
+                    onClick={() => onRowClick?.(row)}
+                  >
+                    {enhancedColumns.map((col, colIndex) => (
+                      <TableCell
+                        key={`cell-${rowKey}-${col.key}`}
+                        className={`px-4 py-2 ${colIndex < enhancedColumns.length - 1 ? 'border-r border-gray-200' : ''}`}
+                      >
+                        {col.render ? col.render(row[col.key], row) : row[col.key]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
