@@ -3,16 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield } from "lucide-react";
-import { Role } from "@/types/userType";
 import ContentLayout from "@/layout/ContentLayout";
+import { IGetRole } from "@/types/staffType";
 
 interface MyProps {
-  roles: Role[];
+  roles: IGetRole[];
   loading: boolean;
 }
 
 const RoleAndPermission = ({loading, roles}: MyProps) => {
-
+  console.log('-->.RoleAndPermission.Roles', roles)
   if (loading)
     return (
       <div className="flex justify-center items-center h-40">
@@ -31,12 +31,12 @@ const RoleAndPermission = ({loading, roles}: MyProps) => {
       >
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {roles.map((role) => (
-            <Card key={role.name} className="flex flex-col justify-between h-full">
+            <Card key={role.role_code} className="flex flex-col justify-between h-full">
               <div>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <span>{role.name}</span>
-                    <Badge variant="secondary">{role.users} utilisateurs</Badge>
+                    <span>{role.title}</span>
+                    <Badge variant="secondary">{role.user_count} utilisateurs</Badge>
                   </CardTitle>
                   <CardDescription>{role.description}</CardDescription>
                 </CardHeader>
@@ -45,9 +45,9 @@ const RoleAndPermission = ({loading, roles}: MyProps) => {
                     <h4 className="text-sm font-medium">Permissions :</h4>
                     <ul className="text-sm text-muted-foreground space-y-1">
                       {role.permissions.map((permission) => (
-                        <li key={permission} className="flex items-center">
+                        <li key={permission.permission_code} className="flex items-center">
                           <div className="h-1.5 w-1.5 bg-primary rounded-full mr-2" />
-                          {permission}
+                          {permission.permission_title}
                         </li>
                       ))}
                     </ul>

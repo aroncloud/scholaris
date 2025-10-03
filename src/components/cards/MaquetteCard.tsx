@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
@@ -27,9 +28,10 @@ type MyComponentProps = {
   curriculum: ICurriculumDetail
   programName: string
   refresh: () => void;
+  isLoading: boolean;
 }
 
-const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) => {
+const MaquetteCard = ({ curriculum, programName, refresh, isLoading }: MyComponentProps) => {
   // État pour gérer l'expansion du card principal
   const [isCardExpanded, setIsCardExpanded] = useState(false);
   

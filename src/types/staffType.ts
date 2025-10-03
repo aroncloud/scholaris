@@ -42,8 +42,8 @@ export interface IGetEnrollmentRequest {
   cni_issue_date: string;
   cni_issue_location: string;
   application_status_code: string;
-  submitted_at: string;
-  processed_at: string;
+  submitted_at: string | null;
+  processed_at: string | null;
   rejection_reason: string;
   application_data: any | null;
   phone_number: string;
@@ -57,6 +57,39 @@ export interface IGetEnrollmentRequest {
     program_name: string;
   };
 }
+
+
+/**
+ * Définit la structure d'une permission individuelle associée à un rôle.
+ */
+interface IPermissionDetail {
+  /** Code unique de la permission (ex: "dossier:read:own"). */
+  permission_code: string;
+  
+  /** Titre lisible de la permission (ex: "Read Own Dossier"). */
+  permission_title: string;
+}
+
+/**
+ * Définit la structure complète d'un rôle dans le système.
+ */
+export interface IGetRole {
+  /** Code unique du rôle (ex: "STUDENT", "ADMIN", "FACULTY"). */
+  role_code: string;
+  
+  /** Titre lisible du rôle (ex: "Étudiant"). */
+  title: string;
+  
+  /** Description du rôle et de ses fonctions principales. */
+  description: string;
+  
+  /** Nombre total d'utilisateurs assignés à ce rôle. */
+  user_count: number;
+  
+  /** Liste des permissions spécifiques attribuées à ce rôle. */
+  permissions: IPermissionDetail[];
+}
+
 
 export interface IStudent {
   id: string;
@@ -134,7 +167,7 @@ export interface IUserProfile {
   role_title: string;
 }
 
-export interface IUserList {           // added id property for user identifier
+export interface IGetUser {           // added id property for user identifier
   user_code: string;
   first_name: string;
   last_name: string;

@@ -80,7 +80,6 @@ export async function createUser (student: ICreateStudent) {
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
         code: 'success',
@@ -110,7 +109,6 @@ export async function updateUser (student: ICreateStudent) {
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
         code: 'success',
@@ -135,7 +133,6 @@ export async function getUserList(){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -233,7 +230,6 @@ export async function createProgram(programInfo: ICreateProgram){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -262,7 +258,6 @@ export async function updateProgram(programInfo: ICreateProgram){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -287,7 +282,6 @@ export async function getProgramList(){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -316,7 +310,6 @@ export async function getProgramDetail(programCode: string) {
       }
     );
 
-    console.log('-->result', response.data);
 
     return {
       code: 'success',
@@ -347,7 +340,6 @@ export async function createCurriculum(curriculumInfo: ICreateCurriculum){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data.data);
         
         return {
             code: 'success',
@@ -376,7 +368,6 @@ export async function updateCurriculum(curriculumInfo: ICreateCurriculum, curric
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data.data);
         
         return {
             code: 'success',
@@ -401,7 +392,6 @@ export async function getCurriculumList(){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -430,7 +420,6 @@ export async function getCurriculumDetail(curriculumCode: string) {
       }
     );
 
-    console.log('-->result', response.data);
 
     return {
       code: 'success',
@@ -462,7 +451,6 @@ export async function getListAcademicYearsSchedulesForCurriculum(curriculum_code
         }
         );
 
-        console.log("-->result", response.data);
 
         return {
         code: "success" as const,
@@ -495,7 +483,6 @@ export async function createSemester(semesterInfo: ICreateSemester){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -524,7 +511,6 @@ export async function updateSemester(semesterInfo: ICreateSemester, semester_cod
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -549,7 +535,6 @@ export async function getSemesterList(idCurriculum: string){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -574,7 +559,6 @@ export async function getSemesterForCurriculum(idCurriculum: string){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -605,7 +589,6 @@ export async function createDomain(domainInfo: ICreateDomain){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -634,7 +617,6 @@ export async function updateDomain(domainInfo: ICreateDomain){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -659,7 +641,6 @@ export async function getDomainListPerCurriculum(idCurriculum: string){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -692,7 +673,6 @@ export async function createModule(moduleInfo: ICreateModule){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -721,7 +701,6 @@ export async function updateModule(moduleInfo: ICreateModule){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -746,7 +725,6 @@ export async function getModuleListPerDomain(idDomain: string){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -771,7 +749,6 @@ export async function getModuleListPerCurriculum(curriculum_code: string){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -803,7 +780,6 @@ export async function createUE(UEInfo: ICreateUE){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -832,7 +808,6 @@ export async function updateUE(UEInfo: ICreateUE){
             'Content-Type': 'application/json',
         },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -857,7 +832,6 @@ export async function getUEListPerModule(moduleId: string){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -882,7 +856,6 @@ export async function getUEListPerCurriculum(curriculumId: string){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response.data);
         
         return {
             code: 'success',
@@ -907,7 +880,6 @@ export async function getUEListForTeacher(teacher_user_code: string){
             Authorization: `Bearer ${token}`,
           },
       });
-      console.log('-->result', response.data);
       
       return {
           code: 'success',
@@ -931,7 +903,6 @@ export async function assignATeacherToACourseUnit(course_unit_code: string, teac
       {headers: {Authorization: `Bearer ${token}`}}
     );
     
-    console.log('-->result', response);
     
     return {
       code: 'success',

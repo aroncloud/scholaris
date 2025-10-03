@@ -85,7 +85,6 @@ const ScoreInput: React.FC<{
 const Page = () => {
     const [selectedCurriculum, setSelectedCurriculum] = useState<string>('');
     const [selectedExam, setSelectedExam] = useState<string>('');
-    const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('');
     const [selectedSchedule, setSelectedSchedule] = useState<string>('');
     const [examSheet, setExamSheet] = useState<EvaluationSheet | undefined>(undefined);
     const [isLoadingExamDetail, setIsLoadingExamDetail] = useState<boolean>(false);
@@ -97,7 +96,7 @@ const Page = () => {
 
     const { factorizedPrograms } = useFactorizedProgramStore();
     const { examList, fetchtEvaluationsForSchedule, isLoadingExam } = useEvaluationData();
-    const { academicYears } = useAcademicYearStore();
+    const { selectedAcademicYear } = useAcademicYearStore();
 
     const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
 
@@ -225,9 +224,6 @@ const Page = () => {
                         <div className="font-medium">
                             {student.first_name} {student.last_name}
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                            {student.enrollment_code}
-                        </div>
                     </div>
                 ),
             },
@@ -308,22 +304,6 @@ const Page = () => {
                 {/* Selection Panel */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <BookOpen className="w-4 h-4 inline mr-2" />
-                                Année académique
-                            </label>
-                            <Combobox
-                                options={academicYears.map(ay => ({ 
-                                    value: ay.academic_year_code, 
-                                    label: `${ay.start_date.split('-')[0]} - ${ay.end_date.split('-')[0]}`
-                                }))}
-                                value={selectedAcademicYear}
-                                onChange={setSelectedAcademicYear}
-                                placeholder="Sélectionner une année académique"
-                                className='py-5'
-                            />
-                        </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">

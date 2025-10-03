@@ -16,10 +16,11 @@ import ContentLayout from "@/layout/ContentLayout";
 type MyComponentProps = {
   curriculumList: ICurriculumDetail[];
   refresh: () => void;
+  isLoading: boolean;
 
 };
 
-const MaquettesTab = ({curriculumList, refresh}: MyComponentProps) => {
+const MaquettesTab = ({curriculumList, refresh, isLoading}: MyComponentProps) => {
   // ---- Curriculum ----
   const [isCreateCurriculumDialogOpen, setIsCreateCurriculumDialogOpen] = useState(false);
 
@@ -76,6 +77,7 @@ const MaquettesTab = ({curriculumList, refresh}: MyComponentProps) => {
                 curriculum={curric}
                 refresh={refresh}
                 programName={curric.program.program_name}
+                isLoading={isLoading}
               />
             })
           }

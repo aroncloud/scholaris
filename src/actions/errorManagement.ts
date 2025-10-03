@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function actionErrorHandler(error: unknown) {
-  console.log("-->actionErrorHandler.error", error);
+  const _error = error as any;
+  console.log("-->actionErrorHandler.error", _error.response);
     let isRedirect = false;
     interface AxiosError {
       code?: string;

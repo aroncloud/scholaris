@@ -54,6 +54,7 @@ const FilieresTab = ({
   isCreateProgramOpen,
   refresh,
   setIsCreateProgramOpen,
+  isDataLoading
 }: MyComponentProps) => {
   const [selectedProgram, setSelectedProgram] = useState<ICreateProgram | null>(null);
   const [isEditProgramOpen, setIsEditProgramOpen] = useState(false);
@@ -196,6 +197,7 @@ const FilieresTab = ({
           columns={filiereColumns}
           data={programList.map(fil => ({...fil, program_code: fil.program.program_code}))}
           paginate={20}
+          isLoading={isDataLoading}
         />
       </ContentLayout>
 

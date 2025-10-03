@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { useState, useMemo } from "react";
@@ -13,11 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2, Shield, UserCheck, UserX } from "lucide-react";
-import { Role } from "@/types/userType";
 import { getRoleColor, getStatusColor } from "@/lib/utils";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 import Link from "next/link";
-import { IUserList } from "@/types/staffType";
+import { IGetRole, IGetUser } from "@/types/staffType";
 import DialogManageUserRole from "./Modal/DialogManageUserRole";
 import ContentLayout from "@/layout/ContentLayout";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
@@ -25,15 +25,15 @@ import { useUserData } from "@/hooks/feature/users/useUserData";
 import { showToast } from "@/components/ui/showToast";
 
 interface MyProps {
-  userList: IUserList[];
+  userList: IGetUser[];
   loading: boolean;
-  roles: Role[];
-  onUpdateUserRoles?: (userId: string, selectedRoles: string[]) => Promise<void>;
+  roles: IGetRole[];
+  onUpdateUserRoles?: (userId: string, rolesToRemove: string[], rolesToAdd: string[]) => Promise<boolean>;
   fetchUserList: () => Promise<void>
 }
 
 export default function UserSection({ loading, userList, roles, onUpdateUserRoles, fetchUserList }: MyProps) {
-  const [roleModal, setRoleModal] = useState<{ user: IUserList | null; open: boolean }>({
+  const [roleModal, setRoleModal] = useState<{ user: IGetUser | null; open: boolean }>({
     user: null,
     open: false,
   });
@@ -49,12 +49,11 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
   } = useUserData();
 
 
-  const handleSaveRoles = async (userId: string, selectedRoles: string[]) => {
+  const handleSaveRoles = async (userId: string, rolesToRemove: string[], rolesToAdd: string[]) => {
     if (!onUpdateUserRoles) return;
-    
     try {
       setIsUpdatingRoles(true);
-      await onUpdateUserRoles(userId, selectedRoles);
+      await onUpdateUserRoles(userId, rolesToRemove, rolesToAdd);
       setRoleModal({ user: null, open: false });
       // You might want to show a success toast here
     } catch (error) {
@@ -65,7 +64,7 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
     }
   };
 
-  const userColumns: TableColumn<IUserList>[] = useMemo(() => [
+  const userColumns: TableColumn<IGetUser>[] = useMemo(() => [
     {
       key: "user",
       label: "Utilisateur",
@@ -127,7 +126,11 @@ export default function UserSection({ loading, userList, roles, onUpdateUserRole
             </DropdownMenuItem>
 
             <DropdownMenuItem
-              onClick={() => setRoleModal({ user, open: true })}
+              onClick={() => {
+                console.log("-->user", user)
+                setSelectedUser(user.user_code)
+                setRoleModal({ user, open: true })
+              }}
               className="flex items-center cursor-pointer"
             >
               <Shield className="mr-2 h-4 w-4" /> Gérer les rôles

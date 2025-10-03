@@ -9,6 +9,10 @@ export interface ICreateEvaluation {
   status_code: string; 
 }
 
+export type ViewMode = 'grid' | 'list';
+export type SortBy = 'date' | 'title' | 'coefficient' | 'type';
+export type FilterType = 'all' | 'CC' | 'EXAM_SEQ';
+export type FilterStatus = 'all' | 'active' | 'pending' | 'completed' | 'cancelled';
 
 export interface IGetEvaluationsForCurriculum {
   evaluation_code: string;

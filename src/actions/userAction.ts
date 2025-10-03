@@ -287,7 +287,7 @@ export async function createUser(user: ICreateUser) {
 }
 
 
-export async function getUserList(limit = 100, offset = 0) {
+export async function getUserList(limit = 1000, offset = 0) {
   try {
     console.log('Fetching user list with limit:', limit, 'offset:', offset);
     const session = await verifySession();
@@ -375,16 +375,13 @@ export async function getUserDetail(user_code: string) {
     
   } catch (error: any) {
     
+    console.log('-->getUserDetail.error')
     const errResult = actionErrorHandler(error);
-    return {
-      ...errResult,
-      data: null
-    };
+    return errResult;
   }
 }
 
 export async function deactivateUser (userCode: string) {
-    console.log('-->deactivateUser', userCode)
     try {
         const session = await verifySession();
         
@@ -395,7 +392,6 @@ export async function deactivateUser (userCode: string) {
                 Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response);
         
         return {
             code: 'success',
@@ -420,7 +416,6 @@ export async function deleteUser (userCode: string) {
                 Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->result', response);
         
         return {
             code: 'success',
@@ -462,5 +457,82 @@ export async function updateUser(user: IUpdateUserForm, user_code: string) {
     console.log("-->updateClassroom.error");
     const errResult = actionErrorHandler(error);
     return errResult;
+  }
+}
+
+export async function getFullRoles() {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const url = `${process.env.AIM_WORKER_ENDPOINT}/api/roles/full`;
+    console.log('API URL:', url);
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      validateStatus: (status) => status < 500,
+    });
+
+    // console.log('-->getFullRoles:', response.data);
+    
+    return {
+      code: 'success',
+      error: null,
+      data: response.data,
+    };
+    
+  } catch (error: any) {
+    console.log('-->getFullRoles.error')
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
+}
+
+export async function assignRolesToUser(user_code: string, roleList: string[]) {
+  try {
+    const session = await verifySession();
+    
+    const token = session.accessToken;
+    
+    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/role`, roleList, {
+      headers: {
+          Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    return {
+        code: 'success',
+        error: null,
+        data: response.data
+    }
+  } catch (error: unknown) {
+      const errResult = actionErrorHandler(error);
+      return errResult;
+  }
+}
+
+export async function removeUserRoles (user_code: string, roleList: string[]) {
+  try {
+    const session = await verifySession();
+    
+    const token = session.accessToken;
+    
+    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/role`, roleList, {
+      headers: {
+          Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    return {
+        code: 'success',
+        error: null,
+        data: response.data
+    }
+  } catch (error: unknown) {
+      const errResult = actionErrorHandler(error);
+      return errResult;
   }
 }

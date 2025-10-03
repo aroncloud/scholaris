@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,6 +25,10 @@ import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTabl
 import ContentLayout from "@/layout/ContentLayout";
 import { IGetEnrollmentRequest } from "@/types/staffType";
 import { useRouter } from "@bprogress/next/app";
+import ApplicationImportWizard, { FieldMapping } from "../students/ApplicationImportWizard";
+import { importStudentsInBulkJSON } from "@/actions/studentAction";
+import { showToast } from "@/components/ui/showToast";
+import { IImportStudentApplicationInBulkJSON } from "@/types/userType";
 
 type MyComponentProps = {
   setSearchTerm: Dispatch<SetStateAction<string>>;
@@ -37,13 +43,25 @@ type MyComponentProps = {
 
 const EnrollmentRequests = ({
   enrollmentRequests,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleApproveRequest,
   onCreateEnrollment,
   loading
 }: MyComponentProps) => {
 
   const router = useRouter();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const mappingConfig: FieldMapping[] = [
+    { key: 'curriculum_code', label: 'Curriculum', type: 'SHEET_NAME' as const, required: true, dataType: "string" },
+    { key: 'student_number', label: 'Matricule', type: 'COLUMN' as const, required: true, dataType: "string" },
+    { key: 'last_name', label: 'Nom', type: 'COLUMN' as const, required: true, dataType: "string" },
+    { key: 'first_name', label: 'Prénom', type: 'COLUMN' as const, required: false, dataType: "string" },
+    { key: 'email', label: 'Email', type: 'COLUMN' as const, required: false, dataType: "string" },
+    { key: 'phone_number', label: 'Contact', type: 'COLUMN' as const, required: false, dataType: "string" },
+    { key: 'gender', label: 'Sexe', type: 'COLUMN' as const, required: false, dataType: "string" },
+    { key: 'date_of_birth', label: 'Date de naissance', type: 'COLUMN' as const, required: false, dataType: "date" },
+    { key: 'place_of_birth', label: 'Lieu de naissance', type: 'COLUMN' as const, required: false, dataType: "string" }
+  ];
+
   const columns: TableColumn<IGetEnrollmentRequest >[] = [
     {
       key: "last_name",
@@ -140,6 +158,39 @@ const EnrollmentRequests = ({
     },
   ];
 
+  const handleSave = async (data: any) => {
+    const payload: IImportStudentApplicationInBulkJSON [] = data.map((item: IImportStudentApplicationInBulkJSON) => ({
+      curriculum_code: item?.curriculum_code ?? "",
+      first_name: item?.first_name ?? "",
+      last_name: item?.last_name ?? "",
+      email: item?.email ?? "",
+      phone_number: item?.phone_number ?? "",
+      student_number: item?.student_number ?? "",
+      gender: item?.gender ?? "",
+      date_of_birth: new Date(item?.date_of_birth).toJSON().split("T")[0] ?? "",
+      place_of_birth: item?.place_of_birth ?? "",
+    }));
+    console.log('payload', payload)
+    const result = await importStudentsInBulkJSON(payload)
+    if(result.code == 'success') {
+      showToast({
+        variant: "success-solid",
+        message: 'Action éffectuée avec succès',
+        description: `${data.length} fiches d'étudiant ont été importés avec succès`,
+        position: 'top-center',
+      });
+      return true;
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Erreur lors de la sauvegarde",
+        description:result.error ?? "Une erreur est survenue lors de l'import des fiches, essayez encore ou veuillez contacter l'administrateur",
+        position: 'top-center',
+      });
+    }
+    return false;
+  };
+
   return (
     <>
      <ContentLayout
@@ -159,7 +210,7 @@ const EnrollmentRequests = ({
               <Download className="h-4 w-4 mr-2" />
               Exporter
             </Button>
-            <Button variant="outline" className="text-sm w-full sm:w-fit flex-1 sm:flex-none">
+            <Button variant="outline" className="text-sm w-full sm:w-fit flex-1 sm:flex-none" onClick={() => setDialogOpen(true)}>
               <Upload className="h-4 w-4 mr-2" />
               Importer
             </Button>
@@ -178,6 +229,14 @@ const EnrollmentRequests = ({
           paginate={15}
         />
       </ContentLayout>
+
+      <ApplicationImportWizard
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        title="Import de demande d'inscription depuis Excel"
+        onSave={handleSave}
+        mapping={mappingConfig}
+      />
     </>
   );
 };

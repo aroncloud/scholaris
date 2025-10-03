@@ -74,9 +74,11 @@ export default function CoursePlanningTab() {
   useEffect(() => {
     setTimetableData([])
     const key = String(selectedFilter.value);
+    console.log('key', key)
     switch (key) {
       case String(PlanificationStatus.CURRICULUM): {
         const allCurriculums = (factorizedPrograms || []).flatMap((fp) => fp.curriculums || []);
+        console.log('allCurriculums', allCurriculums)
         setSubFilterValue(allCurriculums.map((curr) => ({ value: curr.curriculum_code, label: curr.curriculum_name })));
         break;
       }
@@ -131,9 +133,11 @@ export default function CoursePlanningTab() {
                       options={PLANIFICATION_FILTER}
                       value={selectedFilter.value || ""}
                       onChange={(value) => {
-                        setSelectedFilter(PLANIFICATION_FILTER.find(filter => filter.value === value) || PLANIFICATION_FILTER[0])
-                        setSelectedSubFilter(null);
-                        setSubFilterValue([]);
+                        setSelectedFilter(PLANIFICATION_FILTER.find(filter => filter.value === value) || PLANIFICATION_FILTER[0]);
+                        if(!value) {
+                          setSelectedSubFilter(null);
+                          setSubFilterValue([]);
+                        }
                       }}
                       placeholder="Sélectionner un cours"
                       className='py-5'
@@ -160,7 +164,6 @@ export default function CoursePlanningTab() {
               {/* ----- DÉBUT DES MODIFICATIONS POUR L'EXPÉRIENCE DE CHARGEMENT ----- */}
 
               <div className="relative min-h-[500px]">
-                {/* 1. L'indicateur de chargement en superposition */}
                 {isLoadingCalendarData && (
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-center space-y-4 bg-white/80 backdrop-blur-sm rounded-md">
                     <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
@@ -168,9 +171,7 @@ export default function CoursePlanningTab() {
                   </div>
                 )}
                 
-                {/* 2. Affichage conditionnel : soit le calendrier, soit un message guide */}
                 {selectedSubFilter ? (
-                  // Le bloc Calendar est exactement le même, non modifié.
                   <Calendar
                     events={convertIntoFullCalendarFormat(
                       timetableData.map(item => {
@@ -186,7 +187,6 @@ export default function CoursePlanningTab() {
                     refreshData={loadCalendarData}
                   />
                 ) : (
-                  // Message affiché quand aucun sous-filtre n'est sélectionné
                   <div className="flex h-full min-h-[500px] items-center justify-center rounded-lg border-2 border-dashed bg-gray-50">
                     <p className="text-center text-lg text-gray-500">
                       Veuillez sélectionner un filtre et une valeur pour afficher le calendrier.
@@ -194,8 +194,6 @@ export default function CoursePlanningTab() {
                   </div>
                 )}
               </div>
-
-              {/* ----- FIN DES MODIFICATIONS ----- */}
             </div>
           </div>
         </ContentLayout>

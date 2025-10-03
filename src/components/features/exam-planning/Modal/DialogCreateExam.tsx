@@ -36,7 +36,7 @@ interface DialogCreateEvaluationProps {
   onOpenChange: (open: boolean) => void;
   onSave: (data: ICreateEvaluation) => Promise<boolean>;
   curriculum_code?: string;
-  academic_year_code?: string;
+  academic_year_code?: string | null;
 }
 
 export default function DialogCreateExam({

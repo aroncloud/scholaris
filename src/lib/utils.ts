@@ -40,7 +40,10 @@ export function getExtension(filename: string): string {
   return parts.length > 1 ? '.' + parts.pop()! : '';
 }
 
-export function formatDateToText(dateString: string): string {
+export function formatDateToText(dateString: string | null): string {
+  if(!dateString) {
+    return "-"
+  }
   const date = new Date(dateString);
   return date.toLocaleDateString('fr-FR', {
     day: '2-digit',

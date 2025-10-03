@@ -210,7 +210,6 @@ const Page = () => {
                 position: "top-center",
             });
             }
-            console.log("-->getTeacherSessions.result", result);
         } catch (error) {
             showToast({
             variant: "error-solid",

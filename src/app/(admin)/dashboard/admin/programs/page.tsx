@@ -9,7 +9,6 @@ import {
   Upload,
   Plus,
 } from "lucide-react";
-import SkeletonFilieresTab from "@/components/features/skeleton/SkeletonFilieresTab";
 import { useProgramData } from "@/hooks/feature/programs/useProgramData";
 // import StatCard from "@/components/cards/StatCard";
 import PageHeader from "@/layout/PageHeader";
@@ -98,42 +97,40 @@ export default function ProgramsPage() {
         {/* Main Content */}
         <Tabs defaultValue="maquettes" className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="academic_year">Années académiques</TabsTrigger>
+            <TabsTrigger value="maquettes">Maquettes pédagogiques</TabsTrigger>
             <TabsTrigger value="program">
               Filières ({programs.length})
             </TabsTrigger>
-            <TabsTrigger value="maquettes">Maquettes pédagogiques</TabsTrigger>
+            <TabsTrigger value="academic_year">Années académiques</TabsTrigger>
           </TabsList>
             <TabsContents className="">
-              {/* Filieres Tab */}
-              {loading ? (
-                <SkeletonFilieresTab />
-              ) : (
-                <TabsContent value="program" className="space-y-4">
-                  <FilieresTab
-                    programList={programs}
-                    setIsCreateProgramOpen={setIsCreateProgramOpen}
-                    isCreateProgramOpen={isCreateProgramOpen}
-                    isExportModalOpen={isExportModalOpen}
-                    setIExportModalOpen={setIsExportModalOpen}
-                    isImportModalOpen={isImportModalOpen}
-                    setIsImportModalOpen={setIsImportModalOpen}
-                    isDataLoading={loading}
-                    refresh={refresh}
-                  />
-                </TabsContent>
-              )}
-
               {/* Maquettes Tab */}
-              {!loading && <TabsContent value="maquettes" className="space-y-4">
-                <MaquettesTab curriculumList={curriculumList} refresh={refresh} />
-              </TabsContent>}
+              <TabsContent value="maquettes" className="space-y-4">
+                <MaquettesTab curriculumList={curriculumList} refresh={refresh} isLoading />
+              </TabsContent>
 
-              {/* Modules Tab */}
-              
+
+              {/* Filieres Tab */}
+              <TabsContent value="program" className="space-y-4">
+                <FilieresTab
+                  programList={programs}
+                  setIsCreateProgramOpen={setIsCreateProgramOpen}
+                  isCreateProgramOpen={isCreateProgramOpen}
+                  isExportModalOpen={isExportModalOpen}
+                  setIExportModalOpen={setIsExportModalOpen}
+                  isImportModalOpen={isImportModalOpen}
+                  setIsImportModalOpen={setIsImportModalOpen}
+                  isDataLoading={loading}
+                  refresh={refresh}
+                />
+              </TabsContent>
 
               {/* Calendrier Tab */}
-              {!loading && <TabsContent value="academic_year" className="space-y-4"><CalendrierTab /></TabsContent>}
+              <TabsContent value="academic_year" className="space-y-4">
+                <CalendrierTab />
+              </TabsContent>
+
+
             </TabsContents>
         </Tabs>
       </div>

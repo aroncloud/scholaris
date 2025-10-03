@@ -34,23 +34,25 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
   return (
     <div className={cn("", className)}>
       <Card className={cn("w-full", cardClassName)}>
-        {title || description || actions && <CardHeader className={cn(
-          "flex flex-row items-center justify-between space-y-0 pb-6",
-          headerClassName
-        )}>
-          {title && <div className="space-y-1 flex-1">
-            <h1 className="text-xl font-bold tracking-tight">{title}</h1>
-            {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
+        {/* {title || description || actions &&  */}
+          <CardHeader className={cn(
+            "flex flex-row items-center justify-between space-y-0 pb-6",
+            headerClassName
+          )}>
+            {title && <div className="space-y-1 flex-1">
+              <h1 className="text-xl font-bold tracking-tight">{title}</h1>
+              {description && (
+                <p className="text-sm text-muted-foreground">{description}</p>
+              )}
+            </div>}
+            
+            {actions && (
+              <div className="flex items-center gap-2 ml-6">
+                {actions}
+              </div>
             )}
-          </div>}
-          
-          {actions && (
-            <div className="flex items-center gap-2 ml-6">
-              {actions}
-            </div>
-          )}
-        </CardHeader>}
+          </CardHeader>
+        {/* } */}
 
         <CardContent className={cn("pt-0", contentClassName)}>
           {children}

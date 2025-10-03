@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
   {
     icon: <LayoutDashboard className="w-5 h-5" />,
     name: "Dashboard",
-    path: "/admin",
+    path: "/dashboard//admin",
     authorizedRoles: [
       "ADMIN_SUPER",
       "ADMIN_ACADEMIC",
@@ -30,7 +30,7 @@ const navItems: NavItem[] = [
   {
     icon: <LayoutDashboard className="w-5 h-5" />,
     name: "Dashboard",
-    path: "/student",
+    path: "/dashboard/student",
     authorizedRoles: [
       "STUDENT",
     ],
@@ -90,11 +90,6 @@ const navItems: NavItem[] = [
         path: "/dashboard/admin/classroom",
         authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
       },
-      {
-        name: "Règles de Calcul",
-        path: "/dashboard/admin/exam-config",
-        authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
-      }
     ],
   },
   {

@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Eye, Plus } from "lucide-react";
+import { MoreHorizontal, Edit, Eye, Plus, Download, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ICreateStudent, IListStudent } from "@/types/staffType";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 import {  getStatusColor } from "@/lib/utils";
 import ContentLayout from "@/layout/ContentLayout";
+import ApplicationImportWizard, { FieldMapping } from "../students/ApplicationImportWizard";
 
 
 
@@ -33,9 +34,26 @@ const CurrentStudents = ({
   setAction,
   loading
 }: CurrentStudentsProps) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const handleViewStudentDetails = (id: string) => router.push(`/dashboard/admin/students/annual-enrollment/${id}`);
+  const mappingConfig: FieldMapping[] = [
+    { key: 'curriculum_code', label: 'Curriculum', type: 'SHEET_NAME' as const, required: true },
+    { key: 'last_name', label: 'Nom', type: 'COLUMN' as const, required: true },
+    { key: 'first_name', label: 'Prénom', type: 'COLUMN' as const, required: true },
+    { key: 'email', label: 'Email', type: 'COLUMN' as const, required: true },
+    { key: 'phone_number', label: 'Contact', type: 'COLUMN' as const, required: false }
+  ];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleSave = async (data: any) => {
+      // console.log('-->handleSave.data', data);
+      // const response = await fetch('/api/import', {
+      //   method: 'POST',
+      //   body: JSON.stringify(data)
+      // });
+      return false;
+    };
   const columns: TableColumn<IListStudent>[] = [
     { key: "student", label: "Étudiant", render: (_, row) => (
       <div>
@@ -83,28 +101,38 @@ const CurrentStudents = ({
         title={`Étudiants actuels`}
         description="Liste des étudiants actuellement inscrits"
         actions = {
-          <Button
-            onClick={() => {
-              setAction("CREATE");
-              setFormData({
-                password_plaintext: "",
-                email: "",
-                first_name: "",
-                last_name: "",
-                gender: "MALE",
-                phone_number: "",
-                curriculum_code: "",
-                student_number: "",
-                education_level_code: "LICENCE"
-              });
-              setIsStudentDialogOpen(true);
-            }}
-            variant="info"
-            className="ml-4"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nouvel étudiant
-          </Button>
+          <div className="mt-4 md:mt-0 space-x-3">
+            <Button
+              onClick={() => {
+                setAction("CREATE");
+                setFormData({
+                  password_plaintext: "",
+                  email: "",
+                  first_name: "",
+                  last_name: "",
+                  gender: "MALE",
+                  phone_number: "",
+                  curriculum_code: "",
+                  student_number: "",
+                  education_level_code: "LICENCE"
+                });
+                setIsStudentDialogOpen(true);
+              }}
+              variant="info"
+              className="ml-4"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nouvel étudiant
+            </Button>         
+            <Button variant="outline" className="text-sm w-full sm:w-fit flex-1 sm:flex-none">
+              <Download className="h-4 w-4 mr-2" />
+              Exporter
+            </Button>
+            <Button variant="outline" className="text-sm w-full sm:w-fit flex-1 sm:flex-none" onClick={() => setDialogOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Importer
+            </Button>
+          </div>
         }
       >
 
@@ -116,6 +144,13 @@ const CurrentStudents = ({
           isLoading={loading}
         />
       </ContentLayout>
+        <ApplicationImportWizard
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          title="Import de demande d'inscription depuis Excel"
+          onSave={handleSave}
+          mapping={mappingConfig}
+        />
     </>
   );
 };

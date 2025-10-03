@@ -119,7 +119,6 @@ export default function SessionDetailPage() {
                 position: 'top-center',
             });
         }
-        console.log("-->getTeacherSessions.result", result);
     }
   }, [user, sessionId]);
 

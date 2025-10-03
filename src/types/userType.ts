@@ -162,3 +162,37 @@ export interface ReenrollmentEligibility {
     isAccountActive: boolean;
   };
 }
+
+/**
+ * Représente la structure d'une candidature d'étudiant pour une importation en masse.
+ */
+export interface IImportStudentApplicationInBulkJSON {
+  /** Code du cursus ou programme auquel l'étudiant postule (requis). */
+  curriculum_code: string;
+
+  /** Nom de famille de l'étudiant (requis). */
+  last_name: string;
+
+  /** Numéro matricule ou numéro d'identification de l'étudiant (requis). */
+  student_number: string;
+
+  /** Sexe de l'étudiant (requis). */
+  gender: 'MALE' | 'FEMALE' | string;
+
+  /** Date de naissance au format AAAA-MM-JJ (requis). */
+  date_of_birth: string;
+
+  /** Lieu de naissance de l'étudiant (requis). */
+  place_of_birth: string;
+
+  // --- Champs Optionnels ---
+
+  /** Prénom de l'étudiant (optionnel). */
+  first_name?: string;
+
+  /** Adresse e-mail de l'étudiant (optionnel). */
+  email?: string;
+
+  /** Numéro de téléphone, format international recommandé (optionnel). */
+  phone_number?: string;
+}

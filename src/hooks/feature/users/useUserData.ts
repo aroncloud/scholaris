@@ -11,11 +11,11 @@ import {
   getUserList,
   updateUser,
 } from "@/actions/userAction";
-import { ICreateUser, IGetUserDetail, IUpdateUserForm, IUserList } from "@/types/staffType";
+import { ICreateUser, IGetUserDetail, IUpdateUserForm, IGetUser } from "@/types/staffType";
 import { showToast } from "@/components/ui/showToast";
 
 export function useUserData() {
-  const [userList, setUserList] = useState<IUserList[]>([]);
+  const [userList, setUserList] = useState<IGetUser[]>([]);
   const [userDetail, setUserDetail] = useState<IGetUserDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +24,7 @@ export function useUserData() {
     setLoading(true);
     try {
       const result = await getUserList();
+      console.log('result:', result)
       if (result.code === "success") {
         setUserList(result.data.body ?? []);
       } else {

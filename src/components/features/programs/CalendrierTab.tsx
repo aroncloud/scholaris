@@ -17,6 +17,7 @@ import { ICreateAcademicYear, IGetAcademicYears } from "@/types/planificationTyp
 import { createAcademicYear } from "@/actions/planificationAction"
 import { showToast } from "@/components/ui/showToast"
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable"
+import ContentLayout from "@/layout/ContentLayout"
 
 
 const CalendrierTab = () => {
@@ -126,58 +127,29 @@ const CalendrierTab = () => {
 
     return (
         <div>
-            <Card>
-                <CardHeader className="flex justify-between items-center mb-10">
-                    <div>
-                        <CardTitle className="text-lg">Calendrier académique</CardTitle>
-                        <CardDescription>
-                            Planning des périodes d&apos;enseignement et d&apos;évaluation
-                        </CardDescription>
-                    </div>
-                    <div>
-                        <Button
-                            onClick={() => setIsCreateYearDialogOpen(true)}
-                            className="text-sm w-full sm:w-fit"
-                            variant={"info"}
-                        >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Nouvelle année académique
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {
-                        loading ?
-
-                        <>
-                            <LoadingSpinner size={48} message="Chargement du contenu ..." />
-                        </> : academicYearList.length == 0 ? <>
-                            <div className="text-center py-8 text-muted-foreground">
-                                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                                <p>
-                                Bienvenu sur votre utilitaire de gestion des année années académiques.
-                                </p>
-                                <Button variant="outline" size="sm" className="mt-2">
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Configurer une année
-                                </Button>
-                            </div>
-                        </> : <>
-
-                            <div className="overflow-x-auto">
-                                <ResponsiveTable
-                                    columns={academicYearColumns}
-                                    data={academicYearList}
-                                    paginate={20}
-                                    searchKey={["year_code", "academic_year_code"]}
-                                />
-                            </div>
-                        
-                        </>
-                    }
-                        
-                </CardContent>
-            </Card>
+            <ContentLayout
+                title="Calendrier académique"
+                description="Planning des périodes d&apos;enseignement et d&apos;évaluation"
+                actions={
+                    <>
+                    <Button
+                        onClick={() => setIsCreateYearDialogOpen(true)}
+                        className="text-sm w-full sm:w-fit"
+                        variant={"info"}
+                    >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nouvelle année académique
+                    </Button></>
+                }
+            >
+                <ResponsiveTable
+                    columns={academicYearColumns}
+                    data={academicYearList}
+                    paginate={20}
+                    searchKey={["year_code", "academic_year_code"]}
+                    isLoading={loading}
+                />
+            </ContentLayout>
 
 
             <DialogCreateAcademicYear

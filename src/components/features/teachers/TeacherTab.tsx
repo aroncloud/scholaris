@@ -126,17 +126,17 @@ const TeacherTab = ({
         {
             key: "type_code",
             label: "Contrat",
-            render: (value) => value ? <Badge>{value}</Badge> : "-",
+            render: (_, t) => t.type_code ? <Badge className={getStatusColor(t.type_code)}>{t.type_code}</Badge> : "-",
         },
         {
             key: "hiring_date",
             label: "Date d'embauche",
-            render: (value) => formatDateToText(value),
+            render: (_, t) => formatDateToText(t.hiring_date),
         },
         {
             key: "status_code",
             label: "Statut",
-            render: (value) => <Badge>{value}</Badge>,
+            render: (_, t) => <Badge className={getStatusColor(t.status_code)}>{t.status_code}</Badge>,
         },
         {
             key: "actions",

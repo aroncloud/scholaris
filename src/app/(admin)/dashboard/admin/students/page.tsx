@@ -24,6 +24,7 @@ import { DialogCreateStudent } from "@/components/features/students/modal/Dialog
 import CurrentStudents from "@/components/features/admin-students/CurrentStudentsTab";
 import Header from "@/components/features/admin-students/HeaderSection";
 import EnrollmentRequests from "@/components/features/admin-students/EnrollmentRequestsTab";
+import ApplicationImportWizard from "@/components/features/students/ApplicationImportWizard";
 
 
 export default function StudentsPage() {

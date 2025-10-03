@@ -83,6 +83,7 @@
     "tailwind-merge": "^2.6.0",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.1.9",
     "zustand": "^5.0.8",
     "zustand-persist": "^0.4.0"

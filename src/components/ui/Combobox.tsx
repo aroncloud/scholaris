@@ -17,7 +17,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { v4 as uuidv4 } from 'uuid';
 
 export interface Option {
   label: string
@@ -69,7 +68,8 @@ export function Combobox({
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
-                  key={uuidv4()}
+                  // MODIFICATION : Utiliser une clé stable et unique
+                  key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
                     onChange(currentValue)
