@@ -35,8 +35,9 @@ const TeacherSessionTab = ({ sessionList, courseList }: MyProps) => {
         console.log("-->end", end)
         const result = await getTeacherSchedule(
           user.user.user_code,
-          end,
-          start
+          
+          start,
+          end
         );
 
         console.log('-->Session.result', result)

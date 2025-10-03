@@ -23,16 +23,25 @@ export const getMonthRange = () => {
 export const getWeekRange = () => {
   const today = new Date();
   const day = today.getDay();
+  
+  // Calcul du décalage pour obtenir le lundi de la semaine courante
   const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+  
+  // On crée une copie de 'today' pour éviter de modifier l'original
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(diff);
+  
+  // On crée également une copie pour la fin de la semaine (dimanche)
+  const endOfWeek = new Date(today);
+  endOfWeek.setDate(diff + 6);
 
-  const startOfWeek = new Date(today.setDate(diff));
-  const endOfWeek = new Date(today.setDate(diff + 6));
-
+  // On formate les dates en YYYY-MM-DD
   const start = startOfWeek.toISOString().split("T")[0];
   const end = endOfWeek.toISOString().split("T")[0];
 
   return { start, end };
 };
+
 
 
 export function getExtension(filename: string): string {
