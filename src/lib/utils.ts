@@ -22,8 +22,8 @@ export const getMonthRange = () => {
 
 export const getWeekRange = () => {
   const today = new Date();
-  const day = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
-  const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Ajuste la date pour le lundi de la semaine
+  const day = today.getDay();
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1);
 
   const startOfWeek = new Date(today.setDate(diff));
   const endOfWeek = new Date(today.setDate(diff + 6));

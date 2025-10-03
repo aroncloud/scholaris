@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -19,6 +20,7 @@ import {
 import MyCoursesTab from "@/components/features/cours/MyCoursesTab";
 import TeacherCoursePlanningTab from "@/components/features/cours/TeacherCoursePlanningTab";
 import TeacherSessionTab from "@/components/features/cours/TeacherSessionTab";
+import { useCoursData } from "@/hooks/feature/cours/useCoursData";
 
 interface Course {
   id: string;
@@ -192,6 +194,8 @@ const mockCourses: Course[] = [
 export default function TeacherCourses() {
   const [searchTerm, setSearchTerm] = useState("");
 
+
+
   const filteredCourses = mockCourses.filter(
     (course) =>
       course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -328,7 +332,7 @@ export default function TeacherCourses() {
               </TabsList>
               <TabsContents>
                 <TabsContent value="courses" className="space-y-4">
-                  <MyCoursesTab courses={filteredCourses} />
+                  <MyCoursesTab />
                 </TabsContent>
 
                 <TabsContent value="sessions" className="space-y-4">

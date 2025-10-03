@@ -37,11 +37,11 @@ export default function AdminLayout({
     if(user?.roles && !user.roles.includes("STUDENT")&& !user.roles.includes("TEACHER")) {
       fetchTeacher();
       fetchClassrooms();
-      fetchAcademicYears();
       setSelectedAcademicYear(getCurrentAcademicYear()?.academic_year_code ?? "")
       initConfigs(getConfig);
     }
     fetchPrograms();
+    fetchAcademicYears();
   }, [fetchPrograms, fetchTeacher, fetchClassrooms, fetchAcademicYears, user?.roles, initConfigs, setSelectedAcademicYear, getCurrentAcademicYear]);
 
   return (

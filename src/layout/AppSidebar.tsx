@@ -36,6 +36,14 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    icon: <LayoutDashboard className="w-5 h-5" />,
+    name: "Dashboard",
+    path: "/dashboard/teacher",
+    authorizedRoles: [
+      "TEACHER",
+    ],
+  },
+  {
     icon: <Users className="w-5 h-5" />,
     name: "Utilisateurs",
     path: "/dashboard/admin/users",
@@ -58,12 +66,6 @@ const navItems: NavItem[] = [
     name: "Etudiants",
     path: "/dashboard/admin/students",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
-  },
-  {
-    icon: <BookOpen className="w-5 h-5" />,
-    name: "Mes cours",
-    path: "/dashboard/teacher/cours",
-    authorizedRoles: ["TEACHER"],
   },{
     icon: <BookOpen className="w-5 h-5" />,
     name: "Absences",
