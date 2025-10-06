@@ -23,6 +23,7 @@ import { DialogUpdateModule } from '../features/programs/Modal/DialogUpdateModul
 import { DialogCreateUE } from '../features/programs/Modal/DialogCreateUE'
 import { Button } from '../ui/button'
 import { useRouter } from "@bprogress/next/app";
+import MaquetteCardSkeleton from '../features/programs/MaquetteCardSkeleton'
 
 type MyComponentProps = {
   curriculum: ICurriculumDetail
@@ -321,6 +322,10 @@ const MaquetteCard = ({ curriculum, programName, refresh, isLoading }: MyCompone
     if (UEResult.code == 'success') {
       setFetchedUEList((ue) => [...ue, ...UEResult.data.body])
     }
+  }
+
+  if(isLoading) {
+    return <MaquetteCardSkeleton />
   }
 
   return (
