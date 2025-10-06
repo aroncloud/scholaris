@@ -154,7 +154,7 @@ export async function getStudentDetails(userCode: string) {
         const session = await verifySession();
         const token = session.accessToken;
         
-        const response = await axios.get(`https://student-worker-dev.scholaris-sys.workers.dev/api/students/${userCode}`, {
+        const response = await axios.get(`${process.env.STUDENT_WORKER_ENDPOINT}/api/students/${userCode}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -196,6 +196,35 @@ export async function importStudentsInBulkJSON(payload: IImportStudentApplicatio
         }
     } catch (error: unknown) {
         console.log('-->importStudentsInBulkJSON.error', error)
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+
+export async function createNewAnnualEnrollment(student_code: string, academic_year_code: string, curriculum_code: string) {
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+        const response = await axios.post(`${process.env.STUDENT_WORKER_ENDPOINT}/api/students/${student_code}/enrollments`, {
+            "academic_year_code": academic_year_code,
+            "curriculum_code": curriculum_code,
+            "notes": "RAS"
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->createNewAnnualEnrollment.error')
         const errResult = actionErrorHandler(error);
         return errResult;
     }

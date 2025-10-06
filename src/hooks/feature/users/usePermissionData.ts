@@ -14,7 +14,6 @@ export function useRoleData() {
     setLoading(true);
     try {
       const result = await getFullRoles();
-      console.log('getFullRoles:', result)
       if (result.code === "success") {
         setRoles(result.data.body);
       } else {

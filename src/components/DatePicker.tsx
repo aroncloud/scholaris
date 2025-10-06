@@ -34,9 +34,6 @@ export function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
   
-  // Note: La gestion d'état interne peut être enlevée si le composant
-  // est toujours contrôlé de l'extérieur (comme avec react-hook-form)
-  // mais nous la gardons pour que le composant reste flexible.
   const [date, setDate] = React.useState<Date | undefined>(defaultDate)
 
   React.useEffect(() => {

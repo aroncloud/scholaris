@@ -348,7 +348,7 @@ export default function TeacherCourses() {
               </TabsList>
               <TabsContents>
                 <TabsContent value="courses" className="space-y-4">
-                  <MyCoursesTab courses={filteredCourses} />
+                  <MyCoursesTab />
                 </TabsContent>
 
                 <TabsContent value="sessions" className="space-y-4">

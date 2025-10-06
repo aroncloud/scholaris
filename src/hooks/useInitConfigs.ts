@@ -20,7 +20,6 @@ export const useInitConfigs = () => {
         console.log('Fetched config result:', result);
         if (result.code === 'success' && result.data) {
           setConfigs(result.data);
-          console.log('Config loaded:', result.data);
         }
       } catch (error) {
         console.error('Error loading configs:', error);

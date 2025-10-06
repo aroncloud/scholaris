@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 // import { v4 as uuiv4 } from "uuid";
-import { Tabs, TabsList, TabsTrigger, TabsContent, TabsContents } from '@/components/animate-ui/components/animate/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useAcademicYears } from "@/hooks/feature/planifincation/useAcademicYears"
 import {
   Download,
   Upload,
@@ -46,6 +47,7 @@ export default function ProgramsPage() {
   const [isCreateProgramOpen, setIsCreateProgramOpen] = useState(false);
 
   const { curriculumList, programs, loading, refresh, } =  useProgramData();
+  const { academicYearList, loadingAccademicyears, fetchAcademicYear } = useAcademicYears();
 
 
   
@@ -76,7 +78,7 @@ export default function ProgramsPage() {
         </div>
       </PageHeader>
       
-      <div className="space-y-6 max-w-7xl p-6">
+      <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex flex-col gap-4 w-full">
           {/* Stats Cards en responsive */}
@@ -95,44 +97,46 @@ export default function ProgramsPage() {
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="maquettes" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="maquettes">Maquettes pédagogiques</TabsTrigger>
-            <TabsTrigger value="program">
-              Filières ({programs.length})
-            </TabsTrigger>
-            <TabsTrigger value="academic_year">Années académiques</TabsTrigger>
-          </TabsList>
-            <TabsContents className="">
-              {/* Maquettes Tab */}
-              <TabsContent value="maquettes" className="space-y-4">
-                <MaquettesTab curriculumList={curriculumList} refresh={refresh} isLoading />
-              </TabsContent>
+        <div className="w-full">
+          <Tabs defaultValue="maquettes" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="maquettes">Maquettes pédagogiques</TabsTrigger>
+              <TabsTrigger value="program">
+                Filières ({programs.length})
+              </TabsTrigger>
+              <TabsTrigger value="academic_year">Années académiques</TabsTrigger>
+            </TabsList>
+                {/* Maquettes Tab */}
+                <TabsContent value="maquettes" className="space-y-4">
+                  <MaquettesTab curriculumList={curriculumList} refresh={refresh} isLoading = {loading} />
+                </TabsContent>
 
 
-              {/* Filieres Tab */}
-              <TabsContent value="program" className="space-y-4">
-                <FilieresTab
-                  programList={programs}
-                  setIsCreateProgramOpen={setIsCreateProgramOpen}
-                  isCreateProgramOpen={isCreateProgramOpen}
-                  isExportModalOpen={isExportModalOpen}
-                  setIExportModalOpen={setIsExportModalOpen}
-                  isImportModalOpen={isImportModalOpen}
-                  setIsImportModalOpen={setIsImportModalOpen}
-                  isDataLoading={loading}
-                  refresh={refresh}
-                />
-              </TabsContent>
+                {/* Filieres Tab */}
+                <TabsContent value="program" className="space-y-4">
+                  <FilieresTab
+                    programList={programs}
+                    setIsCreateProgramOpen={setIsCreateProgramOpen}
+                    isCreateProgramOpen={isCreateProgramOpen}
+                    isExportModalOpen={isExportModalOpen}
+                    setIExportModalOpen={setIsExportModalOpen}
+                    isImportModalOpen={isImportModalOpen}
+                    setIsImportModalOpen={setIsImportModalOpen}
+                    isDataLoading={loading}
+                    refresh={refresh}
+                  />
+                </TabsContent>
 
-              {/* Calendrier Tab */}
-              <TabsContent value="academic_year" className="space-y-4">
-                <CalendrierTab />
-              </TabsContent>
-
-
-            </TabsContents>
-        </Tabs>
+                {/* Calendrier Tab */}
+                <TabsContent value="academic_year" className="space-y-4">
+                  <CalendrierTab 
+                    academicYears = {academicYearList}
+                    isLoading = {loadingAccademicyears}
+                    fetchAcademicYear = {fetchAcademicYear}
+                  />
+                </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </>
   );

@@ -37,7 +37,7 @@ export async function assignRole(userCode: string, roleCode: string): Promise<Ap
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-API-KEY": process.env.X_API,
+          "X-API-KEY": process.env.PUBLIC_API_KEY,
           "Content-Type": "application/json",
         },
       }
@@ -72,7 +72,7 @@ export async function removeRole(userCode: string, roleCode: string, profile_cod
     const response = await axios.delete(url, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "X-API-KEY": process.env.X_API,
+        "X-API-KEY": process.env.PUBLIC_API_KEY,
         "Content-Type": "application/json",
       },
       data: { role_code: roleCode }, // ✅ backend only needs role_code now

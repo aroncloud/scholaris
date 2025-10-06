@@ -22,17 +22,26 @@ export const getMonthRange = () => {
 
 export const getWeekRange = () => {
   const today = new Date();
-  const day = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
-  const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Ajuste la date pour le lundi de la semaine
+  const day = today.getDay();
+  
+  // Calcul du décalage pour obtenir le lundi de la semaine courante
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+  
+  // On crée une copie de 'today' pour éviter de modifier l'original
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(diff);
+  
+  // On crée également une copie pour la fin de la semaine (dimanche)
+  const endOfWeek = new Date(today);
+  endOfWeek.setDate(diff + 6);
 
-  const startOfWeek = new Date(today.setDate(diff));
-  const endOfWeek = new Date(today.setDate(diff + 6));
-
+  // On formate les dates en YYYY-MM-DD
   const start = startOfWeek.toISOString().split("T")[0];
   const end = endOfWeek.toISOString().split("T")[0];
 
   return { start, end };
 };
+
 
 
 export function getExtension(filename: string): string {
@@ -251,3 +260,14 @@ export function regroupLocation(params: {
 
   return { regions: regionsOut };
 }
+
+export const formatTimestamp = (timestamp: number | null) => {
+    if (!timestamp) return 'Non disponible';
+    return new Date(timestamp * 1000).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };

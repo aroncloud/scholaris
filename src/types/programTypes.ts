@@ -335,3 +335,72 @@ export interface ICreateEnrollment {
   notes?: string;
 //   status_code?: string;
 }
+
+
+/**
+ * Représente les informations détaillées d'une unité d'enseignement (UE) ou d'un cours.
+ */
+export interface IGetTeacherCourseUnit {
+  /** Code unique de l'unité d'enseignement (ex: "UE_IDE_CELL_TISSUE_AFF"). */
+  course_unit_code: string;
+  
+  /** Code du module auquel l'UE appartient (ex: "MOD_IDE_MED_AFF_1"). */
+  module_code: string;
+  
+  /** Code utilisateur de l'enseignant responsable de l'UE. */
+  teacher_user_code: string;
+  
+  /** Nom complet de l'unité d'enseignement (ex: "Cellules et Tissus"). */
+  course_unit_name: string;
+  
+  /** Code interne spécifique (ex: "IDE2511"). */
+  internal_code: string;
+  
+  /** Nombre d'heures de cours magistraux. */
+  lecture_hours: number;
+  
+  /** Nombre d'heures de travaux dirigés/pratiques (peut être null). */
+  lab_tutorial_hours: number | null;
+  
+  /** Coefficient ou crédits de l'unité d'enseignement. */
+  coefficient: number;
+  
+  /** Indicateur si l'UE est obligatoire (1 pour oui, 0 pour non). */
+  is_mandatory: 0 | 1;
+  
+  /** Indicateur si l'enseignant est le coordinateur du module (0 pour non, 1 pour oui). */
+  is_module_coordinator: 0 | 1;
+  
+  /** Statut de l'UE (ex: "ACTIVE"). */
+  status_code: string;
+  
+  /** Note maximale attribuable pour cette UE. */
+  max_score: number;
+  
+  /** Code du cursus auquel l'UE est associée (ex: "CURR_IDE_Y2"). */
+  curriculum_code: string;
+  
+  /** Code du programme d'études (ex: "TPMS_SP"). */
+  program_code: string;
+  
+  /** Niveau d'étude associé à l'UE (ex: "Année 1"). */
+  study_level: string;
+  
+  /** Nom complet du cursus (ex: "Programme de Première Année - Sciences Pharmaceutiques"). */
+  curriculum_name: string;
+  
+  /** Date et heure de création de l'enregistrement. */
+  created_at: string; // Utiliser 'Date' si vous parsez la chaîne
+  
+  /** Code de la séquence ou du semestre (ex: "SEQ_IDE_Y2_S3"). */
+  sequence_code: string;
+  
+  /** Nom lisible de la séquence (ex: "3ème Séquence"). */
+  sequence_name: string;
+  
+  /** Numéro de la séquence (ex: "3"). */
+  sequence_number: string;
+  
+  /** Description de l'unité d'enseignement (peut être null). */
+  description: string | null;
+}

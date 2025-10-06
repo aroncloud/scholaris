@@ -9,7 +9,7 @@ export async function searchStudentByMatricule(matricule: string) {
             `${process.env.APPLICATION_WORKER_ENDPOINT}/api/public/student-applications/${matricule}`,
             {
                 headers: {
-                    "X-API-Key": process.env.X_API,
+                    "X-API-Key": process.env.PUBLIC_API_KEY,
                 },
             }
         );
@@ -35,7 +35,7 @@ export async function submitAdmissionRequest(formData: CreateApplicantRequest, a
             formData,
             {
                 headers: {
-                    "X-API-Key": process.env.X_API,
+                    "X-API-Key": process.env.PUBLIC_API_KEY,
                 },
             }
         );

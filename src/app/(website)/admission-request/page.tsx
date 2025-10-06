@@ -84,11 +84,8 @@ const AdmissionRequest: React.FC = () => {
     const result = await getConfig();
     if(result.code === 'success' && result.data) {
       setConfigs(result.data);
-      console.log('Config loaded:', result.data);
     }
     const curriculumResult = await getCurriculumListSite();
-      console.log('-->curriculumResult', curriculumResult);
-      console.log('-->factorizeByProgram.curriculumResult', factorizeByProgram(curriculumResult.data.body));
       if(curriculumResult.code == 'success'){
         setProgram(factorizeByProgram(curriculumResult.data.body))
       }

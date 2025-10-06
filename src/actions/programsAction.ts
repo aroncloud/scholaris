@@ -14,7 +14,7 @@ export async function checkReenrollmentPrerequisites(studentCode: string) {
     const session = await verifySession();
     const token = session.accessToken;
 
-    const apiUrl = `${process.env.STUDENT_AIM_WORKER_ENDPOINT}/api/students/${studentCode}/reenrollment-prerequisites`;
+    const apiUrl = `${process.env.STUDENT_WORKER_ENDPOINT}/api/students/${studentCode}/reenrollment-prerequisites`;
 
     const response = await axios.get(apiUrl, {
       headers: {
@@ -42,7 +42,7 @@ export async function getStudentEnrollmentHistory(studentCode: string) {
     const session = await verifySession();
     const token = session.accessToken;
 
-    const apiUrl = `${process.env.STUDENT_AIM_WORKER_ENDPOINT}/api/students/${studentCode}/enrollments`;
+    const apiUrl = `${process.env.STUDENT_WORKER_ENDPOINT}/api/students/${studentCode}/enrollments`;
 
     const response = await axios.get(apiUrl, {
       headers: {
@@ -915,3 +915,29 @@ export async function assignATeacherToACourseUnit(course_unit_code: string, teac
   }
 }
 
+export async function getTeacherCoures (teacher_user_code: string) {
+    console.log('-->getTeacherCoures', teacher_user_code)
+    console.log('-->URL', `${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units/for-teacher/${teacher_user_code}`)
+  try {
+    const session = await verifySession();
+    
+    const token = session.accessToken;
+    
+
+    const response = await axios.get(`${process.env.CURRICULUM_WORKER_ENDPOINT}/api/course-units/for-teacher/${teacher_user_code}`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+    });
+    
+    return {
+        code: 'success',
+        error: null,
+        data: response.data
+    }
+    } catch (error: unknown) {
+      console.log('-->getTeacherCoures.error')
+      const errResult = actionErrorHandler(error);
+      return errResult;
+    }
+}

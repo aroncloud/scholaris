@@ -38,11 +38,11 @@ const CurrentStudents = ({
   const router = useRouter();
   const handleViewStudentDetails = (id: string) => router.push(`/dashboard/admin/students/annual-enrollment/${id}`);
   const mappingConfig: FieldMapping[] = [
-    { key: 'curriculum_code', label: 'Curriculum', type: 'SHEET_NAME' as const, required: true },
-    { key: 'last_name', label: 'Nom', type: 'COLUMN' as const, required: true },
-    { key: 'first_name', label: 'Prénom', type: 'COLUMN' as const, required: true },
-    { key: 'email', label: 'Email', type: 'COLUMN' as const, required: true },
-    { key: 'phone_number', label: 'Contact', type: 'COLUMN' as const, required: false }
+    { key: 'curriculum_code', label: 'Curriculum', type: 'SHEET_NAME' as const, dataType: 'string', required: true },
+    { key: 'last_name', label: 'Nom', type: 'COLUMN' as const, dataType: 'string', required: true },
+    { key: 'first_name', label: 'Prénom', type: 'COLUMN' as const, dataType: 'string', required: true },
+    { key: 'email', label: 'Email', type: 'COLUMN' as const, dataType: 'string', required: true },
+    { key: 'phone_number', label: 'Contact', type: 'COLUMN' as const, dataType: 'string', required: false }
   ];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

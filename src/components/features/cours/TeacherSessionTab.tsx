@@ -31,11 +31,16 @@ const TeacherSessionTab = ({ sessionList, courseList }: MyProps) => {
       setLoading(true);
       try {
         const { start, end } = getWeekRange();
+        console.log("-->start", start)
+        console.log("-->end", end)
         const result = await getTeacherSchedule(
           user.user.user_code,
+          
           start,
           end
         );
+
+        console.log('-->Session.result', result)
         if (result.code === "success") {
           setTeacherSessions(result.data.body || []);
         } else {

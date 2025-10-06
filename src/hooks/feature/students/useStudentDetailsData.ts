@@ -1,15 +1,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEnrollmentHistory } from './useEnrollmentHistory';
-import { getStudentDetails } from '@/actions/studentAction';
+import { createNewAnnualEnrollment, getStudentDetails } from '@/actions/studentAction';
 import { showToast } from '@/components/ui/showToast';
 import { IGetStudentDetail } from '@/types/userType';
+import { useAcademicYearStore } from '@/store/useAcademicYearStore';
+
+export type OperationResult<T = void> = {
+  success: boolean;
+  data?: T;
+};
 
 export const useStudentDetails = (studentId: string) => {
     const [student, setStudent] = useState<IGetStudentDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isProcessing, setIsProcessing] = useState(false);
     
     const { history, isLoadingHistory: isHistoryLoading, fetchHistory } = useEnrollmentHistory();
+    const {  selectedAcademicYear } = useAcademicYearStore();
 
     const router = useRouter();
 
@@ -43,6 +51,24 @@ export const useStudentDetails = (studentId: string) => {
         }
     }, [router, fetchHistory]);
 
+    const handleFinalizeInscription = async () => {
+        if(student && selectedAcademicYear) {
+            setIsProcessing(true);
+            const result = await createNewAnnualEnrollment(student.user_code, selectedAcademicYear, student.curriculum_code)
+            setIsProcessing(false);
+            if(result.code ==  "success") {
+                return { success: true, data: 'Utilisateur désactivé avec succès' };
+            } else {
+                return { 
+                    success: false, 
+                    data: result.error ?? "Erreur lors de la désactivation de l'utilisateur" 
+                };
+            }
+        }
+
+        return
+    }
+
     useEffect(() => {
         if (studentId) {
             fetchStudent(studentId);
@@ -56,5 +82,7 @@ export const useStudentDetails = (studentId: string) => {
         isLoading,
         history,
         isHistoryLoading,
+        handleFinalizeInscription,
+        isProcessing,
     };
 };

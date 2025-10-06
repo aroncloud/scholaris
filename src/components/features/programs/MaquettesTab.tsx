@@ -12,6 +12,7 @@ import { createCurriculum } from "@/actions/programsAction";
 import { showToast } from "@/components/ui/showToast";
 import { DialogCreateCurriculum } from "./Modal/DialogCreateCurriculum";
 import ContentLayout from "@/layout/ContentLayout";
+import MaquetteCardSkeleton from "./MaquetteCardSkeleton";
 
 type MyComponentProps = {
   curriculumList: ICurriculumDetail[];
@@ -71,6 +72,14 @@ const MaquettesTab = ({curriculumList, refresh, isLoading}: MyComponentProps) =>
       >
         <div className="space-y-3">
           {
+            isLoading ? <>
+              <MaquetteCardSkeleton />
+              <MaquetteCardSkeleton />
+              <MaquetteCardSkeleton />
+              <MaquetteCardSkeleton />
+              <MaquetteCardSkeleton />
+            </>
+            :
             curriculumList.map(curric => {
               return <MaquetteCard
                 key={uuidv4()}

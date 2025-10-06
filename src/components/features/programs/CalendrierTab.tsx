@@ -19,9 +19,13 @@ import { showToast } from "@/components/ui/showToast"
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable"
 import ContentLayout from "@/layout/ContentLayout"
 
+interface MyProps {
+    academicYears: IGetAcademicYears[]
+    isLoading: boolean;
+    fetchAcademicYear: () => Promise<void>
+}
 
-const CalendrierTab = () => {
-    const { academicYearList, loading, fetchAcademicYear } = useAcademicYears();
+const CalendrierTab = ({academicYears, fetchAcademicYear, isLoading} : MyProps) => {
 
     const [isCreateYearDialogOpen, setIsCreateYearDialogOpen] = useState(false);
 
@@ -144,10 +148,10 @@ const CalendrierTab = () => {
             >
                 <ResponsiveTable
                     columns={academicYearColumns}
-                    data={academicYearList}
+                    data={academicYears}
                     paginate={20}
                     searchKey={["year_code", "academic_year_code"]}
-                    isLoading={loading}
+                    isLoading={isLoading}
                 />
             </ContentLayout>
 

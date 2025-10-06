@@ -76,6 +76,7 @@ interface IStudentCurriculum {
 export interface IGetStudentDetail {
   user_code: string;
   curriculum_code: string;
+  student_status_code: string;
   student_number: string;
   status_code: string;
   enrollment_date: string;
