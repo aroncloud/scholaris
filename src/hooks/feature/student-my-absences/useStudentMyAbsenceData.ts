@@ -3,11 +3,22 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getMyAbsencesList } from '@/actions/studentMyAbsencesAction';
 import { Absence, AbsenceHistoryResponse } from '@/types/studentmyabsencesTypes';
+import { useUserStore } from '@/store/useAuthStore'
+
+
 
 export function useStudentAbsenceData() {
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // ✅ Get the current user_code from the auth store
+  const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    console.log("🧠 User data from store:", user);
+    console.log("🧩 User code:", user?.user?.user_code);
+  }, [user]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -15,10 +26,8 @@ export function useStudentAbsenceData() {
       console.log('useStudentAbsenceData - Fetching absences...');
 
       const result = await getMyAbsencesList();
-
       console.log('✅ API response:', result);
 
-      // Check if result has 'body' and 'code'
       if (
         result &&
         'code' in result &&
@@ -30,7 +39,6 @@ export function useStudentAbsenceData() {
       } else {
         console.error('❌ API returned failure:', result);
         setAbsences([]);
-        // Try to get error message safely
         setError(
           (result && 'message' in result && result.message) ||
           (result && 'error' in result && result.error) ||
@@ -45,7 +53,6 @@ export function useStudentAbsenceData() {
       setLoading(false);
     }
   }, []);
-
 
   useEffect(() => {
     fetchData();

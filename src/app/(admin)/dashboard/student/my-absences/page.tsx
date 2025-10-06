@@ -18,6 +18,8 @@ export default function MyAbsencesPage() {
   const [isSubmitJustificationOpen, setIsSubmitJustificationOpen] = useState(false);
   const [selectedAbsences, setSelectedAbsences] = useState<number[]>([]);
 
+  
+
   const getStatutColor = (statut: string) => {
     switch (statut) {
       case "JUSTIFIED":
@@ -38,13 +40,13 @@ export default function MyAbsencesPage() {
     switch (statut) {
       case "JUSTIFIED":
       case "justifiee":
-        return "Justifiée";
+        return "JUSTIFIED";
       case "PENDING_REVIEW":
       case "en_attente":
-        return "En attente";
+        return "PENDING_REVIEW";
       case "UNJUSTIFIED":
       case "non_justifiee":
-        return "Non justifiée";
+        return "UNJUSTIFIED";
       default:
         return statut;
     }

@@ -102,7 +102,7 @@ export default function DialogMyAbsencesViewDetail({
                         Fermer
                     </Button>
                     {selectedAbsence?.status_code === "UNJUSTIFIED" && (
-                        <Button onClick={handleSubmitJustification}>
+                        <Button onClick={handleSubmitJustification} className="bg-blue-600 hover:bg-blue-700">
                             <FileUp className="h-4 w-4 mr-2" />
                             Soumettre justificatif
                         </Button>
