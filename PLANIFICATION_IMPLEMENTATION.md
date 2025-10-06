@@ -260,7 +260,7 @@ scholaris/src/components/features/cours/
 └── planification.tsx                    # Main planification component
 
 Updated Files:
-├── app/(admin)/admin/cours/page.tsx     # Updated to include planification tab
+├── app/(admin)/dashboard/admin/cours/page.tsx     # Updated to include planification tab
 ```
 
 ## Dependencies

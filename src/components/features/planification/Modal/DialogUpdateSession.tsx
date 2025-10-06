@@ -124,11 +124,11 @@ export function DialogUpdateSession({
 
           <DialogFooter className="flex justify-between">
             <div className="space-x-2">
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} variant={'info'}>
                 {isSubmitting ? "Enregistrement..." : "Mettre à jour"}
               </Button>
             </div>
-            <Button variant="destructive" type="button" onClick={handleCancelSessionClick} disabled={isSubmitting}>
+            <Button variant={"secondary"} type="button" onClick={handleCancelSessionClick} disabled={isSubmitting}>
               Annuler la session
             </Button>
           </DialogFooter>

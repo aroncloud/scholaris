@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
   {
     icon: <LayoutDashboard className="w-5 h-5" />,
     name: "Dashboard",
-    path: "/admin",
+    path: "/dashboard//admin",
     authorizedRoles: [
       "ADMIN_SUPER",
       "ADMIN_ACADEMIC",
@@ -30,7 +30,7 @@ const navItems: NavItem[] = [
   {
     icon: <LayoutDashboard className="w-5 h-5" />,
     name: "Dashboard",
-    path: "/student",
+    path: "/dashboard/student",
     authorizedRoles: [
       "STUDENT",
     ],
@@ -38,36 +38,36 @@ const navItems: NavItem[] = [
   {
     icon: <Users className="w-5 h-5" />,
     name: "Utilisateurs",
-    path: "/admin/users",
+    path: "/dashboard/admin/users",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_HR"],
   },
   {
     icon: <BookOpen className="w-5 h-5" />,
     name: "Programmes",
-    path: "/admin/programs",
+    path: "/dashboard/admin/programs",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
   },
   {
     icon: <UserSquare className="w-5 h-5" />,
     name: "Enseignants",
-    path: "/admin/teachers",
+    path: "/dashboard/admin/teachers",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC", "DEPT_HEAD"],
   },
   {
     icon: <GraduationCap className="w-5 h-5" />,
     name: "Etudiants",
-    path: "/admin/students",
+    path: "/dashboard/admin/students",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
   },
   {
     icon: <BookOpen className="w-5 h-5" />,
     name: "Mes cours",
-    path: "/teacher/cours",
+    path: "/dashboard/teacher/cours",
     authorizedRoles: ["TEACHER"],
   },{
     icon: <BookOpen className="w-5 h-5" />,
     name: "Absences",
-    path: "/admin/absences",
+    path: "/dashboard/admin/absences",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
   },
   {
@@ -77,30 +77,31 @@ const navItems: NavItem[] = [
     subItems: [
       {
         name: "Planification des Cours",
-        path: "/admin/planification",
+        path: "/dashboard/admin/planification",
         authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
       },
       {
         name: "Planification des Évaluations",
-        path: "/admin/exam-planning",
+        path: "/dashboard/admin/exam-planning",
         authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
       },
       {
         name: "Salles de classes",
-        path: "/admin/classroom",
+        path: "/dashboard/admin/classroom",
         authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
       },
-      {
-        name: "Règles de Calcul",
-        path: "/admin/exam-config",
-        authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
-      }
     ],
   },
   {
     icon: <Award className="w-5 h-5" />,
     name: "Gestion des notes",
-    path: "/teacher/grade-management",
+    path: "/dashboard/teacher/grade-management",
+    authorizedRoles: ["TEACHER"],
+  },
+  {
+    icon: <Award className="w-5 h-5" />,
+    name: "Gestion des notes",
+    path: "/dashboard/admin/grade-management",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
   },
   {
@@ -110,22 +111,22 @@ const navItems: NavItem[] = [
     subItems: [
       {
         name: "Tableau de bord Financier",
-        path: "/admin/financial-dashboard",
+        path: "/dashboard/admin/financial-dashboard",
         authorizedRoles: ["ADMIN_SUPER", "FINANCE"],
       },
       {
         name: "Gestion des Paiements",
-        path: "/admin/payment-management",
+        path: "/dashboard/admin/payment-management",
         authorizedRoles: ["ADMIN_SUPER", "FINANCE"],
       },
       {
         name: "Transactions Diverses",
-        path: "/admin/transactions",
+        path: "/dashboard/admin/transactions",
         authorizedRoles: ["ADMIN_SUPER", "FINANCE"],
       },
       {
         name: "Gestion des Absences",
-        path: "/admin/absence-management",
+        path: "/dashboard/admin/absence-management",
         authorizedRoles: ["ADMIN_SUPER", "ADMIN_HR", "ADMIN_ACADEMIC", "TEACHER"],
       },
     ],
@@ -133,25 +134,25 @@ const navItems: NavItem[] = [
   {
     icon: <FileText className="w-5 h-5" />,
     name: "Saisir les notes",
-    path: "/teacher/grades-entry",
+    path: "/dashboard/teacher/grades-entry",
     authorizedRoles: ["TEACHER"],
   },
   {
     icon: <ClipboardList className="w-5 h-5" />,
     name: "Notes",
-    path: "/student/grades",
+    path: "/dashboard/student/grades",
     authorizedRoles: ["STUDENT"],
   },
   {
     icon: <ClipboardList className="w-5 h-5" />,
     name: "Profile",
-    path: "/student/profile",
+    path: "/dashboard/student/profile",
     authorizedRoles: ["STUDENT"],
   },
   {
     icon: <ClipboardList className="w-5 h-5" />,
     name: "Mes Absences",
-    path: "/student/my-absences",
+    path: "/dashboard/student/my-absences",
     authorizedRoles: ["STUDENT"],
   }
 ];

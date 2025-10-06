@@ -52,7 +52,7 @@ scholaris/src/
 │   ├── CourseCard.tsx               # Individual course card component
 │   ├── CourseDetailsModal.tsx       # Course details modal
 │   └── CourseEditModal.tsx          # Course edit modal
-└── app/(admin)/admin/cours/
+└── app/(admin)/dashboard/admin/cours/
     └── page.tsx                     # Main dashboard page
 ```
 

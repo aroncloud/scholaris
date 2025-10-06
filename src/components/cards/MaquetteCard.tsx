@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
@@ -27,9 +28,10 @@ type MyComponentProps = {
   curriculum: ICurriculumDetail
   programName: string
   refresh: () => void;
+  isLoading: boolean;
 }
 
-const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) => {
+const MaquetteCard = ({ curriculum, programName, refresh, isLoading }: MyComponentProps) => {
   // État pour gérer l'expansion du card principal
   const [isCardExpanded, setIsCardExpanded] = useState(false);
   
@@ -371,7 +373,7 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => {
-                        router.push(`/admin/programs/${curriculum.curriculum_code}`)
+                        router.push(`/dashboard/admin/programs/${curriculum.curriculum_code}`)
                       }}>
                         <Eye className="mr-2 h-5 w-5" />
                         Detail
@@ -421,7 +423,7 @@ const MaquetteCard = ({ curriculum, programName, refresh }: MyComponentProps) =>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => {}}>
                         <Eye className="mr-2 h-4 w-4" />
-                        Detail
+                        Détail
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => {

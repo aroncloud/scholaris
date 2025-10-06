@@ -136,7 +136,6 @@ export async function terminateSession (session_code: string, status: "CANCELLED
           {headers: {Authorization: `Bearer ${token}`}}
         );
         
-        console.log('-->result', response);
         
         return {
             code: 'success',

@@ -47,7 +47,6 @@ const TeacherSessionTab = ({ sessionList, courseList }: MyProps) => {
             position: "top-center",
           });
         }
-        console.log("-->getTeacherSessions.result", result);
       } catch (error) {
         showToast({
           variant: "error-solid",

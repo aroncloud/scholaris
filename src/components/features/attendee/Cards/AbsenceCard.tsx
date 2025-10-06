@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { Absence } from "@/app/(admin)/admin/my-absences/page";
+import { Absence } from "@/app/(admin)/dashboard/admin/my-absences/page";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Calendar, Clock, Eye, MapPin, Send, User } from "lucide-react";

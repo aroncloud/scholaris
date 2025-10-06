@@ -7,13 +7,16 @@ import {
   createUser,
   deactivateUser,
   deleteUser,
+  getUserDetail,
   getUserList,
   updateUser,
 } from "@/actions/userAction";
-import { ICreateUser, IUserList } from "@/types/staffType";
+import { ICreateUser, IGetUserDetail, IUpdateUserForm, IGetUser } from "@/types/staffType";
+import { showToast } from "@/components/ui/showToast";
 
 export function useUserData() {
-  const [userList, setUserList] = useState<IUserList[]>([]);
+  const [userList, setUserList] = useState<IGetUser[]>([]);
+  const [userDetail, setUserDetail] = useState<IGetUserDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,19 +24,39 @@ export function useUserData() {
     setLoading(true);
     try {
       const result = await getUserList();
+      console.log('result:', result)
       if (result.code === "success") {
         setUserList(result.data.body ?? []);
       } else {
         setError(result.error ?? "Erreur inconnue");
-        toast("Erreur de récupération des utilisateurs", { description: result.error });
       }
     } catch (err) {
       setError("Erreur réseau");
-      toast("Erreur de récupération des utilisateurs", { description: "Erreur réseau" });
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const fetchUserDetail = useCallback(
+  async (user_code: string) => {
+    setLoading(true);
+    const result = await getUserDetail(user_code);
+    console.log("fetchUserDetail result:", result);
+    if (result.code === "success") {
+      setUserDetail(result.data.body ?? []);
+    } else {
+      setError(result.error ?? "Erreur inconnue");
+      showToast({
+        variant: "error-solid",
+        message: "Erreur lors du chargement",
+        description: result.error ?? "Une erreur est survenue lors du chargement des données utilisateur.",
+        position: 'top-center',
+      });
+    }
+    setLoading(false)
+  },
+  [setLoading, setUserDetail, setError]
+);
 
   useEffect(() => {
     fetchUserList();
@@ -45,18 +68,22 @@ export function useUserData() {
       await fetchUserList();
       return { success: true };
     } else {
-      toast("Erreur lors de la création de l'utilisateur", { description: result.error });
+      showToast({
+        variant: "error-solid",
+        message: "Erreur lors de la création de l'utilisateur",
+        description: result.error ?? "Une erreur est survenue lors de la cré utilisateur.",
+        position: 'top-center',
+      });
       return { success: false, error: result.error };
     }
   };
 
-  const handleUpdateUser = async (payload: ICreateUser) => {
-    const result = await updateUser(payload);
+  const handleUpdateUser = async (payload: IUpdateUserForm, user_code: string) => {
+    const result = await updateUser(payload, user_code);
     if (result.code === "success") {
       await fetchUserList();
       return { success: true };
     } else {
-      toast("Erreur lors de la mise à jour de l'utilisateur", { description: result.error });
       return { success: false, error: result.error };
     }
   };
@@ -67,7 +94,12 @@ export function useUserData() {
       await fetchUserList();
       return { success: true };
     } else {
-      toast("Erreur lors de la suppression de l'utilisateur", { description: result.error });
+      showToast({
+        variant: "error-solid",
+        message: "Erreur lors de la création de l'utilisateur",
+        description: result.error ?? "Une erreur est survenue lors de la suppréssion utilisateur.",
+        position: 'top-center',
+      });
       return { success: false, error: result.error };
     }
   };
@@ -79,6 +111,12 @@ export function useUserData() {
       return { success: true };
     } else {
       toast("Erreur lors de la désactivation de l'utilisateur", { description: result.error });
+      showToast({
+        variant: "error-solid",
+        message: "Erreur lors de la création de l'utilisateur",
+        description: result.error ?? "Une erreur est survenue lors de la désactivation utilisateur.",
+        position: 'top-center',
+      });
       return { success: false, error: result.error };
     }
   };
@@ -92,5 +130,7 @@ export function useUserData() {
     handleUpdateUser,
     handleDeleteUser,
     handleDesactivateUser,
+    fetchUserDetail,
+    userDetail
   };
 }
