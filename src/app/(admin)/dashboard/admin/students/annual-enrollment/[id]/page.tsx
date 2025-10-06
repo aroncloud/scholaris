@@ -90,13 +90,13 @@ export default function StudentDetailPage() {
             description={`Inscrit le ${formatDateToText(student.enrollment_date)}`}
             backUrl='/dashboard/admin/students'
             status={
-              <Badge className={getStatusColor(student.status_code ?? "N/A")}>
-                {student.status_code ?? "N/A"}
+              <Badge className={getStatusColor(student.student_status_code ?? "N/A")}>
+                {student.student_status_code ?? "N/A"}
               </Badge>
             }
           >
             <div className="flex items-center justify-end space-x-3">
-              {!['ENROLLED', 'PROMOTED'].includes(student?.status_code || '') && (
+              {!['ENROLLED', 'PROMOTED'].includes(student?.student_status_code || '') && (
                 <Button
                   onClick={finalizeInscription}
                   className="bg-primary hover:bg-primary/90 text-white"
