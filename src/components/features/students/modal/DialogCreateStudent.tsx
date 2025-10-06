@@ -250,7 +250,7 @@ export function DialogCreateStudent({
                         )}
                     />
                     <span onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer">
-                        {showPassword ? <EyeIcon className="fill-gray-100" /> : <EyeClosedIcon className="fill-gray-100" />}
+                        {showPassword ? <EyeIcon className="text-gray-600 h-5 w-h-5" /> : <EyeClosedIcon className="text-gray-400 h-5 w-h-5" />}
                     </span>
                 </div>
                 {errors.password_plaintext && (

@@ -11,7 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useUserData } from '@/hooks/feature/users/useUserData';
-import { getStatusColor } from '@/lib/utils';
+import { formatTimestamp, getStatusColor } from '@/lib/utils';
 import { DialogUpdateUser } from '@/components/features/users/Modal/DialogUpdateUser';
 import { IUpdateUserForm } from '@/types/staffType';
 import { showToast } from '@/components/ui/showToast';
@@ -27,16 +27,16 @@ const UserDetailPage = () => {
   const { 
     fetchUserDetail, 
     userDetail, 
-    loading,
-    handleDesactivateUser,
+    loadingUserData,
+    processing,
     handleDeleteUser,
-    handleUpdateUser
+    handleUpdateUser,
+    handleDeactivateUser
   } = useUserData();
 
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
-  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -52,76 +52,49 @@ const UserDetailPage = () => {
     setUpdateDialogOpen(true);
   };
 
-  const handleDeactivate = async () => {
-    if (!userDetail) return;
-    
-    setProcessing(true);
-    try {
-      const result = await handleDesactivateUser(userDetail.user_code);
-      if (result.success) {
-        setDeactivateDialogOpen(false);
-        await fetchUserDetail(userId);
-        showToast({
-          variant: "success-solid",
-          message: 'Utilisateur désactivé',
-          description: 'L\'utilisateur a été désactivé avec succès.',
-          position: 'top-center',
-        });
-      }
-    } catch (error) {
-      console.error('Error deactivating user:', error);
+  const handleDeactivate = async (user_code: string) => {
+    const result = await handleDeactivateUser(user_code);
+    if (result.success) {
+      setDeactivateDialogOpen(false);
+      await fetchUserDetail(userId);
+      showToast({
+        variant: "success-solid",
+        message: 'Utilisateur désactivé',
+        description: 'L\'utilisateur a été désactivé avec succès.',
+        position: 'top-center',
+      });
+    } else {
       showToast({
         variant: "error-solid",
         message: 'Erreur',
-        description: 'Impossible de désactiver l\'utilisateur.',
+        description: result.error,
         position: 'top-center',
       });
-    } finally {
-      setProcessing(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (!userDetail) return;
-    
-    setProcessing(true);
-    try {
-      const result = await handleDeleteUser(userDetail.user_code);
-      if (result.success) {
-        setDeleteDialogOpen(false);
-        showToast({
-          variant: "success-solid",
-          message: 'Utilisateur supprimé',
-          description: 'L\'utilisateur a été supprimé définitivement.',
-          position: 'top-center',
-        });
-        router.push('/dashboard/admin/users');
-      }
-    } catch (error) {
-      console.error('Error deleting user:', error);
+  const handleDelete = async (user_code: string) => {
+    const result = await handleDeleteUser(user_code);
+    if (result.success) {
+      setDeleteDialogOpen(false);
+      showToast({
+        variant: "success-solid",
+        message: 'Utilisateur supprimé',
+        description: 'L\'utilisateur a été supprimé définitivement.',
+        position: 'top-center',
+      });
+      router.push('/dashboard/admin/users');
+    } else {
       showToast({
         variant: "error-solid",
         message: 'Erreur',
-        description: 'Impossible de supprimer l\'utilisateur.',
+        description: result.error,
         position: 'top-center',
       });
-    } finally {
-      setProcessing(false);
     }
   };
 
 
-
-  const formatTimestamp = (timestamp: number | null) => {
-    if (!timestamp) return 'Non disponible';
-    return new Date(timestamp * 1000).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const updateUser = async (data: IUpdateUserForm) => {
     console.log('Update data received:', data);
@@ -136,7 +109,6 @@ const UserDetailPage = () => {
           description: `Les données sur l'utilisateur ${data.last_name} ont été mise à jour avec succès.`,
           position: 'top-center',
         });
-        await fetchUserDetail(userId);
         return true
       } else {
         showToast({
@@ -153,15 +125,12 @@ const UserDetailPage = () => {
     }
   }
 
-  // Afficher le skeleton pendant le chargement
-  if (loading) {
+  
+  if (loadingUserData) {
     return (
       <BoxedSkeleton />
     );
-  }
-
-  // Afficher le message d'erreur uniquement si le chargement est terminé et qu'il n'y a pas de données
-  if (!userDetail) {
+  } else if (!userDetail) {
     return (
       <div className="min-h-screen bg-gray-50/50 p-6 flex items-center justify-center">
         <div className="text-center">
@@ -188,7 +157,7 @@ const UserDetailPage = () => {
         >
 
           <div className="flex items-center space-x-3 shrink-0">
-            <Button onClick={handleEdit} variant="outline-info" className="shrink-0">
+            <Button onClick={handleEdit} variant="outline-info" className="shrink-0" disabled={processing}>
               <Edit className="h-4 w-4 mr-2" />
               Modifier
             </Button>
@@ -196,6 +165,7 @@ const UserDetailPage = () => {
             <Button 
               variant={userDetail.status_code === 'ACTIVE' ? 'outline-danger' : 'outline-success'}
               onClick={() => setDeactivateDialogOpen(true)}
+               disabled={processing}
             >
               <XCircle className="h-4 w-4 mr-2" />
               {userDetail.status_code === 'ACTIVE' ? 'Désactiver' : 'Activer'}
@@ -205,6 +175,7 @@ const UserDetailPage = () => {
               onClick={() => setDeleteDialogOpen(true)} 
               variant="danger" 
               className="shrink-0"
+               disabled={processing}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Supprimer
@@ -358,12 +329,12 @@ const UserDetailPage = () => {
       <ConfirmActionDialog
         open={deactivateDialogOpen}
         onOpenChange={setDeactivateDialogOpen}
-        onConfirm={handleDeactivate}
-        title="Désactiver l'utilisateur"
-        description="Êtes-vous sûr de vouloir désactiver cet utilisateur ? Cette action peut être annulée ultérieurement."
+        onConfirm={() => {handleDeactivate(userDetail.user_code)}}
+        title={userDetail.status_code === 'ACTIVE' ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
+        description={`"Êtes-vous sûr de vouloir ${userDetail.status_code === 'ACTIVE' ? 'désactiver' : 'activer'}  cet utilisateur ? Cette action peut être annulée ultérieurement."`}
         confirmLabel="Désactiver"
         cancelLabel="Annuler"
-        variant="warning"
+        variant={userDetail.status_code === 'ACTIVE' ? 'danger' : 'success'}
         loading={processing}
         loadingText="Désactivation..."
       />
@@ -371,7 +342,7 @@ const UserDetailPage = () => {
       <ConfirmActionDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        onConfirm={handleDelete}
+        onConfirm={() => {handleDelete(userDetail.user_code)}}
         title="Supprimer définitivement l'utilisateur"
         description="Cette action est irréversible. Toutes les données associées à cet utilisateur seront définitivement supprimées. Êtes-vous absolument sûr ?"
         confirmLabel="Supprimer définitivement"

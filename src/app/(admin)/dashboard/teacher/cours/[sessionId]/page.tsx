@@ -126,7 +126,10 @@ export default function SessionDetailPage() {
     try {
       setIsLoading(true);
       const result = await getSessionAttendees(sessionId);
-      setStudentList(result.data.body || []);
+      console.log('-->getSessionAttendees.result', result);
+      if(result.code == "success") 
+      setStudentList(result.data.body.attendees
+ || []);
       console.log('-->result', result);
     } catch (error) {
       console.error("Failed to fetch session attendees:", error);
@@ -240,7 +243,7 @@ export default function SessionDetailPage() {
   const hasStudents = studentList.length > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-6 py-5">

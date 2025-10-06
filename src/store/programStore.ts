@@ -72,7 +72,6 @@ export const useFactorizedProgramStore = create<ProgramStoreState>()(
                 training_sequences,
               });
             });
-            console.log("-->factorizedPrograms.grouped", grouped);
             set({
               factorizedPrograms: Object.values(grouped),
               loading: false,

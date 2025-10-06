@@ -25,6 +25,8 @@ import { IConfig, ICountryMap } from "@/types/utilitiesTypes";
 import { regroupLocation } from "@/lib/utils";
 import { MARITAl_STATUS } from "@/constant";
 import { IFactorizedProgram } from "@/types/programTypes";
+import { DatePicker } from "@/components/DatePicker";
+import { Combobox } from "@/components/ui/Combobox";
 
 interface FormSectionProps {
   title: string;
@@ -133,7 +135,16 @@ export const PersonalInfoForm: React.FC<StepFormProps> = ({
       </div>
       <div className="space-y-2">
         <Label htmlFor="dateNaissance">Date de naissance <span className="text-red-500">*</span></Label>
-        <Input id="dateNaissance" type="date" value={formData.dateNaissance} onChange={(e) => handleInputChange("dateNaissance", e.target.value)} className={errors.dateNaissance ? "border-red-500" : ""} />
+        <DatePicker
+          label=""
+          minDate={new Date(1900, 0, 1)}
+          onChange={(e) => {
+            if(e){
+              handleInputChange("dateNaissance", e?.toJSON().split('T')[0])
+             }
+          }}
+          selected={formData.dateNaissance ? new Date(formData.dateNaissance) : undefined}
+        />
         {errors.dateNaissance && <p className="text-sm text-red-600">{errors.dateNaissance}</p>}
       </div>
       <div className="space-y-2">
@@ -145,7 +156,17 @@ export const PersonalInfoForm: React.FC<StepFormProps> = ({
       
       <div className="space-y-2">
         <Label htmlFor="cni_issue_date">Date de delivrance de la CNI <span className="text-red-500">*</span></Label>
-        <Input id="cni_issue_date" type="date" value={formData.cni_issue_date} onChange={(e) => handleInputChange("cni_issue_date", e.target.value)} className={errors.cni_issue_date ? "border-red-500" : ""} />
+        {/* <Input id="cni_issue_date" type="date" value={formData.cni_issue_date} onChange={(e) => handleInputChange("cni_issue_date", e.target.value)} className={errors.cni_issue_date ? "border-red-500" : ""} /> */}
+        <DatePicker
+          label=""
+          minDate={new Date(1900, 0, 1)}
+          onChange={(e) => {
+            if(e){
+              handleInputChange("cni_issue_date", e?.toJSON().split('T')[0])
+             }
+          }}
+          selected={formData.cni_issue_date ? new Date(formData.cni_issue_date) : undefined}
+        />
         {errors.cni_issue_date && <p className="text-sm text-red-600">{errors.cni_issue_date}</p>}
       </div>
       <div className="space-y-2">
@@ -233,43 +254,32 @@ export const OriginInfoForm: React.FC<StepFormProps> = ({
         {/* Région */}
         <div className="space-y-2">
           <Label htmlFor="region">Région <span className="text-red-500">*</span></Label>
-          <Select
+          <Combobox
+            options={countryMap.regions.map(r => ({ 
+                value: r.region_code, 
+                label: r.region_name
+            }))}
             value={formData.region}
-            onValueChange={(value) => handleInputChange("region", value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sélectionnez la région" />
-            </SelectTrigger>
-            <SelectContent>
-              {countryMap.regions.map(region => (
-                <SelectItem key={region.region_code} value={region.region_code}>
-                  {region.region_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={(value) => handleInputChange("region", value)}
+            placeholder="Sélectionner un cours"
+            
+          />
           {errors.region && <p className="text-sm text-red-600">{errors.region}</p>}
         </div>
 
         {/* Département */}
         <div className="space-y-2">
           <Label htmlFor="departement">Département <span className="text-red-500">*</span></Label>
-          <Select
+          <Combobox
+            options={departments.map(d => ({ 
+                value: d.code, 
+                label: d.name
+            }))}
             value={formData.departement}
-            onValueChange={(value) => handleInputChange("departement", value)}
-            disabled={!departments.length}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sélectionnez le département" />
-            </SelectTrigger>
-            <SelectContent>
-              {departments.map(dept => (
-                <SelectItem key={dept.code} value={dept.code}>
-                  {dept.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={(value) => handleInputChange("departement", value)}
+            placeholder="Sélectionnez le département"
+            
+          />
           {errors.departement && <p className="text-sm text-red-600">{errors.departement}</p>}
         </div>
       </div>
@@ -278,22 +288,16 @@ export const OriginInfoForm: React.FC<StepFormProps> = ({
         {/* Arrondissement */}
         <div className="space-y-2">
           <Label htmlFor="arrondissement">Arrondissement <span className="text-red-500">*</span></Label>
-          <Select
+          <Combobox
+            options={arrondissements.map(a => ({ 
+                value: a.code, 
+                label: a.name
+            }))}
             value={formData.arrondissement}
-            onValueChange={(value) => handleInputChange("arrondissement", value)}
-            disabled={!arrondissements.length}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sélectionnez l'arrondissement" />
-            </SelectTrigger>
-            <SelectContent>
-              {arrondissements.map(arr => (
-                <SelectItem key={arr.code} value={arr.code}>
-                  {arr.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={(value) => handleInputChange("arrondissement", value)}
+            placeholder="Sélectionnez l'arrondissement"
+            
+          />
           {errors.arrondissement && <p className="text-sm text-red-600">{errors.arrondissement}</p>}
         </div>
 
@@ -325,21 +329,16 @@ export const AdditionalInfoForm: React.FC<StepFormProps> = ({
         {/* Ethnie */}
         <div className="space-y-2">
           <Label htmlFor="ethnie">Ethnie <span className="text-red-500">*</span></Label>
-          <Select
+          <Combobox
+            options={((configs && configs.ethnicities.map(c => ({ 
+                value: c.ethnicity_code, 
+                label: c.ethnicity_name
+            }))) ?? [])}
             value={formData.ethnie}
-            onValueChange={(value) => handleInputChange("ethnie", value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sélectionnez l'ethnie" />
-            </SelectTrigger>
-            <SelectContent>
-              {configs && configs.ethnicities.map((eth) => (
-                <SelectItem key={eth.ethnicity_code} value={eth.ethnicity_code}>
-                  {eth.ethnicity_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={(value) => handleInputChange("ethnie", value)}
+            placeholder="Sélectionnez l'ethnie"
+            
+          />
           {errors.ethnie && <p className="text-sm text-red-600">{errors.ethnie}</p>}
         </div>
 
@@ -358,7 +357,7 @@ export const AdditionalInfoForm: React.FC<StepFormProps> = ({
                       </SelectItem>
                     ))}
                   </SelectContent>
-              </Select> 
+              </Select>
           </div>
         </div>
       </div>
@@ -406,57 +405,41 @@ export const AcademicInfoForm: React.FC<StepFormProps> = ({
   return (
     <div className="space-y-6">
       {/* Sélection du programme */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <div className="space-y-2">
           <Label htmlFor="formation">
             Formation Souhaitée <span className="text-red-500">*</span>
           </Label>
-          <Select
+          <Combobox
+            options={programList.map(p => ({ 
+                value: p.program.program_code, 
+                label: p.program.program_name
+            }))}
             value={formData.formation}
-            onValueChange={(value) => {
+            onChange={(value) => {
               handleInputChange("formation", value)
-              setSelectedProgram(value) // stocke le programme sélectionné
-              handleInputChange("curriculum", "") // reset curriculum
+              setSelectedProgram(value)
+              handleInputChange("curriculum", "") 
             }}
-          >
-            <SelectTrigger className={`w-full ${errors.formation ? "border-red-500" : ""}`}>
-              <SelectValue placeholder="Choisissez votre formation" />
-            </SelectTrigger>
-            <SelectContent className="w-full">
-              {programList.map(item => (
-                <SelectItem
-                  key={item.program.program_code}
-                  value={item.program.program_code}
-                >
-                  {item.program.program_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder="Sélectionnez la formation"
+            
+          />
           {errors.formation && <p className="text-sm text-red-600">{errors.formation}</p>}
         </div>
 
         
         <div className="space-y-2">
           <Label htmlFor="curriculum">Curriculum <span className="text-red-500">*</span></Label>
-          <Select
+          <Combobox
+            options={selectedCurriculums.map(c => ({ 
+                value: c.curriculum_code, 
+                label: c.curriculum_name
+            }))}
             value={formData.curriculum}
-            onValueChange={(value) => handleInputChange("curriculum", value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choisissez un curriculum" />
-            </SelectTrigger>
-            <SelectContent className="w-full">
-              {selectedCurriculums.map(curriculum => (
-                <SelectItem
-                  key={curriculum.curriculum_code}
-                  value={curriculum.curriculum_code}
-                >
-                  {curriculum.curriculum_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={(value) => handleInputChange("curriculum", value)}
+            placeholder="Sélectionnez le curriculum"
+            
+          />
           {errors.curriculum && <p className="text-sm text-red-600">{errors.curriculum}</p>}
         </div>
 

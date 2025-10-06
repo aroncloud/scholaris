@@ -475,8 +475,6 @@ export async function getFullRoles() {
       },
       validateStatus: (status) => status < 500,
     });
-
-    // console.log('-->getFullRoles:', response.data);
     
     return {
       code: 'success',

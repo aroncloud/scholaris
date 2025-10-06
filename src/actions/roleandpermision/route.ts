@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-API-KEY": process.env.X_API,
+          "X-API-KEY": process.env.PUBLIC_API_KEY,
         },
       }
     );

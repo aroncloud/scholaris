@@ -12,7 +12,6 @@ interface MyProps {
 }
 
 const RoleAndPermission = ({loading, roles}: MyProps) => {
-  console.log('-->.RoleAndPermission.Roles', roles)
   if (loading)
     return (
       <div className="flex justify-center items-center h-40">
