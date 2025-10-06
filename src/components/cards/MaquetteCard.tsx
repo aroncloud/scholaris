@@ -23,7 +23,6 @@ import { DialogUpdateModule } from '../features/programs/Modal/DialogUpdateModul
 import { DialogCreateUE } from '../features/programs/Modal/DialogCreateUE'
 import { Button } from '../ui/button'
 import { useRouter } from "@bprogress/next/app";
-import MaquetteCardSkeleton from '../features/programs/MaquetteCardSkeleton'
 
 type MyComponentProps = {
   curriculum: ICurriculumDetail
@@ -324,10 +323,6 @@ const MaquetteCard = ({ curriculum, programName, refresh, isLoading }: MyCompone
     }
   }
 
-  if(isLoading) {
-    return <MaquetteCardSkeleton />
-  }
-
   return (
     <>
       <Collapsible
@@ -444,7 +439,7 @@ const MaquetteCard = ({ curriculum, programName, refresh, isLoading }: MyCompone
                           setIsUpdateSequenceDialogOpen(true);
                         }}
                       >
-                        <Edit className="mr-2 h-4 w-4" /> 
+                        <Edit className="mr-2 h-4 w-4" />
                         Modifier
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {}}>

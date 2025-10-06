@@ -7,7 +7,7 @@ import { useState, useCallback, useEffect } from "react";
 
 export function useAcademicYears() {
   const [academicYearList, setAcademicYearList] = useState<IGetAcademicYears[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loadingAccademicyears, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -34,7 +34,7 @@ export function useAcademicYears() {
 
   return {
     academicYearList,
-    loading,
+    loadingAccademicyears,
     error,
     fetchAcademicYear: fetchData,
   };

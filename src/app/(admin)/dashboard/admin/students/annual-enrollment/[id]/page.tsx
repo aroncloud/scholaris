@@ -3,13 +3,16 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client';
 
+import { createNewAnnualEnrollment } from '@/actions/studentAction';
 import BoxedSkeleton from '@/components/Skeletons/BoxedSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { showToast } from '@/components/ui/showToast';
 import { useStudentDetails } from '@/hooks/feature/students/useStudentDetailsData';
 import PageHeader from '@/layout/PageHeader';
 import { formatDateToText, getStatusColor } from '@/lib/utils';
+import { useAcademicYearStore } from '@/store/useAcademicYearStore';
 import { useRouter } from '@bprogress/next/app';
 import { 
   ArrowLeft, 
@@ -30,16 +33,35 @@ import {
   User2
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
-import { v4 as uuidv4 } from "uuid";
 
 export default function StudentDetailPage() {
   const params = useParams();
   const studentId = params.id;
   const router = useRouter();
-  const [isEnrollmentModalOpen, setIsEnrollmentModalOpen] = useState(false);
+  const {  selectedAcademicYear } = useAcademicYearStore();
 
-  const { student, isLoading, history, isHistoryLoading } = useStudentDetails(studentId as string);
+  const { student, isLoading, history, isHistoryLoading, handleFinalizeInscription, isProcessing } = useStudentDetails(studentId as string);
+  
+
+  const finalizeInscription = async () => {
+    const result = await handleFinalizeInscription();
+    if(result?.success) {
+      showToast({
+        variant: "success-solid",
+        message: 'Inscription finalisée avec succès',
+        description: `L'étudiant ${student?.first_name} ${student?.last_name} a été inscris avec succès en classe de ${student?.cirriculum.curriculum_name}.`,
+        position: 'top-center',
+      });
+    } else {
+      
+      showToast({
+        variant: "success-solid",
+        message: "Erreur lors de l'Inscription de l'étudiant",
+        description: `Une erreur est survenue lors de l'inscription de l'étudiant ${student?.first_name} ${student?.last_name} a été inscris avec succès en classe de ${student?.cirriculum.curriculum_name}.`,
+        position: 'top-center',
+      });
+    }
+  }
   
   const handleBack = () => {
     router.push('/dashboard/admin/students');
@@ -76,11 +98,12 @@ export default function StudentDetailPage() {
             <div className="flex items-center justify-end space-x-3">
               {!['ENROLLED', 'PROMOTED'].includes(student?.status_code || '') && (
                 <Button
-                  onClick={() => setIsEnrollmentModalOpen(true)}
+                  onClick={finalizeInscription}
                   className="bg-primary hover:bg-primary/90 text-white"
                   variant={"info"}
+                  disabled={isProcessing}
                 >
-                  Finaliser L'inscription
+                  {isProcessing ? "Finaliser en cours ..." : "Finaliser l'inscription"}
                 </Button>
               )}
             </div>

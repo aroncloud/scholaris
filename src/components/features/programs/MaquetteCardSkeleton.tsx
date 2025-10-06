@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const MaquetteCardSkeleton = () => {
@@ -38,52 +38,6 @@ const MaquetteCardSkeleton = () => {
           <Skeleton className="h-6 w-40 rounded-full" />
         </div>
       </CardHeader>
-
-      <CardContent>
-        {/* Bouton "Nouveau domaine" skeleton */}
-        <Skeleton className="h-6 w-48 rounded mb-4" />
-
-        {/* Domaines skeleton */}
-        {[1, 2, 3].map((index) => (
-          <div key={index} className="mb-4">
-            {/* Domaine header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full p-2 bg-gray-50 rounded-lg mb-3 gap-2">
-              <div className="flex items-center gap-2 flex-1">
-                <Skeleton className="h-4 w-4" />
-                <Skeleton className="h-4 w-4" />
-                <Skeleton className="h-5 w-48" />
-              </div>
-              <div className="flex gap-2">
-                <Skeleton className="h-6 w-32 rounded" />
-                <Skeleton className="h-6 w-6 rounded" />
-                <Skeleton className="h-6 w-6 rounded" />
-              </div>
-            </div>
-
-            {/* Modules skeleton (optionnel, pour montrer l'état expanded) */}
-            {index === 1 && (
-              <div className="ml-6 space-y-2">
-                {[1, 2].map((modIndex) => (
-                  <div
-                    key={modIndex}
-                    className="flex flex-col md:flex-row md:items-center md:justify-between w-full p-2 bg-blue-50 rounded-lg gap-2"
-                  >
-                    <div className="flex items-center gap-2 flex-1">
-                      <Skeleton className="h-4 w-4" />
-                      <Skeleton className="h-5 w-40" />
-                    </div>
-                    <div className="flex gap-2">
-                      <Skeleton className="h-6 w-32 rounded" />
-                      <Skeleton className="h-6 w-6 rounded" />
-                      <Skeleton className="h-6 w-6 rounded" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </CardContent>
     </Card>
   )
 }
