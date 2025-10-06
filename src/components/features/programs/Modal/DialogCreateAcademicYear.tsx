@@ -27,6 +27,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { useEffect } from "react";
 import { ICreateAcademicYear } from "@/types/planificationType";
+import { DatePicker } from "@/components/DatePicker";
 
 interface DialogCreateAcademicYearProps {
   open: boolean;
@@ -88,7 +89,7 @@ export default function DialogCreateAcademicYear({
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl md:min-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Créer une nouvelle année académique</DialogTitle>
           <DialogDescription>
@@ -105,26 +106,12 @@ export default function DialogCreateAcademicYear({
               control={control}
               rules={{ required: "Date de début requise" }}
               render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
-                      disabled={isSubmitting}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(new Date(field.value), "dd/MM/yyyy") : <span>Sélectionner</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
-                      disabled={isSubmitting}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DatePicker
+                  label=""
+                  minDate={new Date(1900, 0, 1)}
+                  onChange={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
+                  disabled={isSubmitting}
+                />
               )}
             />
             {errors.start_date && <p className="text-red-600 text-sm">{errors.start_date.message}</p>}
@@ -137,26 +124,12 @@ export default function DialogCreateAcademicYear({
               control={control}
               rules={{ required: "Date de fin requise" }}
               render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
-                      disabled={isSubmitting}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(new Date(field.value), "dd/MM/yyyy") : <span>Sélectionner</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
-                      disabled={isSubmitting}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DatePicker
+                  label=""
+                  minDate={new Date(1900, 0, 1)}
+                  onChange={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
+                  disabled={isSubmitting}
+                />
               )}
             />
             {errors.end_date && <p className="text-red-600 text-sm">{errors.end_date.message}</p>}
@@ -164,7 +137,7 @@ export default function DialogCreateAcademicYear({
 
           <div className="space-y-1">
             <Label>Code Année</Label>
-            <Input {...register("year_code")} disabled />
+            <Input {...register("year_code")} />
           </div>
 
 

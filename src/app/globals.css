@@ -626,6 +626,15 @@ span.flatpickr-weekday,
 .event-fc-color.fc-bg-success {
   @apply border-success-50 bg-success-50;
 }
+.event-fc-color.fc-bg-teal {
+  @apply border-teal-50 bg-teal-50;
+}
+.event-fc-color.fc-bg-purple {
+  @apply border-purple-50 bg-purple-50;
+}
+.event-fc-color.fc-bg-pink {
+  @apply border-pink-50 bg-pink-50;
+}
 .event-fc-color.fc-bg-danger {
   @apply border-error-50 bg-error-50;
 }
@@ -637,6 +646,15 @@ span.flatpickr-weekday,
 }
 .event-fc-color.fc-bg-success .fc-daygrid-event-dot {
   @apply bg-success-500;
+}
+.event-fc-color.fc-bg-teal .fc-daygrid-event-dot {
+  @apply bg-teal-500;
+}
+.event-fc-color.fc-bg-purple .fc-daygrid-event-dot {
+  @apply bg-purple-500;
+}
+.event-fc-color.fc-bg-pink .fc-daygrid-event-dot {
+  @apply bg-pink-500;
 }
 .event-fc-color.fc-bg-danger .fc-daygrid-event-dot {
   @apply bg-error-500;

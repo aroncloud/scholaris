@@ -5,6 +5,7 @@ import { verifySession } from "@/lib/session";
 import { IInitiateStudentApplication } from "@/types/staffType";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
+import { IImportStudentApplicationInBulkJSON } from "@/types/userType";
 
 export async function initiateStudentApplication(applicationData: IInitiateStudentApplication) {
     console.log('-->initiateStudentApplication', applicationData)
@@ -169,6 +170,32 @@ export async function getStudentDetails(userCode: string) {
         };
     } catch (error: unknown) {
         console.error('-->getStudentDetails.error', error);
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+
+export async function importStudentsInBulkJSON(payload: IImportStudentApplicationInBulkJSON[]) {
+    try {
+        // console.log('-->payload', payload);
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        
+        const response = await axios.post(`${process.env.APPLICATION_WORKER_ENDPOINT}/api/admin/student-applications/initiate-bulk`, payload, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->importStudentsInBulkJSON.error', error)
         const errResult = actionErrorHandler(error);
         return errResult;
     }

@@ -108,8 +108,6 @@ export async function getClassroomList() {
       }
     );
 
-    console.log("-->getClassroomList.result", response.data);
-
     return {
       code: "success",
       error: null,

@@ -14,16 +14,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {  Shield, Plus, Minus, Save, X } from 'lucide-react';
-import {  Role } from '@/types/userType';
 import { getRoleColor } from '@/lib/utils';
-import { IUserList } from '@/types/staffType';
+import { IGetRole, IGetUser } from '@/types/staffType';
 
 interface DialogManageUserRoleProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: IUserList | null;
-  availableRoles: Role[];
-  onSave: (userId: string, selectedRoles: string[]) => void;
+  user: IGetUser | null;
+  availableRoles: IGetRole[];
+  onSave: (userId: string, rolesToRemove: string[], rolesToAdd: string[]) => void;
   loading?: boolean;
 }
 
@@ -38,16 +37,16 @@ export default function DialogManageUserRole({
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [initialRoles, setInitialRoles] = useState<string[]>([]);
 
-  // Initialize selected roles when user changes
   useEffect(() => {
     if (user) {
       const currentRoles = user.profiles.map(profile => profile.role_code);
+      console.log('-->currentRoles', currentRoles)
+      console.log('-->availableRoles', availableRoles)
       setSelectedRoles(currentRoles);
       setInitialRoles(currentRoles);
     }
-  }, [user]);
+  }, [user, availableRoles]);
 
-  // Handle role selection/deselection
   const handleRoleToggle = (roleCode: string) => {
     setSelectedRoles(prev => 
       prev.includes(roleCode)
@@ -56,20 +55,19 @@ export default function DialogManageUserRole({
     );
   };
 
-  // Handle save action
   const handleSave = () => {
     if (user) {
-      onSave(user.userId, selectedRoles);
+      const rolesToAdd = getAddedRoles();
+      const rolesToRemove = getRemovedRoles();
+      onSave(user.user_code, rolesToRemove, rolesToAdd);
     }
   };
 
-  // Check if there are changes
   const hasChanges = () => {
     if (selectedRoles.length !== initialRoles.length) return true;
     return selectedRoles.some(role => !initialRoles.includes(role));
   };
 
-  // Get role counts for display
   const getAddedRoles = () => selectedRoles.filter(role => !initialRoles.includes(role));
   const getRemovedRoles = () => initialRoles.filter(role => !selectedRoles.includes(role));
 
@@ -77,7 +75,7 @@ export default function DialogManageUserRole({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-3xl md:min-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
@@ -138,12 +136,12 @@ export default function DialogManageUserRole({
             <ScrollArea className="h-64 pr-4">
               <div className="space-y-2">
                 {availableRoles.map(role => {
-                  const isSelected = selectedRoles.includes(role.name);
-                  const wasInitiallySelected = initialRoles.includes(role.name);
+                  const isSelected = selectedRoles.includes(role.role_code);
+                  const wasInitiallySelected = initialRoles.includes(role.role_code);
                   
                   return (
                     <div
-                      key={role.name}
+                      key={role.role_code}
                       className={`flex items-start space-x-3 p-3 rounded-lg border transition-colors ${
                         isSelected 
                           ? 'bg-primary/5 border-primary/20' 
@@ -152,13 +150,13 @@ export default function DialogManageUserRole({
                     >
                       <Checkbox
                         checked={isSelected}
-                        onCheckedChange={() => handleRoleToggle(role.name)}
+                        onCheckedChange={() => handleRoleToggle(role.role_code)}
                         className="mt-1"
                       />
                       
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{role.name}</span>
+                          <span className="font-medium">{role.role_code}</span>
                           {!wasInitiallySelected && isSelected && (
                             <Plus className="h-4 w-4 text-green-600" />
                           )}
@@ -172,7 +170,7 @@ export default function DialogManageUserRole({
                         </p>
                         
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>{role.users} utilisateur(s)</span>
+                          <span>{role.user_count} utilisateur(s)</span>
                           <span>{role.permissions.length} permission(s)</span>
                         </div>
                       </div>

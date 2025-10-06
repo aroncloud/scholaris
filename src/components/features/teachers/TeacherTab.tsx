@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import { TeacherTabSkeleton } from "./skeleton/TeacherTabSkeleton";
 import { showToast } from "@/components/ui/showToast";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
+import ContentLayout from "@/layout/ContentLayout";
 
 interface ComponentProps {
     teachers: Teacher[];
@@ -125,17 +126,17 @@ const TeacherTab = ({
         {
             key: "type_code",
             label: "Contrat",
-            render: (value) => value ? <Badge>{value}</Badge> : "-",
+            render: (_, t) => t.type_code ? <Badge className={getStatusColor(t.type_code)}>{t.type_code}</Badge> : "-",
         },
         {
             key: "hiring_date",
             label: "Date d'embauche",
-            render: (value) => formatDateToText(value),
+            render: (_, t) => formatDateToText(t.hiring_date),
         },
         {
             key: "status_code",
             label: "Statut",
-            render: (value) => <Badge>{value}</Badge>,
+            render: (_, t) => <Badge className={getStatusColor(t.status_code)}>{t.status_code}</Badge>,
         },
         {
             key: "actions",
@@ -183,66 +184,19 @@ const TeacherTab = ({
 
     return (
         <>
-            <TabsContent value="enseignants" className="space-y-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Personnel enseignant</CardTitle>
-                        <CardDescription>Gestion du corps professoral</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {/* Barre de filtres */}
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
-                            {/* Search */}
-                            <div className="relative w-full md:w-64">
-                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Rechercher..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-8 w-full"
-                                />
-                            </div>
-
-                            {/* Filter */}
-                            <div className="flex w-full md:w-auto space-y-2 md:space-y-0 md:space-x-2 flex-col md:flex-row">
-                                <Select value={filterStatut} onValueChange={setFilterStatut}>
-                                    <SelectTrigger className="w-full md:w-48">
-                                        <SelectValue placeholder="Filtrer par statut" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">Tous les statuts</SelectItem>
-                                        <SelectItem value="actif">Actif</SelectItem>
-                                        <SelectItem value="suspendu">Suspendu</SelectItem>
-                                        <SelectItem value="conge">En congé</SelectItem>
-                                        <SelectItem value="archive">Archivé</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-
-
-                        {/* Tableau des enseignants */}
-                        {
-                            isDataLoading ? <TeacherTabSkeleton /> : <>
-                        
-                                <div className="overflow-x-auto border rounded-lg">
-                                    <ResponsiveTable
-                                        data={filteredTeachers}
-                                        columns={teacherColumns}
-                                        paginate={20}
-                                       searchKey={["first_name", "last_name", "email"]}
-                                    />
-                                </div>
-
-                            </>
-                        }
-
-                    </CardContent>
-                </Card>
-            </TabsContent>
-
-
-
+            <ContentLayout
+                title={`Personnel enseignant`}
+                description="Gestion du corps professoral"
+                actions
+            >
+                <ResponsiveTable
+                    data={filteredTeachers}
+                    columns={teacherColumns}
+                    paginate={20}
+                    searchKey={["first_name", "last_name", "email"]}
+                    isLoading={isDataLoading}
+                />
+            </ContentLayout>
             {/* Create Teacher Dialog */}
             <DialogCreateTeacher
                 open={isCreateTeacherOpen}

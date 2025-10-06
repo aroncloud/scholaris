@@ -17,7 +17,6 @@ export async function getTeachers(){
               Authorization: `Bearer ${token}`,
             },
         });
-        console.log('-->getTeachers result', response);
         
         return {
             code: 'success',

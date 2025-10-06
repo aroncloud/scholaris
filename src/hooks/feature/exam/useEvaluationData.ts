@@ -1,21 +1,22 @@
 import { useCallback, useState } from "react";
-import { ICreateEvaluation } from "@/types/examTypes";
-import { getEvaluationListForCurriculum, getEvaluationListForTeacher } from "@/actions/examAction";
+import { IGetEvaluationsForCurriculum } from "@/types/examTypes";
+import { getEvaluationListForCurriculum, getEvaluationListForTeacher, getEvaluationsForSchedule } from "@/actions/examAction";
 
 export function useEvaluationData() {
-  const [data, setData] = useState<ICreateEvaluation[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [examList, setExamList] = useState<IGetEvaluationsForCurriculum[]>([]);
+  const [isLoadingExam, setIsLoadingExam] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
 
   const fetchEvaluationForCurriculum = useCallback(async (curriculum_code: string) => {
-    setLoading(true);
+    setIsLoadingExam(true);
     setError(null);
     try {
+      if(!curriculum_code)  return
       const result = await getEvaluationListForCurriculum(curriculum_code);
       console.log("-->useEvaluations.result", result);
       if (result.code === "success") {
-        setData(result.data.body as ICreateEvaluation[]);
+        setExamList(result.data.body as IGetEvaluationsForCurriculum[]);
       } else {
         setError(result.error || "Erreur lors de la récupération des évaluations");
       }
@@ -23,17 +24,17 @@ export function useEvaluationData() {
       console.error("-->useEvaluations.error", err);
       setError("Erreur inattendue");
     } finally {
-      setLoading(false);
+      setIsLoadingExam(false);
     }
   }, []);
-  const fetchEvaluationForTeacher = useCallback(async (teacher_code: string) => {
-    setLoading(true);
+  const fetchEvaluationForTeacher = useCallback(async (teacher_code: string, schedule_code: string) => {
+    setIsLoadingExam(true);
     setError(null);
     try {
-      const result = await getEvaluationListForTeacher(teacher_code);
+      const result = await getEvaluationListForTeacher(teacher_code, schedule_code);
       console.log("-->fetchEvaluationForTeacher.result", result);
       if (result.code === "success") {
-        setData(result.data.body as ICreateEvaluation[]);
+        setExamList(result.data.body as IGetEvaluationsForCurriculum[]);
       } else {
         setError(result.error || "Erreur lors de la récupération des évaluations");
       }
@@ -41,17 +42,36 @@ export function useEvaluationData() {
       console.error("-->fetchEvaluationForTeacher.error", err);
       setError("Erreur inattendue");
     } finally {
-      setLoading(false);
+      setIsLoadingExam(false);
+    }
+  }, []);
+  const fetchtEvaluationsForSchedule = useCallback(async (schedule_code: string) => {
+    setIsLoadingExam(true);
+    setError(null);
+    try {
+      const result = await getEvaluationsForSchedule(schedule_code);
+      console.log("-->fetchEvaluationPerModule.result", result);
+      if (result.code === "success") {
+        setExamList(result.data.body as IGetEvaluationsForCurriculum[]);
+      } else {
+        setError(result.error || "Erreur lors de la récupération des évaluations");
+      }
+    } catch (err) {
+      console.error("-->fetchEvaluationPerModule.error", err);
+      setError("Erreur inattendue");
+    } finally {
+      setIsLoadingExam(false);
     }
   }, []);
 
 
 
   return {
-    data,
-    loading,
+    examList,
+    isLoadingExam,
     error,
     fetchEvaluationForCurriculum: fetchEvaluationForCurriculum,
     fetchEvaluationForTeacher: fetchEvaluationForTeacher,
+    fetchtEvaluationsForSchedule: fetchtEvaluationsForSchedule,
   };
 }

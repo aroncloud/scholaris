@@ -6,10 +6,10 @@ import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
+import AcademicYearSelector from "./AcademicYearSelector";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
-
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const handleToggle = () => {
@@ -80,12 +80,9 @@ const AppHeader: React.FC = () => {
                 />
               </svg>
             )}
-            {/* Cross Icon */}
           </button>
-          {/* Logo */}
           
           <Link href="/" className="flex items-center">
-            
             <div className="bg-white rounded-2xl p-1.5">
               <Image 
                 src='/images/logo/logoEPFPS.png'
@@ -94,7 +91,6 @@ const AppHeader: React.FC = () => {
                 height={200}
                 width={200}
               />
-
             </div>
             <div className="ml-3 flex flex-col gap-2 text-white">
               <h1 className="text-xl md:text-4xl font-bold tracking-tight">
@@ -110,7 +106,7 @@ const AppHeader: React.FC = () => {
             onClick={toggleApplicationMenu}
             className="flex items-center justify-center w-10 h-10 text-white/80 rounded-lg hover:bg-blue-700 hover:text-white dark:text-blue-100 dark:hover:bg-blue-700 lg:hidden"
           >
-            <svg
+           <svg
               width="24"
               height="24"
               viewBox="0 0 24 24"
@@ -133,16 +129,10 @@ const AppHeader: React.FC = () => {
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex bg-blue-600/90 backdrop-blur-sm lg:justify-end lg:px-0 lg:bg-transparent dark:bg-blue-800/90`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
-            {/* <!-- Dark Mode Toggler --> */}
-            {/* <ThemeToggleButton /> */}
-            {/* <!-- Dark Mode Toggler --> */}
+            <AcademicYearSelector />
 
-           {/* <NotificationDropdown />  */}
-            {/* <!-- Notification Menu Area --> */}
           </div>
-          {/* <!-- User Area --> */}
           <UserDropdown /> 
-    
         </div>
       </div>
     </header>

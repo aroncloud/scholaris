@@ -76,7 +76,7 @@ const TeacherSessionCard = ({ session, refresh }: Myprops) => {
                     {isTerminatingSession ? "Lancement ..." : "Démarrer"}
                 </Button>
                 <Button variant="outline-info" size="sm">
-                    <Link href={`/teacher/cours/${session.session_code}`} className='flex flex-nowrap gap-3 items-center'>
+                    <Link href={`/dashboard/teacher/cours/${session.session_code}`} className='flex flex-nowrap gap-3 items-center'>
                         <Edit className="h-4 w-4" />
                         Detail
                     </Link>

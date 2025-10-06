@@ -46,7 +46,7 @@ export const useClassroomStore = create<ClassroomStoreState>()(
           } else {
             showToast({
               variant: "error-solid",
-              message: "Erreur lors de la récupération des salles",
+              message: "Store.Erreur lors de la récupération des salles",
               description: result.code,
               position: "top-center",
             });
