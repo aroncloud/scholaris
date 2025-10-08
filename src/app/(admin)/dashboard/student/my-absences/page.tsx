@@ -18,8 +18,6 @@ export default function MyAbsencesPage() {
   const [isSubmitJustificationOpen, setIsSubmitJustificationOpen] = useState(false);
   const [selectedAbsences, setSelectedAbsences] = useState<number[]>([]);
 
-  
-
   const getStatutColor = (statut: string) => {
     switch (statut) {
       case "JUSTIFIED":
@@ -72,11 +70,15 @@ export default function MyAbsencesPage() {
   const filteredAbsences = absences.filter(absence => {
     const matchesSearch =
       absence.course_unit_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      absence.session_title.toLowerCase().includes(searchTerm.toLowerCase())
+      absence.session_title.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
-
+  // ✅ Updated: refetch absences from backend after successful justification
+  const handleJustificationSuccess = async () => {
+    setSelectedAbsences([]); // reset selection
+    await refetch(); // fetch updated absences from database
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -109,8 +111,6 @@ export default function MyAbsencesPage() {
                 {loading ? "Actualisation..." : "Actualiser"}
               </Button>
 
-
-
               <Button onClick={handleSubmitJustification} className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4 mr-2" />
                 Soumettre un justificatif
@@ -122,16 +122,15 @@ export default function MyAbsencesPage() {
 
       {/* MyAbsencesListprops */}
       <MyAbsencesListSection
-
         filteredAbsences={filteredAbsences}
         getStatutColor={getStatutColor}
         getStatutLabel={getStatutLabel}
         handleViewDetails={handleViewDetails}
         handleSubmitJustification={handleSubmitJustification}
       />
+
       {/* ViewDetailprops */}
       <DialogMyAbsencesViewDetail
-
         isDetailsDialogOpen={isDetailsDialogOpen}
         setIsDetailsDialogOpen={setIsDetailsDialogOpen}
         selectedAbsence={selectedAbsence}
@@ -139,15 +138,16 @@ export default function MyAbsencesPage() {
         getStatutLabel={getStatutLabel}
         handleSubmitJustification={handleSubmitJustification}
       />
+
       {/* SubmitJustificationprops */}
       <DialogCreateSubmitJustification
         isSubmitJustificationOpen={isSubmitJustificationOpen}
         setIsSubmitJustificationOpen={setIsSubmitJustificationOpen}
-        absencesData={absences}
+        absencesData={absences} 
         selectedAbsences={selectedAbsences}
         handleAbsenceSelection={handleAbsenceSelection}
+        onJustificationSubmitted={handleJustificationSuccess} // ✅ Updated DB: callback triggers refetch
       />
-
     </div>
   );
 }

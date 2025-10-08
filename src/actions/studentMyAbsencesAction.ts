@@ -61,6 +61,122 @@ export async function fetchAndStoreUserProfile() {
     return null;
   }
 }
+// ✅ Submit Justification
+export async function submitJustification(
+  payload: SubmitJustificationPayload,
+  file: File,
+  userCode: string
+) {
+  try {
+    if (!userCode) {
+      return { code: "USER_NOT_FOUND", error: "Utilisateur introuvable", data: null };
+    }
+
+    // 1️⃣ Verify session and get token
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    // 2️⃣ Upload the file
+    const processName = "Justification";
+    const absenceCode = payload.absence_codes[0];
+    const fileName = `${Date.now()}_${file.name}`;
+    const filePath = `${process.env.STUDENT_FILE_NAME_SRC}/${userCode}/${processName}/${absenceCode}/${fileName}`;
+
+
+    const uploadResult = await uploadFile(file, filePath);
+    if (uploadResult.error) {
+      return {
+        code: uploadResult.code ?? "UPLOAD_ERROR",
+        error: "Erreur lors du téléversement du fichier",
+        data: null,
+      };
+    }
+
+    const uploadedFile: JustificationFile = {
+      content_url: `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${filePath}`,
+      title:
+        payload.files[0]?.title ||
+        (payload.files[0]?.type_code === "MEDICAL_CERTIFICATE"
+          ? "Certificat Médical"
+          : file.name),
+      type_code: payload.files[0]?.type_code || "OTHER",
+    };
+
+
+    // 3️⃣ Prepare final payload
+    const fullPayload: SubmitJustificationPayload = {
+      absence_codes: payload.absence_codes,
+      reason: payload.reason,
+      files: [uploadedFile],
+    };
+
+    console.log("➡️ Payload sent to backend:", JSON.stringify(fullPayload, null, 2));
+
+    // 4️⃣ Send POST request
+    const endpoint = `${process.env.NEXT_PUBLIC_ATTENDANCE_WORKER_ENDPOINT}/api/justifications`;
+    console.log("🚀 Sending final payload to API:", fullPayload);
+    console.log("🔗 Endpoint:", endpoint);
+
+    const response = await axios.post(endpoint, fullPayload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+
+    return { code: "success", error: null, data: response.data };
+  } catch (error: any) {
+    console.error("💥 submitJustification.error:", error.response?.data || error.message);
+
+    // Handle 403 and 400
+    if (error.response?.status === 403) {
+      return { code: "FORBIDDEN", error: "Vous n'avez pas les droits nécessaires (STUDENT role requis)", data: null };
+    }
+    if (error.response?.status === 400) {
+      return { code: "BAD_REQUEST", error: "Requête invalide. Vérifiez les données envoyées.", data: null };
+    }
+
+    return { code: "UNKNOWN_ERROR", error: error.message ?? "Une erreur est survenue", data: null };
+  }
+}
+
+export async function getMyAbsencesList() {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const endpoint = `${process.env.NEXT_PUBLIC_ATTENDANCE_WORKER_ENDPOINT}/api/absences`;
+    const response = await axios.get(endpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("✅ API raw response:", response.data);
+    //  Extract the nested body array
+    const absencesArray = Array.isArray(response.data.body)
+      ? response.data.body
+      : [];
+
+    return {
+      code: 'success',
+      message: 'Données récupérées avec succès',
+      exit: 'OK',
+      body: absencesArray,
+    };
+  } catch (error: any) {
+    console.log(
+      "💥 API call failed:",
+      error.response?.status,
+      error.response?.data || error.message
+    );
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
+}
+
+
+
 
 // export async function submitJustification(payload: SubmitJustificationPayload) {
 //   console.log("--> submitJustification: starting with payload", payload);
@@ -94,110 +210,3 @@ export async function fetchAndStoreUserProfile() {
 //     return errResult;
 //   }
 // }
-
-
-// ✅ Submit Justification
-export async function submitJustification(
-  payload: SubmitJustificationPayload,
-  file: File,
-  userCode: string
-) {
-  try {
-    if (!userCode) {
-      return { code: "USER_NOT_FOUND", error: "Utilisateur introuvable", data: null };
-    }
-
-    // 1️⃣ Verify session and get token
-    const session = await verifySession();
-    const token = session.accessToken;
-
-    // 2️⃣ Upload the file
-    const processName = "Justification";
-    const absenceCode = payload.absence_codes[0];
-    const fileName = `${Date.now()}_${file.name}`;
-    const filePath = `STUDENT_FILE_NAME_SRC/${userCode}/${processName}/${absenceCode}/${fileName}`;
-
-    const uploadResult = await uploadFile(file, filePath);
-    if (uploadResult.error) {
-      return {
-        code: uploadResult.code ?? "UPLOAD_ERROR",
-        error: "Erreur lors du téléversement du fichier",
-        data: null,
-      };
-    }
-
-    const uploadedFile: JustificationFile = {
-      content_url: `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${filePath}`,
-      title: `${payload.files[0]?.type_code ?? "OTHER"} - ${file.name}`,
-      type_code: payload.files[0]?.type_code ?? "OTHER",
-    };
-
-    // 3️⃣ Prepare final payload
-    const fullPayload: SubmitJustificationPayload = {
-      absence_codes: payload.absence_codes,
-      reason: payload.reason,
-      files: [uploadedFile],
-    };
-
-    console.log("➡️ Payload sent to backend:", JSON.stringify(fullPayload, null, 2));
-
-    // 4️⃣ Send POST request
-    const endpoint = `${process.env.ATTENDACE_WORKER_ENDPOINT}/api/justifications`;
-    const response = await axios.post(endpoint, JSON.stringify(fullPayload), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    return { code: "success", error: null, data: response.data };
-  } catch (error: any) {
-    console.error("💥 submitJustification.error:", error.response?.data || error.message);
-
-    // Handle 403 and 400
-    if (error.response?.status === 403) {
-      return { code: "FORBIDDEN", error: "Vous n'avez pas les droits nécessaires (STUDENT role requis)", data: null };
-    }
-    if (error.response?.status === 400) {
-      return { code: "BAD_REQUEST", error: "Requête invalide. Vérifiez les données envoyées.", data: null };
-    }
-
-    return { code: "UNKNOWN_ERROR", error: error.message ?? "Une erreur est survenue", data: null };
-  }
-}
-
-export async function getMyAbsencesList() {
-  try {
-    const session = await verifySession();
-    const token = session.accessToken;
-
-    const endpoint = `${process.env.ATTENDACE_WORKER_ENDPOINT}/api/absences`;
-    const response = await axios.get(endpoint, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    console.log("✅ API raw response:", response.data);
-    //  Extract the nested body array
-    const absencesArray = Array.isArray(response.data.body)
-      ? response.data.body
-      : [];
-
-    return {
-      code: 'success',
-      message: 'Données récupérées avec succès',
-      exit: 'OK',
-      body: absencesArray,
-    };
-  } catch (error: any) {
-    console.log(
-      "💥 API call failed:",
-      error.response?.status,
-      error.response?.data || error.message
-    );
-    const errResult = actionErrorHandler(error);
-    return errResult;
-  }
-}
-
-
