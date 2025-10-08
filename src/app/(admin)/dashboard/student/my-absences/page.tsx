@@ -102,7 +102,9 @@ export default function MyAbsencesPage() {
             <div className="flex items-center space-x-3">
               <Button
                 variant="outline"
-                onClick={() => window.location.reload()}
+                onClick={async () => {
+                  await refetch();
+                }}
                 disabled={loading}
               >
                 <RefreshCw

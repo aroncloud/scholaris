@@ -109,98 +109,106 @@ export default function DialogCreateSubmitJustification({
     }
   };
 
-  return (
-    <Dialog open={isSubmitJustificationOpen} onOpenChange={setIsSubmitJustificationOpen}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Soumettre un justificatif</DialogTitle>
-          <DialogDescription>
-            Sélectionnez les absences concernées et téléversez votre justificatif.
-          </DialogDescription>
-        </DialogHeader>
+ return (
+  <Dialog open={isSubmitJustificationOpen} onOpenChange={setIsSubmitJustificationOpen}>
+    <DialogContent className="max-w-2xl max-h-[600px] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>Soumettre un justificatif</DialogTitle>
+        <DialogDescription>
+          Sélectionnez les absences concernées et téléversez votre justificatif.
+        </DialogDescription>
+      </DialogHeader>
 
-        {/* Type de justificatif */}
-        <div className="w-full mb-4">
-          <Label htmlFor="type">Type de justificatif</Label>
-          <Select onValueChange={(value) => setSelectedType(value)}>
-            <SelectTrigger className="w-full mt-1">
-              <SelectValue placeholder="Sélectionner le type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="MEDICAL_CERTIFICATE">Certificat médical</SelectItem>
-              <SelectItem value="FAMILY_REASON">Justificatif familial</SelectItem>
-              <SelectItem value="TRANSPORT_ISSUE">Problème de transport</SelectItem>
-              <SelectItem value="INTERNSHIP_DOCUMENT">Convention de stage</SelectItem>
-              <SelectItem value="OTHER">Autre</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Type de justificatif */}
+      <div className="w-full mb-4">
+        <Label htmlFor="type">Type de justificatif</Label>
+        <Select onValueChange={(value) => setSelectedType(value)}>
+          <SelectTrigger className="w-full mt-1">
+            <SelectValue placeholder="Sélectionner le type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="MEDICAL_CERTIFICATE">Certificat médical</SelectItem>
+            <SelectItem value="FAMILY_REASON">Justificatif familial</SelectItem>
+            <SelectItem value="TRANSPORT_ISSUE">Problème de transport</SelectItem>
+            <SelectItem value="INTERNSHIP_DOCUMENT">Convention de stage</SelectItem>
+            <SelectItem value="OTHER">Autre</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-        {/* File Upload */}
-        <div className="w-full mb-4">
-          <Label htmlFor="fichier">Fichier justificatif</Label>
-          <div className="mt-1 flex items-center space-x-2 w-full">
-            <Input
-              id="fichier"
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              className="flex-1"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-            />
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => fileInputRef.current?.click()}>
-              <Upload className="h-4 w-4 mr-2" />
-              Parcourir
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Formats acceptés: PDF, JPG, PNG (max 5MB)
-          </p>
-        </div>
-
-        {/* Reason */}
-        <div className="space-y-2 mb-4">
-          <Label htmlFor="reason">Description</Label>
-          <Textarea
-            id="reason"
-            placeholder="Décrivez brièvement le motif de vos absences..."
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
+      {/* File Upload */}
+      <div className="w-full mb-4">
+        <Label htmlFor="fichier">Fichier justificatif</Label>
+        <div className="mt-1 flex items-center space-x-2 w-full">
+          <Input
+            id="fichier"
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            className="flex-1"
+            onChange={handleFileChange}
+            ref={fileInputRef}
           />
-        </div>
-
-        {/* Absence Selection */}
-        <div className="space-y-3 max-h-56 overflow-y-auto border p-3 rounded-md bg-gray-50 mb-4">
-          {absencesData.map((absence, index) => {
-            const isDisabled = absence.status_code !== "UNJUSTIFIED"; // ✅ Disable if already submitted
-            return (
-              <div key={index} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`absence-${index}`}
-                  checked={selectedAbsences.includes(index)}
-                  onCheckedChange={(checked) => handleAbsenceSelection(index, Boolean(checked))}
-                  disabled={isDisabled} // ✅ Disabled checkbox
-                />
-                <Label htmlFor={`absence-${index}`} className={`text-sm ${isDisabled ? "text-gray-400" : ""}`}>
-                  {new Date(absence.recorded_at).toLocaleDateString("fr-FR")} — {absence.course_unit_name} ({absence.session_title})
-                  {isDisabled && " (Déjà soumis)"} {/* ✅ Inform user */}
-                </Label>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Footer */}
-        <DialogFooter className="mt-6">
-          <Button variant="outline" onClick={() => setIsSubmitJustificationOpen(false)}>
-            Annuler
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Parcourir
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSubmit} disabled={selectedAbsences.length === 0 || loading}>
-            <FileUp className="h-4 w-4 mr-2" />
-            {loading ? "Soumission..." : "Soumettre justificatif"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Formats acceptés: PDF, JPG, PNG (max 5MB)
+        </p>
+      </div>
+
+      {/* Reason */}
+      <div className="space-y-2 mb-4">
+        <Label htmlFor="reason">Description</Label>
+        <Textarea
+          id="reason"
+          placeholder="Décrivez brièvement le motif de vos absences..."
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+      </div>
+
+      {/* Absence Selection with limited height + vertical scrollbar */}
+      <div className="space-y-3 max-h-48 overflow-y-auto border p-3 rounded-md bg-gray-50 mb-4">
+        {absencesData.map((absence, index) => {
+          const isDisabled = absence.status_code !== "UNJUSTIFIED";
+          return (
+            <div key={index} className="flex items-center space-x-2">
+              <Checkbox
+                id={`absence-${index}`}
+                checked={selectedAbsences.includes(index)}
+                onCheckedChange={(checked) => handleAbsenceSelection(index, Boolean(checked))}
+                disabled={isDisabled}
+              />
+              <Label htmlFor={`absence-${index}`} className={`text-sm ${isDisabled ? "text-gray-400" : ""}`}>
+                {new Date(absence.recorded_at).toLocaleDateString("fr-FR")} — {absence.course_unit_name} ({absence.session_title})
+                {isDisabled && " (Déjà soumis)"}
+              </Label>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer */}
+      <DialogFooter className="mt-6">
+        <Button variant="outline" onClick={() => setIsSubmitJustificationOpen(false)}>
+          Annuler
+        </Button>
+        <Button
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={handleSubmit}
+          disabled={selectedAbsences.length === 0 || loading}
+        >
+          <FileUp className="h-4 w-4 mr-2" />
+          {loading ? "Soumission..." : "Soumettre justificatif"}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+
 }

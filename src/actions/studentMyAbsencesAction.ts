@@ -79,7 +79,7 @@ export async function submitJustification(
     // 2️⃣ Upload the file
     const processName = "Justification";
     const absenceCode = payload.absence_codes[0];
-    const fileName = `${Date.now()}_${file.name}`;
+    const fileName = `${file.name}`;
     const filePath = `${process.env.STUDENT_FILE_NAME_SRC}/${userCode}/${processName}/${absenceCode}/${fileName}`;
 
 
