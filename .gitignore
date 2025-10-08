@@ -3,6 +3,9 @@
 # dependencies
 /.idea
 /node_modules
+/.claude
+CLAUDE.md
+/CLAUDE.md
 /.pnp
 .pnp.js
 .yarn/install-state.gz

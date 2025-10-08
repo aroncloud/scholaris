@@ -25,8 +25,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ code: "error", error: "Invalid session", data: null });
     }
 
-    const response = await axios.get(
-      "https://iam-worker-dev.scholaris-sys.workers.dev/api/roles/full",
+    const response = await axios.get(`${process.env.AIM_WORKER_ENDPOINT}/api/roles/full`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

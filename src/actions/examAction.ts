@@ -122,6 +122,39 @@ export async function getEvaluationsForSchedule(schedule_code: string) {
   }
 }
 
+export async function getEvaluationsForTeacher(
+  teacher_code: string,
+  academic_year_code: string
+) {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    // Construction de l'URL avec le paramètre de requête academic_year_code
+    const url = `${process.env.GRADE_WORKER_ENDPOINT}/api/evaluations/for-teacher/${teacher_code}`;
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        academic_year_code, // ajout en query param
+      },
+    });
+
+    return {
+      code: "success",
+      error: null,
+      data: response.data,
+    };
+  } catch (error: unknown) {
+    console.log("-->getEvaluationsForTeacher.error");
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
+}
+
+
 
 export async function getListModulesEvaluationsForCurriculum(
   curriculum_code: string,

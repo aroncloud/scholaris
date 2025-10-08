@@ -20,17 +20,33 @@ export function DateTimePicker({
   className = "",
 }: DateTimePickerProps) {
 
+  const handleDateChange = (selectedDate: Date | undefined) => {
+    if (!selectedDate) {
+      onDateChange?.(undefined);
+      return;
+    }
+
+    const normalizedDate = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      12,
+      0,
+      0,
+      0
+    );
+
+    onDateChange?.(normalizedDate);
+  };
+
   return (
     <div className={`flex gap-4 ${className}`}>
       {/* Date picker */}
       <div className="flex-1">
-        
         <DatePicker
           label=""
           minDate={new Date(1900, 0, 1)}
-          onChange={(selectedDate) => {
-            onDateChange?.(selectedDate);
-          }}
+          onChange={handleDateChange}
           selected={date}
         />
       </div>

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { CreateApplicantRequest, FormData } from "@/types/requestSubmissionTypes";
-import { submitAdmissionRequest } from "@/actions/requestSubmissionActions";
+import { submitAdmissionRequest, uploadApplicationDocuments } from "@/actions/requestSubmissionActions";
 
 
 
@@ -34,13 +34,14 @@ const initialFormData: FormData = {
   etablissementOrigine: "",
   matriculeConcours: "",
   documents: {
+    cniRecto: null,
+    cniVerso: null,
+    photo4x4: null,
     releveNotes: null,
     diplome: null,
     acteNaissance: null,
-    photoIdentiteRecto: null,
-    photoIdentiteVerso: null,
-    photo4x4: null,
-    attestationConcours: null,
+    pageResultatConcours: null,
+    pageNomConcours: null,
   },
   accepteConditions: '',
   curriculum: "",
@@ -81,12 +82,22 @@ const validateStep = (
       if (!formData.etablissementOrigine) errors.etablissementOrigine = "L'etablissement d'origine est requise";
       break;
     case 5:
-      // if (!formData.documents.photoIdentiteRecto)
-      //   errors.photoIdentiteRecto = "La photo d'identité (recto) est requise";
-      // if (!formData.documents.photoIdentiteVerso)
-      //   errors.photoIdentiteVerso = "La photo d'identité (verso) est requise";
-      // if (!formData.documents.photo4x4)
-      //   errors.photo4x4 = "La photo 4x4 est requise";
+      if (!formData.documents.cniRecto)
+        errors.cniRecto = "La CNI recto est requise";
+      if (!formData.documents.cniVerso)
+        errors.cniVerso = "La CNI verso est requise";
+      if (!formData.documents.photo4x4)
+        errors.photo4x4 = "La photo 4x4 est requise";
+      if (!formData.documents.releveNotes)
+        errors.releveNotes = "Le relevé de notes est requis";
+      if (!formData.documents.diplome)
+        errors.diplome = "Le diplôme est requis";
+      if (!formData.documents.acteNaissance)
+        errors.acteNaissance = "L'acte de naissance est requis";
+      if (!formData.documents.pageResultatConcours)
+        errors.pageResultatConcours = "La page d'entente du résultat de concours est requise";
+      if (!formData.documents.pageNomConcours)
+        errors.pageNomConcours = "La page avec votre nom du résultat de concours est requise";
       break;
     case 6:
       if (!formData.accepteConditions)
@@ -140,6 +151,33 @@ export const useAdmissionForm = () => {
     try {
       console.log("Formulaire soumis :", JSON.stringify(formData));
 
+      // Vérifier que tous les documents sont présents
+      if (!formData.documents.cniRecto || !formData.documents.cniVerso ||
+          !formData.documents.photo4x4 || !formData.documents.releveNotes ||
+          !formData.documents.diplome || !formData.documents.acteNaissance ||
+          !formData.documents.pageResultatConcours || !formData.documents.pageNomConcours) {
+        alert("Tous les documents sont requis");
+        return false;
+      }
+
+      // Upload des documents
+      const uploadResult = await uploadApplicationDocuments({
+        cniRecto: formData.documents.cniRecto,
+        cniVerso: formData.documents.cniVerso,
+        photo4x4: formData.documents.photo4x4,
+        releveNotes: formData.documents.releveNotes,
+        diplome: formData.documents.diplome,
+        acteNaissance: formData.documents.acteNaissance,
+        pageResultatConcours: formData.documents.pageResultatConcours,
+        pageNomConcours: formData.documents.pageNomConcours,
+        applicationCode
+      });
+
+      if (uploadResult.code !== "success" || !uploadResult.data) {
+        alert(`Erreur lors de l'upload des documents: ${uploadResult.error}`);
+        return false;
+      }
+
       const payload: CreateApplicantRequest = {
         first_name: formData.prenom,
         last_name: formData.nom,
@@ -181,7 +219,7 @@ export const useAdmissionForm = () => {
             email: ""
           }
         ],
-        documents: []
+        documents: uploadResult.data
       };
 
       const result = await submitAdmissionRequest(payload, applicationCode);

@@ -4,6 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import frLocale from '@fullcalendar/core/locales/fr';
 import {
   EventInput,
   EventContentArg,
@@ -44,7 +45,13 @@ export function convertIntoFullCalendarFormat(sessions: IGetSchedule[]): IFullCa
     end: new Date(session.end_time).toJSON(),
     classroom: session.resource_code,
     teacher: session.teacher_user_code,
-    extendedProps: { calendar: "Success" },
+    extendedProps: {
+      calendar: "Success",
+      course_unit_code: session.course_unit_code,
+      schedule_code: session.schedule_code,
+      teacher_user_code: session.teacher_user_code,
+      resource_code: session.resource_code,
+    },
   }));
 }
 
@@ -105,9 +112,11 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
     const currentEvent = {
       id: event.id,
       title: event.title,
-      start: event.start?.toDateString() ?? "",
-      end: event.end?.toDateString() ?? "",
-      ...event.extendedProps,
+      start: event.start?.toISOString() ?? "",
+      end: event.end?.toISOString() ?? "",
+      classroom: event.extendedProps.classroom,
+      teacher: event.extendedProps.teacher,
+      extendedProps: event.extendedProps,
     } as IFullCalendarEvent
     setSelectedEvent(currentEvent);
 
@@ -180,6 +189,21 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
+          
+          // Configuration pour le format 24h et français
+          locale={frLocale}
+          timeZone="local"
+          slotLabelFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false // Format 24h
+          }}
+          eventTimeFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false // Format 24h
+          }}
+          
           headerToolbar={{
             left: "prev,next addEventButton",
             center: "title",

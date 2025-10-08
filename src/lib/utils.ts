@@ -271,3 +271,38 @@ export const formatTimestamp = (timestamp: number | null) => {
       minute: '2-digit'
     });
   };
+
+
+
+// dans /lib/utils.ts
+
+/**
+ * Génère des initiales à partir d'un nom complet.
+ * - Prend la première lettre du premier mot et du dernier mot.
+ * - Gère les noms simples (un seul mot).
+ * - Renvoie une chaîne vide si le nom est invalide.
+ * @param {string} fullName - Le nom complet à traiter.
+ * @returns {string} Les initiales en majuscules (ex: "JD" pour "John Doe").
+ */
+export const getInitials = (fullName?: string | null): string => {
+  // 1. Vérifier si l'entrée est valide
+  if (!fullName || typeof fullName !== 'string' || fullName.trim() === '') {
+    return '?'; // Ou '', selon votre préférence pour les cas vides
+  }
+
+  // 2. Séparer les mots et supprimer les espaces vides
+  const words = fullName.trim().split(/\s+/);
+
+  // 3. Si un seul mot, retourner les deux premières lettres (ex: "Google" -> "GO")
+  // ou juste la première si le mot est court.
+  if (words.length === 1) {
+    const singleWord = words[0];
+    return singleWord.substring(0, 2).toUpperCase();
+  }
+
+  // 4. Si plusieurs mots, prendre la première lettre du premier et du dernier mot
+  const firstInitial = words[0][0] || '';
+  const lastInitial = words[words.length - 1][0] || '';
+
+  return `${firstInitial}${lastInitial}`.toUpperCase();
+};

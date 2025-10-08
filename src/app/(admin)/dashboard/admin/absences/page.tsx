@@ -1,15 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/no-unescaped-entities */
 'use client'
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,14 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,9 +23,7 @@ import {
 
 import {
   FileText,
-  Filter,
   Search,
-  Download,
   Loader2,
   MoreHorizontal,
   Eye,
@@ -48,133 +31,90 @@ import {
   XCircle,
   Clock,
   Calendar,
-  MessageSquare,
-  Check,
-  X,
+  FilterIcon,
 } from "lucide-react";
 
 // Import des fonctions et types
 import { formatDateToText, getStatusColor } from "@/lib/utils";
-import { showToast } from "@/components/ui/showToast";
-import { getAbsencesDetail, getAbsencesList } from "@/actions/attendeesAction";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
-import { IGetAbsencesListRequest, IGetAcademicYearsSchedulesForCurriculum, IGetJustificationDetail } from "@/types/planificationType";
 import { useFactorizedProgramStore } from "@/store/programStore";
-import { getListAcademicYearsSchedulesForCurriculum } from "@/actions/programsAction";
 import { IGetStudentAbsence } from "@/types/absenceTypes";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { DialogReviewJustification } from "@/components/features/attendee/DialogReviewJustification";
+import PageHeader from "@/layout/PageHeader";
+import ContentLayout from "@/layout/ContentLayout";
+import { Combobox } from "@/components/ui/Combobox";
+import { useAbsenceData } from "@/hooks/feature/attendance/useAbsenceData";
 
 export default function AdminAbsenceDashboard() {
   const [selectedCurriculum, setSelectedCurriculum] = useState<string | undefined>(undefined);
   const [selectedSchedule, setSelectedSchedule] = useState<string | undefined>(undefined);
-  const [scheduleList, setScheduleList] = useState<IGetAcademicYearsSchedulesForCurriculum[]>([]);
   const { factorizedPrograms } = useFactorizedProgramStore();
-  const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
-  const [isLoadingData, setIsLoadingData] = useState(false);
-  const { academicYears, selectedAcademicYear, setSelectedAcademicYear } = useAcademicYearStore();
-  const [absences, setAbsences] = useState<IGetStudentAbsence[]>([]);
+  const { selectedAcademicYear } = useAcademicYearStore();
 
   const [selectedAbsence, setSelectedAbsence] = useState<IGetStudentAbsence | null>(null);
-  const [selectedJustification, setSelectedJustification] = useState<IGetJustificationDetail | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [reviewData, setReviewData] = useState({
-    action: '' as 'APPROVE' | 'REJECT' | '',
-    comment: ''
-  });
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [isLoadingJustification, setIsLoadingJustification] = useState(false);
 
-  const fetchListAcademicYearsSchedulesForCurriculum = async (curriculum_code: string, academic_year_code: string) => {
-    // Logique pour charger les séquences...
-    const result = await getListAcademicYearsSchedulesForCurriculum(curriculum_code, academic_year_code);
-    if (result.code === 'success') {
-      setScheduleList(result.data.body);
-    }
-  }
+  // Utilisation du custom hook
+  const {
+    absences,
+    scheduleList,
+    isLoadingData,
+    hasSearched,
+    selectedJustification,
+    loadAbsences,
+    loadJustificationDetail,
+    handleReviewJustification,
+    setSelectedJustification
+  } = useAbsenceData(selectedCurriculum, selectedSchedule, selectedAcademicYear);
 
-  const loadStudentAbsences = useCallback(async () => {
-    if (selectedCurriculum && selectedSchedule) {
-      setIsLoadingData(true);
-      const payload: IGetAbsencesListRequest = {
-        curriculumn_code: selectedCurriculum,
-        limit: 100,
-        offset: 0,
-        schedule_code: selectedSchedule
-      };
-      const result = await getAbsencesList(payload);
-      if (result.code === 'success') {
-        setAbsences(result.data.body);
-      } else {
-        setAbsences([]);
-        showToast({
-          variant: "error-solid",
-          message: "Erreur",
-          description: "Impossible de charger les absences.",
-        });
-      }
-      setIsLoadingData(false);
-    }
-  }, [selectedCurriculum, selectedSchedule]);
+  console.log('--absences', absences)
+  console.log('--selectedJustification', selectedJustification)
+  // Mémorisation de la liste des curriculums
+  const curriculumList = useMemo(() =>
+    factorizedPrograms.flatMap((fp) => fp.curriculums),
+    [factorizedPrograms]
+  );
 
-  useEffect(() => {
-    if (selectedCurriculum && selectedAcademicYear) {
-      fetchListAcademicYearsSchedulesForCurriculum(selectedCurriculum, selectedAcademicYear);
-    }
-  }, [selectedAcademicYear, selectedCurriculum]);
-
-  // Fonctions de gestion des actions
+  // Fonction pour voir les détails
   const handleViewDetails = async (absence: IGetStudentAbsence) => {
-    console.log('-->absence', absence)
-    const result = await getAbsencesDetail(absence.absence_code);
-    if(result.code === 'success' && result.data.body) {
-      setSelectedJustification(result.data.body);
+    setSelectedAbsence(absence);
+    setIsReviewDialogOpen(true);
+    setIsLoadingJustification(true);
+
+    await loadJustificationDetail(absence.absence_code);
+    setIsLoadingJustification(false);
+  };
+
+  // Fonction pour soumettre la review
+  const handleReviewSubmit = async (action: 'APPROVE' | 'REJECT', comment: string) => {
+    if (!selectedJustification) return;
+
+    const success = await handleReviewJustification(
+      action,
+      selectedJustification.justification.justification_code,
+      comment
+    );
+
+    if (success) {
+      setIsReviewDialogOpen(false);
+      setSelectedAbsence(null);
+      setSelectedJustification(null);
     }
-    console.log('-->absence detail', result);
-    setSelectedAbsence(absence);
-    setIsDetailModalOpen(true);
   };
 
-  const handleApprove = (absence: IGetStudentAbsence) => {
-    setSelectedAbsence(absence);
-    setIsApproveModalOpen(true);
+  // Fermeture du dialog
+  const handleDialogClose = (open: boolean) => {
+    setIsReviewDialogOpen(open);
+    if (!open) {
+      setSelectedAbsence(null);
+      setSelectedJustification(null);
+    }
   };
 
-  const handleReject = (absence: IGetStudentAbsence) => {
-    setSelectedAbsence(absence);
-    setIsRejectModalOpen(true);
-  };
-
-  const confirmApprove = () => {
-    if (!selectedAbsence) return;
-    // TODO: Implémenter la logique d'appel API pour approuver l'absence
-    console.log("Approving absence:", selectedAbsence.absence_code);
-    showToast({ variant: "success-solid", message: "Absence approuvée avec succès." });
-    setIsApproveModalOpen(false);
-    setSelectedAbsence(null);
-    // Optionnel: Recharger les données pour refléter le changement de statut
-    // loadStudentAbsences(); 
-  };
-
-  const confirmReject = () => {
-    if (!selectedAbsence) return;
-    // TODO: Implémenter la logique d'appel API pour rejeter l'absence
-    console.log("Rejecting absence:", selectedAbsence.absence_code);
-    showToast({ variant: "error-solid", message: "Absence rejetée." });
-    setIsRejectModalOpen(false);
-    setSelectedAbsence(null);
-     // Optionnel: Recharger les données pour refléter le changement de statut
-    // loadStudentAbsences();
-  };
-
-  const handleReviewSubmit = async () => {
-    
-  };
-  // Définition des colonnes pour la ResponsiveTable
-  const absenceColumns: TableColumn<IGetStudentAbsence>[] = [
+  // Colonnes du tableau mémorisées
+  const absenceColumns: TableColumn<IGetStudentAbsence>[] = useMemo(() => [
     {
       key: "last_name",
       label: "Étudiant",
@@ -215,7 +155,7 @@ export default function AdminAbsenceDashboard() {
       key: "status_code",
       label: "Statut",
       render: (status) => {
-        return <Badge className={getStatusColor(status) + "capitalize"}>{status?.toLowerCase() || 'N/A'}</Badge>;
+        return <Badge className={getStatusColor(status) + " capitalize"}>{status?.toLowerCase() || 'N/A'}</Badge>;
       },
     },
     {
@@ -236,11 +176,17 @@ export default function AdminAbsenceDashboard() {
               Voir les détails
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleApprove(absence)} className="text-green-600 focus:text-green-700">
+            <DropdownMenuItem
+              onClick={() => handleViewDetails(absence)}
+              className="text-green-600 focus:text-green-700"
+            >
               <CheckCircle className="mr-2 h-4 w-4" />
               Approuver
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleReject(absence)} className="text-red-600 focus:text-red-700">
+            <DropdownMenuItem
+              onClick={() => handleViewDetails(absence)}
+              className="text-red-600 focus:text-red-700"
+            >
               <XCircle className="mr-2 h-4 w-4" />
               Rejeter
             </DropdownMenuItem>
@@ -248,228 +194,114 @@ export default function AdminAbsenceDashboard() {
         </DropdownMenu>
       ),
     },
-  ];
+  ], []);
 
   return (
-    <div className="p-6">
+    <div>
       <div className=" mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Gestion des Absences</h1>
-            <p className="text-muted-foreground mt-1">
-              Vue d'ensemble et traitement des absences des étudiants.
-            </p>
-          </div>
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            Exporter
-          </Button>
-        </div>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Filter className="h-5 w-5" />
-                Filtres
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Select value={selectedCurriculum} onValueChange={setSelectedCurriculum}>
-                  <SelectTrigger className="w-full"><SelectValue placeholder="Curriculum" /></SelectTrigger>
-                  <SelectContent className="w-full">
-                    {curriculumList.map((c) => (
-                      <SelectItem key={c.curriculum_code} value={c.curriculum_code}>{c.curriculum_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={selectedSchedule} onValueChange={setSelectedSchedule}>
-                  <SelectTrigger className="w-full"><SelectValue placeholder="Séquence" /></SelectTrigger>
-                  <SelectContent className="w-full">
-                    {scheduleList.map((ays) => (
-                      <SelectItem key={ays.schedule_code} value={ays.schedule_code}>{ays.sequence_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button onClick={loadStudentAbsences} disabled={isLoadingData || !selectedCurriculum || !selectedSchedule}>
-                  {isLoadingData ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-                  Charger
-                </Button>
-              </div>
+        <PageHeader
+          title="GESTION DES ABSCENCES"
+          description="Vue d'ensemble et traitement des absences des étudiants."
+        />
+        <div className="p-6 space-y-6">
+          <ContentLayout
+            icon={<FilterIcon className="h-6 w-6" />}
+            title="Filtres"
+            description="Affinez les résultats en filtrant par curriculum et séquence, puis chargez les données correspondantes."
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Combobox
+                options={curriculumList.map(curriculum => ({
+                    value: curriculum.curriculum_code,
+                    label: curriculum.curriculum_name
+                }))}
+                value={selectedCurriculum}
+                onChange={setSelectedCurriculum}
+                placeholder="Sélectionner un curriculum"
+                className='py-5'
+              />
+              <Select value={selectedSchedule} onValueChange={setSelectedSchedule}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="Séquence" /></SelectTrigger>
+                <SelectContent className="w-full">
+                  {scheduleList.map((ays) => (
+                    <SelectItem key={ays.schedule_code} value={ays.schedule_code}>{ays.sequence_name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button onClick={loadAbsences} disabled={isLoadingData || !selectedCurriculum || !selectedSchedule} variant={'info'}>
+                {isLoadingData ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+                Charger
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          </ContentLayout>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Liste des Absences
-              </span>
-              <Badge variant="secondary">{absences.length} absence(s)</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveTable
-              columns={absenceColumns}
-              data={absences}
-              searchKey={["last_name", "first_name", "student_number", "course_unit_name"]}
-              paginate={10}
-            />
-          </CardContent>
-        </Card>
+
+          <ContentLayout
+            title="Liste des Absences"
+            description={`${absences.length} absence(s)`}
+          >
+            {isLoadingData ? (
+              <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <div className="text-center space-y-2">
+                  <p className="text-lg font-medium">Chargement des absences...</p>
+                  <p className="text-sm text-muted-foreground">Veuillez patienter pendant la récupération des données</p>
+                </div>
+              </div>
+            ) : !hasSearched ? (
+              <div className="border-2 border-dashed rounded-xl bg-blue-50/50">
+                <div className="flex flex-col items-center justify-center p-10 text-center space-y-4">
+                  <div className="rounded-full bg-background p-5 border shadow-sm">
+                    <Search className="h-10 w-10 text-muted-foreground" />
+                  </div>
+                  <div className="max-w-md">
+                    <h3 className="text-lg font-semibold text-card-foreground">
+                      Commencez votre recherche d'absences
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Pour afficher les données, veuillez sélectionner un{' '}
+                      <span className="font-semibold text-primary/90">curriculum</span> et une{' '}
+                      <span className="font-semibold text-primary/90">séquence</span> dans les filtres
+                      ci-dessus, puis cliquez sur{' '}
+                      <span className="font-semibold text-primary/90">Charger</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : absences.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                <div className="rounded-full bg-muted p-6">
+                  <FileText className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <div className="text-center space-y-2 max-w-md">
+                  <p className="text-lg font-medium">Aucune absence trouvée</p>
+                  <p className="text-sm text-muted-foreground">
+                    Aucune absence n'a été enregistrée pour le curriculum et la séquence sélectionnés. Essayez de modifier vos filtres de recherche.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <ResponsiveTable
+                columns={absenceColumns}
+                data={absences}
+                searchKey={["last_name", "first_name", "student_number", "course_unit_name"]}
+                paginate={10}
+              />
+            )}
+          </ContentLayout>
+        </div>
       </div>
 
-    
-
-      {
-        (selectedAbsence && selectedJustification) && 
-        <>
-
-          <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-            <DialogContent className="sm:max-w-2xl">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  {selectedAbsence?.status_code === 'PENDING' ? (
-                    <>
-                      <MessageSquare className="h-5 w-5" />
-                      Traiter la justification
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="h-5 w-5" />
-                      Détails de la justification
-                    </>
-                  )}
-                </DialogTitle>
-                <DialogDescription>
-                  {selectedAbsence && (
-                    <div className="space-y-2 ">
-                      <div className="flex items-center gap-4">
-                        <span className="font-medium">{selectedAbsence.first_name} {selectedAbsence.last_name}</span>
-                        <span>•</span>
-                        <span>{selectedAbsence.status_code}</span>
-                        <span>•</span>
-                        <span>{selectedAbsence.course_unit_name}</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-gray-600">
-                        <span>{formatDateToText(selectedAbsence.recorded_at)}</span>
-                        <span>•</span>
-                        <span>{selectedAbsence.start_time} - </span>
-                      </div>
-                    </div>
-                  )}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-6">
-                {/* Détails de l'étudiant */}
-
-                {/* Détails de la justification */}
-                {/* {selectedJustification?.absence_status !== 'NOT_SUBMITTED' && ( */}
-                  <div className="space-y-4">
-                    <div>
-                      <Label className=" font-medium text-gray-700">Motif de l'absence</Label>
-                      <div className="mt-1 p-3 bg-white border rounded-md ">
-                        {selectedJustification?.justification?.reason}
-                      </div>
-                    </div>
-
-                  </div>
-
-                {/* Formulaire de traitement pour les justifications en attente */}
-                {/* {selectedAbsence?.status_code === 'PENDING' && ( */}
-                  <div className="space-y-4 p-4 border border-blue-200 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-blue-900">Décision</h4>
-                    
-                    <div>
-                      <Label className=" font-medium text-gray-700">Action *</Label>
-                      <Select 
-                        value={reviewData.action} 
-                        onValueChange={(value: 'APPROVE' | 'REJECT') => setReviewData(prev => ({ ...prev, action: value }))}
-                      >
-                        <SelectTrigger className="mt-1 w-full">
-                          <SelectValue placeholder="Sélectionnez une action" />
-                        </SelectTrigger>
-                        <SelectContent className="w-full">
-                          <SelectItem value="APPROVE">
-                            <div className="flex items-center gap-2">
-                              <Check className="h-4 w-4 text-green-600" />
-                              Approuver la justification
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="REJECT">
-                            <div className="flex items-center gap-2">
-                              <X className="h-4 w-4 text-red-600" />
-                              Rejeter la justification
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label className=" font-medium text-gray-700">Commentaire pour l'étudiant *</Label>
-                      <Textarea
-                        placeholder={reviewData.action === 'APPROVE' 
-                          ? "Expliquez pourquoi la justification est acceptée..."
-                          : "Expliquez pourquoi la justification est rejetée et donnez des conseils..."
-                        }
-                        value={reviewData.comment}
-                        onChange={(e) => setReviewData(prev => ({ ...prev, comment: e.target.value }))}
-                        className="mt-1"
-                        rows={4}
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Ce commentaire sera visible par l'étudiant. Soyez constructif et précis.
-                      </p>
-                    </div>
-                  </div>
-                {/* )} */}
-              </div>
-
-              <DialogFooter className="gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsReviewDialogOpen(false)}
-                  disabled={isSubmitting}
-                >
-                  {selectedAbsence?.status_code === 'PENDING' ? 'Annuler' : 'Fermer'}
-                </Button>
-                
-                {selectedAbsence?.status_code === 'PENDING' && (
-                  <Button
-                    onClick={handleReviewSubmit}
-                    disabled={isSubmitting || !reviewData.action || !reviewData.comment.trim()}
-                    className={`flex items-center gap-2 ${
-                      reviewData.action === 'APPROVE' 
-                        ? 'bg-green-600 hover:bg-green-700' 
-                        : reviewData.action === 'REJECT'
-                        ? 'bg-red-600 hover:bg-red-700'
-                        : ''
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : reviewData.action === 'APPROVE' ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <X className="h-4 w-4" />
-                    )}
-                    {isSubmitting 
-                      ? 'Traitement...' 
-                      : reviewData.action === 'APPROVE' 
-                      ? 'Approuver' 
-                      : 'Rejeter'
-                    }
-                  </Button>
-                )}
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        
-        </>
-      }
+      {selectedAbsence && (
+        <DialogReviewJustification
+          onOpenChange={handleDialogClose}
+          open={isReviewDialogOpen}
+          absence={selectedAbsence}
+          justification={selectedJustification}
+          isLoading={isLoadingJustification}
+          onSubmit={handleReviewSubmit}
+        />
+      )}
     </div>
   );
 }

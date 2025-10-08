@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 interface ContentLayoutProps {
   /** Titre principal du layout */
   title?: string;
+  /** AJOUT: Icône optionnelle à afficher à gauche du titre */
+  icon?: ReactNode;
   /** Description optionnelle sous le titre */
-  description?: string;
+  description?: string | ReactNode;
   /** Actions à afficher dans le header (boutons, etc.) */
   actions?: ReactNode;
   /** Contenu principal du layout */
@@ -23,6 +25,7 @@ interface ContentLayoutProps {
 
 const ContentLayout: React.FC<ContentLayoutProps> = ({
   title,
+  icon, // AJOUT: Récupération de la nouvelle prop
   description,
   actions,
   children,
@@ -34,25 +37,33 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
   return (
     <div className={cn("", className)}>
       <Card className={cn("w-full", cardClassName)}>
-        {/* {title || description || actions &&  */}
+        {/* Afficher le header seulement si un titre, une icône, une description ou des actions sont présents */}
+        {(title || icon || description || actions) && (
           <CardHeader className={cn(
             "flex flex-row items-center justify-between space-y-0 pb-6",
             headerClassName
           )}>
-            {title && <div className="space-y-1 flex-1">
-              <h1 className="text-xl font-bold tracking-tight">{title}</h1>
-              {description && (
-                <p className="text-sm text-muted-foreground">{description}</p>
-              )}
-            </div>}
+            {/* MODIFICATION: Conteneur flex pour l'icône et le titre/description */}
+            <div className="flex flex-1 items-start gap-3">
+              {/* Affichage conditionnel de l'icône */}
+              {icon}
+              
+              {/* Le titre et la description ne prennent plus toute la largeur (flex-1) car c'est le rôle du conteneur parent */}
+              <div className="space-y-1">
+                {title && <h1 className="text-xl font-bold tracking-tight">{title}</h1>}
+                {description && (
+                  <div className="text-sm text-muted-foreground">{description}</div>
+                )}
+              </div>
+            </div>
             
             {actions && (
-              <div className="flex items-center gap-2 ml-6">
+              <div className="flex items-center gap-2 ml-4"> {/* ml-4 pour l'espacement */}
                 {actions}
               </div>
             )}
           </CardHeader>
-        {/* } */}
+        )}
 
         <CardContent className={cn("pt-0", contentClassName)}>
           {children}

@@ -68,11 +68,12 @@ export function Combobox({
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
-                  // MODIFICATION : Utiliser une clé stable et unique
                   key={option.value}
-                  value={option.value}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue)
+                  // CORRECTION: Utiliser le label pour la recherche et ajouter keywords
+                  value={option.label}
+                  keywords={[option.value, option.label]}
+                  onSelect={() => {
+                    onChange(option.value)
                     setOpen(false)
                   }}
                 >

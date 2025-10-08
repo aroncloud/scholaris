@@ -193,7 +193,7 @@ export const DialogAssignUEToTeacher: React.FC<DialogAssignUEToTeacherProps> = (
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       
-      <DialogContent className="max-w-7xl md:min-w-3xl max-h-[90vh] overflow-hidden">
+      <DialogContent className=" md:min-w-3xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <BookOpen className="w-5 h-5" />

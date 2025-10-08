@@ -24,6 +24,9 @@ export interface IGetSchedule {
   session_title: string;
   recurrence_rule: string | null;
   parent_session_code: string | null;
+  "resource_name": string,
+  "teacher_first_name": string,
+  "teacher_last_name": string
 }
 
 
@@ -115,29 +118,30 @@ export interface IGetAbsencesListRequest {
 }
 
 
-interface IJustificationDetail {
-  justification_code: string;
-  justification_status: string; // Vous pourriez utiliser un type plus spécifique comme 'SUBMITTED' | 'APPROVED' | 'REJECTED'
-  reason: string;
-  submitted_at: string;
-  processed_at: string | null;
-  rejection_reason: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  documents: any[]; // Remplacer 'any[]' par l'interface des documents si elle existe (ex: IDocument[])
-}
-
-interface ISessionDetail {
-  session_code: string;
-  session_title: string;
-  start_time: string;
-  course_unit_name: string;
-  teacher_name: string;
-}
 
 export interface IGetJustificationDetail {
   absence_code: string;
-  absence_status: string; // Idem, un type plus spécifique serait préférable
-  recorded_at: string;
-  session: ISessionDetail;
-  justification: IJustificationDetail;
+  absence_status: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | string; // tu peux ajuster les statuts connus
+  recorded_at: string; // format "YYYY-MM-DD HH:mm:ss"
+  session: {
+    session_code: string;
+    session_title: string;
+    start_time: string; // format ISO "YYYY-MM-DDTHH:mm:ssZ"
+    course_unit_name: string;
+    teacher_name: string;
+  };
+  justification: {
+    justification_code: string;
+    justification_status: 'SUBMITTED' | 'APPROVED' | 'REJECTED' | string;
+    reason: string;
+    submitted_at: string;
+    processed_at: string | null;
+    rejection_reason: string | null;
+    documents: {
+      content_code: string;
+      title: string;
+      content_url: string;
+      type_code: 'MEDICAL_CERTIFICATE' | 'OTHER' | string;
+    }[];
+  };
 }

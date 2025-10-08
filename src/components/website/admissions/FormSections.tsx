@@ -488,24 +488,27 @@ export const DocumentsForm: React.FC<StepFormProps> = ({
   <div className="space-y-6">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FileUpload
-        label="Photo d'identité (Recto)"
-        documentType="photoIdentiteRecto"
-        file={formData.documents.photoIdentiteRecto}
+        label="CNI Recto"
+        documentType="cniRecto"
+        required
+        file={formData.documents.cniRecto}
         onFileChange={handleFileChange}
-        error={errors.photoIdentiteRecto}
+        error={errors.cniRecto}
         description="Face avant de votre carte d'identité"
       />
       <FileUpload
-        label="Photo d'identité (Verso)"
-        documentType="photoIdentiteVerso"
-        file={formData.documents.photoIdentiteVerso}
+        label="CNI Verso"
+        documentType="cniVerso"
+        required
+        file={formData.documents.cniVerso}
         onFileChange={handleFileChange}
-        error={errors.photoIdentiteVerso}
+        error={errors.cniVerso}
         description="Face arrière de votre carte d'identité"
       />
       <FileUpload
-        label="Photo 4x4"
+        label="Photo d'identité 4x4"
         documentType="photo4x4"
+        required
         file={formData.documents.photo4x4}
         onFileChange={handleFileChange}
         error={errors.photo4x4}
@@ -514,30 +517,47 @@ export const DocumentsForm: React.FC<StepFormProps> = ({
       <FileUpload
         label="Relevé de notes"
         documentType="releveNotes"
+        required
         file={formData.documents.releveNotes}
         onFileChange={handleFileChange}
         error={errors.releveNotes}
+        description="Votre relevé de notes le plus récent"
       />
       <FileUpload
         label="Diplôme"
         documentType="diplome"
+        required
         file={formData.documents.diplome}
         onFileChange={handleFileChange}
         error={errors.diplome}
+        description="Copie de votre diplôme"
       />
       <FileUpload
         label="Acte de naissance"
         documentType="acteNaissance"
+        required
         file={formData.documents.acteNaissance}
         onFileChange={handleFileChange}
         error={errors.acteNaissance}
+        description="Copie de votre acte de naissance"
       />
       <FileUpload
-        label="Attestation de réussite au concours"
-        documentType="attestationConcours"
-        file={formData.documents.attestationConcours}
+        label="Page d'entente du résultat de concours"
+        documentType="pageResultatConcours"
+        required
+        file={formData.documents.pageResultatConcours}
         onFileChange={handleFileChange}
-        error={errors.attestationConcours}
+        error={errors.pageResultatConcours}
+        description="Page montrant l'entente du résultat"
+      />
+      <FileUpload
+        label="Page avec votre nom du résultat de concours"
+        documentType="pageNomConcours"
+        required
+        file={formData.documents.pageNomConcours}
+        onFileChange={handleFileChange}
+        error={errors.pageNomConcours}
+        description="Page où apparaît votre nom"
       />
     </div>
   </div>
