@@ -1,6 +1,11 @@
 // app/api/upload-image/route.ts
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { NextResponse } from "next/server";
+// import { NextResponse } from "next/server";
+export interface UploadResult {
+  success: boolean;
+  url?: string;
+  error?: string;
+}
 
 const R2 = new S3Client({
   region: "auto",
@@ -15,7 +20,7 @@ export async function uploadFile(file: File) {
 
   try {
     if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+      return {success: false, error: "No file provided"}
     }
   
     const buffer = Buffer.from(await file.arrayBuffer());
