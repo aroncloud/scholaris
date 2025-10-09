@@ -204,9 +204,9 @@ export async function importStudentsInBulkJSON(payload: IImportStudentApplicatio
 export async function createNewAnnualEnrollment(student_code: string, academic_year_code: string, curriculum_code: string) {
     try {
         const session = await verifySession();
-        
+
         const token = session.accessToken;
-        
+
         const response = await axios.post(`${process.env.STUDENT_WORKER_ENDPOINT}/api/students/${student_code}/enrollments`, {
             "academic_year_code": academic_year_code,
             "curriculum_code": curriculum_code,
@@ -217,7 +217,7 @@ export async function createNewAnnualEnrollment(student_code: string, academic_y
                 'Content-Type': 'application/json',
             },
         });
-        
+
         return {
             code: 'success',
             error: null,
@@ -225,6 +225,31 @@ export async function createNewAnnualEnrollment(student_code: string, academic_y
         }
     } catch (error: unknown) {
         console.log('-->createNewAnnualEnrollment.error')
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+
+export async function downloadDocument(documentUrl: string) {
+    console.log('-->downloadDocument', documentUrl);
+    try {
+        const response = await axios.get(documentUrl, {
+            responseType: 'arraybuffer',
+        });
+
+        const contentType = response.headers['content-type'] || 'application/octet-stream';
+        const base64 = Buffer.from(response.data).toString('base64');
+
+        return {
+            code: 'success',
+            error: null,
+            data: {
+                content: base64,
+                contentType: contentType
+            }
+        };
+    } catch (error: unknown) {
+        console.log('-->downloadDocument.error', error);
         const errResult = actionErrorHandler(error);
         return errResult;
     }

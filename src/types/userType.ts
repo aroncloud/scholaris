@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Interface pour les types de relation
 export interface IRelative {
   relationship_type_code: string;
@@ -18,14 +19,43 @@ export interface ICurriculum {
   program_name: string;
 }
 
-// Interface pour les documents
+/**
+ * Interface représentant un document téléchargé dans le système (ex: CNI, Acte de Naissance).
+ * Ce schéma est basé sur l'objet JSON fourni.
+ */
 export interface IDocument {
-  // À définir selon vos besoins
-  document_id?: string;
-  document_type?: string;
-  document_name?: string;
-  document_url?: string;
-  uploaded_at?: string;
+    /** Code unique du contenu, souvent une combinaison de l'entité parente et du type de document. */
+    content_code: string;
+
+    /** Code identifiant le type de document (ex: 'CNI_RECTO', 'BIRTH_CERTIFICATE'). */
+    type_code: string;
+
+    /** Titre lisible du document pour l'affichage (ex: 'CNI Recto'). */
+    title: string;
+
+    /** URL où le document est stocké et peut être consulté. */
+    content_url: string;
+
+    /** Code de l'entité parente à laquelle ce document est lié (ex: le code de l'étudiant). */
+    parent_code: string;
+
+    /** Niveau ou contexte d'application du document (ex: 'STUDENT_APPLICATION'). */
+    level_code: string;
+
+    /** Statut actuel du document (ex: 'PENDING', 'VALIDATED', 'REFUSED'). */
+    status_code: string;
+
+    /** Description ou notes supplémentaires. Est null si non défini. */
+    description: string | null;
+
+    /** Métadonnées additionnelles sous forme d'objet JSON. Est null si non défini. */
+    metadata: Record<string, any> | null;
+
+    /** Date et heure de l'upload du document. */
+    uploaded_at: string;
+
+    /** Indicateur d'activité du document (1 pour actif, 0 pour inactif). */
+    is_active: 1 | 0; // Utilisation de l'union type pour les booléens numériques
 }
 
 // Interface principale pour le détail de l'application

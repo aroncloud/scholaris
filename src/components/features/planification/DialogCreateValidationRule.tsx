@@ -183,7 +183,7 @@ export function DialogCreateValidationRule({
             >
               Annuler
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} variant={'info'}>
               {isSubmitting ? "Enregistrement..." : "Enregistrer la règle"}
             </Button>
           </DialogFooter>

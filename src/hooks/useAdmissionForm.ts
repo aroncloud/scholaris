@@ -149,7 +149,7 @@ export const useAdmissionForm = () => {
 
     setIsSubmitting(true);
     try {
-      console.log("Formulaire soumis :", JSON.stringify(formData));
+      // console.log("Formulaire soumis :", formData);
 
       // Vérifier que tous les documents sont présents
       if (!formData.documents.cniRecto || !formData.documents.cniVerso ||
@@ -170,7 +170,7 @@ export const useAdmissionForm = () => {
         acteNaissance: formData.documents.acteNaissance,
         pageResultatConcours: formData.documents.pageResultatConcours,
         pageNomConcours: formData.documents.pageNomConcours,
-        applicationCode
+        matricule: applicationCode
       });
 
       if (uploadResult.code !== "success" || !uploadResult.data) {
@@ -221,7 +221,7 @@ export const useAdmissionForm = () => {
         ],
         documents: uploadResult.data
       };
-
+      console.log('-->payload', payload)
       const result = await submitAdmissionRequest(payload, applicationCode);
       console.log('-->submitAdmissionRequest.result', result);
 

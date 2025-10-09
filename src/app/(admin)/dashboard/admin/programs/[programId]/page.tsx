@@ -468,7 +468,7 @@ export default function EnrollmentDetailPage() {
                                                                     </Badge>
                                                                     {academicYear.academic_year_status === "IN_PROGRESS" && (
                                                                         <Button 
-                                                                            variant="outline"
+                                                                            variant="info"
                                                                             size="sm"
                                                                             onClick={() => handlePlanRules(academicYear.academic_year_code)}
                                                                             className="flex items-center gap-1"

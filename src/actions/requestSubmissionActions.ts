@@ -39,7 +39,7 @@ interface UploadDocumentsParams {
     acteNaissance: File;
     pageResultatConcours: File;
     pageNomConcours: File;
-    applicationCode: string;
+    matricule: string;
 }
 
 export async function uploadApplicationDocuments(params: UploadDocumentsParams) {
@@ -53,16 +53,16 @@ export async function uploadApplicationDocuments(params: UploadDocumentsParams) 
             acteNaissance,
             pageResultatConcours,
             pageNomConcours,
-            applicationCode
+            matricule
         } = params;
 
-        const basePath = `${process.env.APPLICATION_FILE_NAME_SRC}/${applicationCode}`;
+        const basePath = `${process.env.STUDENT_FILE_NAME_SRC}/${matricule}/enrollment`;
 
         // Définir les chemins pour chaque document
         const cniRectoPath = `${basePath}/CNI_RECTO${getExtension(cniRecto.name)}`;
         const cniVersoPath = `${basePath}/CNI_VERSO${getExtension(cniVerso.name)}`;
         const photo4x4Path = `${basePath}/PHOTO4X4${getExtension(photo4x4.name)}`;
-        const releveNotesPath = `${basePath}/RELEVE_NOTES${getExtension(releveNotes.name)}`;
+        const releveNotesPath = `${basePath}/MARK_SHEET${getExtension(releveNotes.name)}`;
         const diplomePath = `${basePath}/DIPLOME${getExtension(diplome.name)}`;
         const acteNaissancePath = `${basePath}/BIRTH_CERTIFICATE${getExtension(acteNaissance.name)}`;
         const pageResultatConcoursPath = `${basePath}/CONTENT_RESULT_PAGE${getExtension(pageResultatConcours.name)}`;
@@ -98,42 +98,42 @@ export async function uploadApplicationDocuments(params: UploadDocumentsParams) 
             {
                 type_code: "CNI_RECTO",
                 title: "CNI Recto",
-                content_url: uploadedCniRecto.filePath!
+                content_url: process.env.CLOUDFLARE_FILE_BASE_URL + '/' + uploadedCniRecto.filePath!
             },
             {
                 type_code: "CNI_VERSO",
                 title: "CNI Verso",
-                content_url: uploadedCniVerso.filePath!
+                content_url: process.env.CLOUDFLARE_FILE_BASE_URL + '/' + uploadedCniVerso.filePath!
             },
             {
                 type_code: "PHOTO4X4",
                 title: "Photo 4x4",
-                content_url: uploadedPhoto4x4.filePath!
+                content_url: process.env.CLOUDFLARE_FILE_BASE_URL + '/' + uploadedPhoto4x4.filePath!
             },
             {
-                type_code: "RELEVE_NOTES",
+                type_code: "MARK_SHEET",
                 title: "Relevé de notes",
-                content_url: uploadedReleveNotes.filePath!
+                content_url: process.env.CLOUDFLARE_FILE_BASE_URL + '/' + uploadedReleveNotes.filePath!
             },
             {
                 type_code: "DIPLOME",
                 title: "Diplôme",
-                content_url: uploadedDiplome.filePath!
+                content_url: process.env.CLOUDFLARE_FILE_BASE_URL + '/' + uploadedDiplome.filePath!
             },
             {
                 type_code: "BIRTH_CERTIFICATE",
                 title: "Acte de naissance",
-                content_url: uploadedActeNaissance.filePath!
+                content_url: process.env.CLOUDFLARE_FILE_BASE_URL + '/' + uploadedActeNaissance.filePath!
             },
             {
                 type_code: "CONTENT_RESULT_PAGE",
                 title: "Page d'entente du résultat de concours",
-                content_url: uploadedPageResultatConcours.filePath!
+                content_url: process.env.CLOUDFLARE_FILE_BASE_URL + '/' + uploadedPageResultatConcours.filePath!
             },
             {
                 type_code: "HEADER_RESULT_PAGE",
                 title: "Page avec le nom du résultat de concours",
-                content_url: uploadedPageNomConcours.filePath!
+                content_url: process.env.CLOUDFLARE_FILE_BASE_URL + '/' + uploadedPageNomConcours.filePath!
             }
         ];
 
