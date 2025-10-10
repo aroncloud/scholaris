@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, LucideIcon, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,6 +15,7 @@ interface PageHeaderProps {
     backLabel?: string;
     loading?: boolean;
     status?: React.ReactNode;
+    Icon?: LucideIcon
 }
 
 const PageHeader = ({ 
@@ -24,7 +25,8 @@ const PageHeader = ({
     backUrl,
     backLabel = "Retour",
     loading = false,
-    status
+    status,
+    Icon = Users
 }: PageHeaderProps) => {
     const router = useRouter();
 
@@ -83,16 +85,22 @@ const PageHeader = ({
                         )}
                         
                         <div className="min-w-0 flex gap-4 flex-nowrap items-center">
-                            <div className='flex flex-col'>
-                                <h1 className="text-xl font-semibold text-gray-900 truncate">
-                                    {title}
-                                </h1>
-                                {description && (
-                                    <p className="text-sm text-gray-500 mt-1">{description}</p>
-                                )}
+                            <div className='flex items-center gap-3'>
+                                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-lg">
+                                    <Icon className="w-6 h-6 text-white" />
+                                </div>
+                                <div className='flex flex-col'>
+                                    <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
+                                        {title}
+                                    </h1>
+                                    {description && (
+                                        <p className="text-gray-600 mt-1 font-medium">{description}</p>
+                                    )}
+                                </div>
                             </div>
                             {status && <div className="shrink-0">{status}</div>}
                         </div>
+                    
                     </div>
 
                     {/* Partie droite avec actions */}

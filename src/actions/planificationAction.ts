@@ -62,8 +62,8 @@ export async function cancelSession(session_code: string) {
     const token = session.accessToken;
 
     const response = await axios.patch(
-      `${process.env.TIMETABLE_WORKER_ENDPOINT}/api/sessions/${session_code}`,
-      {"status_code": "CANCELLED"},
+      `${process.env.TIMETABLE_WORKER_ENDPOINT}/api/sessions/${session_code}/status`,
+      {"status_code": "TERMINATED"},
       { headers: { Authorization: `Bearer ${token}` } }
     );
 

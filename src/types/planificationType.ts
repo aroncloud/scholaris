@@ -8,6 +8,11 @@ export interface ICreateSession {
   start_time: string;
   end_time: string;
   curriculum_code: string;
+  recurrence?: {
+    "frequency": "WEEKLY" | "MONTHLY ",
+    "count": 10,
+    byday: string[]//,"byday" : ["SU", "MO", "TU", "WE", "TH", "FR", "SA"] // optional
+  }
 }
 
 

@@ -45,7 +45,7 @@ export default function AdminLayout({
   }, [fetchPrograms, fetchTeacher, fetchClassrooms, fetchAcademicYears, user?.roles, initConfigs, setSelectedAcademicYear, getCurrentAcademicYear]);
 
   return (
-    <div className="min-h-screen xl:flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 xl:flex">
         {/* Sidebar */}
         <AppSidebar />
         <Backdrop />

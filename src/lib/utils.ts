@@ -126,6 +126,7 @@ export const getStatusColor = (status: string): string => {
     case "PENDING":
     case "PENDING_APPROVAL":
     case "EN_ATTENTE":
+    case "PENDING_REVIEW":
       return "bg-yellow-100 text-yellow-600 dark:bg-gray-700/20 dark:text-yellow-400";
 
     // Actif ou approuvé (succès, payé, inscrit)
@@ -136,6 +137,7 @@ export const getStatusColor = (status: string): string => {
     case "PAID":
     case "ACTIF":
     case "IN_PROGRESS":
+    case "JUSTIFIED":
       return "bg-green-100 text-green-600 dark:bg-gray-700/20 dark:text-green-400";
 
     // Progression / partiellement atteint
@@ -152,6 +154,7 @@ export const getStatusColor = (status: string): string => {
     // Statut spécial / exception
     case "EXEMPTED":
     case "PLANNED":
+    case "UNJUSTIFIED":
       return "bg-purple-100 text-purple-800 dark:bg-gray-700/20 dark:text-purple-400";
 
     // Annulé, rejeté, inactif, en échec

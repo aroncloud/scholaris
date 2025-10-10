@@ -16,13 +16,13 @@ import { DialogCreateSequence } from '../features/programs/Modal/DialogCreateSeq
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { DialogUpdateSequence } from '../features/programs/Modal/DialogUpdateSequence'
 import { DialogCreateDomain } from '../features/programs/Modal/DialogCreateDomain'
-import { Separator } from '../custom-ui/separator'
 import { DialogUpdateDomain } from '../features/programs/Modal/DialogUpdateDomain'
 import { DialogCreateModule } from '../features/programs/Modal/DialogCreateModule'
 import { DialogUpdateModule } from '../features/programs/Modal/DialogUpdateModule'
 import { DialogCreateUE } from '../features/programs/Modal/DialogCreateUE'
 import { Button } from '../ui/button'
 import { useRouter } from "@bprogress/next/app";
+import { Separator } from '../ui/separator'
 
 type MyComponentProps = {
   curriculum: ICurriculumDetail

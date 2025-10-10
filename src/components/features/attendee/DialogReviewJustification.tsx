@@ -58,8 +58,8 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
 
     const handleSubmit = async (action: 'APPROVE' | 'REJECT') => {
         if (action === 'REJECT' && !comment.trim()) {
-        alert("Le commentaire est requis pour rejeter une justification.");
-        return;
+            alert("Le commentaire est requis pour rejeter une justification.");
+            return;
         }
         
         setIsSubmitting(true);

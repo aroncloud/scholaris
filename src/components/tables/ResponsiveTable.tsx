@@ -115,6 +115,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const highPriorityColumns = columns.filter((col) => col.priority === 'high');
   const mediumPriorityColumns = columns.filter((col) => col.priority === 'medium');
@@ -147,6 +148,14 @@ export const ResponsiveTable = <T extends Record<string, any>>({
   useEffect(() => {
     setPage(1);
   }, [searchTerm, selectedFilters]);
+
+  const handlePageChange = (newPage: number) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setPage(newPage);
+      setTimeout(() => setIsTransitioning(false), 50);
+    }, 200);
+  };
 
   const startIndex = paginate ? (page - 1) * paginate : 0;
   const endIndex = paginate ? startIndex + paginate : filteredData.length;
@@ -224,7 +233,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
       </div>
 
       {/* Vue Mobile - Cartes */}
-      <div className="md:hidden space-y-3">
+      <div className={`md:hidden space-y-3 transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
         {isLoading ? (
           Array.from({ length: paginate || 5 }).map((_, index) => (
             <SkeletonCard key={index} />
@@ -323,7 +332,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+          <tbody className={`divide-y divide-gray-100 dark:divide-gray-700 transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {isLoading ? (
               Array.from({ length: paginate || 5 }).map((_, index) => (
                 <SkeletonRow key={index} columnsCount={columns.length} />
@@ -378,9 +387,9 @@ export const ResponsiveTable = <T extends Record<string, any>>({
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setPage((p) => Math.max(p - 1, 1))}
-            disabled={page === 1}
-            className="px-4 h-10 border-gray-200 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all"
+            onClick={() => handlePageChange(Math.max(page - 1, 1))}
+            disabled={page === 1 || isTransitioning}
+            className="px-4 h-10 border-gray-200 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all disabled:opacity-50"
           >
             {locale === "fr" ? "Précédent" : "Previous"}
           </Button>
@@ -392,9 +401,9 @@ export const ResponsiveTable = <T extends Record<string, any>>({
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-            disabled={page === totalPages}
-            className="px-4 h-10 border-gray-200 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all"
+            onClick={() => handlePageChange(Math.min(page + 1, totalPages))}
+            disabled={page === totalPages || isTransitioning}
+            className="px-4 h-10 border-gray-200 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all disabled:opacity-50"
           >
             {locale === "fr" ? "Suivant" : "Next"}
           </Button>

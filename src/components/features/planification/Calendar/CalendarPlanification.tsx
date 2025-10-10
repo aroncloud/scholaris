@@ -11,7 +11,7 @@ import {
   EventClickArg,
 } from "@fullcalendar/core";
 import { ICreateSession, IGetSchedule } from "@/types/planificationType";
-import { CALENDAR_COLORS } from "@/constant";
+import { CALENDAR_COLORS, SESSION_STATUS_TERMINATED } from "@/constant";
 import { format } from "date-fns";
 import { cancelSession, createSession, updateSession } from "@/actions/planificationAction";
 import { showToast } from "@/components/ui/showToast";
@@ -38,7 +38,7 @@ interface CalendarPlanificationProps {
 }
 
 export function convertIntoFullCalendarFormat(sessions: IGetSchedule[]): IFullCalendarEvent[] {
-  return sessions.map((session) => ({
+  return sessions.filter(session => (session.status_code != SESSION_STATUS_TERMINATED)).map((session) => ({
     id: session.session_code,
     title: session.session_title,
     start: new Date(session.start_time).toJSON(),

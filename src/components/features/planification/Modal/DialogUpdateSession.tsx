@@ -1,21 +1,15 @@
 "use client";
 
-import { useForm, Controller, useWatch } from "react-hook-form";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { useForm, Controller } from "react-hook-form";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 import { IFullCalendarEvent } from "@/components/features/planification/Calendar/CalendarPlanification";
 import { useClassroomStore } from "@/store/useClassroomStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useFactorizedProgramStore } from "@/store/programStore";
 import { useTeacherStore } from "@/store/useTeacherStore";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
@@ -23,6 +17,7 @@ import { getListAcademicYearsSchedulesForCurriculum, getUEListPerCurriculum } fr
 import { IGetAcademicYearsSchedulesForCurriculum } from "@/types/planificationType";
 import { IGetUECurriculum } from "@/types/programTypes";
 import { DateTimePicker } from "@/components/ui/DateTimePicker";
+import { Combobox } from "@/components/ui/Combobox";
 
 interface IUpdateSessionForm {
   curriculum_code: string;
@@ -44,6 +39,19 @@ interface DialogUpdateSessionProps {
   eventData: IFullCalendarEvent | null;
 }
 
+// Helper: Parse ISO datetime to time string (HH:mm:ss)
+const parseTime = (isoString: string | undefined, defaultTime: string): string => {
+  if (!isoString) return defaultTime;
+  const timePart = isoString.split("T")[1];
+  return timePart ? timePart.replace(/\..*$/, '') : defaultTime;
+};
+
+// Helper: Create datetime string from date and time
+const createDateTime = (date: Date | undefined, time: string): string => {
+  if (!date) return "";
+  return `${date.toISOString().split("T")[0]}T${time || "00:00:00"}`;
+};
+
 export function DialogUpdateSession({
   open,
   onOpenChange,
@@ -55,167 +63,94 @@ export function DialogUpdateSession({
   const { factorizedPrograms } = useFactorizedProgramStore();
   const { teacherList } = useTeacherStore();
   const { getCurrentAcademicYear } = useAcademicYearStore();
-  const currentAcademicYear = getCurrentAcademicYear();
 
   const [scheduleList, setScheduleList] = useState<IGetAcademicYearsSchedulesForCurriculum[]>([]);
   const [UEList, setUEList] = useState<IGetUECurriculum[]>([]);
+  const [isCanceling, setIsCanceling] = useState(false);
 
   const {
     register,
     handleSubmit,
     control,
     reset,
-    setValue,
+    watch,
     setError,
     clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm<IUpdateSessionForm>({
-    defaultValues: {
-      curriculum_code: "",
-      course_unit_code: "",
-      schedule_code: "",
-      teacher_user_code: "",
-      resource_code: "",
-      session_title: "",
-      start_time: "",
-      end_time: "",
-      academic_year_code: "",
-    },
-  });
+  } = useForm<IUpdateSessionForm>();
 
-  const selectedCurriculum = useWatch({
-    control,
-    name: "curriculum_code",
-  });
+  const [curriculumCode, startTime, endTime] = watch(["curriculum_code", "start_time", "end_time"]);
+  const isDisabled = isSubmitting || isCanceling;
+  const currentAcademicYear = getCurrentAcademicYear();
 
-  const selectedUE = useWatch({
-    control,
-    name: "course_unit_code",
-  });
+  // Memoize curriculum list
+  const curriculumList = useMemo(() =>
+    factorizedPrograms.flatMap((fp) => fp.curriculums),
+    [factorizedPrograms]
+  );
 
-  const selectedAcademicYear = useWatch({
-    control,
-    name: "academic_year_code",
-  });
+  // Fetch functions with useCallback
+  const fetchSchedules = useCallback(async (curriculum: string, academicYear: string) => {
+    const result = await getListAcademicYearsSchedulesForCurriculum(curriculum, academicYear);
+    if (result.code === 'success') setScheduleList(result.data.body);
+  }, []);
 
-  const startTime = useWatch({
-    control,
-    name: "start_time",
-  });
+  const fetchUEList = useCallback(async (curriculum: string) => {
+    const result = await getUEListPerCurriculum(curriculum);
+    if (result.code === 'success') setUEList(result.data.body);
+  }, []);
 
-  const endTime = useWatch({
-    control,
-    name: "end_time",
-  });
-
-  // Charger les données de l'événement
+  // Load event data
   useEffect(() => {
-    if (open && eventData) {
-      console.log('DialogUpdateSession - eventData:', eventData);
-      console.log('DialogUpdateSession - extendedProps:', eventData.extendedProps);
+    if (!open || !eventData) return;
 
-      // Récupérer les codes depuis extendedProps
-      const resourceCode = eventData.extendedProps?.resource_code ?? "";
-      const teacherCode = eventData.extendedProps?.teacher_user_code ?? "";
-      const curriculumCode = eventData.extendedProps?.curriculum_code ?? "";
-      const courseUnitCode = eventData.extendedProps?.course_unit_code ?? "";
-      const scheduleCode = eventData.extendedProps?.schedule_code ?? "";
+    const props = eventData.extendedProps || {};
+    reset({
+      curriculum_code: props.curriculum_code ?? "",
+      course_unit_code: props.course_unit_code ?? "",
+      schedule_code: props.schedule_code ?? "",
+      teacher_user_code: props.teacher_user_code ?? "",
+      resource_code: props.resource_code ?? "",
+      session_title: eventData.title ?? "",
+      start_time: eventData.start ?? "",
+      end_time: eventData.end ?? "",
+      academic_year_code: currentAcademicYear?.academic_year_code ?? "",
+    });
+  }, [open, eventData, reset, currentAcademicYear]);
 
-      console.log('Codes extracted:', {
-        resourceCode,
-        teacherCode,
-        curriculumCode,
-        courseUnitCode,
-        scheduleCode
+  // Load dependent data
+  useEffect(() => {
+    if (open && curriculumCode) {
+      fetchUEList(curriculumCode);
+      if (currentAcademicYear?.academic_year_code) {
+        fetchSchedules(curriculumCode, currentAcademicYear.academic_year_code);
+      }
+    }
+  }, [open, curriculumCode, currentAcademicYear, fetchUEList, fetchSchedules]);
+
+  // Validate time range
+  useEffect(() => {
+    if (!startTime || !endTime) return;
+
+    if (new Date(endTime) < new Date(startTime)) {
+      setError('end_time', {
+        type: 'manual',
+        message: 'La date/heure de fin doit être postérieure à la date/heure de début'
       });
-
-      // Pré-remplir tous les champs
-      setValue("curriculum_code", curriculumCode);
-      setValue("course_unit_code", courseUnitCode);
-      setValue("schedule_code", scheduleCode);
-      setValue("teacher_user_code", teacherCode);
-      setValue("resource_code", resourceCode);
-      setValue("session_title", eventData.title ?? "");
-      setValue("start_time", eventData.start ?? "");
-      setValue("end_time", eventData.end ?? "");
-      setValue("academic_year_code", currentAcademicYear?.academic_year_code ?? "");
-    }
-  }, [open, eventData, setValue, currentAcademicYear]);
-
-  // Charger les UE pour le curriculum
-  useEffect(() => {
-    if (selectedCurriculum && open) {
-      fetchUEListPerCurriculum(selectedCurriculum);
-    }
-  }, [selectedCurriculum, open]);
-
-  // Charger les séquences pour le curriculum et l'année académique
-  useEffect(() => {
-    if (selectedCurriculum && selectedAcademicYear && open) {
-      fetchListAcademicYearsSchedulesForCurriculum(selectedCurriculum, selectedAcademicYear);
-    }
-  }, [selectedAcademicYear, selectedCurriculum, open]);
-
-  // Synchroniser la date de fin avec la date de début (seulement après le chargement initial)
-  useEffect(() => {
-    if (startTime && open && eventData) {
-      const [startDate] = startTime.split('T');
-      if (endTime) {
-        const currentEndDate = endTime.split('T')[0];
-        // Ne synchroniser que si la date de début change
-        if (startDate !== currentEndDate) {
-          const [, endTimeOnly] = endTime.split('T');
-          setValue('end_time', `${startDate}T${endTimeOnly || '11:30:00'}`, { shouldValidate: false });
-        }
-      }
-    }
-  }, [startTime]);
-
-  // Validation: la date de fin doit être >= date de début
-  useEffect(() => {
-    if (startTime && endTime) {
-      const start = new Date(startTime);
-      const end = new Date(endTime);
-
-      if (end < start) {
-        setError('end_time', {
-          type: 'manual',
-          message: 'La date/heure de fin doit être postérieure à la date/heure de début'
-        });
-      } else {
-        clearErrors('end_time');
-      }
+    } else {
+      clearErrors('end_time');
     }
   }, [startTime, endTime, setError, clearErrors]);
 
-  const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
-
-  const fetchListAcademicYearsSchedulesForCurriculum = async (curriculum_code: string, academic_year_code: string) => {
-    const result = await getListAcademicYearsSchedulesForCurriculum(curriculum_code, academic_year_code);
-    if (result.code === 'success') {
-      setScheduleList(result.data.body);
-    }
-  };
-
-  const fetchUEListPerCurriculum = async (curriculum_code: string) => {
-    const result = await getUEListPerCurriculum(curriculum_code);
-    if (result.code === 'success') {
-      setUEList(result.data.body);
-    }
-  };
-
-  const handleCancel = () => {
-    if (isSubmitting) return;
+  const handleCancel = useCallback(() => {
+    if (isDisabled) return;
     reset();
+    setIsCanceling(false);
     onOpenChange(false);
-  };
+  }, [isDisabled, reset, onOpenChange]);
 
-  const handleSubmitForm = async (data: IUpdateSessionForm) => {
-    // Validation finale avant soumission
-    const start = new Date(data.start_time);
-    const end = new Date(data.end_time);
-
-    if (end < start) {
+  const handleSubmitForm = useCallback(async (data: IUpdateSessionForm) => {
+    if (new Date(data.end_time) < new Date(data.start_time)) {
       setError('end_time', {
         type: 'manual',
         message: 'La date/heure de fin doit être postérieure à la date/heure de début'
@@ -223,17 +158,45 @@ export function DialogUpdateSession({
       return;
     }
 
-    const result = await onSave({ resource_code: data.resource_code, session_title: data.session_title });
-    if (result) {
+    const success = await onSave({
+      resource_code: data.resource_code,
+      session_title: data.session_title
+    });
+
+    if (success) {
       reset();
       onOpenChange(false);
     }
-  };
+  }, [onSave, reset, onOpenChange, setError]);
 
-  const handleCancelSessionClick = async () => {
-    await onCancelSession();
-    onOpenChange(false);
-  };
+  const handleCancelSessionClick = useCallback(async () => {
+    setIsCanceling(true);
+    try {
+      const success = await onCancelSession();
+      if (success) {
+        reset();
+        onOpenChange(false);
+      }
+    } finally {
+      setIsCanceling(false);
+    }
+  }, [onCancelSession, reset, onOpenChange]);
+
+  // Reusable field wrapper
+  const FieldWrapper = ({ label, required, children, error }: {
+    label: string;
+    required?: boolean;
+    children: React.ReactNode;
+    error?: string;
+  }) => (
+    <div className="space-y-1">
+      <Label>
+        {label} {required && <span className="text-red-600">*</span>}
+      </Label>
+      {children}
+      {error && <p className="text-red-600 text-sm">{error}</p>}
+    </div>
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
@@ -243,97 +206,95 @@ export function DialogUpdateSession({
           <DialogDescription>Modifiez les informations de la session</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(handleSubmitForm)} className="grid grid-cols-2 gap-4">
-          {/* Curriculum - READ ONLY */}
-          <div className="space-y-1 col-span-2">
-            <Label>
-              Curriculum <span className="text-red-600">*</span>
-            </Label>
-            <Controller
-              name="curriculum_code"
-              control={control}
-              rules={{ required: "Curriculum requis" }}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange} disabled>
-                  <SelectTrigger className="w-full bg-muted">
-                    <SelectValue placeholder="Sélectionner un curriculum" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    {curriculumList.map((c) => (
-                      <SelectItem key={c.curriculum_code} value={c.curriculum_code}>
-                        {c.curriculum_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.curriculum_code && (
-              <p className="text-red-600 text-sm">{errors.curriculum_code.message}</p>
-            )}
+        <form onSubmit={handleSubmit(handleSubmitForm)} className="grid grid-cols-2 gap-4 relative">
+          {isCanceling && (
+            <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70 z-50 flex items-center justify-center rounded-lg">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Annulation de la session...
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Curriculum (READ ONLY) */}
+          <div className="col-span-2">
+            <FieldWrapper label="Curriculum" required error={errors.curriculum_code?.message}>
+              <Controller
+                name="curriculum_code"
+                control={control}
+                rules={{ required: "Curriculum requis" }}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange} disabled>
+                    <SelectTrigger className="w-full bg-muted">
+                      <SelectValue placeholder="Sélectionner un curriculum" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {curriculumList.map((c) => (
+                        <SelectItem key={c.curriculum_code} value={c.curriculum_code}>
+                          {c.curriculum_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </FieldWrapper>
           </div>
 
-          {/* Unité d'enseignement */}
-          <div className="space-y-1 col-span-2">
-            <Label>
-              Unité d&apos;enseignement <span className="text-red-600">*</span>
-            </Label>
-            <Controller
-              name="course_unit_code"
-              control={control}
-              rules={{ required: "UE requise" }}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting || UEList.length === 0}>
-                  <SelectTrigger className={errors.course_unit_code ? "border-red-500 w-full" : "w-full"}>
-                    <SelectValue placeholder="Sélectionner une UE" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    {UEList.map((ue) => (
-                      <SelectItem key={ue.course_unit_code} value={ue.course_unit_code}>
-                        {ue.course_unit_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.course_unit_code && (
-              <p className="text-red-600 text-sm">{errors.course_unit_code.message}</p>
-            )}
+          {/* UE */}
+          <div className="col-span-2">
+            <FieldWrapper label="Unité d'enseignement" required error={errors.course_unit_code?.message}>
+              <Controller
+                name="course_unit_code"
+                control={control}
+                rules={{ required: "UE requise" }}
+                render={({ field }) => (
+                  <Combobox
+                    options={UEList.map(ue => ({ 
+                        value: ue.course_unit_code, 
+                        label: ue.course_unit_name
+                    }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Sélectionner un cours"
+                    className='py-5'
+                  />
+                )}
+              />
+            </FieldWrapper>
           </div>
 
-          {/* Schedule code */}
-          <div className="space-y-1">
-            <Label>Semestre/Trimestre</Label>
+          {/* Schedule & Teacher */}
+          <FieldWrapper label="Semestre/Trimestre">
             <Controller
               name="schedule_code"
               control={control}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting || scheduleList.length === 0}>
-                  <SelectTrigger className={errors.schedule_code ? "border-red-500 w-full" : "w-full"}>
+                <Select value={field.value} onValueChange={field.onChange} disabled={isDisabled || !scheduleList.length}>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Sélectionner une séquence" />
                   </SelectTrigger>
                   <SelectContent className="w-full">
-                    {scheduleList.map((ays) => (
-                      <SelectItem key={ays.schedule_code} value={ays.schedule_code}>
-                        {ays.sequence_name}
+                    {scheduleList.map((s) => (
+                      <SelectItem key={s.schedule_code} value={s.schedule_code}>
+                        {s.sequence_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
             />
-          </div>
+          </FieldWrapper>
 
-          {/* Enseignant */}
-          <div className="space-y-1">
-            <Label>Enseignant</Label>
+          <FieldWrapper label="Enseignant">
             <Controller
               name="teacher_user_code"
               control={control}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
-                  <SelectTrigger className={errors.teacher_user_code ? "border-red-500 w-full" : "w-full"}>
+                <Select value={field.value} onValueChange={field.onChange} disabled={isDisabled}>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Sélectionner un enseignant" />
                   </SelectTrigger>
                   <SelectContent className="w-full">
@@ -346,17 +307,16 @@ export function DialogUpdateSession({
                 </Select>
               )}
             />
-          </div>
+          </FieldWrapper>
 
-          {/* Salle */}
-          <div className="space-y-1">
-            <Label>Salle <span className="text-red-600">*</span></Label>
+          {/* Classroom */}
+          <FieldWrapper label="Salle" required error={errors.resource_code?.message}>
             <Controller
               name="resource_code"
               control={control}
               rules={{ required: "Salle requise" }}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
+                <Select value={field.value} onValueChange={field.onChange} disabled={isDisabled}>
                   <SelectTrigger className={errors.resource_code ? "border-red-500 w-full" : "w-full"}>
                     <SelectValue placeholder="Sélectionner une salle" />
                   </SelectTrigger>
@@ -370,95 +330,63 @@ export function DialogUpdateSession({
                 </Select>
               )}
             />
-            {errors.resource_code && (
-              <p className="text-red-600 text-sm">{errors.resource_code.message}</p>
-            )}
+          </FieldWrapper>
+
+          {/* Title */}
+          <div>
+            <FieldWrapper label="Titre de la session" required error={errors.session_title?.message}>
+              <Input
+                {...register("session_title", { required: "Champ requis" })}
+                disabled={isDisabled}
+                className={errors.session_title ? "border-red-500" : ""}
+              />
+            </FieldWrapper>
           </div>
 
-          {/* Titre */}
-          <div className="space-y-1 col-span-2">
-            <Label>Titre de la session <span className="text-red-600">*</span></Label>
-            <Input
-              {...register("session_title", { required: "Champ requis" })}
-              disabled={isSubmitting}
-              className={errors.session_title ? "border-red-500" : ""}
-            />
-            {errors.session_title && (
-              <p className="text-red-600 text-sm">{errors.session_title.message}</p>
-            )}
-          </div>
+          {/* Date/Time fields */}
+          {["start_time", "end_time"].map((fieldName, idx) => (
+            <div key={fieldName} className="col-span-2">
+              <FieldWrapper
+                label={idx === 0 ? "Début de la session" : "Fin de la session"}
+                error={errors[fieldName as keyof typeof errors]?.message}
+              >
+                <Controller
+                  control={control}
+                  name={fieldName as "start_time" | "end_time"}
+                  rules={{ required: `Heure de ${idx === 0 ? 'début' : 'fin'} requise` }}
+                  render={({ field }) => {
+                    const date = field.value ? new Date(field.value) : undefined;
+                    const time = parseTime(field.value, idx === 0 ? "10:30:00" : "11:30:00");
 
-          {/* Start / End Time */}
-          <div className="space-y-1 col-span-2">
-            <Label>Début de la session</Label>
-            <Controller
-              control={control}
-              name="start_time"
-              rules={{ required: "Heure de début requise" }}
-              render={({ field }) => {
-                const [date, time] = field.value
-                  ? [new Date(field.value), field.value.split("T")[1]]
-                  : [undefined, "10:30:00"];
-                return (
-                  <DateTimePicker
-                    date={date}
-                    time={time}
-                    onDateChange={(d) => {
-                      if (!d) return;
-                      field.onChange(`${d.toISOString().split("T")[0]}T${time || "00:00:00"}`);
-                    }}
-                    onTimeChange={(t) => {
-                      if (!date) return;
-                      field.onChange(`${date.toISOString().split("T")[0]}T${t}`);
-                    }}
-                  />
-                );
-              }}
-            />
-            {errors.start_time && <p className="text-red-600 text-sm">{errors.start_time.message}</p>}
-          </div>
-
-          <div className="space-y-1 col-span-2">
-            <Label>Fin de la session</Label>
-            <Controller
-              control={control}
-              name="end_time"
-              rules={{ required: "Heure de fin requise" }}
-              render={({ field }) => {
-                const [date, time] = field.value
-                  ? [new Date(field.value), field.value.split("T")[1]]
-                  : [undefined, "11:30:00"];
-                return (
-                  <DateTimePicker
-                    date={date}
-                    time={time}
-                    onDateChange={(d) => {
-                      if (!d) return;
-                      field.onChange(`${d.toISOString().split("T")[0]}T${time || "00:00:00"}`);
-                    }}
-                    onTimeChange={(t) => {
-                      if (!date) return;
-                      field.onChange(`${date.toISOString().split("T")[0]}T${t}`);
-                    }}
-                  />
-                );
-              }}
-            />
-            {errors.end_time && <p className="text-red-600 text-sm">{errors.end_time.message}</p>}
-          </div>
+                    return (
+                      <DateTimePicker
+                        date={date}
+                        time={time}
+                        disabled={isDisabled}
+                        onDateChange={(d) => d && field.onChange(createDateTime(d, time))}
+                        onTimeChange={(t) => date && field.onChange(createDateTime(date, t))}
+                      />
+                    );
+                  }}
+                />
+              </FieldWrapper>
+            </div>
+          ))}
 
           {/* Footer */}
-          <DialogFooter className="col-span-2 flex justify-between">
+          <DialogFooter className="col-span-2 flex justify-between border-t pt-5 mt-1">
             <div className="space-x-2">
-              <Button variant="outline" type="button" onClick={handleCancel} disabled={isSubmitting}>
+              <Button variant="outline" type="button" onClick={handleCancel} disabled={isDisabled}>
                 Annuler
               </Button>
-              <Button type="submit" disabled={isSubmitting} variant={'info'}>
+              <Button type="submit" disabled={isDisabled} variant="info">
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isSubmitting ? "Mise à jour..." : "Mettre à jour"}
               </Button>
             </div>
-            <Button variant={"secondary"} type="button" onClick={handleCancelSessionClick} disabled={isSubmitting}>
-              Annuler la session
+            <Button variant="danger" type="button" onClick={handleCancelSessionClick} disabled={isDisabled}>
+ n              {isCanceling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isCanceling ? "Annulation..." : "Annuler la session"}
             </Button>
           </DialogFooter>
         </form>

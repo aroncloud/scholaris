@@ -155,7 +155,7 @@ export default function AdminAbsenceDashboard() {
       key: "status_code",
       label: "Statut",
       render: (status) => {
-        return <Badge className={getStatusColor(status) + " capitalize"}>{status?.toLowerCase() || 'N/A'}</Badge>;
+        return <Badge className={getStatusColor(status) + " capitalize"}>{status || 'N/A'}</Badge>;
       },
     },
     {

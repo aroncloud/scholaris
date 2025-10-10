@@ -284,3 +284,133 @@ export const UESELECTION_CONSTANTS = {
   }
 } as const;
 
+
+export type Variant =
+  | "info"
+  | "danger"
+  | "warning"
+  | "success"
+  | "neutral"
+  | "draft"
+  | "pending"
+  | "approved"
+  | "progress"
+  | "special"
+  | "canceled"
+  | "refunded";
+
+
+export interface ColorConfig {
+  lightBg: string;
+  gradient: string;
+  hover?: string;
+  active?: string;
+  dark?: string;
+  text: string;
+}
+
+export const colorVariants: Record<Variant, ColorConfig> = {
+  info: {
+    lightBg: "bg-blue-50",
+    gradient: "bg-gradient-to-r from-blue-600 to-blue-500",
+    hover: "hover:from-blue-700 hover:to-blue-600",
+    active: "active:from-blue-800 active:to-blue-700",
+    dark: "dark:from-blue-700 dark:to-blue-600",
+    text: "text-blue-600",
+  },
+  danger: {
+    lightBg: "bg-red-50",
+    gradient: "bg-gradient-to-r from-red-600 to-red-500",
+    hover: "hover:from-red-700 hover:to-red-600",
+    active: "active:from-red-800 active:to-red-700",
+    dark: "dark:from-red-700 dark:to-red-600",
+    text: "text-red-600",
+  },
+  warning: {
+    lightBg: "bg-yellow-50",
+    gradient: "bg-gradient-to-r from-yellow-500 to-yellow-400",
+    hover: "hover:from-yellow-600 hover:to-yellow-500",
+    active: "active:from-yellow-700 active:to-yellow-600",
+    dark: "dark:from-yellow-600 dark:to-yellow-500",
+    text: "text-yellow-600",
+  },
+  success: {
+    lightBg: "bg-green-50",
+    gradient: "bg-gradient-to-r from-green-600 to-green-500",
+    hover: "hover:from-green-700 hover:to-green-600",
+    active: "active:from-green-800 active:to-green-700",
+    dark: "dark:from-green-700 dark:to-green-600",
+    text: "text-green-600",
+  },
+  neutral: {
+    lightBg: "bg-gray-50",
+    gradient: "bg-gradient-to-r from-gray-600 to-gray-500",
+    hover: "hover:from-gray-700 hover:to-gray-600",
+    active: "active:from-gray-800 active:to-gray-700",
+    dark: "dark:from-gray-700 dark:to-gray-600",
+    text: "text-gray-700",
+  },
+
+  // Nouveaux variants basés sur tes statuts
+  draft: {
+    lightBg: "bg-gray-100",
+    gradient: "bg-gradient-to-r from-gray-500 to-gray-400",
+    hover: "hover:from-gray-600 hover:to-gray-500",
+    active: "active:from-gray-700 active:to-gray-600",
+    dark: "dark:from-gray-700 dark:to-gray-500",
+    text: "text-gray-600",
+  },
+  pending: {
+    lightBg: "bg-yellow-100",
+    gradient: "bg-gradient-to-r from-yellow-500 to-yellow-400",
+    hover: "hover:from-yellow-600 hover:to-yellow-500",
+    active: "active:from-yellow-700 active:to-yellow-600",
+    dark: "dark:from-yellow-700 dark:to-yellow-500",
+    text: "text-yellow-600",
+  },
+  approved: {
+    lightBg: "bg-green-100",
+    gradient: "bg-gradient-to-r from-green-600 to-green-500",
+    hover: "hover:from-green-700 hover:to-green-600",
+    active: "active:from-green-800 active:to-green-700",
+    dark: "dark:from-green-700 dark:to-green-600",
+    text: "text-green-600",
+  },
+  progress: {
+    lightBg: "bg-blue-100",
+    gradient: "bg-gradient-to-r from-blue-600 to-blue-500",
+    hover: "hover:from-blue-700 hover:to-blue-600",
+    active: "active:from-blue-800 active:to-blue-700",
+    dark: "dark:from-blue-700 dark:to-blue-600",
+    text: "text-blue-600",
+  },
+  special: {
+    lightBg: "bg-purple-100",
+    gradient: "bg-gradient-to-r from-purple-600 to-purple-500",
+    hover: "hover:from-purple-700 hover:to-purple-600",
+    active: "active:from-purple-800 active:to-purple-700",
+    dark: "dark:from-purple-700 dark:to-purple-600",
+    text: "text-purple-700",
+  },
+  canceled: {
+    lightBg: "bg-red-100",
+    gradient: "bg-gradient-to-r from-red-600 to-red-500",
+    hover: "hover:from-red-700 hover:to-red-600",
+    active: "active:from-red-800 active:to-red-700",
+    dark: "dark:from-red-700 dark:to-red-600",
+    text: "text-red-600",
+  },
+  refunded: {
+    lightBg: "bg-gray-200",
+    gradient: "bg-gradient-to-r from-gray-500 to-gray-400",
+    hover: "hover:from-gray-600 hover:to-gray-500",
+    active: "active:from-gray-700 active:to-gray-600",
+    dark: "dark:from-gray-700 dark:to-gray-600",
+    text: "text-gray-800",
+  },
+};
+
+
+
+
+export const SESSION_STATUS_TERMINATED = "TERMINATED"
