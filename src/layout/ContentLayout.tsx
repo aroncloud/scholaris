@@ -40,7 +40,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
         {/* Afficher le header seulement si un titre, une icône, une description ou des actions sont présents */}
         {(title || icon || description || actions) && (
           <CardHeader className={cn(
-            "flex flex-row items-center justify-between space-y-0 pb-6",
+            "flex flex-row items-center justify-between space-y-0 pb-4 border-b bg-gradient-to-r from-gray-50 to-white",
             headerClassName
           )}>
             {/* MODIFICATION: Conteneur flex pour l'icône et le titre/description */}
@@ -50,7 +50,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
               
               {/* Le titre et la description ne prennent plus toute la largeur (flex-1) car c'est le rôle du conteneur parent */}
               <div className="space-y-1">
-                {title && <h1 className="text-xl font-bold tracking-tight">{title}</h1>}
+                {title && <h1 className="text-2xl font-bold tracking-tight">{title}</h1>}
                 {description && (
                   <div className="text-sm text-muted-foreground">{description}</div>
                 )}

@@ -4,6 +4,7 @@ import { verifySession } from "@/lib/session";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
 import { ICreateAcademicYear, ICreateAcademicYearSchedules, ICreateSession, ICreateValidationRule } from "@/types/planificationType";
+import { IUpdateSessionForm } from "@/types/programTypes";
 
 
 export async function createSession(sessionData: ICreateSession) {
@@ -23,7 +24,9 @@ export async function createSession(sessionData: ICreateSession) {
   }
 }
 
-export async function updateSession(sessionData: { resource_code: string; session_title: string }, session_code: string) {
+export async function updateSession(sessionData: IUpdateSessionForm, session_code: string) {
+  console.log('-->sessionData', sessionData)
+  console.log('-->session_code', session_code)
   try {
     const session = await verifySession();
     const token = session.accessToken;

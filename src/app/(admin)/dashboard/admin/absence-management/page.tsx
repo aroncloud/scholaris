@@ -1,803 +1,650 @@
-/* eslint-disable react/no-unescaped-entities */
-'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client"
 
-import { useState  } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { 
+  Plus,
+  X,
+  Save,
+  Calendar,
+  DollarSign,
+  GraduationCap,
+  Trash2,
+  Edit2,
+  Search,
+  Filter,
+  ChevronDown,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  MoreVertical
+} from "lucide-react"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  TrendingUp,
-  TrendingDown,
-  Download,
-  RefreshCw,
-  Search,
-  MoreHorizontal,
-  Eye,
-  Check,
-  X,
-  FileText,
-  Bell,
-  MessageSquare,
-  FileDown,
-} from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
-// Interfaces TypeScript
-interface Absence {
-  id: number;
-  etudiantId: number;
-  etudiantNom: string;
-  etudiantEmail: string;
-  programme: string;
-  dateDebut: string;
-  dateFin: string;
-  duree: number;
-  motif: string;
-  typeAbsence: string;
-  statut: "en_attente" | "approuve" | "refuse";
-  justificatif?: {
-    type: string;
-    fichier: string;
-    dateUpload: string;
-  };
-  commentaireAdmin?: string;
-  dateTraitement?: string;
-  cours: string;
-  enseignant: string;
+// Types
+interface Echeance {
+  id: string
+  libelle: string
+  pourcentage: number
+  dateEcheance: string
 }
 
-interface AbsenceStats {
-  title: string;
-  value: string;
-  status: string;
-  description: string;
-  icon: React.ReactNode;
-  trend?: string;
-  trendDirection?: "up" | "down";
+interface GrilleTarifaire {
+  id: string
+  filiere: string
+  niveau: string
+  anneeAcademique: string
+  montantTotal: number
+  echeances: Echeance[]
+  statut: "ACTIVE" | "BROUILLON"
 }
 
-// Types d'absences
-const typesAbsences = [
-  { value: "maladie", label: "Maladie", color: "bg-red-100 text-red-800" },
-  { value: "famille", label: "Raisons familiales", color: "bg-blue-100 text-blue-800" },
-  { value: "stage", label: "Stage/Formation", color: "bg-green-100 text-green-800" },
-  { value: "transport", label: "Problème transport", color: "bg-orange-100 text-orange-800" },
-  { value: "personnel", label: "Raisons personnelles", color: "bg-purple-100 text-purple-800" },
-  { value: "autre", label: "Autre", color: "bg-gray-100 text-gray-800" }
-];
+const filieres = [
+  "Informatique", "Gestion", "Finance", "Marketing", "Commerce International",
+  "Droit", "Architecture", "Médecine", "Pharmacie", "Génie Civil",
+  "Génie Électrique", "Génie Mécanique", "Télécommunications", "Réseaux",
+  "Cybersécurité", "Data Science", "Intelligence Artificielle", "Design Graphique"
+]
 
-// Données mock pour les statistiques
-const absenceStats: AbsenceStats[] = [
-  {
-    title: "Justificatifs en attente",
-    value: "12",
-    status: "warning",
-    description: "À traiter",
-    icon: <Clock className="h-4 w-4" />,
-  },
-  {
-    title: "Justificatifs traités",
-    value: "45",
-    status: "normal",
-    description: "Cette semaine",
-    icon: <CheckCircle className="h-4 w-4" />,
-    trend: "+8.2%",
-    trendDirection: "up"
-  },
-  {
-    title: "Taux d'approbation",
-    value: "78%",
-    status: "excellent",
-    description: "Justificatifs validés",
-    icon: <TrendingUp className="h-4 w-4" />,
-    trend: "+5.1%",
-    trendDirection: "up"
-  },
-  {
-    title: "Alertes seuil critique",
-    value: "3",
-    status: "alert",
-    description: "Étudiants à risque",
-    icon: <AlertTriangle className="h-4 w-4" />,
-  },
-];
+const niveaux = ["L1", "L2", "L3", "M1", "M2"]
 
-// Données mock pour les absences
-const absencesData: Absence[] = [
+const anneesAcademiques = ["2024-2025", "2025-2026", "2026-2027"]
+
+// Données exemple
+const grillesInitiales: GrilleTarifaire[] = [
   {
-    id: 1,
-    etudiantId: 1001,
-    etudiantNom: "Jean-Baptiste Kouame",
-    etudiantEmail: "jean.kouame@student.univ.fr",
-    programme: "Médecine - 3ème année",
-    dateDebut: "2024-01-22",
-    dateFin: "2024-01-24",
-    duree: 3,
-    motif: "Grippe saisonnière avec fièvre",
-    typeAbsence: "maladie",
-    statut: "en_attente",
-    justificatif: {
-      type: "Certificat médical",
-      fichier: "certificat_medical_kouame.pdf",
-      dateUpload: "2024-01-22"
-    },
-    cours: "Anatomie Générale",
-    enseignant: "Dr. Assi Marie"
+    id: "1",
+    filiere: "Informatique",
+    niveau: "L1",
+    anneeAcademique: "2024-2025",
+    montantTotal: 400000,
+    statut: "ACTIVE",
+    echeances: [
+      { id: "e1", libelle: "Inscription", pourcentage: 40, dateEcheance: "2024-09-15" },
+      { id: "e2", libelle: "2ème Tranche", pourcentage: 30, dateEcheance: "2024-12-15" },
+      { id: "e3", libelle: "3ème Tranche", pourcentage: 30, dateEcheance: "2025-03-15" }
+    ]
   },
   {
-    id: 2,
-    etudiantId: 1002,
-    etudiantNom: "Marie-Claire Assi",
-    etudiantEmail: "marie.assi@student.univ.fr",
-    programme: "Pharmacie - 2ème année",
-    dateDebut: "2024-01-20",
-    dateFin: "2024-01-20",
-    duree: 1,
-    motif: "Décès grand-parent",
-    typeAbsence: "famille",
-    statut: "approuve",
-    justificatif: {
-      type: "Acte de décès",
-      fichier: "acte_deces_assi.pdf",
-      dateUpload: "2024-01-20"
-    },
-    commentaireAdmin: "Justificatif valide, toutes mes condoléances",
-    dateTraitement: "2024-01-21",
-    cours: "Pharmacologie",
-    enseignant: "Prof. Kone David"
+    id: "2",
+    filiere: "Informatique",
+    niveau: "L2",
+    anneeAcademique: "2024-2025",
+    montantTotal: 450000,
+    statut: "ACTIVE",
+    echeances: [
+      { id: "e4", libelle: "1ère Tranche", pourcentage: 50, dateEcheance: "2024-09-15" },
+      { id: "e5", libelle: "2ème Tranche", pourcentage: 50, dateEcheance: "2025-01-15" }
+    ]
   },
   {
-    id: 3,
-    etudiantId: 1003,
-    etudiantNom: "Kofi Mensah",
-    etudiantEmail: "kofi.mensah@student.univ.fr",
-    programme: "Dentaire - 4ème année",
-    dateDebut: "2024-01-19",
-    dateFin: "2024-01-21",
-    duree: 3,
-    motif: "Stage pratique en clinique externe",
-    typeAbsence: "stage",
-    statut: "approuve",
-    justificatif: {
-      type: "Convention de stage",
-      fichier: "convention_stage_mensah.pdf",
-      dateUpload: "2024-01-18"
-    },
-    commentaireAdmin: "Stage validé par le département",
-    dateTraitement: "2024-01-19",
-    cours: "Chirurgie Dentaire",
-    enseignant: "Dr. Traore Fatou"
-  },
-  {
-    id: 4,
-    etudiantId: 1004,
-    etudiantNom: "Fatou Traore",
-    etudiantEmail: "fatou.traore@student.univ.fr",
-    programme: "Kinésithérapie - 1ère année",
-    dateDebut: "2024-01-18",
-    dateFin: "2024-01-18",
-    duree: 1,
-    motif: "Problème de transport public",
-    typeAbsence: "transport",
-    statut: "refuse",
-    commentaireAdmin: "Justificatif insuffisant, prévoir des alternatives",
-    dateTraitement: "2024-01-19",
-    cours: "Anatomie",
-    enseignant: "Dr. Kone Paul"
-  },
-  {
-    id: 5,
-    etudiantId: 1005,
-    etudiantNom: "David Kone",
-    etudiantEmail: "david.kone@student.univ.fr",
-    programme: "Médecine - 5ème année",
-    dateDebut: "2024-01-25",
-    dateFin: "2024-01-26",
-    duree: 2,
-    motif: "Consultation médicale spécialisée",
-    typeAbsence: "maladie",
-    statut: "en_attente",
-    justificatif: {
-      type: "Convocation médicale",
-      fichier: "convocation_kone.pdf",
-      dateUpload: "2024-01-24"
-    },
-    cours: "Stage Hospitalier",
-    enseignant: "Prof. Bernard Claire"
-  },
-  {
-    id: 6,
-    etudiantId: 1006,
-    etudiantNom: "Aminata Diallo",
-    etudiantEmail: "aminata.diallo@student.univ.fr",
-    programme: "Infirmerie - 3ème année",
-    dateDebut: "2024-01-23",
-    dateFin: "2024-01-25",
-    duree: 3,
-    motif: "Formation continue certifiante",
-    typeAbsence: "stage",
-    statut: "en_attente",
-    justificatif: {
-      type: "Attestation de formation",
-      fichier: "formation_diallo.pdf",
-      dateUpload: "2024-01-22"
-    },
-    cours: "Soins Infirmiers",
-    enseignant: "Mme. Petit Anne"
+    id: "3",
+    filiere: "Gestion",
+    niveau: "L1",
+    anneeAcademique: "2024-2025",
+    montantTotal: 380000,
+    statut: "ACTIVE",
+    echeances: [
+      { id: "e6", libelle: "Inscription", pourcentage: 35, dateEcheance: "2024-09-10" },
+      { id: "e7", libelle: "2ème Tranche", pourcentage: 35, dateEcheance: "2024-12-10" },
+      { id: "e8", libelle: "3ème Tranche", pourcentage: 30, dateEcheance: "2025-03-10" }
+    ]
   }
-];
+]
 
-export default function AbsenceManagementPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedAbsence, setSelectedAbsence] = useState<Absence | null>(null);
-  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
-  const [isValidationDialogOpen, setIsValidationDialogOpen] = useState(false);
-  const [validationAction, setValidationAction] = useState<"approve" | "reject">("approve");
-  const [commentaire, setCommentaire] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
-  const [filterType, setFilterType] = useState("all");
+const formatMontant = (montant: number) => {
+  return new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(montant) + ' FCFA'
+}
 
-  const getStatutColor = (statut: string) => {
-    switch (statut) {
-      case "en_attente":
-        return "bg-yellow-100 text-yellow-800";
-      case "approuve":
-        return "bg-green-100 text-green-800";
-      case "refuse":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+export default function GrilleTarifairePage() {
+  const [grilles, setGrilles] = useState<GrilleTarifaire[]>(grillesInitiales)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingGrille, setEditingGrille] = useState<GrilleTarifaire | null>(null)
+  
+  // Filtres
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterFiliere, setFilterFiliere] = useState<string>("TOUS")
+  const [filterNiveau, setFilterNiveau] = useState<string>("TOUS")
+  const [filterAnnee, setFilterAnnee] = useState<string>("TOUS")
+  
+  // Form state
+  const [filiere, setFiliere] = useState("")
+  const [niveau, setNiveau] = useState("")
+  const [anneeAcademique, setAnneeAcademique] = useState("")
+  const [montantTotal, setMontantTotal] = useState("")
+  const [echeances, setEcheances] = useState<Echeance[]>([
+    { id: "1", libelle: "Inscription", pourcentage: 40, dateEcheance: "" },
+    { id: "2", libelle: "2ème Tranche", pourcentage: 30, dateEcheance: "" },
+    { id: "3", libelle: "3ème Tranche", pourcentage: 30, dateEcheance: "" }
+  ])
+
+  const handleAjouterEcheance = () => {
+    const newEcheance: Echeance = {
+      id: Date.now().toString(),
+      libelle: `${echeances.length + 1}ème Tranche`,
+      pourcentage: 0,
+      dateEcheance: ""
     }
-  };
+    setEcheances([...echeances, newEcheance])
+  }
 
-  const getStatutLabel = (statut: string) => {
-    switch (statut) {
-      case "en_attente":
-        return "En attente";
-      case "approuve":
-        return "Approuvé";
-      case "refuse":
-        return "Refusé";
-      default:
-        return statut;
+  const handleSupprimerEcheance = (id: string) => {
+    if (echeances.length > 1) {
+      setEcheances(echeances.filter(e => e.id !== id))
     }
-  };
+  }
 
-  const getTypeAbsenceColor = (type: string) => {
-    const typeObj = typesAbsences.find(t => t.value === type);
-    return typeObj?.color || "bg-gray-100 text-gray-800";
-  };
+  const handleUpdateEcheance = (id: string, field: keyof Echeance, value: any) => {
+    setEcheances(echeances.map(e => 
+      e.id === id ? { ...e, [field]: value } : e
+    ))
+  }
 
-  const getTypeAbsenceLabel = (type: string) => {
-    const typeObj = typesAbsences.find(t => t.value === type);
-    return typeObj?.label || type;
-  };
+  const calculerMontantEcheance = (pourcentage: number) => {
+    if (!montantTotal) return 0
+    return (parseFloat(montantTotal) * pourcentage) / 100
+  }
 
-  const getStatColor = (status: string) => {
-    switch (status) {
-      case "normal":
-        return "text-blue-600";
-      case "warning":
-        return "text-orange-600";
-      case "alert":
-        return "text-red-600";
-      case "excellent":
-        return "text-green-600";
-      default:
-        return "text-gray-600";
+  const totalPourcentage = echeances.reduce((acc, e) => acc + (e.pourcentage || 0), 0)
+  const isFormValid = filiere && niveau && anneeAcademique && montantTotal && totalPourcentage === 100 && echeances.every(e => e.dateEcheance)
+
+  const handleSauvegarder = () => {
+    const nouvelleGrille: GrilleTarifaire = {
+      id: editingGrille?.id || Date.now().toString(),
+      filiere,
+      niveau,
+      anneeAcademique,
+      montantTotal: parseFloat(montantTotal),
+      statut: "ACTIVE",
+      echeances: echeances
     }
-  };
 
-  const handleViewDetails = (absence: Absence) => {
-    setSelectedAbsence(absence);
-    setIsDetailsDialogOpen(true);
-  };
-
-  const handleValidation = (absence: Absence, action: "approve" | "reject") => {
-    setSelectedAbsence(absence);
-    setValidationAction(action);
-    setCommentaire("");
-    setIsValidationDialogOpen(true);
-  };
-
-  const confirmValidation = () => {
-    if (selectedAbsence) {
-      // Ici on ferait l'appel API pour valider/refuser
-      console.log(`${validationAction} absence ${selectedAbsence.id} avec commentaire: ${commentaire}`);
-      setIsValidationDialogOpen(false);
-      setSelectedAbsence(null);
-      setCommentaire("");
+    if (editingGrille) {
+      setGrilles(grilles.map(g => g.id === editingGrille.id ? nouvelleGrille : g))
+    } else {
+      setGrilles([...grilles, nouvelleGrille])
     }
-  };
 
-  const generateReport = () => {
-    // Ici on génèrerait le rapport d'assiduité
-    console.log("Génération du rapport d'assiduité");
-  };
+    handleReset()
+  }
 
-  const filteredAbsences = absencesData.filter(absence => {
-    const matchesSearch = absence.etudiantNom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         absence.programme.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         absence.cours.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         absence.motif.toLowerCase().includes(searchTerm.toLowerCase());
+  const handleReset = () => {
+    setIsDialogOpen(false)
+    setEditingGrille(null)
+    setFiliere("")
+    setNiveau("")
+    setAnneeAcademique("")
+    setMontantTotal("")
+    setEcheances([
+      { id: "1", libelle: "Inscription", pourcentage: 40, dateEcheance: "" },
+      { id: "2", libelle: "2ème Tranche", pourcentage: 30, dateEcheance: "" },
+      { id: "3", libelle: "3ème Tranche", pourcentage: 30, dateEcheance: "" }
+    ])
+  }
 
-    const matchesTab = activeTab === "all" ||
-                      (activeTab === "pending" && absence.statut === "en_attente") ||
-                      (activeTab === "approved" && absence.statut === "approuve") ||
-                      (activeTab === "rejected" && absence.statut === "refuse");
+  const handleEditer = (grille: GrilleTarifaire) => {
+    setEditingGrille(grille)
+    setFiliere(grille.filiere)
+    setNiveau(grille.niveau)
+    setAnneeAcademique(grille.anneeAcademique)
+    setMontantTotal(grille.montantTotal.toString())
+    setEcheances(grille.echeances)
+    setIsDialogOpen(true)
+  }
 
-    const matchesType = filterType === "all" || absence.typeAbsence === filterType;
+  const handleSupprimer = (id: string) => {
+    setGrilles(grilles.filter(g => g.id !== id))
+  }
 
-    return matchesSearch && matchesTab && matchesType;
-  });
+  // Filtres
+  const filteredGrilles = grilles.filter(grille => {
+    const matchSearch = 
+      grille.filiere.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      grille.niveau.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchFiliere = filterFiliere === "TOUS" || grille.filiere === filterFiliere
+    const matchNiveau = filterNiveau === "TOUS" || grille.niveau === filterNiveau
+    const matchAnnee = filterAnnee === "TOUS" || grille.anneeAcademique === filterAnnee
+    
+    return matchSearch && matchFiliere && matchNiveau && matchAnnee
+  })
 
-  // Compter les nouveaux justificatifs (simulé)
-  const nouveauxJustificatifs = absencesData.filter(a => a.statut === "en_attente").length;
+  // Grouper par année académique
+  const grillesParAnnee = filteredGrilles.reduce((acc, grille) => {
+    if (!acc[grille.anneeAcademique]) {
+      acc[grille.anneeAcademique] = []
+    }
+    acc[grille.anneeAcademique].push(grille)
+    return acc
+  }, {} as Record<string, GrilleTarifaire[]>)
+
+  const uniqueFilieres = Array.from(new Set(grilles.map(g => g.filiere))).sort()
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Gestion des Absences
-          </h2>
-          <p className="text-muted-foreground">
-            Tableau de bord centralisé des justificatifs et gestion des absences étudiantes
-          </p>
-        </div>
-
-        <div className="flex space-x-2">
-          {nouveauxJustificatifs > 0 && (
-            <div className="flex items-center space-x-2 px-3 py-2 bg-orange-50 rounded-lg border border-orange-200">
-              <Bell className="h-4 w-4 text-orange-600" />
-              <span className="text-sm text-orange-600 font-medium">
-                {nouveauxJustificatifs} nouveau{nouveauxJustificatifs > 1 ? 'x' : ''} justificatif{nouveauxJustificatifs > 1 ? 's' : ''}
-              </span>
-            </div>
-          )}
-          <Button variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualiser
-          </Button>
-          <Button variant="outline" onClick={generateReport}>
-            <Download className="h-4 w-4 mr-2" />
-            Rapport d'assiduité
-          </Button>
-        </div>
-      </div>
-
-      {/* Absence Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {absenceStats.map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <div className={getStatColor(stat.status)}>
-                {stat.icon}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-                {stat.trend && (
-                  <div className={`flex items-center text-xs ${
-                    stat.trendDirection === 'up' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {stat.trendDirection === 'up' ?
-                      <TrendingUp className="h-3 w-3 mr-1" /> :
-                      <TrendingDown className="h-3 w-3 mr-1" />
-                    }
-                    {stat.trend}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Absences Table with Tabs */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+      <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
+        
+        {/* Header */}
+        <div className="mb-6 md:mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <DollarSign className="h-5 w-5 text-slate-600" />
+            <span className="text-xs md:text-sm font-medium text-slate-600 tracking-wide uppercase">
+              Configuration Financière
+            </span>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <CardTitle>Liste des Absences et Justificatifs</CardTitle>
-              <CardDescription>
-                Gestion centralisée des demandes de justification d'absence
-              </CardDescription>
+              <h1 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tight mb-1">
+                Grilles Tarifaires
+              </h1>
+              <p className="text-sm md:text-base text-slate-600">
+                {filteredGrilles.length} grille{filteredGrilles.length > 1 ? 's' : ''} configurée{filteredGrilles.length > 1 ? 's' : ''}
+              </p>
             </div>
-            <div className="flex space-x-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Button size="lg" className="gap-2 w-full sm:w-auto" onClick={() => {
+              handleReset()
+              setIsDialogOpen(true)
+            }}>
+              <Plus className="h-5 w-5" />
+              Nouvelle Grille
+            </Button>
+          </div>
+        </div>
+
+        {/* Filtres rapides */}
+        <Card className="border-slate-200 shadow-sm mb-6">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="relative col-span-1 md:col-span-2">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="Rechercher..."
+                  placeholder="Rechercher une filière ou niveau..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 w-64"
+                  className="pl-10 h-10"
                 />
               </div>
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Filtrer par type" />
+
+              <Select value={filterFiliere} onValueChange={setFilterFiliere}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Filière" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tous les types</SelectItem>
-                  {typesAbsences.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
+                  <SelectItem value="TOUS">Toutes les filières</SelectItem>
+                  {uniqueFilieres.map(f => (
+                    <SelectItem key={f} value={f}>{f}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={filterNiveau} onValueChange={setFilterNiveau}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Niveau" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TOUS">Tous les niveaux</SelectItem>
+                  {niveaux.map(n => (
+                    <SelectItem key={n} value={n}>{n}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="all">Toutes ({absencesData.length})</TabsTrigger>
-              <TabsTrigger value="pending">En attente ({absencesData.filter(a => a.statut === "en_attente").length})</TabsTrigger>
-              <TabsTrigger value="approved">Approuvées ({absencesData.filter(a => a.statut === "approuve").length})</TabsTrigger>
-              <TabsTrigger value="rejected">Refusées ({absencesData.filter(a => a.statut === "refuse").length})</TabsTrigger>
-            </TabsList>
+          </CardContent>
+        </Card>
 
-            <TabsContent value={activeTab}>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Étudiant</TableHead>
-                    <TableHead>Cours</TableHead>
-                    <TableHead>Période</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Justificatif</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAbsences.map((absence) => (
-                    <TableRow key={absence.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{absence.etudiantNom}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {absence.programme}
-                          </div>
+        {/* Grilles groupées par année */}
+        {Object.entries(grillesParAnnee).sort().reverse().map(([annee, grillesAnnee]) => (
+          <div key={annee} className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-xl font-bold text-slate-900">{annee}</h2>
+              <Badge variant="outline" className="font-medium">{grillesAnnee.length} grille{grillesAnnee.length > 1 ? 's' : ''}</Badge>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {grillesAnnee.map((grille) => (
+                <Card key={grille.id} className="border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="h-11 w-11 bg-slate-900 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <GraduationCap className="h-5 w-5 text-white" />
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{absence.cours}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {absence.enseignant}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="text-sm font-medium">
-                            {new Date(absence.dateDebut).toLocaleDateString('fr-FR')}
-                            {absence.dateDebut !== absence.dateFin &&
-                              ` - ${new Date(absence.dateFin).toLocaleDateString('fr-FR')}`
-                            }
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {absence.duree} jour{absence.duree > 1 ? 's' : ''}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className={getTypeAbsenceColor(absence.typeAbsence)}
-                        >
-                          {getTypeAbsenceLabel(absence.typeAbsence)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {absence.justificatif ? (
-                          <div className="flex items-center space-x-2">
-                            <FileText className="h-4 w-4 text-blue-600" />
-                            <span className="text-sm">{absence.justificatif.type}</span>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">Aucun</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className={getStatutColor(absence.statut)}
-                        >
-                          {getStatutLabel(absence.statut)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => handleViewDetails(absence)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            {absence.justificatif && (
-                              <DropdownMenuItem>
-                                <FileDown className="mr-2 h-4 w-4" />
-                                Télécharger justificatif
-                              </DropdownMenuItem>
-                            )}
-                            {absence.statut === "en_attente" && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => handleValidation(absence, "approve")}
-                                  className="text-green-600"
-                                >
-                                  <Check className="mr-2 h-4 w-4" />
-                                  Approuver
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleValidation(absence, "reject")}
-                                  className="text-red-600"
-                                >
-                                  <X className="mr-2 h-4 w-4" />
-                                  Refuser
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                              <MessageSquare className="mr-2 h-4 w-4" />
-                              Contacter étudiant
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      {/* Absence Details Dialog */}
-      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Détails de l'Absence</DialogTitle>
-            <DialogDescription>
-              Informations complètes sur la demande de justification
-            </DialogDescription>
-          </DialogHeader>
-          {selectedAbsence && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Étudiant</Label>
-                  <div>
-                    <p className="text-sm font-medium">{selectedAbsence.etudiantNom}</p>
-                    <p className="text-xs text-muted-foreground">{selectedAbsence.etudiantEmail}</p>
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Programme</Label>
-                  <p className="text-sm">{selectedAbsence.programme}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Cours</Label>
-                  <div>
-                    <p className="text-sm font-medium">{selectedAbsence.cours}</p>
-                    <p className="text-xs text-muted-foreground">{selectedAbsence.enseignant}</p>
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Type d'absence</Label>
-                  <Badge className={getTypeAbsenceColor(selectedAbsence.typeAbsence)}>
-                    {getTypeAbsenceLabel(selectedAbsence.typeAbsence)}
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Date début</p>
-                  <p className="text-sm font-bold">{new Date(selectedAbsence.dateDebut).toLocaleDateString('fr-FR')}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Date fin</p>
-                  <p className="text-sm font-bold">{new Date(selectedAbsence.dateFin).toLocaleDateString('fr-FR')}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Durée</p>
-                  <p className="text-sm font-bold">{selectedAbsence.duree} jour{selectedAbsence.duree > 1 ? 's' : ''}</p>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium">Motif</Label>
-                <p className="text-sm mt-1 p-3 bg-gray-50 rounded-lg">{selectedAbsence.motif}</p>
-              </div>
-
-              {selectedAbsence.justificatif && (
-                <div>
-                  <Label className="text-sm font-medium">Justificatif</Label>
-                  <div className="mt-1 p-3 bg-blue-50 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="h-4 w-4 text-blue-600" />
-                        <div>
-                          <p className="text-sm font-medium">{selectedAbsence.justificatif.type}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Uploadé le {new Date(selectedAbsence.justificatif.dateUpload).toLocaleDateString('fr-FR')}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-slate-900 truncate">
+                            {grille.filiere}
+                          </h3>
+                          <p className="text-sm text-slate-500">
+                            Niveau {grille.niveau}
                           </p>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">
-                        <FileDown className="h-4 w-4 mr-1" />
-                        Télécharger
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditer(grille)}>
+                            <Edit2 className="h-4 w-4 mr-2" />
+                            Modifier
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleSupprimer(grille.id)}
+                            className="text-rose-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="p-3 bg-slate-50 rounded-lg">
+                        <p className="text-xs text-slate-500 mb-1">Montant Total</p>
+                        <p className="text-xl font-bold text-slate-900">
+                          {formatMontant(grille.montantTotal)}
+                        </p>
+                      </div>
+
+                      <Separator />
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-500">Échéances</span>
+                          <span className="font-medium text-slate-700">{grille.echeances.length} tranche{grille.echeances.length > 1 ? 's' : ''}</span>
+                        </div>
+                        
+                        {grille.echeances.map((echeance, index) => (
+                          <div key={echeance.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-slate-900 truncate">
+                                {echeance.libelle}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {new Date(echeance.dateEcheance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                              </p>
+                            </div>
+                            <div className="text-right ml-3">
+                              <Badge variant="outline" className="text-xs">
+                                {echeance.pourcentage}%
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-4">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 gap-2"
+                        onClick={() => handleEditer(grille)}
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                        Modifier
                       </Button>
                     </div>
-                  </div>
-                </div>
-              )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ))}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Statut</Label>
-                  <Badge className={getStatutColor(selectedAbsence.statut)}>
-                    {getStatutLabel(selectedAbsence.statut)}
-                  </Badge>
+        {filteredGrilles.length === 0 && (
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="p-12 text-center">
+              <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Filter className="h-8 w-8 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                Aucune grille trouvée
+              </h3>
+              <p className="text-slate-500 mb-6">
+                Essayez de modifier vos filtres ou créez une nouvelle grille
+              </p>
+              <Button onClick={() => {
+                handleReset()
+                setIsDialogOpen(true)
+              }} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Créer une grille
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Dialog Création/Édition */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">
+                {editingGrille ? "Modifier la grille" : "Nouvelle grille tarifaire"}
+              </DialogTitle>
+              <DialogDescription>
+                Configurez les tarifs et échéances de paiement
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              
+              {/* Informations générales */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="filiere">Filière *</Label>
+                  <Select value={filiere} onValueChange={setFiliere}>
+                    <SelectTrigger id="filiere" className="h-11">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {filieres.map(f => (
+                        <SelectItem key={f} value={f}>{f}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                {selectedAbsence.dateTraitement && (
-                  <div>
-                    <Label className="text-sm font-medium">Date de traitement</Label>
-                    <p className="text-sm">{new Date(selectedAbsence.dateTraitement).toLocaleDateString('fr-FR')}</p>
-                  </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="niveau">Niveau *</Label>
+                  <Select value={niveau} onValueChange={setNiveau}>
+                    <SelectTrigger id="niveau" className="h-11">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {niveaux.map(n => (
+                        <SelectItem key={n} value={n}>{n}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="annee">Année *</Label>
+                  <Select value={anneeAcademique} onValueChange={setAnneeAcademique}>
+                    <SelectTrigger id="annee" className="h-11">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {anneesAcademiques.map(a => (
+                        <SelectItem key={a} value={a}>{a}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="montant">Montant Total (FCFA) *</Label>
+                <Input
+                  id="montant"
+                  type="number"
+                  placeholder="450000"
+                  value={montantTotal}
+                  onChange={(e) => setMontantTotal(e.target.value)}
+                  className="h-12 text-lg font-semibold"
+                />
+                {montantTotal && (
+                  <p className="text-sm text-slate-500">
+                    {formatMontant(parseFloat(montantTotal))}
+                  </p>
                 )}
               </div>
 
-              {selectedAbsence.commentaireAdmin && (
-                <div>
-                  <Label className="text-sm font-medium">Commentaire administratif</Label>
-                  <p className="text-sm mt-1 p-3 bg-gray-50 rounded-lg">{selectedAbsence.commentaireAdmin}</p>
+              <Separator />
+
+              {/* Échéances */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-base">Échéances de paiement</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAjouterEcheance}
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Ajouter
+                  </Button>
                 </div>
-              )}
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
-              Fermer
-            </Button>
-            {selectedAbsence?.statut === "en_attente" && (
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => handleValidation(selectedAbsence, "reject")}
-                  className="text-red-600 border-red-600 hover:bg-red-50"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Refuser
+
+                <div className="space-y-3">
+                  {echeances.map((echeance, index) => (
+                    <Card key={echeance.id} className="border-slate-200 bg-slate-50/30">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-slate-600">Tranche {index + 1}</span>
+                            {echeances.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSupprimerEcheance(echeance.id)}
+                                className="h-7 w-7 p-0 text-rose-600 hover:bg-rose-50"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+
+                          <Input
+                            value={echeance.libelle}
+                            onChange={(e) => handleUpdateEcheance(echeance.id, 'libelle', e.target.value)}
+                            placeholder="Libellé"
+                            className="h-10"
+                          />
+
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="space-y-1">
+                              <Label className="text-xs">Pourcentage</Label>
+                              <div className="relative">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  value={echeance.pourcentage}
+                                  onChange={(e) => handleUpdateEcheance(echeance.id, 'pourcentage', parseFloat(e.target.value) || 0)}
+                                  className="h-10 pr-8"
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">%</span>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <Label className="text-xs">Montant</Label>
+                              <div className="h-10 px-3 border border-slate-200 rounded-lg bg-white flex items-center">
+                                <span className="text-sm font-semibold text-slate-900 truncate">
+                                  {formatMontant(calculerMontantEcheance(echeance.pourcentage))}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <Label className="text-xs">Date limite</Label>
+                              <Input
+                                type="date"
+                                value={echeance.dateEcheance}
+                                onChange={(e) => handleUpdateEcheance(echeance.id, 'dateEcheance', e.target.value)}
+                                className="h-10"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <Card className={`border-2 ${totalPourcentage === 100 ? 'border-emerald-200 bg-emerald-50/50' : 'border-amber-200 bg-amber-50/50'}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {totalPourcentage === 100 ? (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                        ) : (
+                          <AlertCircle className="h-5 w-5 text-amber-600" />
+                        )}
+                        <span className="font-medium text-sm">Total des pourcentages</span>
+                      </div>
+                      <span className={`text-xl font-bold ${totalPourcentage === 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {totalPourcentage}%
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={handleReset} className="w-full sm:w-auto">
+                  Annuler
                 </Button>
-                <Button
-                  onClick={() => handleValidation(selectedAbsence, "approve")}
-                  className="bg-green-600 hover:bg-green-700"
+                <Button 
+                  onClick={handleSauvegarder}
+                  disabled={!isFormValid}
+                  className="gap-2 w-full sm:w-auto"
                 >
-                  <Check className="h-4 w-4 mr-2" />
-                  Approuver
+                  <Save className="h-4 w-4" />
+                  {editingGrille ? "Mettre à jour" : "Enregistrer"}
                 </Button>
               </div>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Validation Dialog */}
-      <AlertDialog open={isValidationDialogOpen} onOpenChange={setIsValidationDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {validationAction === "approve" ? "Approuver" : "Refuser"} la demande
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {validationAction === "approve"
-                ? "Vous êtes sur le point d'approuver cette demande de justification d'absence."
-                : "Vous êtes sur le point de refuser cette demande de justification d'absence."
-              }
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="commentaire">Commentaire {validationAction === "reject" ? "(obligatoire)" : "(optionnel)"}</Label>
-              <Textarea
-                id="commentaire"
-                placeholder={validationAction === "approve"
-                  ? "Commentaire optionnel..."
-                  : "Motif du refus..."
-                }
-                value={commentaire}
-                onChange={(e) => setCommentaire(e.target.value)}
-                className="mt-1"
-              />
             </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmValidation}
-              className={validationAction === "approve" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
-              disabled={validationAction === "reject" && !commentaire.trim()}
-            >
-              {validationAction === "approve" ? "Approuver" : "Refuser"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
-  );
+  )
 }

@@ -2,13 +2,11 @@
 "use client"
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFactorizedProgramStore } from '@/store/programStore';
-import { BookOpen, Calendar, GraduationCap, Info, Loader2, AlertCircle, Clock, BookMarked, Target, Search, Filter, Download, Grid3x3, List, MoreVertical, Edit, Trash2, Copy, TrendingUp, CheckCircle2, XCircle, Clock3 } from 'lucide-react';
+import { BookOpen, Calendar, GraduationCap, Info, Loader2, AlertCircle, Clock, BookMarked, Target, Download, MoreVertical, Edit, Trash2, Copy, TrendingUp, CheckCircle2, XCircle, Clock3 } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react'
-import { Alert } from '@/components/ui/alert';
-import { AlertDescription } from '@/components/custom-ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createEvaluation, getEvaluationListForCurriculum } from '@/actions/examAction';
 import { showToast } from '@/components/ui/showToast';
@@ -22,9 +20,8 @@ import PageHeader from '@/layout/PageHeader';
 import ContentLayout from '@/layout/ContentLayout';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { ResponsiveTable, TableColumn } from '@/components/tables/ResponsiveTable';
 
-type ViewMode = 'grid' | 'list';
-type SortBy = 'date' | 'title' | 'coefficient' | 'type';
 type FilterType = 'all' | 'CC' | 'EXAM_SEQ';
 type FilterStatus = 'all' | 'active' | 'pending' | 'completed' | 'cancelled';
 
@@ -35,11 +32,6 @@ export default function Page() {
     const [listEvaluationForCurriculum, setListEvaluationForCurriculum] = useState<IGetEvaluationsForCurriculum[]>();
     const [isLoadingEvaluations, setIsLoadingEvaluations] = useState(false);
     const [scheduleList, setScheduleList] = useState<IGetAcademicYearsSchedulesForCurriculum[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    
-    // Nouveaux états pour les filtres et options
-    const [viewMode, setViewMode] = useState<ViewMode>('list');
-    const [sortBy, setSortBy] = useState<SortBy>('date');
     const [filterType, setFilterType] = useState<FilterType>('all');
     const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
 
@@ -97,6 +89,224 @@ export default function Page() {
         return false
     }
 
+    // Helper functions
+    const getEvaluationTypeLabel = (type: string) => {
+        switch (type) {
+            case 'CC': return 'Contrôle Continu';
+            case 'EXAM_SEQ': return 'Examen de Séquence';
+            default: return type;
+        }
+    };
+
+    const getTargetLevelLabel = (level: string) => {
+        switch (level) {
+            case 'COURSE_UNIT': return 'Unité d\'Enseignement';
+            case 'MODULE': return 'Module';
+            default: return level;
+        }
+    };
+
+    const getStatusConfig = (status: string) => {
+        const statusLower = status.toLowerCase();
+        switch (statusLower) {
+            case 'active':
+            case 'actif':
+                return {
+                    color: 'bg-green-100 text-green-800 border-green-200',
+                    icon: <CheckCircle2 className="w-3 h-3" />,
+                    label: 'Actif'
+                };
+            case 'pending':
+            case 'en_attente':
+                return {
+                    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                    icon: <Clock3 className="w-3 h-3" />,
+                    label: 'En attente'
+                };
+            case 'completed':
+            case 'terminé':
+                return {
+                    color: 'bg-blue-100 text-blue-800 border-blue-200',
+                    icon: <CheckCircle2 className="w-3 h-3" />,
+                    label: 'Terminé'
+                };
+            case 'cancelled':
+            case 'annulé':
+                return {
+                    color: 'bg-red-100 text-red-800 border-red-200',
+                    icon: <XCircle className="w-3 h-3" />,
+                    label: 'Annulé'
+                };
+            default:
+                return {
+                    color: 'bg-gray-100 text-gray-800 border-gray-200',
+                    icon: <Info className="w-3 h-3" />,
+                    label: status
+                };
+        }
+    };
+
+    const formatDate = (dateString: string | null) => {
+        if (!dateString) return 'Non définie';
+        return new Date(dateString).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
+    const getDaysUntilDeadline = (dateString: string | null) => {
+        if (!dateString) return null;
+        const deadline = new Date(dateString);
+        const today = new Date();
+        const diffTime = deadline.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    };
+
+    const handleEdit = () => {
+        showToast({
+            variant: "info-solid",
+            message: 'Édition',
+            description: 'Fonctionnalité d\'édition en cours de développement',
+            position: 'top-center',
+        });
+    };
+
+    const handleDelete = () => {
+        showToast({
+            variant: "warning-solid",
+            message: 'Suppression',
+            description: 'Fonctionnalité de suppression en cours de développement',
+            position: 'top-center',
+        });
+    };
+
+    const handleDuplicate = () => {
+        showToast({
+            variant: "info-solid",
+            message: 'Duplication',
+            description: 'Fonctionnalité de duplication en cours de développement',
+            position: 'top-center',
+        });
+    };
+
+    // Définir les colonnes du tableau
+    const evaluationColumns: TableColumn<IGetEvaluationsForCurriculum>[] = useMemo(() => [
+        {
+            key: "title",
+            label: "Évaluation",
+            priority: 'high',
+            render: (_, evaluation) => {
+                const statusConfig = getStatusConfig(evaluation.status);
+                return (
+                    <div>
+                        <div className="font-semibold text-lg text-foreground mb-2">{evaluation.title}</div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Badge className={`${statusConfig.color} flex items-center gap-1`}>
+                                {statusConfig.icon}
+                                {statusConfig.label}
+                            </Badge>
+                            <Badge variant="outline">
+                                {getEvaluationTypeLabel(evaluation.evaluation_type_code)}
+                            </Badge>
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            key: "target_code",
+            label: "Code UE",
+            priority: 'high',
+            render: (_, evaluation) => (
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                        <BookMarked className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-medium">{evaluation.target_code}</span>
+                    </div>
+                    <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                        <Target className="w-3 h-3" />
+                        {getTargetLevelLabel(evaluation.target_level)}
+                    </Badge>
+                </div>
+            ),
+        },
+        {
+            key: "coefficient",
+            label: "Coefficient",
+            priority: 'medium',
+            render: (_, evaluation) => (
+                <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-semibold text-primary">{evaluation.coefficient}</span>
+                </div>
+            ),
+        },
+        {
+            key: "max_score",
+            label: "Note max",
+            priority: 'medium',
+            render: (_, evaluation) => (
+                <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-semibold">{evaluation.max_score}</span>
+                </div>
+            ),
+        },
+        {
+            key: "deadline_date",
+            label: "Date limite",
+            priority: 'high',
+            render: (_, evaluation) => {
+                const daysUntil = getDaysUntilDeadline(evaluation.deadline_date);
+                return (
+                    <div className="text-center">
+                        <div className="font-semibold text-orange-600">{formatDate(evaluation.deadline_date)}</div>
+                        {daysUntil !== null && daysUntil >= 0 && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                                Dans {daysUntil} jour{daysUntil > 1 ? 's' : ''}
+                            </div>
+                        )}
+                        {daysUntil !== null && daysUntil < 0 && (
+                            <div className="text-xs text-red-600 font-medium mt-1">
+                                Échue depuis {Math.abs(daysUntil)} jour{Math.abs(daysUntil) > 1 ? 's' : ''}
+                            </div>
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
+            key: "actions",
+            label: "Actions",
+            priority: 'high',
+            render: (_, evaluation) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon" className="h-9 w-9">
+                            <MoreVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={handleEdit}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Éditer
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleDuplicate}>
+                            <Copy className="mr-2 h-4 w-4" />
+                            Dupliquer
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Supprimer
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+        },
+    ], []);
+
     // Calcul des statistiques
     const statistics = useMemo(() => {
         if (!listEvaluationForCurriculum) return null;
@@ -111,62 +321,38 @@ export default function Page() {
         return { total, active, completed, pending, cc, exam };
     }, [listEvaluationForCurriculum]);
 
-    // Filtrer et trier les évaluations
-    const filteredAndSortedEvaluations = useMemo(() => {
+    // Filtrer les évaluations
+    const filteredEvaluations = useMemo(() => {
         if (!listEvaluationForCurriculum) return [];
-        
+
         let filtered = [...listEvaluationForCurriculum];
-        
-        // Recherche
-        if (searchTerm) {
-            filtered = filtered.filter(evaluation =>
-                evaluation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                evaluation.target_code.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
-        
+
         // Filtre par type
         if (filterType !== 'all') {
             filtered = filtered.filter(e => e.evaluation_type_code === filterType);
         }
-        
+
         // Filtre par statut
         if (filterStatus !== 'all') {
             filtered = filtered.filter(e => e.status.toLowerCase() === filterStatus);
         }
-        
-        // Tri
-        filtered.sort((a, b) => {
-            switch (sortBy) {
-                case 'date':
-                    return new Date(b.deadline_date || 0).getTime() - new Date(a.deadline_date || 0).getTime();
-                case 'title':
-                    return a.title.localeCompare(b.title);
-                case 'coefficient':
-                    return b.coefficient - a.coefficient;
-                case 'type':
-                    return a.evaluation_type_code.localeCompare(b.evaluation_type_code);
-                default:
-                    return 0;
-            }
-        });
-        
+
         return filtered;
-    }, [listEvaluationForCurriculum, searchTerm, filterType, filterStatus, sortBy]);
+    }, [listEvaluationForCurriculum, filterType, filterStatus]);
 
     // Grouper les évaluations par trimestre
     const evaluationsBySchedule = useMemo(() => {
         const grouped: { [scheduleCode: string]: IGetEvaluationsForCurriculum[] } = {};
-        
-        filteredAndSortedEvaluations.forEach(evaluation => {
+
+        filteredEvaluations.forEach(evaluation => {
             if (!grouped[evaluation.schedule_code]) {
                 grouped[evaluation.schedule_code] = [];
             }
             grouped[evaluation.schedule_code].push(evaluation);
         });
-        
+
         return grouped;
-    }, [filteredAndSortedEvaluations]);
+    }, [filteredEvaluations]);
 
     const handleExport = () => {
         showToast({
@@ -232,58 +418,23 @@ export default function Page() {
 
                 <ContentLayout
                     title='Liste des Évaluations Programmées'
-                    description={`Curriculum sélectionné: ${curriculumList.find(c => c.curriculum_code === selectedCurriculum)?.curriculum_name} • ${filteredAndSortedEvaluations.length} évaluation(s) affichée(s)`}
+                    description={`Curriculum sélectionné: ${curriculumList.find(c => c.curriculum_code === selectedCurriculum)?.curriculum_name} • ${filteredEvaluations.length} évaluation(s) affichée(s)`}
                 >
                     <>
-                        {/* Barre de recherche et filtres */}
-                        <div className="space-y-4 mb-6">
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                {/* Recherche */}
-                                <div className="flex-1 relative">
-                                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder="Rechercher une évaluation par titre ou code UE..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10"
-                                    />
-                                </div>
-                                
-                                {/* Actions */}
-                                <div className="flex gap-2">
-                                    <div className="flex border rounded-md">
-                                        <Button
-                                            variant={viewMode === 'list' ? "default" : "ghost"}
-                                            size="icon"
-                                            onClick={() => setViewMode('list')}
-                                            className="rounded-r-none"
-                                        >
-                                            <List className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant={viewMode === 'grid' ? "default" : "ghost"}
-                                            size="icon"
-                                            onClick={() => setViewMode('grid')}
-                                            className="rounded-l-none"
-                                        >
-                                            <Grid3x3 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                    
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={handleExport}
-                                    >
-                                        <Download className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-
+                        {/* Bouton d'export */}
+                        <div className="flex justify-end mb-6">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleExport}
+                            >
+                                <Download className="h-4 w-4 mr-2" />
+                                Exporter
+                            </Button>
                         </div>
 
                         {/* Vérifier s'il y a des résultats après filtrage */}
-                        {filteredAndSortedEvaluations.length === 0 && (searchTerm || filterType !== 'all' || filterStatus !== 'all') ? (
+                        {filteredEvaluations.length === 0 && (filterType !== 'all' || filterStatus !== 'all') ? (
                             <div className="text-center py-12 bg-muted/10 rounded-lg">
                                 <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                                 <h3 className="text-lg font-semibold text-muted-foreground mb-2">
@@ -295,12 +446,11 @@ export default function Page() {
                                 <Button
                                     variant="outline"
                                     onClick={() => {
-                                        setSearchTerm('');
                                         setFilterType('all');
                                         setFilterStatus('all');
                                     }}
                                 >
-                                    Réinitialiser la recherche
+                                    Réinitialiser les filtres
                                 </Button>
                             </div>
                         ) : (
@@ -360,16 +510,14 @@ export default function Page() {
                                                         </p>
                                                     </div>
                                                 ) : (
-                                                    <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
-                                                        {scheduleEvaluations.map((evaluation) => (
-                                                            <EvaluationCard
-                                                                key={evaluation.evaluation_code}
-                                                                evaluation={evaluation}
-                                                                schedule={schedule}
-                                                                viewMode={viewMode}
-                                                            />
-                                                        ))}
-                                                    </div>
+                                                    <ResponsiveTable
+                                                        columns={evaluationColumns}
+                                                        data={scheduleEvaluations}
+                                                        searchKey={["title", "target_code"]}
+                                                        paginate={10}
+                                                        locale="fr"
+                                                        keyField="evaluation_code"
+                                                    />
                                                 )}
                                             </div>
                                         </TabsContent>
@@ -564,290 +712,3 @@ const NoEvaluationsMessage = ({ curriculumName }: { curriculumName?: string }) =
         </CardContent>
     </Card>
 );
-
-const EvaluationCard = ({
-    evaluation,
-    schedule,
-    viewMode
-}: {
-    evaluation: IGetEvaluationsForCurriculum;
-    schedule?: IGetAcademicYearsSchedulesForCurriculum;
-    viewMode: ViewMode;
-}) => {
-    const getEvaluationTypeLabel = (type: string) => {
-        switch (type) {
-            case 'CC': return 'Contrôle Continu';
-            case 'EXAM_SEQ': return 'Examen de Séquence';
-            default: return type;
-        }
-    };
-
-    const getTargetLevelLabel = (level: string) => {
-        switch (level) {
-            case 'COURSE_UNIT': return 'Unité d\'Enseignement';
-            case 'MODULE': return 'Module';
-            default: return level;
-        }
-    };
-
-    const getStatusConfig = (status: string) => {
-        const statusLower = status.toLowerCase();
-        switch (statusLower) {
-            case 'active':
-            case 'actif':
-                return {
-                    color: 'bg-green-100 text-green-800 border-green-200',
-                    icon: <CheckCircle2 className="w-3 h-3" />,
-                    label: 'Actif'
-                };
-            case 'pending':
-            case 'en_attente':
-                return {
-                    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                    icon: <Clock3 className="w-3 h-3" />,
-                    label: 'En attente'
-                };
-            case 'completed':
-            case 'terminé':
-                return {
-                    color: 'bg-blue-100 text-blue-800 border-blue-200',
-                    icon: <CheckCircle2 className="w-3 h-3" />,
-                    label: 'Terminé'
-                };
-            case 'cancelled':
-            case 'annulé':
-                return {
-                    color: 'bg-red-100 text-red-800 border-red-200',
-                    icon: <XCircle className="w-3 h-3" />,
-                    label: 'Annulé'
-                };
-            default:
-                return {
-                    color: 'bg-gray-100 text-gray-800 border-gray-200',
-                    icon: <Info className="w-3 h-3" />,
-                    label: status
-                };
-        }
-    };
-
-    const formatDate = (dateString: string | null) => {
-        if (!dateString) return 'Non définie';
-        return new Date(dateString).toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        });
-    };
-
-    const getDaysUntilDeadline = (dateString: string | null) => {
-        if (!dateString) return null;
-        const deadline = new Date(dateString);
-        const today = new Date();
-        const diffTime = deadline.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
-    };
-
-    const statusConfig = getStatusConfig(evaluation.status);
-    const daysUntil = getDaysUntilDeadline(evaluation.deadline_date);
-
-    const handleEdit = () => {
-        showToast({
-            variant: "info-solid",
-            message: 'Édition',
-            description: 'Fonctionnalité d\'édition en cours de développement',
-            position: 'top-center',
-        });
-    };
-
-    const handleDelete = () => {
-        showToast({
-            variant: "warning-solid",
-            message: 'Suppression',
-            description: 'Fonctionnalité de suppression en cours de développement',
-            position: 'top-center',
-        });
-    };
-
-    const handleDuplicate = () => {
-        showToast({
-            variant: "info-solid",
-            message: 'Duplication',
-            description: 'Fonctionnalité de duplication en cours de développement',
-            position: 'top-center',
-        });
-    };
-
-    if (viewMode === 'grid') {
-        return (
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary">
-                <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                            <CardTitle className="text-base line-clamp-2">{evaluation.title}</CardTitle>
-                            <div className="flex items-center gap-2 mt-2">
-                                <Badge className={`${statusConfig.color} flex items-center gap-1`}>
-                                    {statusConfig.icon}
-                                    {statusConfig.label}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                    {getEvaluationTypeLabel(evaluation.evaluation_type_code)}
-                                </Badge>
-                            </div>
-                        </div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={handleEdit}>
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Éditer
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleDuplicate}>
-                                    <Copy className="mr-2 h-4 w-4" />
-                                    Dupliquer
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Supprimer
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2">
-                            <Target className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-muted-foreground">Niveau:</span>
-                            <span className="font-medium truncate">{getTargetLevelLabel(evaluation.target_level)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <BookMarked className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-muted-foreground">Code:</span>
-                            <span className="font-medium truncate">{evaluation.target_code}</span>
-                        </div>
-                    </div>
-
-                    <div className="pt-3 border-t space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Date limite</span>
-                            <div className="text-right">
-                                <div className="font-medium text-orange-600">{formatDate(evaluation.deadline_date)}</div>
-                                {daysUntil !== null && daysUntil >= 0 && (
-                                    <div className="text-xs text-muted-foreground">
-                                        Dans {daysUntil} jour{daysUntil > 1 ? 's' : ''}
-                                    </div>
-                                )}
-                                {daysUntil !== null && daysUntil < 0 && (
-                                    <div className="text-xs text-red-600">
-                                        Échue depuis {Math.abs(daysUntil)} jour{Math.abs(daysUntil) > 1 ? 's' : ''}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Coefficient</span>
-                            <span className="font-semibold text-primary">{evaluation.coefficient}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Note max</span>
-                            <span className="font-semibold">{evaluation.max_score}</span>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
-
-    // Vue liste
-    return (
-        <div className="border rounded-lg p-4 bg-card hover:shadow-md transition-all duration-200 border-l-4 border-l-blue-600">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                {/* Informations principales */}
-                <div className="flex-1 space-y-3">
-                    <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                            <h4 className="font-semibold text-lg text-foreground mb-2">{evaluation.title}</h4>
-                            <div className="flex flex-wrap items-center gap-2">
-                                <Badge className={`${statusConfig.color} flex items-center gap-1`}>
-                                    {statusConfig.icon}
-                                    {statusConfig.label}
-                                </Badge>
-                                <Badge variant="outline">
-                                    {getEvaluationTypeLabel(evaluation.evaluation_type_code)}
-                                </Badge>
-                                <Badge variant="secondary" className="flex items-center gap-1">
-                                    <Target className="w-3 h-3" />
-                                    {getTargetLevelLabel(evaluation.target_level)}
-                                </Badge>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Détails de l'évaluation */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div className="flex items-center gap-2">
-                            <BookMarked className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">Code UE:</span>
-                            <span className="font-medium">{evaluation.target_code}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">Coefficient:</span>
-                            <span className="font-semibold text-primary">{evaluation.coefficient}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Target className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">Note max:</span>
-                            <span className="font-semibold">{evaluation.max_score}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Date et actions */}
-                <div className="flex lg:flex-col items-center lg:items-end gap-3 lg:gap-2 border-t lg:border-t-0 lg:border-l pt-3 lg:pt-0 lg:pl-4">
-                    <div className="text-center lg:text-right flex-1 lg:flex-none">
-                        <div className="text-xs text-muted-foreground mb-1">Date limite</div>
-                        <div className="font-semibold text-orange-600">{formatDate(evaluation.deadline_date)}</div>
-                        {daysUntil !== null && daysUntil >= 0 && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                                Dans {daysUntil} jour{daysUntil > 1 ? 's' : ''}
-                            </div>
-                        )}
-                        {daysUntil !== null && daysUntil < 0 && (
-                            <div className="text-xs text-red-600 font-medium mt-1">
-                                Échue depuis {Math.abs(daysUntil)} jour{Math.abs(daysUntil) > 1 ? 's' : ''}
-                            </div>
-                        )}
-                    </div>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-9 w-9">
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={handleEdit}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Éditer
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleDuplicate}>
-                                <Copy className="mr-2 h-4 w-4" />
-                                Dupliquer
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Supprimer
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </div>
-        </div>
-    );
-};

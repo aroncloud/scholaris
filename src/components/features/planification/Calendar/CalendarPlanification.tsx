@@ -17,6 +17,7 @@ import { cancelSession, createSession, updateSession } from "@/actions/planifica
 import { showToast } from "@/components/ui/showToast";
 import { DialogUpdateSession } from "../Modal/DialogUpdateSession";
 import { DialogCreateSession } from "../Modal/DialogCreateSession";
+import { IUpdateSessionForm } from "@/types/programTypes";
 
 
 export interface IFullCalendarEvent extends EventInput {
@@ -153,10 +154,15 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
   };
 
 
-  const handleSaveEvent = async (session: { resource_code: string; session_title: string }) => {
+  const handleSaveEvent = async (session: IUpdateSessionForm) => {
     console.log('handleSaveEvent.session', session)
     if(selectedEvent) {
-      const result = await updateSession(session, selectedEvent.id);
+      const result = await updateSession({
+        ... session,
+        start_time: new Date(session.end_time).toJSON().split("T")[0] ?? "",
+        end_time: new Date(session.start_time).toJSON().split("T")[0] ?? ""
+
+      }, selectedEvent.id);
       console.log("handleSaveEvent result:", result);
 
       if (result.code === 'success') {

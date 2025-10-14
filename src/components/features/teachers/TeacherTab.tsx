@@ -187,7 +187,10 @@ const TeacherTab = ({
             <ContentLayout
                 title={`Personnel enseignant`}
                 description="Gestion du corps professoral"
-                actions
+                actions = {<div>
+                    <Button></Button>
+                    <Button></Button>
+                </div>}
             >
                 <ResponsiveTable
                     data={filteredTeachers}

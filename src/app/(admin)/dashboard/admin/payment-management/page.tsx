@@ -1,15 +1,47 @@
-'use client'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client"
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { 
+  Search, 
+  Plus, 
+  DollarSign, 
+  Calendar,
+  CreditCard,
+  Wallet,
+  Building2,
+  Smartphone,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Download,
+  GraduationCap,
+  Users,
+  TrendingUp,
+  Eye,
+  ChevronRight
+} from "lucide-react"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import {
   Table,
   TableBody,
@@ -17,567 +49,512 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  CreditCard,
-  DollarSign,
-  TrendingUp,
-  CheckCircle,
-  AlertTriangle,
-  Download,
-  RefreshCw,
-  Search,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  User,
-  CalendarDays,
-  Receipt,
-  Banknote,
-  Wallet,
-} from "lucide-react";
-import { getUserList } from "@/actions/programsAction";
-import { IListStudent } from "@/types/staffType";
-import { toast } from "sonner";
+} from "@/components/ui/table"
 
-// Interfaces TypeScript
-interface Payment {
-  id: number;
-  studentId: number;
-  studentName: string;
-  programme: string;
-  montant: number;
-  modePaiement: string;
-  datePaiement: string;
-  reference: string;
-  fraisRetard?: number;
+// Types
+interface Etudiant {
+  id: string
+  matricule: string
+  nom: string
+  prenom: string
+  niveau: string
+  filiere: string
+  montantTotal: number
+  montantPaye: number
+  statut: "COMPLET" | "PARTIEL" | "IMPAYE"
 }
 
-interface PaymentStats {
-  title: string;
-  value: string;
-  status: string;
-  description: string;
-  icon: React.ReactNode;
-  trend: string;
-  trendDirection: "up" | "down";
+interface Paiement {
+  id: string
+  date: string
+  montant: number
+  modePaiement: "ESPECES" | "CARTE" | "VIREMENT" | "MOBILE_MONEY" | "CHEQUE"
+  reference: string
+  notes?: string
 }
 
-// Données mock pour les statistiques
-const paymentStats: PaymentStats[] = [
-  {
-    title: "Paiements aujourd'hui",
-    value: "450,000 FCFA",
-    status: "normal",
-    description: "12 transactions",
-    icon: <DollarSign className="h-4 w-4" />,
-    trend: "+18.2%",
-    trendDirection: "up"
-  },
-  {
-    title: "Montant total collecté",
-    value: "2,450,000 FCFA",
-    status: "excellent",
-    description: "Ce mois",
-    icon: <TrendingUp className="h-4 w-4" />,
-    trend: "+12.5%",
-    trendDirection: "up"
-  },
-  {
-    title: "Taux de recouvrement",
-    value: "87.2%",
-    status: "normal",
-    description: "Objectif: 90%",
-    icon: <CheckCircle className="h-4 w-4" />,
-    trend: "+3.4%",
-    trendDirection: "up"
-  },
-];
+interface ModePaiement {
+  id: string
+  nom: string
+  icon: any
+  description: string
+}
 
-// Données mock pour les paiements
-const paymentsData: Payment[] = [
-  {
-    id: 1,
-    studentId: 1001,
-    studentName: "Jean-Baptiste Kouame",
-    programme: "Médecine - 3ème année",
-    montant: 250000,
-    modePaiement: "BANK_DEPOSIT",
-    datePaiement: "2024-01-22",
-    reference: "PAY-2024-001"
-  },
-  {
-    id: 2,
-    studentId: 1002,
-    studentName: "Marie-Claire Assi",
-    programme: "Pharmacie - 2ème année",
-    montant: 180000,
-    modePaiement: "Mobile Money",
-    datePaiement: "2024-01-21",
-    reference: "PAY-2024-002"
-  },
-  {
-    id: 3,
-    studentId: 1003,
-    studentName: "Kofi Mensah",
-    programme: "Dentaire - 4ème année",
-    montant: 320000,
-    modePaiement: "Espèces",
-    datePaiement: "2024-01-18",
-    reference: "PAY-2024-003",
-    fraisRetard: 15000
-  },
-  {
-    id: 4,
-    studentId: 1004,
-    studentName: "Fatou Traore",
-    programme: "Kinésithérapie - 1ère année",
-    montant: 150000,
-    modePaiement: "Carte bancaire",
-    datePaiement: "2024-01-21",
-    reference: "PAY-2024-004"
-  },
-  {
-    id: 5,
-    studentId: 1005,
-    studentName: "David Kone",
-    programme: "Médecine - 5ème année",
-    montant: 300000,
-    modePaiement: "BANK_DEPOSIT",
-    datePaiement: "2024-01-22",
-    reference: "PAY-2024-005"
-  },
-  {
-    id: 6,
-    studentId: 1006,
-    studentName: "Aminata Diallo",
-    programme: "Infirmerie - 3ème année",
-    montant: 95000,
-    modePaiement: "Mobile Money",
-    datePaiement: "2024-01-15",
-    reference: "PAY-2024-006"
+interface Filiere {
+  id: string
+  nom: string
+  niveaux: string[]
+}
+
+const filieres: Filiere[] = [
+  { id: "info", nom: "Informatique", niveaux: ["L1", "L2", "L3", "M1", "M2"] },
+  { id: "gestion", nom: "Gestion", niveaux: ["L1", "L2", "L3", "M1", "M2"] },
+  { id: "finance", nom: "Finance", niveaux: ["L1", "L2", "L3", "M1", "M2"] },
+  { id: "marketing", nom: "Marketing", niveaux: ["L1", "L2", "L3", "M1", "M2"] }
+]
+
+const modesPaiement: ModePaiement[] = [
+  { id: "ESPECES", nom: "Espèces", icon: Wallet, description: "Paiement en liquide" },
+  { id: "CARTE", nom: "Carte Bancaire", icon: CreditCard, description: "CB, Visa, Mastercard" },
+  { id: "VIREMENT", nom: "Virement", icon: Building2, description: "Virement bancaire" },
+  { id: "MOBILE_MONEY", nom: "Mobile Money", icon: Smartphone, description: "Orange Money, MTN..." },
+  { id: "CHEQUE", nom: "Chèque", icon: CreditCard, description: "Chèque bancaire" }
+]
+
+// Données exemple
+const etudiantsData: Etudiant[] = [
+  { id: "1", matricule: "21A001CM", nom: "KAMGA", prenom: "Jean-Pierre", niveau: "L2", filiere: "info", montantTotal: 450000, montantPaye: 450000, statut: "COMPLET" },
+  { id: "2", matricule: "21A002CM", nom: "NGUENDO", prenom: "Marie", niveau: "L1", filiere: "info", montantTotal: 400000, montantPaye: 250000, statut: "PARTIEL" },
+  { id: "3", matricule: "21A003CM", nom: "MBARGA", prenom: "Paul", niveau: "M1", filiere: "info", montantTotal: 550000, montantPaye: 0, statut: "IMPAYE" },
+  { id: "4", matricule: "21B001CM", nom: "FOUDA", prenom: "Alice", niveau: "L3", filiere: "info", montantTotal: 450000, montantPaye: 450000, statut: "COMPLET" },
+  { id: "5", matricule: "21B002CM", nom: "NKOMO", prenom: "David", niveau: "L2", filiere: "info", montantTotal: 450000, montantPaye: 150000, statut: "PARTIEL" },
+  { id: "6", matricule: "21C001CM", nom: "ATEBA", prenom: "Sophie", niveau: "L1", filiere: "gestion", montantTotal: 400000, montantPaye: 400000, statut: "COMPLET" },
+  { id: "7", matricule: "21C002CM", nom: "BIKOE", prenom: "Thomas", niveau: "L2", filiere: "gestion", montantTotal: 450000, montantPaye: 200000, statut: "PARTIEL" },
+  { id: "8", matricule: "21D001CM", nom: "OWONA", prenom: "Carine", niveau: "M1", filiere: "finance", montantTotal: 550000, montantPaye: 550000, statut: "COMPLET" },
+  { id: "9", matricule: "21D002CM", nom: "ESSOMBA", prenom: "Marc", niveau: "L3", filiere: "finance", montantTotal: 450000, montantPaye: 0, statut: "IMPAYE" },
+  { id: "10", matricule: "21E001CM", nom: "MANGA", prenom: "Julie", niveau: "L1", filiere: "marketing", montantTotal: 400000, montantPaye: 100000, statut: "PARTIEL" }
+]
+
+const paiementsData: Record<string, Paiement[]> = {
+  "1": [
+    { id: "p1", date: "2024-09-15", montant: 250000, modePaiement: "VIREMENT", reference: "VIR20240915001" },
+    { id: "p2", date: "2024-11-20", montant: 200000, modePaiement: "MOBILE_MONEY", reference: "MM20241120458" }
+  ],
+  "2": [{ id: "p3", date: "2024-10-05", montant: 250000, modePaiement: "ESPECES", reference: "ESP20241005123" }]
+}
+
+const getStatutStyle = (statut: string) => {
+  switch (statut) {
+    case "COMPLET": return "bg-emerald-500/10 text-emerald-700 border-emerald-500/20"
+    case "PARTIEL": return "bg-amber-500/10 text-amber-700 border-amber-500/20"
+    case "IMPAYE": return "bg-rose-500/10 text-rose-700 border-rose-500/20"
+    default: return "bg-slate-500/10 text-slate-700 border-slate-500/20"
   }
-];
+}
 
-export default function PaymentManagementPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
-  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
-  const [isCreatePaymentOpen, setIsCreatePaymentOpen] = useState(false);
-  const [studentList, setStudentList] = useState<IListStudent[]>([]);
+const getStatutIcon = (statut: string) => {
+  switch (statut) {
+    case "COMPLET": return <CheckCircle2 className="h-3.5 w-3.5" />
+    case "PARTIEL": return <Clock className="h-3.5 w-3.5" />
+    case "IMPAYE": return <AlertCircle className="h-3.5 w-3.5" />
+  }
+}
 
-  // Fonction pour charger la liste des étudiants
-  const loadStudentList = useCallback(async () => {
-    try {
-      const result = await getUserList();
-      if (result.code === 'success') {
-        setStudentList(result.data.body || []);
-      } else {
-        console.error('Error loading student list:', result.error);
-        toast("Erreur", {
-          description: "Impossible de charger la liste des étudiants.",
-        });
-      }
-    } catch (error) {
-      console.error('Error loading student list:', error);
-      toast("Erreur", {
-        description: "Une erreur s'est produite lors du chargement des étudiants.",
-      });
-    }
-  }, []);
+const formatMontant = (montant: number) => {
+  return new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(montant) + ' FCFA'
+}
 
-  useEffect(() => {
-    loadStudentList();
-  }, [loadStudentList]);
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  })
+}
 
+export default function GestionScolaritePage() {
+  const [selectedFiliere, setSelectedFiliere] = useState<string>("")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedStatut, setSelectedStatut] = useState<string>("TOUS")
+  const [selectedEtudiant, setSelectedEtudiant] = useState<Etudiant | null>(null)
+  const [viewMode, setViewMode] = useState<"details" | "list">("list")
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [montant, setMontant] = useState("")
+  const [modePaiement, setModePaiement] = useState("")
+  const [reference, setReference] = useState("")
+  const [notes, setNotes] = useState("")
 
-  const getPaymentModeIcon = (mode: string) => {
-    switch (mode) {
-      case "BANK_DEPOSIT":
-        return <Banknote className="h-4 w-4" />;
-      case "Mobile Money":
-        return <Wallet className="h-4 w-4" />;
-      case "Carte bancaire":
-        return <CreditCard className="h-4 w-4" />;
-      case "Espèces":
-        return <DollarSign className="h-4 w-4" />;
-      default:
-        return <Receipt className="h-4 w-4" />;
-    }
-  };
+  const filteredEtudiants = etudiantsData.filter(etudiant => {
+    const matchFiliere = !selectedFiliere || etudiant.filiere === selectedFiliere
+    const matchSearch = 
+      etudiant.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      etudiant.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      etudiant.matricule.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchStatut = selectedStatut === "TOUS" || etudiant.statut === selectedStatut
+    return matchFiliere && matchSearch && matchStatut
+  })
 
-  const getPaymentModeLabel = (mode: string) => {
-    switch (mode) {
-      case "BANK_DEPOSIT":
-        return "Virement bancaire";
-      case "Mobile Money":
-        return "Mobile Money";
-      case "Carte bancaire":
-        return "Carte bancaire";
-      case "Espèces":
-        return "Espèces";
-      default:
-        return mode;
-    }
-  };
+  const stats = {
+    total: filteredEtudiants.reduce((acc, e) => acc + e.montantTotal, 0),
+    paye: filteredEtudiants.reduce((acc, e) => acc + e.montantPaye, 0),
+    reste: filteredEtudiants.reduce((acc, e) => acc + (e.montantTotal - e.montantPaye), 0),
+    complet: filteredEtudiants.filter(e => e.statut === "COMPLET").length,
+    partiel: filteredEtudiants.filter(e => e.statut === "PARTIEL").length,
+    impaye: filteredEtudiants.filter(e => e.statut === "IMPAYE").length
+  }
 
-  const getStatColor = (status: string) => {
-    switch (status) {
-      case "normal":
-        return "text-green-600";
-      case "warning":
-        return "text-orange-600";
-      case "alert":
-        return "text-red-600";
-      case "excellent":
-        return "text-blue-600";
-      default:
-        return "text-gray-600";
-    }
-  };
+  const handleNouveauPaiement = () => {
+    console.log({ etudiant: selectedEtudiant?.id, montant, modePaiement, reference, notes })
+    setIsDialogOpen(false)
+    setMontant("")
+    setModePaiement("")
+    setReference("")
+    setNotes("")
+  }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR').format(amount) + " FCFA";
-  };
+  // État initial : sélection de filière
+  if (!selectedFiliere) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center p-4">
+        <div className="max-w-4xl w-full">
+          <div className="text-center mb-12">
+            <div className="inline-flex h-16 w-16 bg-slate-900 rounded-2xl items-center justify-center mb-4">
+              <DollarSign className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-slate-900 mb-3">
+              Gestion des Paiements
+            </h1>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Bienvenue sur l&apos;interface de gestion financière. Sélectionnez une filière pour commencer à gérer les paiements de scolarité de vos étudiants.
+            </p>
+          </div>
 
-  const handleViewDetails = (payment: Payment) => {
-    setSelectedPayment(payment);
-    setIsDetailsDialogOpen(true);
-  };
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filieres.map((filiere) => (
+              <button
+                key={filiere.id}
+                onClick={() => setSelectedFiliere(filiere.id)}
+                className="group p-8 bg-white border-2 border-slate-200 rounded-2xl text-left transition-all hover:border-slate-900 hover:shadow-lg"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="h-12 w-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-900 transition-colors">
+                    <GraduationCap className="h-6 w-6 text-slate-600 group-hover:text-white transition-colors" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-slate-900 transition-colors" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">{filiere.nom}</h3>
+                <p className="text-sm text-slate-500">
+                  {filiere.niveaux.length} niveaux disponibles
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
-  const filteredPayments = paymentsData.filter(payment => {
-    const matchesSearch = payment.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.programme.toLowerCase().includes(searchTerm.toLowerCase());
-
-    return matchesSearch;
-  });
+  const currentFiliere = filieres.find(f => f.id === selectedFiliere)
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Gestion des Paiements
-          </h2>
-          <p className="text-muted-foreground">
-            Suivi et gestion des paiements étudiants
-          </p>
-        </div>
-
-        <div className="flex space-x-2">
-          <Button variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualiser
-          </Button>
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Exporter
-          </Button>
-          <Button onClick={() => setIsCreatePaymentOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nouveau paiement
-          </Button>
-        </div>
-      </div>
-
-      {/* Payment Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {paymentStats.map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <div className={getStatColor(stat.status)}>
-                {stat.icon}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-                <div className={`flex items-center text-xs ${
-                  stat.trendDirection === 'up' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {stat.trendDirection === 'up' ?
-                    <TrendingUp className="h-3 w-3 mr-1" /> :
-                    <AlertTriangle className="h-3 w-3 mr-1" />
-                  }
-                  {stat.trend}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Payments Table with Tabs */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Liste des Paiements</CardTitle>
-              <CardDescription>
-                Gestion et suivi de tous les paiements
-              </CardDescription>
-            </div>
-            <div className="flex space-x-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher un paiement..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 w-64"
-                />
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Référence</TableHead>
-                <TableHead>Étudiant</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Mode</TableHead>
-                <TableHead>Date paiement</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-                <TableBody>
-                  {filteredPayments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-mono">
-                        {payment.reference}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{payment.studentName}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {payment.programme}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {formatCurrency(payment.montant)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          {getPaymentModeIcon(payment.modePaiement)}
-                          <span className="text-sm">{getPaymentModeLabel(payment.modePaiement)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-1">
-                          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">
-                            {new Date(payment.datePaiement).toLocaleDateString('fr-FR')}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => handleViewDetails(payment)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Receipt className="mr-2 h-4 w-4" />
-                              Générer reçu
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                              <User className="mr-2 h-4 w-4" />
-                              Contacter étudiant
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Annuler paiement
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Payment Details Dialog */}
-      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Détails du Paiement - {selectedPayment?.reference}</DialogTitle>
-            <DialogDescription>
-              Informations complètes sur le paiement
-            </DialogDescription>
-          </DialogHeader>
-          {selectedPayment && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Étudiant</Label>
-                  <p className="text-sm">{selectedPayment.studentName}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Programme</Label>
-                  <p className="text-sm">{selectedPayment.programme}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Référence</Label>
-                  <p className="text-sm font-mono">{selectedPayment.reference}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Mode de paiement</Label>
-                  <div className="flex items-center space-x-2">
-                    {getPaymentModeIcon(selectedPayment.modePaiement)}
-                    <span className="text-sm">{getPaymentModeLabel(selectedPayment.modePaiement)}</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        
+        {/* Header avec sélecteur de filière */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedFiliere("")}
+                className="gap-2"
+              >
+                <ChevronRight className="h-4 w-4 rotate-180" />
+                Retour
+              </Button>
+              
+              <Select value={selectedFiliere} onValueChange={setSelectedFiliere}>
+                <SelectTrigger className="w-[250px] h-11 border-2">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4" />
+                    <SelectValue />
                   </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Montant</p>
-                  <p className="text-lg font-bold">{formatCurrency(selectedPayment.montant)}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Date de paiement</Label>
-                  <p className="text-sm">{new Date(selectedPayment.datePaiement).toLocaleDateString('fr-FR')}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
-              Fermer
-            </Button>
-            <Button>
-              <Receipt className="h-4 w-4 mr-2" />
-              Générer reçu
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Create Payment Dialog */}
-      <Dialog open={isCreatePaymentOpen} onOpenChange={setIsCreatePaymentOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Nouveau Paiement</DialogTitle>
-            <DialogDescription>
-              Créer un nouveau paiement pour un étudiant
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="student">Étudiant</Label>
-              <Select>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sélectionner un étudiant" />
                 </SelectTrigger>
-                <SelectContent className="max-h-48">
-                  {studentList.map((student) => (
-                    <SelectItem key={student.user_code} value={student.user_code}>
-                      <div className="flex items-center w-full max-w-full">
-                        <span className="truncate">
-                          {student.first_name} {student.last_name} - {student.email}
-                        </span>
-                      </div>
+                <SelectContent>
+                  {filieres.map((filiere) => (
+                    <SelectItem key={filiere.id} value={filiere.id}>
+                      {filiere.nom}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="montant">Montant (FCFA)</Label>
-                <Input id="montant" type="number" placeholder="0" />
-              </div>
-              <div>
-                <Label htmlFor="mode">Mode de paiement</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Mode de paiement" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BANK_DEPOSIT">Virement bancaire</SelectItem>
-                    <SelectItem value="mobile">Mobile Money</SelectItem>
-                    <SelectItem value="carte">Carte bancaire</SelectItem>
-                    <SelectItem value="especes">Espèces</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="datePaiement">Date de paiement</Label>
-                <Input id="datePaiement" type="date" />
-              </div>
-              <div>
-                <Label htmlFor="reference">Référence</Label>
-                <Input id="reference" placeholder="REF-2024-XXX" />
-              </div>
+
+            <div className="flex items-center gap-3">
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Exporter
+              </Button>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreatePaymentOpen(false)}>
-              Annuler
-            </Button>
-            <Button>
-              Créer le paiement
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          <h1 className="text-3xl font-bold text-slate-900 mb-1">
+            {currentFiliere?.nom}
+          </h1>
+          <p className="text-slate-600">
+            {filteredEtudiants.length} étudiant{filteredEtudiants.length > 1 ? 's' : ''} inscrit{filteredEtudiants.length > 1 ? 's' : ''}
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                </div>
+                <Users className="h-4 w-4 text-slate-400" />
+              </div>
+              <p className="text-2xl font-bold text-slate-900 mb-1">{filteredEtudiants.length}</p>
+              <p className="text-xs text-slate-500">Étudiants</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-10 w-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                </div>
+                <Badge variant="outline" className="text-emerald-600">{stats.complet}</Badge>
+              </div>
+              <p className="text-2xl font-bold text-emerald-600 mb-1">{formatMontant(stats.paye)}</p>
+              <p className="text-xs text-slate-500">Montant Perçu</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-10 w-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                </div>
+                <Badge variant="outline" className="text-amber-600">{stats.partiel + stats.impaye}</Badge>
+              </div>
+              <p className="text-2xl font-bold text-amber-600 mb-1">{formatMontant(stats.reste)}</p>
+              <p className="text-xs text-slate-500">Reste à Percevoir</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-slate-600" />
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-slate-900 mb-1">{formatMontant(stats.total)}</p>
+              <p className="text-xs text-slate-500">Montant Total</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filtres */}
+        <Card className="border-slate-200 shadow-sm mb-6">
+          <CardContent className="p-5">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Rechercher par nom, prénom ou matricule..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-10"
+                />
+              </div>
+              
+              <Select value={selectedStatut} onValueChange={setSelectedStatut}>
+                <SelectTrigger className="w-full md:w-[180px] h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TOUS">Tous ({filteredEtudiants.length})</SelectItem>
+                  <SelectItem value="COMPLET">Payé complet ({stats.complet})</SelectItem>
+                  <SelectItem value="PARTIEL">Payé partiel ({stats.partiel})</SelectItem>
+                  <SelectItem value="IMPAYE">Impayé ({stats.impaye})</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Table des étudiants */}
+        <Card className="border-slate-200 shadow-sm">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-50/50">
+                  <TableHead className="font-semibold">Étudiant</TableHead>
+                  <TableHead className="font-semibold">Matricule</TableHead>
+                  <TableHead className="font-semibold">Niveau</TableHead>
+                  <TableHead className="font-semibold text-right">Montant Total</TableHead>
+                  <TableHead className="font-semibold text-right">Payé</TableHead>
+                  <TableHead className="font-semibold text-right">Reste</TableHead>
+                  <TableHead className="font-semibold">Statut</TableHead>
+                  <TableHead className="font-semibold text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredEtudiants.map((etudiant) => (
+                  <TableRow key={etudiant.id} className="hover:bg-slate-50/50">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-semibold text-slate-600">
+                            {etudiant.prenom.charAt(0)}{etudiant.nom.charAt(0)}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900">
+                            {etudiant.prenom} {etudiant.nom}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono text-sm text-slate-600">{etudiant.matricule}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-medium">{etudiant.niveau}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatMontant(etudiant.montantTotal)}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-emerald-600">
+                      {formatMontant(etudiant.montantPaye)}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-amber-600">
+                      {formatMontant(etudiant.montantTotal - etudiant.montantPaye)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`border gap-1.5 ${getStatutStyle(etudiant.statut)}`}>
+                        {getStatutIcon(etudiant.statut)}
+                        {etudiant.statut}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedEtudiant(etudiant)}
+                          className="h-8 gap-1.5"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          Voir
+                        </Button>
+                        <Dialog open={isDialogOpen && selectedEtudiant?.id === etudiant.id} onOpenChange={setIsDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              size="sm"
+                              onClick={() => setSelectedEtudiant(etudiant)}
+                              className="h-8 gap-1.5"
+                            >
+                              <Plus className="h-3.5 w-3.5" />
+                              Paiement
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Enregistrer un paiement</DialogTitle>
+                              <DialogDescription>
+                                {selectedEtudiant?.prenom} {selectedEtudiant?.nom} - {selectedEtudiant?.matricule}
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="space-y-6 py-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="montant">Montant (FCFA)</Label>
+                                <Input
+                                  id="montant"
+                                  type="number"
+                                  placeholder="Ex: 250000"
+                                  value={montant}
+                                  onChange={(e) => setMontant(e.target.value)}
+                                  className="h-11"
+                                />
+                              </div>
+
+                              <div className="space-y-3">
+                                <Label>Mode de paiement</Label>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                  {modesPaiement.map((mode) => {
+                                    const Icon = mode.icon
+                                    return (
+                                      <button
+                                        key={mode.id}
+                                        onClick={() => setModePaiement(mode.id)}
+                                        className={`p-4 border-2 rounded-xl text-left transition-all hover:border-slate-300 ${
+                                          modePaiement === mode.id
+                                            ? 'border-slate-900 bg-slate-50'
+                                            : 'border-slate-200'
+                                        }`}
+                                      >
+                                        <Icon className={`h-5 w-5 mb-2 ${
+                                          modePaiement === mode.id ? 'text-slate-900' : 'text-slate-600'
+                                        }`} />
+                                        <p className="font-medium text-sm text-slate-900">{mode.nom}</p>
+                                        <p className="text-xs text-slate-500 mt-1">{mode.description}</p>
+                                      </button>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label htmlFor="reference">Référence de transaction</Label>
+                                <Input
+                                  id="reference"
+                                  placeholder="Ex: VIR20250115001"
+                                  value={reference}
+                                  onChange={(e) => setReference(e.target.value)}
+                                  className="h-11"
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label htmlFor="notes">Notes (optionnel)</Label>
+                                <Input
+                                  id="notes"
+                                  placeholder="Informations complémentaires..."
+                                  value={notes}
+                                  onChange={(e) => setNotes(e.target.value)}
+                                  className="h-11"
+                                />
+                              </div>
+
+                              <div className="flex justify-end gap-3 pt-4">
+                                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                  Annuler
+                                </Button>
+                                <Button 
+                                  onClick={handleNouveauPaiement}
+                                  disabled={!montant || !modePaiement || !reference}
+                                >
+                                  Enregistrer le paiement
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            {filteredEtudiants.length === 0 && (
+              <div className="p-12 text-center">
+                <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-8 w-8 text-slate-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  Aucun étudiant trouvé
+                </h3>
+                <p className="text-slate-500">
+                  Essayez de modifier vos critères de recherche
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }

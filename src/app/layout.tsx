@@ -6,8 +6,8 @@ import localFont from 'next/font/local'
 
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import ToastProvider from '@/components/custom-ui/alert/ToastProvider';
 import BarProvider from "@/context/BarContext";
+import ToastProvider from '@/components/ui/ToastProvider';
 
 const SpaceGrotesk = Space_Grotesk({
   subsets: ["latin"],

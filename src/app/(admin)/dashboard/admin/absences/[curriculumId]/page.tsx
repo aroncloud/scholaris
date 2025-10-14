@@ -1,19 +1,14 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Download, FileSpreadsheet, AlertTriangle, CheckCircle2, XCircle, Clock, Calendar as CalendarIcon, Search } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Download, FileSpreadsheet, AlertTriangle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import PageHeader from '@/layout/PageHeader';
 import StatCard from '@/components/cards/StatCard';
+import { Avatar } from '@/components/custom-ui/Avatar';
+import Badge, { BadgeVariant } from '@/components/custom-ui/Badge';
+import { ResponsiveTable, TableColumn } from '@/components/tables/ResponsiveTable';
+import ContentLayout from '@/layout/ContentLayout';
 
 interface Student {
   id: string;
@@ -33,15 +28,11 @@ const mockStudents: Student[] = [
   { id: '6', name: 'Moukouri Grace', matricule: '21A006', justifiedAbsences: 3, unjustifiedAbsences: 3, totalAbsences: 6 },
   { id: '7', name: 'Njoya Francis', matricule: '21A007', justifiedAbsences: 5, unjustifiedAbsences: 0, totalAbsences: 5 },
   { id: '8', name: 'Ebogo Sandra', matricule: '21A008', justifiedAbsences: 1, unjustifiedAbsences: 4, totalAbsences: 5 },
-  { id: '9', name: 'Nkolo David', matricule: '21A009', justifiedAbsences: 0, unjustifiedAbsences: 0, totalAbsences: 0 },
   { id: '10', name: 'Mendomo Patricia', matricule: '21A010', justifiedAbsences: 12, unjustifiedAbsences: 8, totalAbsences: 20 },
 ];
 
 export default function AttendanceReport() {
   const [students] = useState<Student[]>(mockStudents);
-  const [period, setPeriod] = useState<string>('semester1');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<string>('name');
 
   const stats = useMemo(() => {
     const totalJustified = students.reduce((sum, s) => sum + s.justifiedAbsences, 0);
@@ -63,26 +54,76 @@ export default function AttendanceReport() {
     };
   }, [students]);
 
-  const filteredAndSortedStudents = useMemo(() => {
-    const filtered = students.filter(student => 
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.matricule.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    return filtered.sort((a, b) => {
-      switch(sortBy) {
-        case 'name': return a.name.localeCompare(b.name);
-        case 'total-desc': return b.totalAbsences - a.totalAbsences;
-        case 'total-asc': return a.totalAbsences - b.totalAbsences;
-        case 'unjustified-desc': return b.unjustifiedAbsences - a.unjustifiedAbsences;
-        default: return 0;
-      }
-    });
-  }, [students, searchTerm, sortBy]);
+  // Définir les colonnes du tableau
+  const studentColumns: TableColumn<Student>[] = useMemo(() => [
+    {
+      key: "name",
+      label: "Étudiant",
+      priority: 'high',
+      render: (_, student) => (
+        <div className="flex items-center gap-4">
+          <Avatar
+            fallback={student.name}
+            variant={
+              student.totalAbsences === 0 ? 'success' :
+              student.unjustifiedAbsences > 5 ? 'danger' :
+              student.totalAbsences > 10 ? 'warning' :
+              'info'
+            }
+          />
+          <div>
+            <div className="font-semibold text-gray-900">{student.name}</div>
+            <div className="text-sm text-gray-500">{student.matricule}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "justifiedAbsences",
+      label: "Justifiées (h)",
+      priority: 'high',
+      render: (_, student) => (
+        <Badge value={student.justifiedAbsences} label='heures' variant='success' />
+      ),
+    },
+    {
+      key: "unjustifiedAbsences",
+      label: "Non Justifiées (h)",
+      priority: 'high',
+      render: (_, student) => (
+        <Badge value={student.unjustifiedAbsences} label='heures' variant='danger' />
+      ),
+    },
+    {
+      key: "totalAbsences",
+      label: "Total",
+      priority: 'medium',
+      render: (_, student) => (
+        <div className="inline-flex flex-col items-center">
+          <span className="text-2xl font-bold text-gray-900">{student.totalAbsences}h</span>
+          {student.totalAbsences > 0 && (
+            <span className="text-xs text-gray-500 mt-0.5">
+              {((student.unjustifiedAbsences / student.totalAbsences) * 100).toFixed(0)}% non just.
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "unjustifiedAbsences",
+      label: "Évaluation",
+      priority: 'medium',
+      render: (_, student) => {
+        const risk = getRiskLevel(student.unjustifiedAbsences);
+        const RiskIcon = risk.icon;
+        return <Badge icon={RiskIcon} label={risk.level} variant={risk.bg as BadgeVariant} size='lg' />;
+      },
+    },
+  ], []);
 
   const exportToCSV = () => {
     const headers = ['Matricule', 'Nom Complet', 'Absences Justifiées (h)', 'Absences Non Justifiées (h)', 'Total (h)', 'Taux'];
-    const rows = filteredAndSortedStudents.map(s => [
+    const rows = students.map(s => [
       s.matricule,
       s.name,
       s.justifiedAbsences,
@@ -92,7 +133,7 @@ export default function AttendanceReport() {
     ]);
     
     const csvContent = [
-      `Rapport d'Assiduité - ${period === 'semester1' ? 'Semestre 1' : period === 'semester2' ? 'Semestre 2' : 'Année Complète'}`,
+      `Rapport d'Assiduité`,
       `Généré le: ${new Date().toLocaleDateString('fr-FR')}`,
       '',
       headers.join(','),
@@ -102,7 +143,7 @@ export default function AttendanceReport() {
     const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `rapport_assiduite_${period}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `rapport_assiduite_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
   };
 
@@ -110,18 +151,11 @@ export default function AttendanceReport() {
     window.print();
   };
 
-  const getStatusColor = (student: Student) => {
-    if (student.totalAbsences === 0) return 'perfect';
-    if (student.unjustifiedAbsences > 5) return 'critical';
-    if (student.totalAbsences > 10) return 'warning';
-    return 'normal';
-  };
-
   const getRiskLevel = (unjustified: number) => {
-    if (unjustified === 0) return { level: 'Excellent', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: CheckCircle2 };
-    if (unjustified <= 3) return { level: 'Acceptable', color: 'text-blue-600', bg: 'bg-blue-50', icon: Clock };
-    if (unjustified <= 5) return { level: 'À surveiller', color: 'text-orange-600', bg: 'bg-orange-50', icon: AlertTriangle };
-    return { level: 'Critique', color: 'text-red-600', bg: 'bg-red-50', icon: XCircle };
+    if (unjustified === 0) return { level: 'Excellent', color: 'text-emerald-600', bg: 'success', icon: CheckCircle2 };
+    if (unjustified <= 3) return { level: 'Acceptable', color: 'text-blue-600', bg: 'info', icon: Clock };
+    if (unjustified <= 5) return { level: 'À surveiller', color: 'text-orange-600', bg: 'warning', icon: AlertTriangle };
+    return { level: 'Critique', color: 'text-red-600', bg: 'danger', icon: XCircle };
   };
 
   return (
@@ -130,26 +164,15 @@ export default function AttendanceReport() {
           title='Rapport d&apos;Assiduité'
           description={`Informatique · Promotion 2021 · ${students.length} étudiants`}
         >
-          <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger className="w-48 h-11 border-gray-300 shadow-sm">
-                <CalendarIcon className="w-4 h-4 mr-2 text-gray-500" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="semester1">Semestre 1 - 2024</SelectItem>
-                <SelectItem value="semester2">Semestre 2 - 2024</SelectItem>
-                <SelectItem value="year">Année complète</SelectItem>
-              </SelectContent>
-            </Select>
             
-            <Button onClick={exportToCSV} variant="outline" className="h-11 gap-2 border-gray-300 shadow-sm hover:bg-gray-50">
-              <FileSpreadsheet className="w-4 h-4" />
-              Exporter CSV
-            </Button>
-            <Button onClick={exportToPDF} className="h-11 gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg">
-              <Download className="w-4 h-4" />
-              Télécharger PDF
-            </Button>
+          <Button onClick={exportToCSV} variant="outline" className="h-11 gap-2 border-gray-300 shadow-sm hover:bg-gray-50">
+            <FileSpreadsheet className="w-4 h-4" />
+            Exporter CSV
+          </Button>
+          <Button onClick={exportToPDF} className="h-11 gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg">
+            <Download className="w-4 h-4" />
+            Télécharger PDF
+          </Button>
 
         </PageHeader>
         <div className="p-6 space-y-8">
@@ -218,121 +241,21 @@ export default function AttendanceReport() {
             </StatCard>
           </div>
 
-          {/* Main Table Card */}
-          <Card className="border-0 shadow-xl bg-white">
-            <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-white">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                  <CardTitle className="text-2xl font-bold">Liste des Étudiants</CardTitle>
-                  <p className="text-gray-600 mt-1">{filteredAndSortedStudents.length} résultat{filteredAndSortedStudents.length > 1 ? 's' : ''}</p>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1 sm:w-64">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      placeholder="Rechercher un étudiant..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 h-11 border-gray-300 shadow-sm"
-                    />
-                  </div>
-                  
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full sm:w-56 h-11 border-gray-300 shadow-sm">
-                      <SelectValue placeholder="Trier par..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="name">Nom (A-Z)</SelectItem>
-                      <SelectItem value="total-desc">Total absences (↓)</SelectItem>
-                      <SelectItem value="total-asc">Total absences (↑)</SelectItem>
-                      <SelectItem value="unjustified-desc">Non justifiées (↓)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b-2 border-gray-200">
-                    <tr>
-                      <th className="text-left py-4 px-6 font-semibold text-sm text-gray-700 uppercase tracking-wider">Étudiant</th>
-                      <th className="text-center py-4 px-6 font-semibold text-sm text-gray-700 uppercase tracking-wider">Justifiées</th>
-                      <th className="text-center py-4 px-6 font-semibold text-sm text-gray-700 uppercase tracking-wider">Non Justifiées</th>
-                      <th className="text-center py-4 px-6 font-semibold text-sm text-gray-700 uppercase tracking-wider">Total</th>
-                      <th className="text-center py-4 px-6 font-semibold text-sm text-gray-700 uppercase tracking-wider">Évaluation</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {filteredAndSortedStudents.map((student) => {
-                      const statusColor = getStatusColor(student);
-                      const risk = getRiskLevel(student.unjustifiedAbsences);
-                      const RiskIcon = risk.icon;
-                      
-                      return (
-                        <tr key={student.id} className="hover:bg-gray-50 transition-colors group">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-4">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-md ${
-                                statusColor === 'perfect' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
-                                statusColor === 'critical' ? 'bg-gradient-to-br from-red-500 to-red-600' :
-                                statusColor === 'warning' ? 'bg-gradient-to-br from-orange-500 to-orange-600' :
-                                'bg-gradient-to-br from-blue-500 to-blue-600'
-                              }`}>
-                                {student.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                              </div>
-                              <div>
-                                <div className="font-semibold text-gray-900">{student.name}</div>
-                                <div className="text-sm text-gray-500">{student.matricule}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200">
-                              <span className="text-emerald-700 font-bold text-lg">{student.justifiedAbsences}</span>
-                              <span className="text-emerald-600 text-xs font-medium">heures</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200">
-                              <span className="text-red-700 font-bold text-lg">{student.unjustifiedAbsences}</span>
-                              <span className="text-red-600 text-xs font-medium">heures</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            <div className="inline-flex flex-col items-center">
-                              <span className="text-2xl font-bold text-gray-900">{student.totalAbsences}h</span>
-                              {student.totalAbsences > 0 && (
-                                <span className="text-xs text-gray-500 mt-0.5">
-                                  {((student.unjustifiedAbsences / student.totalAbsences) * 100).toFixed(0)}% non just.
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${risk.bg} border border-opacity-20`}>
-                              <RiskIcon className={`w-4 h-4 ${risk.color}`} />
-                              <span className={`font-semibold text-sm ${risk.color}`}>{risk.level}</span>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+          <ContentLayout
+            title='Liste des Étudiants'
+            description={`${students.length} étudiant${students.length > 1 ? '(s)' : ''}`}
+          >
 
-              {filteredAndSortedStudents.length === 0 && (
-                <div className="text-center py-16">
-                  <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg">Aucun étudiant trouvé</p>
-                  <p className="text-gray-400 text-sm mt-1">Essayez de modifier votre recherche</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
+            <ResponsiveTable
+              columns={studentColumns}
+              data={students}
+              searchKey={["name", "matricule"]}
+              paginate={10}
+              locale="fr"
+              keyField="id"
+            />
+          </ContentLayout>
 
         </div>
     </div>

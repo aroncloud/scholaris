@@ -143,12 +143,15 @@ export const StatCard: React.FC<StatCardProps> = ({
         !main ? 'group hover:shadow-2xl transition-shadow' : ''
       } ${className}`}
     >
+      {/* Cercle décoratif en arrière-plan */}
       <div
         className={`absolute top-0 right-0 ${circleSize} ${styles.circle} rounded-full ${
           !main ? 'group-hover:scale-110 transition-transform' : ''
-        }`}
+        } z-0`}
       ></div>
-      <CardHeader className="pb-3">
+      
+      {/* Contenu au premier plan */}
+      <CardHeader className="pb-3 relative z-10">
         <div className="flex items-center justify-between">
           <CardTitle className={`text-sm font-semibold ${styles.titleText} uppercase tracking-wide`}>
             {title}
@@ -156,7 +159,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           <Icon className={`w-5 h-5 ${styles.iconColor}`} />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative z-10">
         <div className={`text-4xl font-bold mb-1 ${styles.valueColor}`}>
           {value}
         </div>

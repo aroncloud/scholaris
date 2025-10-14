@@ -404,3 +404,15 @@ export interface IGetTeacherCourseUnit {
   /** Description de l'unité d'enseignement (peut être null). */
   description: string | null;
 }
+
+export interface IUpdateSessionForm {
+  curriculum_code: string;
+  course_unit_code: string;
+  schedule_code: string;
+  teacher_user_code: string;
+  resource_code: string;
+  session_title: string;
+  start_time: string;
+  end_time: string;
+  academic_year_code: string;
+}

@@ -15,26 +15,15 @@ import { useTeacherStore } from "@/store/useTeacherStore";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
 import { getListAcademicYearsSchedulesForCurriculum, getUEListPerCurriculum } from "@/actions/programsAction";
 import { IGetAcademicYearsSchedulesForCurriculum } from "@/types/planificationType";
-import { IGetUECurriculum } from "@/types/programTypes";
+import { IGetUECurriculum, IUpdateSessionForm } from "@/types/programTypes";
 import { DateTimePicker } from "@/components/ui/DateTimePicker";
 import { Combobox } from "@/components/ui/Combobox";
 
-interface IUpdateSessionForm {
-  curriculum_code: string;
-  course_unit_code: string;
-  schedule_code: string;
-  teacher_user_code: string;
-  resource_code: string;
-  session_title: string;
-  start_time: string;
-  end_time: string;
-  academic_year_code: string;
-}
 
 interface DialogUpdateSessionProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: { resource_code: string; session_title: string }) => Promise<boolean>;
+  onSave: (data: IUpdateSessionForm) => Promise<boolean>;
   onCancelSession: () => Promise<boolean>;
   eventData: IFullCalendarEvent | null;
 }
@@ -158,10 +147,7 @@ export function DialogUpdateSession({
       return;
     }
 
-    const success = await onSave({
-      resource_code: data.resource_code,
-      session_title: data.session_title
-    });
+    const success = await onSave(data);
 
     if (success) {
       reset();
