@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,6 +46,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useFinancialData } from "@/hooks/feature/financial/useFinancialData"
+import { useFactorizedProgramStore } from "@/store/programStore"
 
 // Types
 interface Echeance {
@@ -129,6 +131,7 @@ export default function GrilleTarifairePage() {
   const [grilles, setGrilles] = useState<GrilleTarifaire[]>(grillesInitiales)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingGrille, setEditingGrille] = useState<GrilleTarifaire | null>(null)
+  const { planData, listAllPlan } = useFinancialData()
   
   // Filtres
   const [searchTerm, setSearchTerm] = useState("")
@@ -146,6 +149,12 @@ export default function GrilleTarifairePage() {
     { id: "2", libelle: "2ème Tranche", pourcentage: 30, dateEcheance: "" },
     { id: "3", libelle: "3ème Tranche", pourcentage: 30, dateEcheance: "" }
   ])
+
+  const { factorizedPrograms } = useFactorizedProgramStore();
+  const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
+  useEffect(() => {
+    listAllPlan();
+  }, [listAllPlan])
 
   const handleAjouterEcheance = () => {
     const newEcheance: Echeance = {
@@ -328,100 +337,102 @@ export default function GrilleTarifairePage() {
               <Badge variant="outline" className="font-medium">{grillesAnnee.length} grille{grillesAnnee.length > 1 ? 's' : ''}</Badge>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {grillesAnnee.map((grille) => (
-                <Card key={grille.id} className="border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="h-11 w-11 bg-slate-900 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <GraduationCap className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-slate-900 truncate">
-                            {grille.filiere}
-                          </h3>
-                          <p className="text-sm text-slate-500">
-                            Niveau {grille.niveau}
-                          </p>
-                        </div>
-                      </div>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditer(grille)}>
-                            <Edit2 className="h-4 w-4 mr-2" />
-                            Modifier
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleSupprimer(grille.id)}
-                            className="text-rose-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="p-3 bg-slate-50 rounded-lg">
-                        <p className="text-xs text-slate-500 mb-1">Montant Total</p>
-                        <p className="text-xl font-bold text-slate-900">
-                          {formatMontant(grille.montantTotal)}
-                        </p>
-                      </div>
-
-                      <Separator />
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500">Échéances</span>
-                          <span className="font-medium text-slate-700">{grille.echeances.length} tranche{grille.echeances.length > 1 ? 's' : ''}</span>
-                        </div>
-                        
-                        {grille.echeances.map((echeance, index) => (
-                          <div key={echeance.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-slate-900 truncate">
-                                {echeance.libelle}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                {new Date(echeance.dateEcheance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                              </p>
-                            </div>
-                            <div className="text-right ml-3">
-                              <Badge variant="outline" className="text-xs">
-                                {echeance.pourcentage}%
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-4">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 gap-2"
-                        onClick={() => handleEditer(grille)}
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                        Modifier
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           </div>
         ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {planData.map((plan) => (
+            <Card key={plan.fee_code} className="border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="h-11 w-11 bg-slate-900 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <GraduationCap className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-slate-900 truncate">
+                        {curriculumList.find(item => item.curriculum_code ==  plan.curriculum_code)?.curriculum_name}
+                      </h3>
+                      <p className="text-sm text-slate-500">
+                        {curriculumList.find(item => item.curriculum_code ==  plan.curriculum_code)?.study_level}
+                      </p>
+                    </div>
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => {
+                        // handleEditer(grille)
+                      }}>
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Modifier
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleSupprimer(plan.fee_code)}
+                        className="text-rose-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Supprimer
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3 bg-slate-50 rounded-lg">
+                    <p className="text-xs text-slate-500 mb-1">Montant Total</p>
+                    <p className="text-xl font-bold text-slate-900">
+                      {formatMontant(grille.montantTotal)}
+                    </p>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Échéances</span>
+                      <span className="font-medium text-slate-700">{grille.echeances.length} tranche{grille.echeances.length > 1 ? 's' : ''}</span>
+                    </div>
+                    
+                    {grille.echeances.map((echeance, index) => (
+                      <div key={echeance.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-900 truncate">
+                            {echeance.libelle}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {new Date(echeance.dateEcheance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                          </p>
+                        </div>
+                        <div className="text-right ml-3">
+                          <Badge variant="outline" className="text-xs">
+                            {echeance.pourcentage}%
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 mt-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 gap-2"
+                    onClick={() => handleEditer(grille)}
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                    Modifier
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
         {filteredGrilles.length === 0 && (
           <Card className="border-slate-200 shadow-sm">

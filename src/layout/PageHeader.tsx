@@ -90,7 +90,7 @@ const PageHeader = ({
                                     <Icon className="w-6 h-6 text-white" />
                                 </div>
                                 <div className='flex flex-col'>
-                                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                                         {title}
                                     </h1>
                                     {description && (

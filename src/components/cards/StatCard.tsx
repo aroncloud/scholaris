@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LucideIcon, TrendingUp } from 'lucide-react';
 
@@ -14,7 +14,18 @@ interface StatCardProps {
   className?: string;
 }
 
-const variantStyles = {
+// Type pour les styles
+interface VariantStyle {
+  bg: string;
+  text: string;
+  titleText: string;
+  iconColor: string;
+  circle: string;
+  valueColor: string;
+}
+
+// Typage explicite de variantStyles
+const variantStyles: Record<StatCardVariant, { main: VariantStyle; secondary: VariantStyle }> = {
   success: {
     main: {
       bg: 'bg-gradient-to-br from-green-600 to-green-700',
@@ -125,16 +136,24 @@ const variantStyles = {
   },
 };
 
+// Fonction pour obtenir une variante aléatoire
+const getRandomVariant = (): StatCardVariant => {
+  const variants: StatCardVariant[] = ['success', 'danger', 'warning', 'info', 'neutral', 'purple'];
+  return variants[Math.floor(Math.random() * variants.length)];
+};
+
 export const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   icon: Icon = TrendingUp,
-  variant = 'info',
+  variant,
   main = false,
   children,
   className = '',
 }) => {
-  const styles = main ? variantStyles[variant].main : variantStyles[variant].secondary;
+  const selectedVariant = useMemo(() => variant ?? getRandomVariant(), [variant]);
+  
+  const styles = main ? variantStyles[selectedVariant].main : variantStyles[selectedVariant].secondary;
   const circleSize = main ? 'w-32 h-32 -mr-16 -mt-16' : 'w-20 h-20 -mr-10 -mt-10';
 
   return (
@@ -143,14 +162,12 @@ export const StatCard: React.FC<StatCardProps> = ({
         !main ? 'group hover:shadow-2xl transition-shadow' : ''
       } ${className}`}
     >
-      {/* Cercle décoratif en arrière-plan */}
       <div
         className={`absolute top-0 right-0 ${circleSize} ${styles.circle} rounded-full ${
           !main ? 'group-hover:scale-110 transition-transform' : ''
         } z-0`}
       ></div>
       
-      {/* Contenu au premier plan */}
       <CardHeader className="pb-3 relative z-10">
         <div className="flex items-center justify-between">
           <CardTitle className={`text-sm font-semibold ${styles.titleText} uppercase tracking-wide`}>
@@ -160,7 +177,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         </div>
       </CardHeader>
       <CardContent className="relative z-10">
-        <div className={`text-4xl font-bold mb-1 ${styles.valueColor}`}>
+        <div className={`text-lg lg:text-xl xl:text-2xl font-bold mb-1 ${styles.valueColor}`}>
           {value}
         </div>
         {children && (

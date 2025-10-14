@@ -1,19 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Search, ListCollapse, Inbox, X } from "lucide-react";
+import { Search, ListCollapse, Inbox, Eraser } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Combobox } from "../ui/Combobox";
 
 export interface TableColumn<T> {
   key: string;
@@ -35,7 +28,7 @@ interface FilterOption {
 interface DataTableProps<T> {
   columns: TableColumn<T>[];
   data: T[];
-  searchKey?: keyof T | (keyof T)[];
+  searchKey?: string | string[]; // Changé : accepte des strings pour les chemins imbriqués
   paginate?: number;
   showMore?: ShowMoreOption;
   onRowClick?: (row: T) => void;
@@ -122,23 +115,32 @@ export const ResponsiveTable = <T extends Record<string, any>>({
   const lowPriorityColumns = columns.filter((col) => col.priority === 'low');
 
   const filteredData = data.filter((row) => {
+    // Recherche
     let matchesSearch = true;
     if (searchTerm) {
-      const keys = searchKey ? (Array.isArray(searchKey) ? searchKey : [searchKey]) : columns.map((c) => c.key);
+      const keys = searchKey 
+        ? (Array.isArray(searchKey) ? searchKey : [searchKey]) 
+        : columns.map((c) => c.key);
       const term = searchTerm.toString().toLowerCase();
       matchesSearch = keys.some((k) => {
-        const str = getValueByKey(row, String(k)).toLowerCase();
+        const str = getValueByKey(row, k).toLowerCase();
         return str.includes(term);
       });
     }
 
     if (!matchesSearch) return false;
 
+    // Filtres
     for (const f of filters) {
       const sel = selectedFilters[f.key];
       if (sel && sel !== "") {
-        const valStr = getValueByKey(row, f.key).toLowerCase();
-        if (!valStr.includes(String(sel).toLowerCase())) return false;
+        const valStr = String(getValueByKey(row, f.key)).toLowerCase();
+        // Comparaison stricte pour les booléens
+        if (sel === "true" || sel === "false") {
+          if (valStr !== sel) return false;
+        } else {
+          if (!valStr.includes(String(sel).toLowerCase())) return false;
+        }
       }
     }
 
@@ -175,51 +177,43 @@ export const ResponsiveTable = <T extends Record<string, any>>({
               placeholder={locale === "fr" ? "Rechercher..." : "Search..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 h-11 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 transition-colors"
+              className="pl-10 pr-4 h-10 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 transition-colors"
               disabled={isLoading}
             />
           </div>
 
           {filters.map((filter) => (
             <div key={filter.key} className="w-full sm:w-auto min-w-[180px]">
-              <Select
-                value={selectedFilters[filter.key] ?? ""}
-                onValueChange={(value) =>
+              <Combobox
+                value={selectedFilters[filter.key] || ""}
+                className="h-10"
+                onChange={(value) =>
                   setSelectedFilters((prev) => ({
                     ...prev,
                     [filter.key]: value,
                   }))
                 }
-              >
-                <SelectTrigger className="h-11 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900">
-                  <SelectValue
-                    placeholder={
-                      locale === "fr"
-                        ? `Filtrer par ${filter.key}`
-                        : `Filter by ${filter.key}`
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">{locale === "fr" ? "Tous" : "All"}</SelectItem>
-                  {filter.values.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                options={[
+                  { value: "", label: locale === "fr" ? "Tous" : "All" },
+                  ...filter.values
+                ]}
+                placeholder={
+                  locale === "fr"
+                    ? `Filtrer par ${filter.key}`
+                    : `Filter by ${filter.key}`
+                }
+              />
             </div>
           ))}
 
           {anyFilterActive && (
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline-info"
+              className="h-9"
               onClick={() => setSelectedFilters({})}
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
             >
-              <X className="w-4 h-4 mr-1" />
+              <Eraser className="w-4 h-4" />
               {locale === "fr" ? "Réinitialiser" : "Reset"}
             </Button>
           )}

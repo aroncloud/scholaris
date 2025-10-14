@@ -36,11 +36,11 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
 }) => {
   return (
     <div className={cn("", className)}>
-      <Card className={cn("w-full", cardClassName)}>
+      <Card className={cn("w-full pb-4 pt-0 overflow-hidden", cardClassName)}>
         {/* Afficher le header seulement si un titre, une icône, une description ou des actions sont présents */}
         {(title || icon || description || actions) && (
           <CardHeader className={cn(
-            "flex flex-row items-center justify-between space-y-0 pb-4 border-b bg-gradient-to-r from-gray-50 to-white",
+            "flex flex-row items-center justify-between space-y-0 py-4 border-b bg-gray-50",
             headerClassName
           )}>
             {/* MODIFICATION: Conteneur flex pour l'icône et le titre/description */}
