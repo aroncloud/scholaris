@@ -15,7 +15,7 @@ import {
     Unlock,
 } from "lucide-react";
 import { CreateTeacherRequest, Teacher } from "../../../types/teacherTypes";
-import { Badge } from "@/components/ui/badge";
+import Badge from '@/components/custom-ui/Badge';
 import { TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,7 @@ const TeacherTab = ({
     }, [teachers, searchTerm, filterStatut]);
     
     const handleCreateTeacher = async (teacher: CreateTeacherRequest) => {
+        console.log('-->teacher', teacher)
         const response = await createTeacher(teacher);
         console.log("Create teacher response:", response);
         if (response.code === 'success') {
@@ -126,7 +127,7 @@ const TeacherTab = ({
         {
             key: "type_code",
             label: "Contrat",
-            render: (_, t) => t.type_code ? <Badge className={getStatusColor(t.type_code)}>{t.type_code}</Badge> : "-",
+            render: (_, t) => t.type_code ? <Badge size="sm" value={t.type_code} label={t.type_code} /> : "-",
         },
         {
             key: "hiring_date",
@@ -136,7 +137,7 @@ const TeacherTab = ({
         {
             key: "status_code",
             label: "Statut",
-            render: (_, t) => <Badge className={getStatusColor(t.status_code)}>{t.status_code}</Badge>,
+            render: (_, t) => <Badge size="sm" value={t.status_code} label={t.status_code} />,
         },
         {
             key: "actions",
@@ -187,10 +188,6 @@ const TeacherTab = ({
             <ContentLayout
                 title={`Personnel enseignant`}
                 description="Gestion du corps professoral"
-                actions = {<div>
-                    <Button></Button>
-                    <Button></Button>
-                </div>}
             >
                 <ResponsiveTable
                     data={filteredTeachers}

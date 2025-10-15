@@ -7,7 +7,7 @@
 } from "@/components/ui/card";
 import { v4 as uuidv4 } from "uuid"
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Badge from '@/components/custom-ui/Badge';
 import { Progress } from "@/components/ui/progress";
 import {
   Users,
@@ -16,7 +16,6 @@ import {
   Target,
   Settings,
 } from "lucide-react";
-import { getStatusColor } from "@/lib/utils";
 import { useCoursData } from "@/hooks/feature/cours/useCoursData";
 
 
@@ -48,9 +47,11 @@ const MyCoursesTab = () => {
                                     {course.description && <>{course.description} •</>} {course.curriculum_name} - {course.study_level}
                                     </CardDescription>
                                 </div>
-                                <Badge className={getStatusColor(course.status_code)}>
-                                    {course.status_code}
-                                </Badge>
+                                <Badge
+                                    size="sm"
+                                    value={course.status_code}
+                                    label={course.status_code}
+                                />
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-4">

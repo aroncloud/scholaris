@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { getCurriculumFinancialSummary, getPlanList, recordDeposite as recordDepositeAction } from "@/actions/financialAction";
+import { getCurriculumFinancialSummary, getFeesTypes, getPlanList, recordDeposite as recordDepositeAction, createPlanWithInstallments as createPlanWithInstallmentsAction } from "@/actions/financialAction";
 import { showToast } from "@/components/ui/showToast";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
-import { IGetPlan, IRecordDeposit, IStudentGetFinancialInfo } from "@/types/financialTypes";
+import { ICreateFeeTypes, IGetFeeType, IGetPlan, IRecordDeposit, IStudentGetFinancialInfo } from "@/types/financialTypes";
 import { useCallback, useEffect, useState } from "react";
 
 
 export function useFinancialData() {
   const [finData, setFinData] = useState<IStudentGetFinancialInfo[]>([]);
   const [planData, setPlanData] = useState<IGetPlan[]>([]);
+  const [feeList, setFeeList] = useState<IGetFeeType[]>([]);
   const [loadingFinData, setFinloadingFinData] = useState<boolean>(false);
   const [processingFinData, setProcessingFinData] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export function useFinancialData() {
     setFinloadingFinData(true);
     setError(null);
     const result = await getPlanList();
-    console.log('-->result', result);
+    console.log('-->listAllPlan.result', result);
     if (result.code === "success") {
       setPlanData(result.data.body as IGetPlan[]);
     } else {
@@ -60,6 +60,28 @@ export function useFinancialData() {
     return result
   }
 
+  const listAllFeeTypes = async () => {
+    const result = await getFeesTypes();
+
+    if(result.code != "success") {
+      setError(result.error || "Erreur lors la récupération des types de frais universitaires");
+    } else {
+      setFeeList(result.data.body)
+    }
+
+    return result
+  }
+
+  const createPlanWithInstallments = async (payload: ICreateFeeTypes) => {
+    setProcessingFinData(true);
+    const result = await createPlanWithInstallmentsAction(payload);
+
+    if(result.code != "success") {
+      setError(result.error || "Erreur lors de la création du plan de paiement");
+    }
+    setProcessingFinData(false);
+    return result;
+  }
 
   return {
     finData,
@@ -71,6 +93,9 @@ export function useFinancialData() {
     setFinData,
     recordDeposite,
     listAllPlan,
-    planData
+    planData,
+    listAllFeeTypes,
+    feeList,
+    createPlanWithInstallments
   };
 }

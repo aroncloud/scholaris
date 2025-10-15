@@ -13,7 +13,7 @@ import {
   Plus,
   Edit,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import Badge from '@/components/custom-ui/Badge';
 import { TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -87,7 +87,6 @@ const ApplicantTab = ({ applicants, isDataLoading }: ApplicantTabProps) => {
       <ContentLayout
         title={`Personnel enseignant`}
         description="Gestion du corps professoral"
-        actions
       >
         {/* <ResponsiveTable
             data={filteredTeachers}

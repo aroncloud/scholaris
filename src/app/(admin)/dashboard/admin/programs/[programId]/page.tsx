@@ -184,6 +184,7 @@ export default function EnrollmentDetailPage() {
             });
             // Recharger les données après création
             loadApplicationDetails();
+            setIsCreateValisationRuleDialogOpen(false)
         } else {
             showToast({
                 variant: "error-solid",

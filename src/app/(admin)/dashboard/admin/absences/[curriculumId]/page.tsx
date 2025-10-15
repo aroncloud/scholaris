@@ -83,7 +83,7 @@ export default function AttendanceReport() {
       label: "Justifiées (h)",
       priority: 'high',
       render: (_, student) => (
-        <Badge value={student.justifiedAbsences} label='heures' variant='success' />
+        <Badge description={student.justifiedAbsences.toString()} label='heures' variant='success' />
       ),
     },
     {
@@ -91,7 +91,7 @@ export default function AttendanceReport() {
       label: "Non Justifiées (h)",
       priority: 'high',
       render: (_, student) => (
-        <Badge value={student.unjustifiedAbsences} label='heures' variant='danger' />
+        <Badge description={student.unjustifiedAbsences.toString()} label='heures' variant='danger' />
       ),
     },
     {

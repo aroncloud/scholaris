@@ -1,11 +1,10 @@
 import React, { useMemo } from 'react';
 import { ClipboardList, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import Badge from '@/components/custom-ui/Badge';
 import { Separator } from '@/components/ui/separator';
 import { ResponsiveTable, TableColumn } from '@/components/tables/ResponsiveTable';
 import ContentLayout from '@/layout/ContentLayout';
-import { getStatusColor } from '@/lib/utils';
 import { EvaluationSheet, IStudentEvaluationInfo } from '@/types/examTypes';
 import { ScoreInput } from './ScoreInput';
 
@@ -52,10 +51,10 @@ export const GradeTable: React.FC<GradeTableProps> = ({
                 render: (graded: boolean, student: IStudentEvaluationInfo) => {
                     return (
                         <Badge
-                            className={getStatusColor(student.graded ? "APPROVED" : "PENDING")}
-                        >
-                            {student.graded ? "NOTÉ" : "NON NOTÉ"}
-                        </Badge>
+                            size="sm"
+                            value={student.graded ? "NOTÉ" : "NON NOTÉ"}
+                            label={student.graded ? "NOTÉ" : "NON NOTÉ"}
+                        />
                     );
                 },
             },
@@ -102,13 +101,17 @@ export const GradeTable: React.FC<GradeTableProps> = ({
             }
             actions={
                 <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(examSheet.evaluation.status)}>
-                        {examSheet.evaluation.status}
-                    </Badge>
+                    <Badge
+                        variant={examSheet.evaluation.status === "ACTIVE" ? "success" : "info"}
+                        size="sm"
+                        value={examSheet.evaluation.status}
+                    />
                     {modifiedStudents.size > 0 && (
-                        <Badge variant="outline" className="bg-yellow-50 text-yellow-800 border-yellow-300">
-                            {modifiedStudents.size} modification{modifiedStudents.size > 1 ? 's' : ''}
-                        </Badge>
+                        <Badge
+                            variant="warning"
+                            size="sm"
+                            value={`${modifiedStudents.size} modification${modifiedStudents.size > 1 ? 's' : ''}`}
+                        />
                     )}
                 </div>
             }

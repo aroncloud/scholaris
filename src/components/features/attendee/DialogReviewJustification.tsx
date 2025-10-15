@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar } from '@/components/custom-ui/Avatar';
 import { 
   Loader2, 
   User, 
@@ -25,7 +25,7 @@ import {
   Info,
   FileText
 } from 'lucide-react';
-import { formatDateToText, getInitials } from '@/lib/utils';
+import { formatDateToText } from '@/lib/utils';
 import { IGetStudentAbsence } from '@/types/absenceTypes';
 import { IGetJustificationDetail } from '@/types/planificationType';
 
@@ -135,11 +135,11 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                                 <div className="relative overflow-hidden rounded-lg border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 shadow-sm hover:shadow-md transition-shadow">
                                     <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl -mr-12 -mt-12" />
                                     <div className="relative flex items-center gap-3">
-                                        <Avatar className="h-12 w-12 ring-2 ring-primary/20">
-                                            <AvatarFallback className="text-base font-semibold bg-primary text-primary-foreground">
-                                                {getInitials(fullName)}
-                                            </AvatarFallback>
-                                        </Avatar>
+                                        <Avatar
+                                            fallback={fullName}
+                                            variant="info"
+                                            size="lg"
+                                        />
                                         <div>
                                             <p className="font-semibold text-base">{fullName}</p>
                                             <p className="text-xs text-muted-foreground font-mono">{absence.student_number}</p>

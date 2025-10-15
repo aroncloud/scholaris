@@ -58,7 +58,10 @@ export function DialogCreateValidationRule({
       return;
     }
 
-    const result = await onSave(data);
+    const result = await onSave({
+      ...data,
+      validation_threshold: Number(data.validation_threshold)
+    });
     if (!result) return;
     if (result) {
       reset();

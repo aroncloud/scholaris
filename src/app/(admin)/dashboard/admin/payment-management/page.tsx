@@ -49,7 +49,8 @@ export default function GestionScolaritePage() {
     if(selectedCurriculum) {
       getCurriculumFinancialsInfo(selectedCurriculum)
     }
-  }, [selectedCurriculum, getCurriculumFinancialsInfo])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCurriculum])
 
   const wrappedData: FinancialDataWrapper[] = useMemo(() => 
     finData.map(item => ({
@@ -164,7 +165,7 @@ export default function GestionScolaritePage() {
       priority: 'medium',
       render: (_, data) => (
         <Badge 
-          value={data.isPaidOff ? "Soldé" : "Non soldé"} 
+          label={data.isPaidOff ? "Soldé" : "Non soldé"} 
           variant={data.isPaidOff ? "success" : "danger"} 
           size="sm" 
         />

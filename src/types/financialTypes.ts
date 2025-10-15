@@ -94,3 +94,24 @@ export interface IInstallment {
   due_date: string; // format ISO string : "YYYY-MM-DD"
   currency: string;
 }
+
+export interface IGetFeeType {
+  type_code: string;
+  title: string;
+  description: string;
+  is_mandatory: number; // 1 ou 0
+}
+
+
+export interface ICreateFeeTypes {
+  curriculum_code: string;
+  total_amount: number;
+  installments: IInstallment[];
+}
+
+export interface IInstallment {
+  type_code: string;
+  title: string;
+  amount: number;
+  due_date: string; // format ISO string : "YYYY-MM-DD"
+}

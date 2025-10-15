@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   GraduationCap, 
@@ -14,6 +14,7 @@ import {
   Filter,
   Download
 } from 'lucide-react';
+import Badge from '@/components/custom-ui/Badge';
 
 interface Etudiant {
   id: string;
@@ -351,11 +352,12 @@ const TableauBordDeliberations = () => {
                             <span className="text-gray-500 text-sm">/20</span>
                           </td>
                           <td className="p-4 text-center">
-                            <Badge variant="outline" className="font-normal">
+                            {/* <Badge variant="outline" className="font-normal">
                               {etudiant.statut === 'admis' && 'Admis'}
                               {etudiant.statut === 'ajourne' && 'Ajourné'}
                               {etudiant.statut === 'rattrapage' && 'Rattrapage'}
                             </Badge>
+                            <Badge variant={row.status_code === "ACTIVE" ? "success" : "danger"} size="sm" value={row.status_code} /> */}
                           </td>
                           <td className="p-4 text-center">
                             <div className="flex gap-2 justify-center">
@@ -473,9 +475,7 @@ const TableauBordDeliberations = () => {
                         <p className="text-sm text-gray-500">{etudiant.filiere} - {etudiant.uniteEnseignement}</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Badge variant="outline">
-                          {etudiant.statut}
-                        </Badge>
+                        <Badge variant={"neutral"} size="sm" value={etudiant.statut} label={etudiant.statut} />
                         <Button
                           variant="outline"
                           onClick={() => setEtudiantSelectionne(null)}

@@ -3,8 +3,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import Badge from '@/components/custom-ui/Badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +23,7 @@ import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useUserData } from "@/hooks/feature/users/useUserData";
 import { showToast } from "@/components/ui/showToast";
 import { assignRolesToUser, removeUserRoles } from "@/actions/userAction";
+import { Avatar } from "@/components/custom-ui/Avatar";
 
 interface MyProps {
   roles: IGetRole[];
@@ -113,11 +113,10 @@ export default function UserSection({ roles }: MyProps) {
       label: "Utilisateur",
       render: (_, user) => (
         <div className="flex items-center space-x-3">
-        <Avatar>
-        <AvatarFallback>
-        {(user.first_name + " " + user.last_name).split(" ").map(n => n[0]).join("")}
-        </AvatarFallback>
-        </Avatar>
+          <Avatar
+            fallback={(user.first_name + " " + user.last_name)}
+            variant={"info"}
+          />
         <div>
         <div className="font-medium">{user.first_name} {user.last_name}</div>
         <div className="text-sm text-muted-foreground">{user.email}</div>
@@ -132,9 +131,7 @@ export default function UserSection({ roles }: MyProps) {
         user.profiles.length > 0 ? (
         <div className="flex flex-wrap gap-2">
         {user.profiles.map(role => (
-          <Badge key={role.profile_code} variant="secondary" className={getRoleColor(role.role_title)}>
-          {role.role_title}
-          </Badge>
+          <Badge key={role.profile_code} size="sm" value={role.role_title} label={role.role_title} />
         ))}
         </div>
       ) : (
@@ -144,7 +141,7 @@ export default function UserSection({ roles }: MyProps) {
     {
       key: "status_code",
       label: "Statut",
-      render: value => <Badge variant="secondary" className={getStatusColor(value)}>{value}</Badge>,
+      render: value => <Badge size="sm" value={value} label={value} />,
     },
     {
       key: "actions",

@@ -92,13 +92,15 @@ export default function DialogRecordDeposit({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="md:min-w-xl lg:min-w-2xl max-w-3xl max-h-[90vh] flex flex-col p-0">
-        {/* Header fixe */}
-        <DialogHeader className="border-b px-6 py-4 shrink-0">
-          <DialogTitle className="text-xl">
-            Enregistrer un paiement
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="md:min-w-xl lg:min-w-2xl max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-6 text-white shrink-0">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              Enregistrer un paiement
+            </DialogTitle>
+          </DialogHeader>
+        </div>
 
         {/* Contenu avec scroll */}
         <div className="overflow-y-auto px-6 py-4">
@@ -252,31 +254,28 @@ export default function DialogRecordDeposit({
           </form>
         </div>
 
-        {/* Footer fixe */}
-        <div className="border-t px-6 py-4 shrink-0 bg-gray-50 dark:bg-gray-900">
-          <div className="flex gap-3">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => {
-                onOpenChange(false)
-                reset()
-              }} 
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              Annuler
-            </Button>
-            <Button 
-              type="submit"
-              form="payment-form"
-              variant="info"
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Enregistrement..." : "Enregistrer"}
-            </Button>
-          </div>
+        {/* Footer */}
+        <div className="border-t bg-slate-50 px-6 py-4 shrink-0 flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              onOpenChange(false)
+              reset()
+            }}
+            className="flex-1"
+            disabled={isSubmitting}
+          >
+            Annuler
+          </Button>
+          <Button
+            type="submit"
+            form="payment-form"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Enregistrement..." : "Enregistrer"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

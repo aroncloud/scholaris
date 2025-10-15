@@ -141,7 +141,7 @@ export function DialogCreateSession({
                 setValue('end_time', `${startDate}T11:30:00`);
             }
         }
-    }, [startTime, setValue]);
+    }, [startTime, setValue, endTime]);
 
     // Validation: la date de fin doit être >= date de début
     useEffect(() => {

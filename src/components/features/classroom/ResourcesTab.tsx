@@ -22,8 +22,7 @@ import { deleteClassroom, updateClassroom } from "@/actions/classroomAction";
 import { showToast } from "@/components/ui/showToast";
 import DialogDeleteGeneric from "@/components/modal/DialogDeleteGeneric";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { getStatusColor } from "@/lib/utils";
+import Badge from '@/components/custom-ui/Badge';
 
 interface ResourcesTabProps {
   search: string;
@@ -177,9 +176,11 @@ const handleDeleteClassroom = async () => {
                         {cls.type_code}
                       </TableCell>
                       <TableCell className="px-4 py-2 border-r border-gray-200">
-                        <Badge className={getStatusColor(cls.is_available == 1 ? "ACTIVE" : "INACTIVE")}>
-                          {cls.is_available == 1 ? "Disponible" : "Non disponible"}
-                        </Badge>
+                        <Badge
+                          size="sm"
+                          value={cls.is_available == 1 ? "ACTIVE" : "INACTIVE"}
+                          label={cls.is_available == 1 ? "ACTIVE" : "INACTIVE"}
+                        />
                       </TableCell>
                       <TableCell className="px-4 py-2 border-r border-gray-200">{cls.location}</TableCell>
                       <TableCell className="px-4 py-2 text-center">

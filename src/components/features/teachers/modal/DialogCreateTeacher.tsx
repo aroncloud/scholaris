@@ -276,7 +276,7 @@ export function DialogCreateTeacher({
           <Button variant="outline" onClick={handleCancel} disabled={isSubmitting}>
             Annuler
           </Button>
-          <Button onClick={handleSave} disabled={isSubmitting}>
+          <Button onClick={handleSave} disabled={isSubmitting} variant={"info"}>
             {isSubmitting ? "Création..." : "Créer l'enseignant"}
           </Button>
         </DialogFooter>

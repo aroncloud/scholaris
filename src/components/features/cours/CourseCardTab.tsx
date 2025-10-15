@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import Badge from '@/components/custom-ui/Badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ICourse } from '@/types/courseType';
@@ -30,18 +30,6 @@ const CourseCard: React.FC<CourseCardProps> = ({
   onEdit,
   onSettings
 }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'En cours':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'Terminé':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Planifié':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
 
 
   return (
@@ -57,12 +45,11 @@ const CourseCard: React.FC<CourseCardProps> = ({
               <span>{course.code} • {course.program} - Année {course.year}</span>
             </div>
           </div>
-          <Badge 
-            variant="outline" 
-            className={`${getStatusColor(course.status)} border`}
-          >
-            {course.status}
-          </Badge>
+          <Badge
+            size="sm"
+            value={course.status}
+            label={course.status}
+          />
         </div>
       </CardHeader>
 

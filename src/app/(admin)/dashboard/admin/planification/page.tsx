@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -122,11 +121,13 @@ export default function CoursePlanningTab() {
   return (
     <>
       <PageHeader
-          title="Calendriers de séquences"
+          title="Plannficiation des cours"
           description="Dates de début et fin de chaque séquence par filière et niveau"
       />
       <div className="p-6">
-        <ContentLayout>
+        <ContentLayout
+          title="Calendrier de plannification"
+        >
           <div className="text-gray-700 bg-white p-4 sm:p-6 rounded-lg shadow">
             <div>
               <div className="flex flex-col mb-6">
