@@ -5,6 +5,8 @@ import { SessionPayload } from "@/types/authTypes";
 import { ILoginForm } from "@/types/staffType";
 import axios from "axios";
 export async function login (data: ILoginForm) {
+    console.log('-->Data', data);
+    console.log('-->URL', `${process.env.AIM_WORKER_ENDPOINT}/api/auth/login`)
     try {
         const response = await axios.post(
             `${process.env.AIM_WORKER_ENDPOINT}/api/auth/login`,
