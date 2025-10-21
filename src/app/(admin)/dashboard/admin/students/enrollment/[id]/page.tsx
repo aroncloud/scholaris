@@ -1,7 +1,7 @@
 "use client"
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, User, Phone, FileText, Users, Calendar, CheckCircle, XCircle, UserPlus, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, User, Phone, FileText, Users, Calendar, CheckCircle, XCircle, UserPlus, AlertTriangle, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import { formatDateToText, getStatusColor } from '@/lib/utils';
 import { useParams } from 'next/navigation';
 import { useRouter } from "@bprogress/next/app";
 import { showToast } from '@/components/ui/showToast';
-import { convertStudentApplication, getStudentApplication, reviewStudentApplication } from '@/actions/studentAction';
+import { convertStudentApplication, downloadDocument, getStudentApplication, reviewStudentApplication } from '@/actions/studentAction';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { IGetApplicationDetail } from '@/types/userType';
 import PageHeader from '@/layout/PageHeader';
@@ -34,7 +34,7 @@ const ApplicationDetailPage: React.FC = () => {
   const loadApplicationDetails = useCallback(async () => {
     try {
       const result = await getStudentApplication(applicationCode);
-      console.log('-->result', result)
+      console.log('-->applicationData.result', result)
       if (result.code === 'success') {
         setApplicationData(result.data.body);
       } else {
@@ -158,6 +158,55 @@ const ApplicationDetailPage: React.FC = () => {
   const canReject = () => (applicationData?.application_status_code == 'SUBMITTED');
   const canConvert = () => applicationData?.application_status_code === 'APPROVED';
 
+  const handleDownloadDocument = async (documentUrl: string | undefined, documentName: string) => {
+    console.log('-->documentUrl', documentUrl)
+    try {
+      if(documentUrl) {
+        const result = await downloadDocument(documentUrl);
+
+        if (result.code === 'success' && result.data) {
+          const byteCharacters = atob(result.data.content);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: result.data.contentType });
+
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = documentName || 'document';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          showToast({
+            variant: "success-solid",
+            message: 'Succès',
+            description: 'Document téléchargé avec succès',
+            position: 'top-center',
+          });
+        } else {
+          showToast({
+            variant: "error-solid",
+            message: 'Erreur',
+            description: 'Erreur lors du téléchargement du document',
+            position: 'top-center',
+          });
+        }
+      }
+    } catch (error) {
+      showToast({
+        variant: "error-solid",
+        message: 'Erreur',
+        description: 'Erreur lors du téléchargement du document',
+        position: 'top-center',
+      });
+    }
+  };
+
   // Affichage du loader pendant le chargement
   if (loading) {
     return (
@@ -169,7 +218,7 @@ const ApplicationDetailPage: React.FC = () => {
   if (!applicationData) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className=" mx-auto">
           <div className="flex items-center space-x-4 mb-6">
             <Button variant="outline" size="sm" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -285,10 +334,11 @@ const ApplicationDetailPage: React.FC = () => {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Informations personnelles */}
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm overflow-hidden">
+            <div className="h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
-                <User className="h-5 w-5 mr-2 text-gray-600" />
+                <User className="h-5 w-5 mr-2 text-blue-600" />
                 Informations personnelles
               </CardTitle>
             </CardHeader>
@@ -331,10 +381,11 @@ const ApplicationDetailPage: React.FC = () => {
           </Card>
 
           {/* Informations de contact */}
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm overflow-hidden">
+            <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
-                <Phone className="h-5 w-5 mr-2 text-gray-600" />
+                <Phone className="h-5 w-5 mr-2 text-emerald-600" />
                 Coordonnées
               </CardTitle>
             </CardHeader>
@@ -369,10 +420,11 @@ const ApplicationDetailPage: React.FC = () => {
           </Card>
 
           {/* Programme d'études */}
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm overflow-hidden">
+            <div className="h-1.5 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500"></div>
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
-                <FileText className="h-5 w-5 mr-2 text-gray-600" />
+                <FileText className="h-5 w-5 mr-2 text-orange-600" />
                 Programme d&apos;études
               </CardTitle>
             </CardHeader>
@@ -399,10 +451,11 @@ const ApplicationDetailPage: React.FC = () => {
           </Card>
 
           {/* Traitement */}
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm overflow-hidden">
+            <div className="h-1.5 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500"></div>
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
-                <Calendar className="h-5 w-5 mr-2 text-gray-600" />
+                <Calendar className="h-5 w-5 mr-2 text-rose-600" />
                 Informations de traitement
               </CardTitle>
             </CardHeader>
@@ -439,19 +492,20 @@ const ApplicationDetailPage: React.FC = () => {
 
         {/* Proches */}
         {applicationData.relatives && applicationData.relatives.length > 0 && (
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm overflow-hidden">
+            <div className="h-1.5 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500"></div>
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
-                <Users className="h-5 w-5 mr-2 text-gray-600" />
+                <Users className="h-5 w-5 mr-2 text-violet-600" />
                 Personnes de référence
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {applicationData.relatives.map((relative, index) => (
-                  <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
+                  <div key={index} className="bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs bg-violet-100 text-violet-700">
                         {getRelationshipLabel(relative.relationship_type_code)}
                       </Badge>
                     </div>
@@ -480,10 +534,11 @@ const ApplicationDetailPage: React.FC = () => {
         )}
 
         {/* Documents */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 shadow-sm overflow-hidden">
+          <div className="h-1.5 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500"></div>
           <CardHeader className="pb-4">
             <CardTitle className="text-lg font-medium text-gray-900 flex items-center">
-              <FileText className="h-5 w-5 mr-2 text-gray-600" />
+              <FileText className="h-5 w-5 mr-2 text-sky-600" />
               Documents joints
             </CardTitle>
           </CardHeader>
@@ -496,14 +551,20 @@ const ApplicationDetailPage: React.FC = () => {
             ) : (
               <div className="space-y-3">
                 {applicationData.documents.map((doc, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 rounded-lg hover:shadow-md transition-all hover:border-sky-300">
                     <div className="flex items-center">
-                      <FileText className="h-4 w-4 text-gray-400 mr-3" />
+                      <FileText className="h-4 w-4 text-sky-600 mr-3" />
                       <span className="text-sm font-medium text-gray-900">
-                        {doc.document_name || `Document ${index + 1}`}
+                        {doc.title || `Document ${index + 1}`}
                       </span>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownloadDocument(doc.content_url, doc.title || `document-${index + 1}`)}
+                      className="hover:bg-sky-100 hover:text-sky-700 hover:border-sky-400"
+                    >
+                      <Download className="h-4 w-4 mr-1" />
                       Télécharger
                     </Button>
                   </div>

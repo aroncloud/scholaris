@@ -112,7 +112,7 @@ export async function reviewJustification(status: "APPROVED" | "REJECTED", justi
         const session = await verifySession();
         const token = session.accessToken;
 
-        const response = await axios.post(
+        const response = await axios.put(
         `${process.env.ATTENDACE_WORKER_ENDPOINT}/api/justifications/${justification_code}/review`,
         payload,
         { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }

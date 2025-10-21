@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import Badge from '@/components/custom-ui/Badge';
 import { TabsContent } from "@/components/ui/tabs";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
@@ -130,7 +130,7 @@ const FilieresTab = ({
       key: "curriculums",
       label: "Maquettes",
       render: (_, filiere) => (
-        <Badge variant="outline">{filiere.curriculums.length} maquette(s)</Badge>
+        <Badge variant="neutral" size="sm" label={`${filiere.curriculums.length} maquette(s)`} value="curriculum"/>
       ),
     },
     {

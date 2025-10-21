@@ -3,7 +3,7 @@
 "use client";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Badge from '@/components/custom-ui/Badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -99,9 +99,11 @@ const EnrollmentRequests = ({
       label: "Statut",
       render: (_, row) => (
         <div>
-          <Badge className={getStatusColor(row.application_status_code)}>
-            {row.application_status_code}
-          </Badge>
+          <Badge
+            size="sm"
+            value={row.application_status_code}
+            label={row.application_status_code}
+          />
         </div>
       ),
     },

@@ -4,18 +4,20 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import frLocale from '@fullcalendar/core/locales/fr';
 import {
   EventInput,
   EventContentArg,
   EventClickArg,
 } from "@fullcalendar/core";
 import { ICreateSession, IGetSchedule } from "@/types/planificationType";
-import { CALENDAR_COLORS } from "@/constant";
+import { CALENDAR_COLORS, SESSION_STATUS_TERMINATED } from "@/constant";
 import { format } from "date-fns";
 import { cancelSession, createSession, updateSession } from "@/actions/planificationAction";
 import { showToast } from "@/components/ui/showToast";
 import { DialogUpdateSession } from "../Modal/DialogUpdateSession";
 import { DialogCreateSession } from "../Modal/DialogCreateSession";
+import { IUpdateSessionForm } from "@/types/programTypes";
 
 
 export interface IFullCalendarEvent extends EventInput {
@@ -37,14 +39,20 @@ interface CalendarPlanificationProps {
 }
 
 export function convertIntoFullCalendarFormat(sessions: IGetSchedule[]): IFullCalendarEvent[] {
-  return sessions.map((session) => ({
+  return sessions.filter(session => (session.status_code != SESSION_STATUS_TERMINATED)).map((session) => ({
     id: session.session_code,
     title: session.session_title,
     start: new Date(session.start_time).toJSON(),
     end: new Date(session.end_time).toJSON(),
     classroom: session.resource_code,
     teacher: session.teacher_user_code,
-    extendedProps: { calendar: "Success" },
+    extendedProps: {
+      calendar: "Success",
+      course_unit_code: session.course_unit_code,
+      schedule_code: session.schedule_code,
+      teacher_user_code: session.teacher_user_code,
+      resource_code: session.resource_code,
+    },
   }));
 }
 
@@ -105,9 +113,11 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
     const currentEvent = {
       id: event.id,
       title: event.title,
-      start: event.start?.toDateString() ?? "",
-      end: event.end?.toDateString() ?? "",
-      ...event.extendedProps,
+      start: event.start?.toISOString() ?? "",
+      end: event.end?.toISOString() ?? "",
+      classroom: event.extendedProps.classroom,
+      teacher: event.extendedProps.teacher,
+      extendedProps: event.extendedProps,
     } as IFullCalendarEvent
     setSelectedEvent(currentEvent);
 
@@ -144,10 +154,15 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
   };
 
 
-  const handleSaveEvent = async (session: { resource_code: string; session_title: string }) => {
+  const handleSaveEvent = async (session: IUpdateSessionForm) => {
     console.log('handleSaveEvent.session', session)
     if(selectedEvent) {
-      const result = await updateSession(session, selectedEvent.id);
+      const result = await updateSession({
+        ... session,
+        start_time: new Date(session.end_time).toJSON().split("T")[0] ?? "",
+        end_time: new Date(session.start_time).toJSON().split("T")[0] ?? ""
+
+      }, selectedEvent.id);
       console.log("handleSaveEvent result:", result);
 
       if (result.code === 'success') {
@@ -180,6 +195,21 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
+          
+          // Configuration pour le format 24h et français
+          locale={frLocale}
+          timeZone="local"
+          slotLabelFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false // Format 24h
+          }}
+          eventTimeFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false // Format 24h
+          }}
+          
           headerToolbar={{
             left: "prev,next addEventButton",
             center: "title",

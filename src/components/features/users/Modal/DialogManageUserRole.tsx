@@ -8,13 +8,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import Badge from '@/components/custom-ui/Badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar } from '@/components/custom-ui/Avatar';
 import {  Shield, Plus, Minus, Save, X } from 'lucide-react';
-import { getRoleColor } from '@/lib/utils';
 import { IGetRole, IGetUser } from '@/types/staffType';
 
 interface DialogManageUserRoleProps {
@@ -89,14 +88,11 @@ export default function DialogManageUserRole({
         <div className="flex-1 space-y-6 overflow-hidden">
           {/* User Info */}
           <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-            <Avatar className="h-12 w-12">
-              <AvatarFallback>
-                {(user.first_name + " " + user.last_name)
-                  .split(" ")
-                  .map(n => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
+            <Avatar
+              fallback={`${user.first_name} ${user.last_name}`}
+              variant="info"
+              size="lg"
+            />
             <div>
               <h3 className="font-semibold">
                 {user.first_name} {user.last_name}
@@ -111,13 +107,12 @@ export default function DialogManageUserRole({
             <div className="flex flex-wrap gap-2">
               {user.profiles.length > 0 ? (
                 user.profiles.map(profile => (
-                  <Badge 
-                    key={profile.profile_code} 
-                    variant="secondary" 
-                    className={getRoleColor(profile.role_title)}
-                  >
-                    {profile.role_title}
-                  </Badge>
+                  <Badge
+                    key={profile.profile_code}
+                    variant="info"
+                    size="sm"
+                    label={profile.role_title}
+                  />
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground">Aucun rôle assigné</p>

@@ -48,7 +48,7 @@ export async function fetchRoles(locale: keyof typeof roleTranslations): Promise
   if (roleCache[locale]) return roleCache[locale];
 
   try {
-    const res = await fetch("https://iam-worker-dev.scholaris-sys.workers.dev/api/roles");
+    const res = await fetch(`${process.env.AIM_WORKER_ENDPOINT}/api/roles`);
     const json = await res.json();
 
     if (Array.isArray(json.body)) {

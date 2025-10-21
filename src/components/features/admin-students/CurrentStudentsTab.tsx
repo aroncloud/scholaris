@@ -3,7 +3,7 @@
 
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Badge from '@/components/custom-ui/Badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Eye, Plus, Download, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -68,8 +68,9 @@ const CurrentStudents = ({
         <div className="text-sm text-muted-foreground">{row.cirriculum.study_level}</div>
       </div>
     )},
-    { key: "status_code", label: "Statut", render: (_, row) => (<Badge className={getStatusColor(row.status_code)}>{row.status_code}</Badge>) },
-    { key: "financial_status", label: "Financier", render: (_, row) => (<Badge className={getStatusColor(row.financial_status ?? "N/A")}>{row.financial_status ?? "N/A"}</Badge>) },
+    { key: "status_code", label: "Statut", render: (_, row) => (
+      <Badge size="sm" value={row.status_code} label={row.status_code} />) },
+    { key: "financial_status", label: "Financier", render: (_, row) => (<Badge size="sm" value={row.financial_status ?? "N/A"} label={row.financial_status ?? "N/A"}/>) },
     { key: "actions", label: "Actions", render: (_, row) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

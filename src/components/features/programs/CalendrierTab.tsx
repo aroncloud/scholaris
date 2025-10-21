@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import LoadingSpinner from "@/components/LoadingSpinner"
-import { Badge } from "@/components/ui/badge"
+import Badge from '@/components/custom-ui/Badge'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -80,9 +80,11 @@ const CalendrierTab = ({academicYears, fetchAcademicYear, isLoading} : MyProps) 
             key: "status_code",
             label: "Statut",
             render: (_, year) => (
-            <Badge className={getStatusColor(year.status_code)}>
-                {year.status_code}
-            </Badge>
+            <Badge
+                variant={year.status_code === "IN_PROGRESS" ? "success" : year.status_code === "COMPLETED" ? "info" : "neutral"}
+                size="sm"
+                value={year.status_code}
+            />
             ),
         },
         {

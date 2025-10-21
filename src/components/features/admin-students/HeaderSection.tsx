@@ -7,7 +7,6 @@ import {
   Users,
   Clock,
 } from "lucide-react";
-import StatCard from "@/components/cards/StatCard";
 import PageHeader from '@/layout/PageHeader';
 
 

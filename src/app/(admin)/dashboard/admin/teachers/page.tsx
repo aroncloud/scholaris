@@ -58,7 +58,7 @@ export default function TeachersPage() {
             <Upload className="h-4 w-4 mr-2" />
             Importer
           </Button>
-          <Button className="w-full md:w-auto" onClick={() => setIsCreateTeacherOpen(true)}>
+          <Button className="w-full md:w-auto" onClick={() => setIsCreateTeacherOpen(true)} variant={"info"}>
             <Plus className="h-4 w-4 mr-2" />
             Nouvel enseignant
           </Button>

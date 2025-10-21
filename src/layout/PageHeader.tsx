@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, LucideIcon, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,6 +15,7 @@ interface PageHeaderProps {
     backLabel?: string;
     loading?: boolean;
     status?: React.ReactNode;
+    Icon?: LucideIcon
 }
 
 const PageHeader = ({ 
@@ -24,7 +25,8 @@ const PageHeader = ({
     backUrl,
     backLabel = "Retour",
     loading = false,
-    status
+    status,
+    Icon = Users
 }: PageHeaderProps) => {
     const router = useRouter();
 
@@ -64,16 +66,16 @@ const PageHeader = ({
     return (
         <div className="bg-white border-b border-gray-200">
             <div className="mx-auto px-6 py-5">
-                <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center justify-between gap-4">
                     {/* Partie gauche avec bouton retour optionnel */}
-                    <div className="flex items-center flex-wrap gap-3 min-w-0 flex-1">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                         {backUrl && (
                             <>
                                 <Button 
                                     variant="ghost" 
                                     size="sm" 
                                     onClick={handleBack} 
-                                    className="bg-gray-100 hover:bg-gray-200"
+                                    className="bg-gray-100 hover:bg-gray-200 shrink-0"
                                 >
                                     <ArrowLeft className="h-4 w-4 mr-2" />
                                     {backLabel}
@@ -82,25 +84,31 @@ const PageHeader = ({
                             </>
                         )}
                         
-                        <div className="min-w-0 flex gap-4 flex-nowrap items-center">
-                            <div className='flex flex-col'>
-                                <h1 className="text-xl font-semibold text-gray-900 truncate">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-lg shrink-0">
+                                <Icon className="w-6 h-6 text-white" />
+                            </div>
+                            
+                            <div className="flex flex-col min-w-0 flex-1">
+                                <h1 className="text-3xl font-bold text-gray-900 tracking-tight break-words">
                                     {title}
                                 </h1>
                                 {description && (
-                                    <p className="text-sm text-gray-500 mt-1">{description}</p>
+                                    <p className="text-gray-600 font-medium break-words">{description}</p>
                                 )}
                             </div>
-                            {status && <div className="shrink-0">{status}</div>}
                         </div>
                     </div>
 
-                    {/* Partie droite avec actions */}
-                    {children && (
-                        <div className="flex items-center space-x-3 shrink-0">
-                            {children}
-                        </div>
-                    )}
+                    {/* Status et actions alignés */}
+                    <div className="flex items-center gap-3 shrink-0">
+                        {status && (
+                            <div className="shrink-0">
+                                {status}
+                            </div>
+                        )}
+                        {children}
+                    </div>
                 </div>
             </div>
         </div>

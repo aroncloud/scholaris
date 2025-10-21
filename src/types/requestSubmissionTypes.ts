@@ -24,13 +24,14 @@ export interface FormData {
   etablissementOrigine: string;
   matriculeConcours: string;
   documents: {
+    cniRecto: File | null;
+    cniVerso: File | null;
+    photo4x4: File | null;
     releveNotes: File | null;
     diplome: File | null;
     acteNaissance: File | null;
-    photoIdentiteRecto: File | null;
-    photoIdentiteVerso: File | null;
-    photo4x4: File | null;
-    attestationConcours: File | null;
+    pageResultatConcours: File | null;
+    pageNomConcours: File | null;
   };
   accepteConditions: string;
   curriculum: string;

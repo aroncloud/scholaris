@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { ChevronDownIcon, HorizontaLDots } from "../icons/index";
-import {  BookOpen, GraduationCap, LayoutDashboard, Users, UserSquare, Calendar, Award, DollarSign, ClipboardList, FileText } from "lucide-react";
+import {  BookOpen, GraduationCap, LayoutDashboard, Users, UserSquare, Calendar, Award, DollarSign, ClipboardList } from "lucide-react";
 import { useMemo } from "react";
 import { useUserStore } from "@/store/useAuthStore";
 
@@ -88,7 +88,7 @@ const navItems: NavItem[] = [
         authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
       },
       {
-        name: "Salles de classes",
+        name: "Ressources matérielles",
         path: "/dashboard/admin/classroom",
         authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
       },
@@ -127,17 +127,11 @@ const navItems: NavItem[] = [
         authorizedRoles: ["ADMIN_SUPER", "FINANCE"],
       },
       {
-        name: "Gestion des Absences",
-        path: "/dashboard/admin/absence-management",
+        name: "Frais universitaires",
+        path: "/dashboard/admin/payment-setup",
         authorizedRoles: ["ADMIN_SUPER", "ADMIN_HR", "ADMIN_ACADEMIC", "TEACHER"],
       },
     ],
-  },
-  {
-    icon: <FileText className="w-5 h-5" />,
-    name: "Saisir les notes",
-    path: "/dashboard/teacher/grades-entry",
-    authorizedRoles: ["TEACHER"],
   },
   {
     icon: <ClipboardList className="w-5 h-5" />,

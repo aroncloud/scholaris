@@ -170,7 +170,7 @@ export async function createEnrollment(studentCode: string, enrollmentData: ICre
     console.log('API Endpoint:', `${process.env.AIM_WORKER_ENDPOINT}/api/students/${studentCode}/enrollments`);
 
     const response = await axios.post(
-      `https://student-worker-dev.scholaris-sys.workers.dev/api/students/${studentCode}/enrollments`,
+      `${process.env.STUDENT_WORKER_ENDPOINT}/api/students/${studentCode}/enrollments`,
       payload,
       {
         headers: {

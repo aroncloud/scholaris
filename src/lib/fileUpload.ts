@@ -16,11 +16,11 @@ export async function uploadFile(file: File, filePath: string) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const bucket = process.env.ASSET_BUCKET_NAME!; // ex: "rentaldev"
+  const bucket = process.env.ASSET_BUCKET_NAME!;
 
   const command = new PutObjectCommand({
     Bucket: bucket,
-    Key: filePath, // ex: Documents/Assets/AS-1751704976291/Verification/DEED_SALE.pdf
+    Key: filePath,
     Body: buffer,
     ContentType: file.type,
     ACL: "public-read",

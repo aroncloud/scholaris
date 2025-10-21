@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import Badge from '@/components/custom-ui/Badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -31,7 +31,6 @@ import {
 } from 'lucide-react';
 import { IGetUEPerModule } from '@/types/programTypes';
 import { Teacher } from '@/types/teacherTypes';
-import { getStatusColor } from '@/lib/utils';
 
 
 
@@ -51,14 +50,6 @@ const TeacherCard: React.FC<{
   onClick: () => void;
 }> = ({ teacher, isSelected, onClick }) => {
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "PERMANENT": return "bg-purple-100 text-purple-800";
-      case "TEMPORARY": return "bg-orange-100 text-orange-800";
-      case "CONTRACT": return "bg-cyan-100 text-cyan-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
 
   return (
     <div 
@@ -98,12 +89,16 @@ const TeacherCard: React.FC<{
           </div>
           
           <div className="flex flex-wrap gap-1 mt-2">
-            <Badge className={`text-xs ${getStatusColor(teacher.employment_status_code)}`}>
-              {teacher.employment_status_code}
-            </Badge>
-            <Badge className={`text-xs ${getTypeColor(teacher.type_code)}`}>
-              {teacher.type_code}
-            </Badge>
+            <Badge
+              size="sm"
+              value={teacher.employment_status_code}
+              label={teacher.employment_status_code}
+            />
+            <Badge
+              variant={teacher.type_code === "PERMANENT" ? "info" : "neutral"}
+              size="sm"
+              value={teacher.type_code}
+            />
           </div>
         </div>
       </div>
@@ -193,7 +188,7 @@ export const DialogAssignUEToTeacher: React.FC<DialogAssignUEToTeacherProps> = (
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       
-      <DialogContent className="max-w-7xl md:min-w-3xl max-h-[90vh] overflow-hidden">
+      <DialogContent className=" md:min-w-3xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <BookOpen className="w-5 h-5" />
@@ -214,9 +209,7 @@ export const DialogAssignUEToTeacher: React.FC<DialogAssignUEToTeacherProps> = (
                     Enseignant actuel: {currentTeacher.first_name} {currentTeacher.last_name}
                   </span>
                   {ue.is_module_coordinator === 1 && (
-                    <Badge className="bg-yellow-100 text-yellow-800 text-xs">
-                      Coordinateur
-                    </Badge>
+                    <Badge variant="warning" size="sm" value="Coordinateur" />
                   )}
                 </div>
               </div>

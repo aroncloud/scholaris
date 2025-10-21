@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { IGetEvaluationsForCurriculum } from "@/types/examTypes";
-import { getEvaluationListForCurriculum, getEvaluationListForTeacher, getEvaluationsForSchedule } from "@/actions/examAction";
+import { getEvaluationListForCurriculum, getEvaluationsForSchedule, getEvaluationsForTeacher } from "@/actions/examAction";
 
 export function useEvaluationData() {
   const [examList, setExamList] = useState<IGetEvaluationsForCurriculum[]>([]);
@@ -27,11 +27,11 @@ export function useEvaluationData() {
       setIsLoadingExam(false);
     }
   }, []);
-  const fetchEvaluationForTeacher = useCallback(async (teacher_code: string, schedule_code: string) => {
+  const fetchEvaluationForTeacher = useCallback(async (teacher_code: string, academic_year_code: string) => {
     setIsLoadingExam(true);
     setError(null);
     try {
-      const result = await getEvaluationListForTeacher(teacher_code, schedule_code);
+      const result = await getEvaluationsForTeacher(teacher_code, academic_year_code);
       console.log("-->fetchEvaluationForTeacher.result", result);
       if (result.code === "success") {
         setExamList(result.data.body as IGetEvaluationsForCurriculum[]);

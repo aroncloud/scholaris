@@ -1,0 +1,73 @@
+export async function requestLessorProfile(application: ProfileApplication_T){
+  try {
+    const session = await verifySession();
+    const idCardRectoPath = `${process.env.PROFILE_FILE_NAME_SRC}/${session.Code}/CNI_RECTO${getExtension(application.idCardRecto.name)}`;
+    const idCardVersoPath = `${process.env.PROFILE_FILE_NAME_SRC}/${session.Code}/CNI_VERSO${getExtension(application.idCardVerso.name)}`;
+    const selfiePath = `${process.env.PROFILE_FILE_NAME_SRC}/${session.Code}/SELFIE${getExtension(application.selfie.name)}`;
+
+    console.log('-->idCardRectoPath', idCardRectoPath);
+    console.log('-->idCardVersoPath', idCardVersoPath);
+    console.log('-->selfiePath', selfiePath);
+
+    const uploadedIdCardRecto = await uploadFile(application.idCardRecto, idCardRectoPath);
+    if(uploadedIdCardRecto.error) return {error: "error while uploading ID CARD RECTO", code:uploadedIdCardRecto.code, data: null}
+    const uploadedIdCardVerso = await uploadFile(application.idCardVerso, idCardVersoPath);
+    if(uploadedIdCardVerso.error) return {error: "error while uploading ID CARD VERSO", code:uploadedIdCardVerso.code, data: null}
+    const uploadedSelfie = await uploadFile(application.selfie, selfiePath);
+    if(uploadedSelfie.error) return {error: "error while uploading SELFIE", code:uploadedSelfie.code, data: null}
+
+    const payload = {
+      "description":application.description,
+      "userId":session.Code,
+      "body":[
+        { 
+            "Title": `CNI RECTO of ${session.Firstname} ${session.Lastname}`,
+            "ContentUrl": uploadedIdCardRecto.filePath,
+            "Type": "CNI_RECTO"
+        },
+        { 
+            "Title": `CNI VERSO of ${session.Firstname} ${session.Lastname}`,
+            "ContentUrl": uploadedIdCardVerso.filePath,
+            "Type": "CNI_VERSO"
+        },
+        { 
+            "Title": `SELFIE of ${session.Firstname} ${session.Lastname}`,
+            "ContentUrl": uploadedSelfie.filePath,
+            "Type": "SELFIE"
+        } 
+      ]
+    }
+    const response = await axios.post(`${process.env.USER_WORKER_ENDPOINT!}/api/v1/User/Request/Verification`,
+      {
+        Request: {...payload }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      }
+    )
+    // console.log('-->response', response);
+    return {
+      code: null,
+      error: null,
+      data: response.data
+    }
+  } catch (error: any) {
+    console.log('-->requestLessorProfile.error', error)
+    
+    const isRedirect = error.digest?.startsWith('NEXT_REDIRECT');
+    if (isRedirect) {
+      return {
+        data: null,
+        error: 'Session expired',
+        code: 'SESSION_EXPIRED',
+      };
+    }
+    return {
+      code: error.code ?? "unknown",
+      error: error.response?.data?.message ?? "An unexpected error occurred",
+      data: null
+    }
+  }
+}

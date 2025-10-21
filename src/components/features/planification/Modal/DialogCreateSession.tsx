@@ -55,6 +55,8 @@ export function DialogCreateSession({
         control,
         reset,
         setValue,
+        setError,
+        clearErrors,
         formState: { errors, isSubmitting },
     } = useForm<ICreateSession>({
         defaultValues: {
@@ -70,14 +72,17 @@ export function DialogCreateSession({
         },
     });
 
+    // Pré-remplir le formulaire lorsque le dialog s'ouvre
     useEffect(() => {
-        const currentAcademicYear = getCurrentAcademicYear();
-        setValue("curriculum_code", curriculum_code);
-        setValue(
-            "academic_year_code",
-            currentAcademicYear ? currentAcademicYear.academic_year_code : ""
-        );
-    }, [curriculum_code, getCurrentAcademicYear, setValue]);
+        if (open && curriculum_code) {
+            const currentAcademicYear = getCurrentAcademicYear();
+            setValue("curriculum_code", curriculum_code);
+            setValue(
+                "academic_year_code",
+                currentAcademicYear ? currentAcademicYear.academic_year_code : ""
+            );
+        }
+    }, [open, curriculum_code, getCurrentAcademicYear, setValue]);
     // Watch curriculum_code pour filtrer UEs et séquences
     const selectedCurriculum = useWatch({
         control,
@@ -94,6 +99,16 @@ export function DialogCreateSession({
         name: "academic_year_code",
     });
 
+    const startTime = useWatch({
+        control,
+        name: "start_time",
+    });
+
+    const endTime = useWatch({
+        control,
+        name: "end_time",
+    });
+
 
     useEffect(() => {
         if(selectedCurriculum) {
@@ -107,19 +122,61 @@ export function DialogCreateSession({
             setValue('session_title', UEList.find(ue => ue.course_unit_code === selectedUE)?.course_unit_name ?? '')
         }
     }, [UEList, selectedUE, setValue]);
-    
-    
+
+
     useEffect(() => {
         if(selectedCurriculum && selectedAcademicYear) {
             fetchListAcademicYearsSchedulesForCurriculum(selectedCurriculum, selectedAcademicYear);
         }
     }, [selectedAcademicYear, selectedCurriculum]);
 
+    // Synchroniser la date de fin avec la date de début
+    useEffect(() => {
+        if (startTime) {
+            const [startDate] = startTime.split('T');
+            if (endTime) {
+                const [, endTimeOnly] = endTime.split('T');
+                setValue('end_time', `${startDate}T${endTimeOnly || '11:30:00'}`);
+            } else {
+                setValue('end_time', `${startDate}T11:30:00`);
+            }
+        }
+    }, [startTime, setValue, endTime]);
+
+    // Validation: la date de fin doit être >= date de début
+    useEffect(() => {
+        if (startTime && endTime) {
+            const start = new Date(startTime);
+            const end = new Date(endTime);
+
+            if (end < start) {
+                setError('end_time', {
+                    type: 'manual',
+                    message: 'La date/heure de fin doit être postérieure à la date/heure de début'
+                });
+            } else {
+                clearErrors('end_time');
+            }
+        }
+    }, [startTime, endTime, setError, clearErrors]);
+
 
 
     const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
 
     const onSubmit = async (data: ICreateSession) => {
+        // Validation finale avant soumission
+        const start = new Date(data.start_time);
+        const end = new Date(data.end_time);
+
+        if (end < start) {
+            setError('end_time', {
+                type: 'manual',
+                message: 'La date/heure de fin doit être postérieure à la date/heure de début'
+            });
+            return;
+        }
+
         const result = await onSave(data);
         if (!result) return;
         if (result) {
@@ -165,7 +222,7 @@ export function DialogCreateSession({
                     control={control}
                     rules={{ required: "Curriculum requis" }}
                     render={({ field }) => (
-                        <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
+                        <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting || !!curriculum_code}>
                             <SelectTrigger className={errors.curriculum_code ? "border-red-500 w-full" : "w-full"}>
                                 <SelectValue placeholder="Sélectionner un curriculum" />
                             </SelectTrigger>
@@ -215,12 +272,6 @@ export function DialogCreateSession({
                 {errors.course_unit_code && (
                     <p className="text-red-600 text-sm">{errors.course_unit_code.message}</p>
                 )}
-            </div>
-
-            {/* Année académique */}
-            <div className="space-y-1">
-                <Label>Année académique</Label>
-                <Input type="text" disabled value={currentAcademicYear?.year_code ?? ""}/>
             </div>
 
             {/* Schedule code */}

@@ -14,9 +14,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CalendarDays, Check, ChevronsUpDown } from "lucide-react";
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 const AcademicYearSelector: React.FC = () => {
+  const router = useRouter();
   const { academicYears, selectedAcademicYear, setSelectedAcademicYear } = useAcademicYearStore();
+
+  const handleSelectAcademicYear = (academicYearCode: string) => {
+    setSelectedAcademicYear(academicYearCode);
+    router.refresh();
+  };
+
   const selectedYearLabel = useMemo(() => {
     if (!selectedAcademicYear) return "Sélectionner...";
     
@@ -48,7 +56,7 @@ const AcademicYearSelector: React.FC = () => {
         {academicYears.map((ay) => (
           <DropdownMenuItem
             key={ay.academic_year_code}
-            onSelect={() => setSelectedAcademicYear(ay.academic_year_code)}
+            onSelect={() => handleSelectAcademicYear(ay.academic_year_code)}
             className="flex items-center justify-between"
           >
             <span>

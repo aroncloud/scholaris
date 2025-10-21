@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Badge from '@/components/custom-ui/Badge';
 import { Shield } from "lucide-react";
 import ContentLayout from "@/layout/ContentLayout";
 import { IGetRole } from "@/types/staffType";
@@ -35,7 +35,7 @@ const RoleAndPermission = ({loading, roles}: MyProps) => {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span>{role.title}</span>
-                    <Badge variant="secondary">{role.user_count} utilisateurs</Badge>
+                    <Badge variant="info" size="sm" label={`${role.user_count} utilisateurs`} />
                   </CardTitle>
                   <CardDescription>{role.description}</CardDescription>
                 </CardHeader>

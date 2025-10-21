@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ICreateUE, IGetUEPerModule } from "@/types/programTypes"; // adapte le chemin si besoin
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Badge from '@/components/custom-ui/Badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
-import { getStatusColor } from "@/lib/utils";
 import { DialogUpdateUE } from "../Modal/DialogUpdateUE";
 import { showToast } from "@/components/ui/showToast";
 import { assignATeacherToACourseUnit, updateUE } from "@/actions/programsAction";
@@ -129,24 +128,15 @@ const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
               <TableCell className="text-sm">{ue.coefficient}</TableCell>
 
               <TableCell>
-                {ue.is_mandatory === 1 ? (
-                  <Badge variant="default" className="text-xs">Oui</Badge>
-                ) : (
-                  <Badge variant="outline" className="text-xs">Non</Badge>
-                )}
+                <Badge variant={ue.is_mandatory === 1 ? "success" : "neutral"} size="sm" label={ue.is_mandatory === 1 ? "Oui" : "Non"} />
               </TableCell>
 
               <TableCell>
-                {ue.is_module_coordinator === 1 ? (
-                  <Badge variant="default" className="text-xs">Oui</Badge>
-                ) : (
-                  <Badge variant="outline" className="text-xs">Non</Badge>
-                )}
+                <Badge variant={ue.is_module_coordinator === 1 ? "success" : "neutral"} size="sm" label={ue.is_module_coordinator === 1 ? "Oui" : "Non"} />
               </TableCell>
 
               <TableCell>
-                {/* au besoin branche ton mapping de couleurs ici */}
-                <Badge className={getStatusColor(ue.status_code)}>{ue.status_code}</Badge>
+                <Badge size="sm" value={ue.status_code} label={ue.status_code} />
               </TableCell>
 
               <TableCell className="text-right">

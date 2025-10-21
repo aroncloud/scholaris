@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -48,14 +47,17 @@ export default function CoursePlanningTab() {
       switch (key) {
         case String(PlanificationStatus.CURRICULUM):
           result = await getCurriculumSchedule(selectedSubFilter.value, start, end);
+          console.log('result', result);
           if (result.code === "success") setTimetableData(result.data.body);
           break;
         case String(PlanificationStatus.TEACHER):
           result = await getTeacherSchedule(selectedSubFilter.value, start, end);
+          console.log('result', result);
           if (result?.code === "success") setTimetableData(result.data.body);
           break;
         case String(PlanificationStatus.RESSOURCE):
           result = await getResourceSchedule(selectedSubFilter.value, start, end);
+          console.log('result', result);
           if (result?.code === "success") setTimetableData(result.data.body);
           break;
         default:
@@ -109,6 +111,7 @@ export default function CoursePlanningTab() {
       const start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0];
       const end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split("T")[0];
       const result = await getCurriculumSchedule(curriculum_code, start, end);
+      console.log('loadCalendarData.result', result);
       if (result.code === "success") {
         setTimetableData(result.data.body);
       }
@@ -118,11 +121,13 @@ export default function CoursePlanningTab() {
   return (
     <>
       <PageHeader
-          title="Calendriers de séquences"
+          title="Plannficiation des cours"
           description="Dates de début et fin de chaque séquence par filière et niveau"
       />
       <div className="p-6">
-        <ContentLayout>
+        <ContentLayout
+          title="Calendrier de plannification"
+        >
           <div className="text-gray-700 bg-white p-4 sm:p-6 rounded-lg shadow">
             <div>
               <div className="flex flex-col mb-6">
@@ -173,15 +178,15 @@ export default function CoursePlanningTab() {
                 
                 {selectedSubFilter ? (
                   <Calendar
-                    events={convertIntoFullCalendarFormat(
-                      timetableData.map(item => {
-                        return {
-                          ...item,
-                          resource_code: classrooms.find(c => c.resource_code === item.resource_code)?.resource_name ?? "",
-                          teacher_user_code: teacherList.find(t => t.user_code === item.teacher_user_code)?.last_name ?? "",
-                        }
-                      }) 
-                    ) as IFullCalendarEvent[]}
+                    events={convertIntoFullCalendarFormat(timetableData).map(event => ({
+                      ...event,
+                      classroom: timetableData.find(s => s.session_code === event.id)?.resource_name ?? "",
+                      teacher: timetableData.find(s => s.session_code === event.id)?.teacher_last_name ?? "",
+                      extendedProps: {
+                        ...event.extendedProps,
+                        curriculum_code: String(selectedFilter.value) == PlanificationStatus.CURRICULUM ? selectedSubFilter?.value : null
+                      }
+                    })) as IFullCalendarEvent[]}
                     onDateChange={getFilteredResult}
                     curriculum_code={String(selectedFilter.value) == PlanificationStatus.CURRICULUM ? selectedSubFilter ? selectedSubFilter?.value : null : null}
                     refreshData={loadCalendarData}
