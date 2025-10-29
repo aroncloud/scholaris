@@ -110,12 +110,10 @@ export async function getFeedbackFormList() {
     const session = await verifySession();
     const token = session.accessToken;
     console.log('@@@URL', `${process.env.COMMUNICATION_WORKER_ENDPOINT}/api/feedback/forms`);
+    console.log('@@@token', token);
     const response = await axios.get(`${process.env.COMMUNICATION_WORKER_ENDPOINT}/api/feedback/forms`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-
-    // // Simulation d'un délai réseau
-    // await new Promise(resolve => setTimeout(resolve, 300));
 
     return {
       code: 'success' as const,
@@ -340,6 +338,7 @@ export async function listFeedbackCampaigns () {
     const session = await verifySession();
     const token = session.accessToken;
     console.log('@@@URL', `${process.env.COMMUNICATION_WORKER_ENDPOINT}/api/feedback/campaigns`);
+    console.log('@@@token', token);
     const response = await axios.get(`${process.env.COMMUNICATION_WORKER_ENDPOINT}/api/feedback/campaigns`, {
       headers: { Authorization: `Bearer ${token}` }
     });
