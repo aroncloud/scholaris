@@ -176,7 +176,7 @@ const Badge: React.FC<BadgeProps> = ({
     const sizing = sizeStyles[size];
 
     return (
-        <div className={`inline-flex items-center ${sizing.gap} ${sizing.padding} rounded-lg ${style.bg} border ${style.border} ${className}`}>
+        <div className={`inline-flex items-center flex-nowrap ${sizing.gap} ${sizing.padding} rounded-lg ${style.bg} border ${style.border} ${className}`}>
             {Icon && (
                 <Icon className={style.iconColor} size={sizing.iconSize} />
             )}

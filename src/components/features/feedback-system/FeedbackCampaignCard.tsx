@@ -47,7 +47,6 @@ export function FeedbackCampaignCard({ campaign, onViewDetails }: FeedbackCampai
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-slate-500 mb-3">Formulaire: {campaign.formName}</p>
 
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div>

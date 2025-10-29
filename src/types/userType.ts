@@ -227,3 +227,22 @@ export interface IImportStudentApplicationInBulkJSON {
   /** Numéro de téléphone, format international recommandé (optionnel). */
   phone_number?: string;
 }
+
+
+export interface IGetEnrolledStudent {
+  enrollment_code: string;
+  student_user_code: string;
+  academic_year_code: string;
+  curriculum_code: string;
+  status_code: string;
+  enrollment_date: string; // format ISO (ex: "2025-09-01")
+  notes: string | null;
+  user_code: string;
+  first_name: string;
+  last_name: string;
+  place_of_birth: string | null;
+  date_of_birth: string | null;
+  gender: 'MALE' | 'FEMALE' | string; // selon les valeurs possibles dans ton système
+  student_number: string;
+  inscription_paid: boolean;
+}

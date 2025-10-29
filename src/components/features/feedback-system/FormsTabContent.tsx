@@ -24,43 +24,49 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
   onDuplicate: (formCode: string) => void;
   onDelete: (formCode: string) => void;
 }) => {
-
   return (
     <Card className="group bg-white rounded-xl border border-slate-200 hover:border-blue-400 transition-all duration-300 hover:shadow-lg overflow-hidden relative">
-      
-      <CardContent className="p-4">
+      <CardContent className="px-4">
         {/* Header Section */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
+        <div className="flex items-start justify-between mb-4 gap-3">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+              {/* Icon */}
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300 shrink-0">
                 <FileText className="w-6 h-6 text-white" />
               </div>
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-1">
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors duration-200 truncate">
-                    {form.title}
-                  </h3>
-                  {form.is_default && (
-                    <Badge
-                      variant="info"
-                      size="sm"
-                      label='Par défaut'
-                      icon={Sparkles}
-                    />
-                  )}
-                </div>
+
+              {/* Title + Description */}
+              <div className="flex-1 min-w-0">
+                <h3
+                  className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors duration-200 truncate mb-1"
+                  title={form.title}
+                >
+                  {form.title}
+                </h3>
                 <p className="text-sm text-slate-500 line-clamp-2">
                   {form.description || 'Aucune description disponible'}
                 </p>
               </div>
             </div>
           </div>
+
+          {/* Badge */}
+          {form.is_default && (
+            <div className="shrink-0">
+              <Badge
+                variant="info"
+                size="sm"
+                label="Par défaut"
+                icon={Sparkles}
+              />
+            </div>
+          )}
         </div>
 
         {/* Info Section */}
         <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg p-4 mb-4 border border-slate-100">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Target className="w-4 h-4 text-blue-600" />
@@ -70,7 +76,7 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
                 <p className="text-sm font-bold text-slate-900">{form.target_level_code}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
                 <Calendar className="w-4 h-4 text-purple-600" />
@@ -78,10 +84,10 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
               <div>
                 <p className="text-xs text-slate-500 font-medium">Créé le</p>
                 <p className="text-sm font-bold text-slate-900">
-                  {new Date(form.created_at).toLocaleDateString('fr-FR', { 
-                    day: '2-digit', 
+                  {new Date(form.created_at).toLocaleDateString('fr-FR', {
+                    day: '2-digit',
                     month: 'short',
-                    year: 'numeric'
+                    year: 'numeric',
                   })}
                 </p>
               </div>
@@ -91,16 +97,16 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
 
         {/* Actions Section */}
         <div className="flex items-center gap-2">
-          <Button 
+          <Button
             onClick={() => onEdit(form.form_code)}
             className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all duration-200"
           >
             <Edit className="w-4 h-4 mr-2" />
             Modifier
           </Button>
-          
-          <Button 
-            variant="secondary" 
+
+          <Button
+            variant="secondary"
             size="icon"
             onClick={() => onDuplicate(form.form_code)}
             className="bg-slate-100 hover:bg-slate-200 text-slate-700"
@@ -108,19 +114,19 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
           >
             <Copy className="w-4 h-4" />
           </Button>
-          
-          <Button 
-            variant="secondary" 
+
+          <Button
+            variant="secondary"
             size="icon"
             className="bg-slate-100 hover:bg-slate-200 text-slate-700"
             title="Prévisualiser"
           >
             <Eye className="w-4 h-4" />
           </Button>
-          
-          <Button 
+
+          <Button
             onClick={() => onDelete(form.form_code)}
-            variant="destructive" 
+            variant="destructive"
             size="icon"
             className="bg-red-50 hover:bg-red-100 text-red-600 border-0"
             title="Supprimer"
@@ -130,18 +136,28 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
         </div>
 
         {/* Footer metadata */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <p className="text-xs text-slate-400">
-            Code: <span className="font-mono font-semibold text-slate-600">{form.form_code}</span>
+            Code:{' '}
+            <span className="font-mono font-semibold text-slate-600">
+              {form.form_code}
+            </span>
           </p>
           <p className="text-xs text-slate-400">
-            Par: <span className="font-semibold text-slate-600">{form.created_by_user_code}</span>
+            Par:{' '}
+            <span className="font-semibold text-slate-600">
+              {form.created_by_user_code}
+            </span>
           </p>
         </div>
       </CardContent>
     </Card>
   );
 };
+
+
+export default FormCard;
+
 
 export function FormsTabContent({
   forms,

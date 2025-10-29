@@ -16,13 +16,13 @@ import {
   CheckCircle2,
   Clock,
   TrendingUp,
-  FileText,
   AlertCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Filter
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import Badge from '@/components/custom-ui/Badge'
 import { Card, CardContent } from '@/components/ui/card'
 import PageHeader from '@/layout/PageHeader'
 import ContentLayout from '@/layout/ContentLayout'
@@ -62,12 +62,9 @@ const StatusBadge = ({ status }: { status: ICampaignDetails['status'] }) => {
 
   const config = configs[status]
   const Icon = config.icon
-
+  //<Badge size="sm" value={row.status_code} label={row.status_code} />) }
   return (
-    <Badge className={`px-4 py-2 text-sm font-semibold rounded-full border ${config.className} flex items-center space-x-2`}>
-      <Icon className="w-4 h-4" />
-      <span>{config.label}</span>
-    </Badge>
+    <Badge icon={Icon} label={config.label} size='sm' value={status}/>
   )
 }
 
@@ -110,7 +107,7 @@ const NumericScaleCard = ({ result }: { result: INumericScaleResult }) => {
       <CardContent className="p-0">
         {/* Header - Always visible */}
         <div 
-          className="p-6 cursor-pointer hover:bg-slate-50 transition-colors duration-200"
+          className=" cursor-pointer transition-colors duration-200"
           onClick={() => setExpanded(!expanded)}
         >
           <div className="flex items-start justify-between">
@@ -119,7 +116,7 @@ const NumericScaleCard = ({ result }: { result: INumericScaleResult }) => {
                 <Star className="w-6 h-6" />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-lg font-bold text-slate-900 mb-2 pr-4">{result.question_text}</h4>
+                <h4 className="text-lg font-bold text-slate-900 mb-2">{result.question_text}</h4>
                 <div className="flex items-center space-x-4 text-sm text-slate-500">
                   <span className="flex items-center space-x-1">
                     <Users className="w-4 h-4" />
@@ -150,7 +147,7 @@ const NumericScaleCard = ({ result }: { result: INumericScaleResult }) => {
                   {result.average_score.toFixed(1)}<span className="text-lg text-slate-500">/5</span>
                 </p>
               </div>
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+              <button className=" hover:bg-slate-100 rounded-lg transition-colors">
                 {expanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
               </button>
             </div>
@@ -159,7 +156,7 @@ const NumericScaleCard = ({ result }: { result: INumericScaleResult }) => {
 
         {/* Distribution - Collapsible */}
         {expanded && (
-          <div className="px-6 pb-6 pt-2 border-t border-slate-100">
+          <div className="pb-3 mt-2 pt-2 border-t border-slate-100">
             <p className="text-sm font-semibold text-slate-700 mb-4">Distribution détaillée</p>
             <div className="space-y-3">
               {[5, 4, 3, 2, 1].map((rating) => {
@@ -200,13 +197,13 @@ const MultipleChoiceCard = ({ result }: { result: IMultipleChoiceResult }) => {
 
   return (
     <Card className="bg-white border border-slate-200 hover:shadow-lg transition-all duration-200">
-      <CardContent className="p-6">
+      <CardContent>
         <div className="flex items-start space-x-4 mb-6">
           <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl text-white font-bold shadow-lg shadow-purple-500/30 flex-shrink-0">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-lg font-bold text-slate-900 mb-2">{result.question_text}</h4>
+            <h4 className="text-lg font-bold text-slate-900">{result.question_text}</h4>
             <div className="flex items-center space-x-1 text-sm text-slate-500">
               <Users className="w-4 h-4" />
               <span>{totalResponses} réponses</span>
@@ -242,8 +239,9 @@ const MultipleChoiceCard = ({ result }: { result: IMultipleChoiceResult }) => {
 
 // Qualitative Results Component
 const QualitativeResults = ({ results }: { results: IQualitativeResult[] }) => {
-  const [visibleCount, setVisibleCount] = useState(5)
-  const [expandedQuestions, setExpandedQuestions] = useState<{ [key: string]: boolean }>({})
+  const [searchTerm, setSearchTerm] = useState('')
+  const [answersPerPage] = useState(10)
+  const [currentPage, setCurrentPage] = useState<{ [key: string]: number }>({})
 
   const groupedByQuestion = results.reduce((acc, result) => {
     if (!acc[result.question_code]) {
@@ -256,77 +254,209 @@ const QualitativeResults = ({ results }: { results: IQualitativeResult[] }) => {
     return acc
   }, {} as { [key: string]: { question_text: string; answers: string[] } })
 
-  const toggleQuestion = (questionCode: string) => {
-    setExpandedQuestions(prev => ({
+  const filterAnswers = (answers: string[]) => {
+    if (!searchTerm.trim()) return answers
+    return answers.filter(answer => 
+      answer.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }
+
+  const getPaginatedAnswers = (questionCode: string, answers: string[]) => {
+    const page = currentPage[questionCode] || 1
+    const filteredAnswers = filterAnswers(answers)
+    const startIndex = (page - 1) * answersPerPage
+    const endIndex = startIndex + answersPerPage
+    return {
+      answers: filteredAnswers.slice(startIndex, endIndex),
+      totalPages: Math.ceil(filteredAnswers.length / answersPerPage),
+      totalFiltered: filteredAnswers.length,
+      currentPage: page
+    }
+  }
+
+  const changePage = (questionCode: string, newPage: number) => {
+    setCurrentPage(prev => ({
       ...prev,
-      [questionCode]: !prev[questionCode]
+      [questionCode]: newPage
     }))
   }
 
   return (
-    <div className="space-y-4">
-      {Object.entries(groupedByQuestion).map(([questionCode, data]) => {
-        const isExpanded = expandedQuestions[questionCode] ?? true
-        const displayedAnswers = isExpanded ? data.answers : data.answers.slice(0, 3)
+    <div className="space-y-6">
+      {/* Search bar */}
+      <div className="bg-white rounded-lg border border-slate-200 p-4">
+        <div className="flex items-center space-x-3">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder="Rechercher dans les commentaires..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value)
+                setCurrentPage({}) // Reset pagination on search
+              }}
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <MessageSquare className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+          </div>
+          {searchTerm && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setSearchTerm('')
+                setCurrentPage({})
+              }}
+            >
+              Réinitialiser
+            </Button>
+          )}
+        </div>
+      </div>
 
-        return (
-          <Card key={questionCode} className="bg-white border border-slate-200 hover:shadow-lg transition-all duration-200">
-            <CardContent className="p-0">
-              {/* Header */}
-              <div 
-                className="p-6 cursor-pointer hover:bg-slate-50 transition-colors duration-200 border-b border-slate-100"
-                onClick={() => toggleQuestion(questionCode)}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl text-white font-bold shadow-lg shadow-green-500/30 flex-shrink-0">
-                      <MessageSquare className="w-6 h-6" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-lg font-bold text-slate-900 mb-2 pr-4">{data.question_text}</h4>
-                      <div className="flex items-center space-x-1 text-sm text-slate-500">
-                        <Users className="w-4 h-4" />
-                        <span>{data.answers.length} réponses</span>
+      {/* Questions */}
+      <div className="space-y-4">
+        {Object.entries(groupedByQuestion).map(([questionCode, data]) => {
+          const { answers, totalPages, totalFiltered, currentPage: page } = getPaginatedAnswers(questionCode, data.answers)
+          const hasResults = answers.length > 0
+
+          return (
+            <Card key={questionCode} className="bg-white border border-slate-200 hover:shadow-lg transition-all duration-200 pt-4 pb-0">
+              <CardContent className="p-0">
+                {/* Header */}
+                <div className="pb-2 border-b border-slate-100">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl text-white font-bold shadow-lg shadow-green-500/30 flex-shrink-0">
+                        <MessageSquare className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-lg font-bold text-slate-900 mb-2 pr-4">{data.question_text}</h4>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                          <span className="flex items-center space-x-1">
+                            <Users className="w-4 h-4" />
+                            <span>{data.answers.length} réponses</span>
+                          </span>
+                          {searchTerm && totalFiltered !== data.answers.length && (
+                            <span className="flex items-center space-x-1 text-blue-600">
+                              <Filter className="w-4 h-4" />
+                              <span>{totalFiltered} résultats filtrés</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors ml-4">
-                    {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
-                  </button>
                 </div>
-              </div>
 
-              {/* Answers */}
-              {isExpanded && (
-                <div className="p-6 space-y-3">
-                  {displayedAnswers.map((answer, idx) => (
-                    <div key={idx} className="p-4 bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-lg hover:shadow-md transition-shadow duration-200">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-xs font-bold text-blue-600">#{idx + 1}</span>
-                        </div>
-                        <p className="text-sm text-slate-700 flex-1 leading-relaxed">{answer}</p>
+                {/* Answers */}
+                <div className="pt-4">
+                  {hasResults ? (
+                    <>
+                      <div className="space-y-3 mb-6">
+                        {answers.map((answer, idx) => {
+                          const globalIndex = (page - 1) * answersPerPage + idx + 1
+                          return (
+                            <div key={idx} className="p-2 bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-lg hover:shadow-md transition-shadow duration-200">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <span className="text-xs font-bold text-blue-600">#{globalIndex}</span>
+                                </div>
+                                <p className="text-sm text-slate-700 flex-1 leading-relaxed">
+                                  {searchTerm ? (
+                                    <span dangerouslySetInnerHTML={{
+                                      __html: answer.replace(
+                                        new RegExp(searchTerm, 'gi'),
+                                        match => `<mark class="bg-yellow-200 text-slate-900 px-1 rounded">${match}</mark>`
+                                      )
+                                    }} />
+                                  ) : (
+                                    answer
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
-                    </div>
-                  ))}
 
-                  {data.answers.length > 3 && !isExpanded && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggleQuestion(questionCode)
-                      }}
-                      className="w-full px-4 py-3 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200 border border-blue-200"
-                    >
-                      Voir toutes les réponses ({data.answers.length})
-                    </button>
+                      {/* Pagination */}
+                      {totalPages > 1 && (
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200">
+                          <p className="text-sm text-slate-600">
+                            Page {page} sur {totalPages} • {totalFiltered} réponse{totalFiltered > 1 ? 's' : ''}
+                          </p>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => changePage(questionCode, page - 1)}
+                              disabled={page === 1}
+                            >
+                              Précédent
+                            </Button>
+                            
+                            {/* Page numbers */}
+                            <div className="flex items-center space-x-1">
+                              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                let pageNum
+                                if (totalPages <= 5) {
+                                  pageNum = i + 1
+                                } else if (page <= 3) {
+                                  pageNum = i + 1
+                                } else if (page >= totalPages - 2) {
+                                  pageNum = totalPages - 4 + i
+                                } else {
+                                  pageNum = page - 2 + i
+                                }
+
+                                return (
+                                  <button
+                                    key={i}
+                                    onClick={() => changePage(questionCode, pageNum)}
+                                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                      pageNum === page
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                    }`}
+                                  >
+                                    {pageNum}
+                                  </button>
+                                )
+                              })}
+                            </div>
+
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => changePage(questionCode, page + 1)}
+                              disabled={page === totalPages}
+                            >
+                              Suivant
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <MessageSquare className="w-8 h-8 text-slate-400" />
+                      </div>
+                      <p className="text-sm text-slate-500">
+                        {searchTerm 
+                          ? `Aucun résultat trouvé pour "${searchTerm}"`
+                          : 'Aucune réponse disponible'
+                        }
+                      </p>
+                    </div>
                   )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        )
-      })}
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -343,18 +473,11 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
   return (
     <>
       <PageHeader
-        title={campaign_details.title}
+        title="Résumé de la campagne"
         description={`Analyse détaillée de la campagne • ${summary.total_responses} réponses collectées`}
+        backUrl='/dashboard/admin/feedback-system'
       >
         <div className="flex flex-wrap items-center gap-3">
-          <Button
-            variant="secondary"
-            onClick={() => router.back()}
-            className="flex-shrink-0"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Retour</span>
-          </Button>
           <Button variant="secondary" className="flex-shrink-0">
             <Share2 className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Partager</span>
@@ -370,12 +493,12 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
       <div className="px-4 sm:px-6 py-6 space-y-6">
         {/* Campaign Info Header */}
         <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-200 overflow-hidden">
-          <CardContent className="p-4 sm:p-6">
+          <CardContent className="">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <StatusBadge status={campaign_details.status} />
               <div className="text-left sm:text-right">
-                <p className="text-xs sm:text-sm text-slate-600 mb-1">Code formulaire</p>
-                <p className="text-xs sm:text-sm font-mono font-semibold text-slate-900 break-all">{campaign_details.form_code}</p>
+                <p className="text-xs sm:text-sm text-slate-600 mb-1">Titre de la campagne</p>
+                <p className="text-xs sm:text-sm font-mono font-semibold text-slate-900 break-all">{campaign_details.title}</p>
               </div>
             </div>
 
@@ -499,7 +622,7 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
         {/* Quantitative Results - Numeric Scale */}
         {quantitative_results.numeric_scale.length > 0 && (
           <ContentLayout
-            title="📊 Résultats quantitatifs - Échelles de notation"
+            title="Résultats quantitatifs - Échelles de notation"
             description={`${quantitative_results.numeric_scale.length} question${quantitative_results.numeric_scale.length > 1 ? 's' : ''} avec notation de 1 à 5 étoiles`}
           >
             <div className="space-y-4">
@@ -513,7 +636,7 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
         {/* Quantitative Results - Multiple Choice */}
         {quantitative_results.multiple_choice.length > 0 && (
           <ContentLayout
-            title="✅ Résultats quantitatifs - Choix multiples"
+            title="Résultats quantitatifs - Choix multiples"
             description={`${quantitative_results.multiple_choice.length} question${quantitative_results.multiple_choice.length > 1 ? 's' : ''} à choix multiples avec distribution des réponses`}
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
@@ -527,7 +650,7 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
         {/* Qualitative Results */}
         {qualitative_results.length > 0 && (
           <ContentLayout
-            title="💬 Résultats qualitatifs"
+            title="Résultats qualitatifs"
             description={`${qualitative_results.length} commentaire${qualitative_results.length > 1 ? 's' : ''} détaillé${qualitative_results.length > 1 ? 's' : ''} des participants`}
           >
             <QualitativeResults results={qualitative_results} />

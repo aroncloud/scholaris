@@ -40,7 +40,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
         {/* Afficher le header seulement si un titre, une icône, une description ou des actions sont présents */}
         {(title || icon || description || actions) && (
           <CardHeader className={cn(
-            "flex flex-row items-center justify-between space-y-0 py-4 border-b bg-gray-50",
+            "flex flex-row items-center justify-between space-y-0 pt-4 border-b bg-gray-50",
             headerClassName
           )}>
             {/* MODIFICATION: Conteneur flex pour l'icône et le titre/description */}

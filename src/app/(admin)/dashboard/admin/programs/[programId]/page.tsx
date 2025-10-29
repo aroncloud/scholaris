@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
 import {
@@ -25,6 +25,9 @@ import {
   Power,
   Settings,
   AlertCircle,
+  Users,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { getStatusColor, formatDateToText } from "@/lib/utils";
 import { getCurriculumDetail, getListAcademicYearsSchedulesForCurriculum, getSemesterForCurriculum } from "@/actions/programsAction";
@@ -36,7 +39,10 @@ import { createAcademicYearSchedule, createValidationRule } from "@/actions/plan
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
 import { DialogCreateValidationRule } from "@/components/features/planification/DialogCreateValidationRule";
 import PageHeader from "@/layout/PageHeader";
+import ContentLayout from "@/layout/ContentLayout";
 import { getCurriculumnEnrollments } from "@/actions/studentAction";
+import { IGetEnrolledStudent } from "@/types/userType";
+import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 
 // Composant de chargement
 const LoadingCard = () => (
@@ -121,12 +127,73 @@ export default function EnrollmentDetailPage() {
     
     const [curriculum, setCurriculum] = useState<IGetCurriculumDetail | null>(null);
     const [sequenceList, setSequenceList] = useState<IGetTrainingSequenceForCurriculum []>([]);
+    const [enrolledStudents, setEnrolledStudents] = useState<IGetEnrolledStudent[]>([]);
     const [isCreateAcademicYearScheduleDialogOpen, setIsCreateAcademicYearScheduleDialogOpen] = useState(false);
     const [isCreateValisationRuleDialogOpen, setIsCreateValisationRuleDialogOpen] = useState(false);
     const [currentAcademicYear, setCurrentAcademicYear] = useState('');
     const [academicYearsSchedulesForCurriculumList, setAcademicYearsSchedulesForCurriculumList] = useState<IAcademicYearsSchedulesForCurriculum[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { academicYears, selectedAcademicYear } = useAcademicYearStore();
+
+    // Table columns for enrolled students
+    const enrolledStudentsColumns = useMemo<TableColumn<IGetEnrolledStudent>[]>(() => [
+        {
+            key: 'student_number',
+            label: 'Matricule',
+            priority: 'high',
+        },
+        {
+            key: 'last_name',
+            label: 'Nom',
+            priority: 'high',
+        },
+        {
+            key: 'first_name',
+            label: 'Prénom',
+            priority: 'high',
+        },
+        {
+            key: 'gender',
+            label: 'Genre',
+            priority: 'medium',
+        },
+        {
+            key: 'enrollment_date',
+            label: 'Date d\'inscription',
+            priority: 'medium',
+            render: (value) => formatDateToText(value),
+        },
+        {
+            key: 'status_code',
+            label: 'Statut',
+            priority: 'high',
+            render: (value) => (
+                <Badge className={getStatusColor(value)} variant="secondary">
+                    {value}
+                </Badge>
+            ),
+        },
+        {
+            key: 'inscription_paid',
+            label: 'Frais payés',
+            priority: 'medium',
+            render: (value) => (
+                <div className="flex items-center gap-2">
+                    {value ? (
+                        <>
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                            <span className="text-green-600 font-medium">Oui</span>
+                        </>
+                    ) : (
+                        <>
+                            <XCircle className="w-4 h-4 text-red-600" />
+                            <span className="text-red-600 font-medium">Non</span>
+                        </>
+                    )}
+                </div>
+            ),
+        },
+    ], []);
 
     const handlePlanSequences = async (aysList: ICreateAcademicYearSchedules[]) => {
         console.log('aysList', aysList);
@@ -203,12 +270,13 @@ export default function EnrollmentDetailPage() {
                 console.log('-->enrolledStudents', enrolledStudents)
                 console.log('historic', historic);
 
-                if (result.code === "success" && sequenceListResult.code === "success" && historic.code === "success") {
+                if (result.code === "success" && sequenceListResult.code === "success" && historic.code === "success" && enrolledStudents.code === "success") {
                     console.log("result", result);
                     console.log("sequenceListResult", sequenceListResult);
                     setCurriculum(result.data.body);
                     setSequenceList(sequenceListResult.data.body as IGetTrainingSequenceForCurriculum []);
                     setAcademicYearsSchedulesForCurriculumList(historic.data.body);
+                    setEnrolledStudents(enrolledStudents.data.body);
                 } else {
                     showToast({
                         variant: "error-solid",
@@ -332,146 +400,154 @@ export default function EnrollmentDetailPage() {
             <main className="container mx-auto px-4 sm:px-6 py-6">
                 <div className="space-y-6 sm:space-y-5">
                     {/* Informations générales */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                            <FileText className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                            Informations générales
-                            </CardTitle>
-                            <CardDescription className="otf">
-                            Détails du curriculum et informations administratives
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                {/* Colonne de gauche */}
-                                <div className="space-y-4">
+                    <ContentLayout
+                        icon={<FileText className="h-5 w-5 text-gray-500 flex-shrink-0" />}
+                        title="Informations générales"
+                        description="Détails du curriculum et informations administratives"
+                        
+                    >
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Colonne de gauche */}
+                            <div className="space-y-4">
                                 <div className="flex items-center gap-3">
                                     <Code className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                     <div className="flex-1">
-                                    <p className="otf font-medium text-gray-900">Code Curriculum</p>
-                                    <p className="otf text-gray-600 mt-0.5">
-                                        {curriculum.curriculum_code}
-                                    </p>
+                                        <p className="otf font-medium text-gray-900">Code Curriculum</p>
+                                        <p className="otf text-gray-600 mt-0.5">
+                                            {curriculum.curriculum_code}
+                                        </p>
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-3">
                                     <BookOpen className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                     <div className="flex-1">
-                                    <p className="otf font-medium text-gray-900">Code Programme</p>
-                                    <p className="otf text-gray-600 mt-0.5">
-                                        {curriculum.program_code}
-                                    </p>
+                                        <p className="otf font-medium text-gray-900">Code Programme</p>
+                                        <p className="otf text-gray-600 mt-0.5">
+                                            {curriculum.program_code}
+                                        </p>
                                     </div>
-                                </div>
-                                </div>
-
-                                {/* Colonne de droite */}
-                                <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <GraduationCap className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                    <div className="flex-1">
-                                    <p className="otf font-medium text-gray-900">Niveau d'études</p>
-                                    <p className="otf text-gray-600 mt-0.5">
-                                        {curriculum.study_level}
-                                    </p>
-                                    </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-3">
-                                    <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                    <div className="flex-1">
-                                    <p className="otf font-medium text-gray-900">Date de création</p>
-                                    <p className="otf text-gray-600 mt-0.5">
-                                        {formatDateToText(curriculum.created_at)}
-                                    </p>
-                                    </div>
-                                </div>
                                 </div>
                             </div>
 
-                            {/* Section séparée pour les statistiques */}
-                            <div className="border-t border-gray-100 mt-6 pt-4">
+                            {/* Colonne de droite */}
+                            <div className="space-y-4">
                                 <div className="flex items-center gap-3">
+                                    <GraduationCap className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                    <div className="flex-1">
+                                        <p className="otf font-medium text-gray-900">Niveau d'études</p>
+                                        <p className="otf text-gray-600 mt-0.5">
+                                            {curriculum.study_level}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                    <div className="flex-1">
+                                        <p className="otf font-medium text-gray-900">Date de création</p>
+                                        <p className="otf text-gray-600 mt-0.5">
+                                            {formatDateToText(curriculum.created_at)}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Section séparée pour les statistiques */}
+                        <div className="border-t border-gray-100 mt-6 pt-4">
+                            <div className="flex items-center gap-3">
                                 <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
                                     <span className="otf font-semibold text-blue-600">
-                                    {sequenceList.length}
+                                        {sequenceList.length}
                                     </span>
                                 </div>
                                 <div>
                                     <p className="otf font-medium text-gray-900">Séquences</p>
                                     <p className="text-sm text-gray-500">Nombre total de séquence</p>
                                 </div>
-                                </div>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </ContentLayout>
 
                     {/* Séquences de formation */}
-                    <Card>
-                        <CardHeader className="pb-3">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                <CardTitle className="flex items-center gap-2 text-base">
-                                    <CalendarDays className="h-4 w-4 flex-shrink-0" />
-                                    Horaires Académiques
-                                </CardTitle>
-                                {groupedSchedules.length > 0 && (
-                                    <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        onClick={() => setIsCreateAcademicYearScheduleDialogOpen(true)}
-                                        className="flex items-center gap-1.5"
-                                    >
-                                        <CalendarDays className="h-3.5 w-3.5" />
-                                        Planifier
-                                    </Button>
-                                )}
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            {groupedSchedules.length === 0 ? (
-                                <EmptyAcademicSchedules onPlanClick={() => setIsCreateAcademicYearScheduleDialogOpen(true)} />
-                            ) : (
-                                <div className="space-y-2">
-                                    {groupedSchedules.map((schedulesForYear) => {
-                                        const academicYear = schedulesForYear[0];
-                                        
-                                        return (
-                                            <div 
-                                                key={academicYear.academic_year_code} 
-                                                className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                    <Badge className={getStatusColor(academicYear.academic_year_status)} variant="outline">
-                                                        {academicYear.academic_year_status}
-                                                    </Badge>
-                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0 flex-1">
-                                                        <span className="font-medium text-gray-900 text-sm truncate">
-                                                            {academicYear.academic_year_name}
-                                                        </span>
-                                                        <span className="text-gray-500 text-xs">
-                                                            ({schedulesForYear.length} séquence{schedulesForYear.length > 1 ? 's' : ''})
-                                                        </span>
-                                                    </div>
+                    <ContentLayout
+                        icon={<CalendarDays className="h-5 w-5 text-gray-500 flex-shrink-0" />}
+                        title="Horaires Académiques"
+                        
+                        actions={
+                            groupedSchedules.length > 0 && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setIsCreateAcademicYearScheduleDialogOpen(true)}
+                                    className="flex items-center gap-1.5"
+                                >
+                                    <CalendarDays className="h-3.5 w-3.5" />
+                                    Planifier
+                                </Button>
+                            )
+                        }
+                    >
+                        {groupedSchedules.length === 0 ? (
+                            <EmptyAcademicSchedules onPlanClick={() => setIsCreateAcademicYearScheduleDialogOpen(true)} />
+                        ) : (
+                            <div className="space-y-2">
+                                {groupedSchedules.map((schedulesForYear) => {
+                                    const academicYear = schedulesForYear[0];
+
+                                    return (
+                                        <div
+                                            key={academicYear.academic_year_code}
+                                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                <Badge className={getStatusColor(academicYear.academic_year_status)} variant="outline">
+                                                    {academicYear.academic_year_status}
+                                                </Badge>
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0 flex-1">
+                                                    <span className="font-medium text-gray-900 text-sm truncate">
+                                                        {academicYear.academic_year_name}
+                                                    </span>
+                                                    <span className="text-gray-500 text-xs">
+                                                        ({schedulesForYear.length} séquence{schedulesForYear.length > 1 ? 's' : ''})
+                                                    </span>
                                                 </div>
-                                                {academicYear.academic_year_status === "IN_PROGRESS" && (
-                                                    <Button 
-                                                        className="inline-flex items-center gap-2"
-                                                        variant='outline'
-                                                        onClick={() => handlePlanRules(academicYear.academic_year_code)}
-                                                    >
-                                                        <Settings className="h-3.5 w-3.5" />
-                                                        <span className="text-xs">Règles</span>
-                                                    </Button>
-                                                )}
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                                            {academicYear.academic_year_status === "IN_PROGRESS" && (
+                                                <Button
+                                                    className="inline-flex items-center gap-2"
+                                                    variant='outline'
+                                                    onClick={() => handlePlanRules(academicYear.academic_year_code)}
+                                                >
+                                                    <Settings className="h-3.5 w-3.5" />
+                                                    <span className="text-xs">Règles</span>
+                                                </Button>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </ContentLayout>
+
+                    {/* Enrolled Students */}
+                    <ContentLayout
+                        icon={<Users className="h-5 w-5 text-gray-500 flex-shrink-0" />}
+                        title="Étudiants inscrits"
+                        description={`Liste des étudiants inscrits pour l'année académique ${selectedAcademicYear}`}
+                        
+                    >
+                        <ResponsiveTable
+                            columns={enrolledStudentsColumns}
+                            data={enrolledStudents}
+                            searchKey={['student_number', 'first_name', 'last_name']}
+                            keyField="enrollment_code"
+                            locale="fr"
+                            isLoading={isLoading}
+                            paginate={10}
+                        />
+                    </ContentLayout>
                 </div>
             </main>
             
