@@ -109,6 +109,7 @@ export async function getFeedbackFormList() {
   try {
     const session = await verifySession();
     const token = session.accessToken;
+    console.log('@@@URL', `${process.env.COMMUNICATION_WORKER_ENDPOINT}/api/feedback/forms`);
     const response = await axios.get(`${process.env.COMMUNICATION_WORKER_ENDPOINT}/api/feedback/forms`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -338,6 +339,7 @@ export async function listFeedbackCampaigns () {
   try {
     const session = await verifySession();
     const token = session.accessToken;
+    console.log('@@@URL', `${process.env.COMMUNICATION_WORKER_ENDPOINT}/api/feedback/campaigns`);
     const response = await axios.get(`${process.env.COMMUNICATION_WORKER_ENDPOINT}/api/feedback/campaigns`, {
       headers: { Authorization: `Bearer ${token}` }
     });
