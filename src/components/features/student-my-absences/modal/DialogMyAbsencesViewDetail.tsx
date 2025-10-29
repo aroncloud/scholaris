@@ -28,7 +28,6 @@ export default function DialogMyAbsencesViewDetail({
     setIsDetailsDialogOpen,
     selectedAbsence,
     getStatutColor,
-    getStatutLabel,
     handleSubmitJustification,
 }: DialogMyAbsencesViewDetailProps) {
 

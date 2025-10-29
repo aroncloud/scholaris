@@ -69,9 +69,10 @@ export function DialogCreateCampaign({
   const handleSave = async () => {
     if (!validate()) {
       showToast({
-        variant: 'error-solid',
-        title: 'Erreur de validation',
-        description: 'Veuillez remplir tous les champs requis'
+        variant: "error-solid",
+        message: 'Erreur de validation',
+        description: `Veuillez remplir tous les champs requis`,
+        position: 'top-center',
       });
       return;
     }
@@ -90,17 +91,19 @@ export function DialogCreateCampaign({
       await onSave(dataToSave);
 
       showToast({
-        variant: 'success-solid',
-        title: 'Succès',
-        description: 'Campagne créée avec succès'
+        variant: "success-solid",
+        message: 'Succès',
+        description: `Campagne créée avec succès`,
+        position: 'top-center',
       });
 
       onOpenChange(false);
     } catch (error) {
       showToast({
-        variant: 'error-solid',
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors de la création'
+        variant: "error-solid",
+        message: 'Erreur',
+        description: `Une erreur est survenue lors de la création`,
+        position: 'top-center',
       });
     } finally {
       setIsSubmitting(false);
@@ -136,7 +139,7 @@ export function DialogCreateCampaign({
             Nouvelle campagne de feedback
           </DialogTitle>
           <DialogDescription className="text-sm text-slate-500 mt-1">
-            Planifiez une nouvelle campagne d'évaluation
+            Planifiez une nouvelle campagne d&apos;évaluation
           </DialogDescription>
         </DialogHeader>
 
@@ -186,7 +189,7 @@ export function DialogCreateCampaign({
             <Label htmlFor="target-audience">
               <div className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
-                <span>Nombre d'étudiants ciblés <span className="text-red-500">*</span></span>
+                <span>Nombre d&apos;étudiants ciblés <span className="text-red-500">*</span></span>
               </div>
             </Label>
             <Input

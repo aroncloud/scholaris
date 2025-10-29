@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Campaign, QuestionAnalytics } from "@/types/feedbackTypes";
 import { X, Star, Users } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 
 interface DialogCampaignDetailsProps {
   open: boolean;
@@ -214,7 +213,7 @@ export function DialogCampaignDetails({
                   {/* Text Responses */}
                   {qAnalytics.type === 'text' && Array.isArray(qAnalytics.responses) && (
                     <div className="space-y-3">
-                      {qAnalytics.responses.slice(0, 4).map((response: string, idx: number) => (
+                      {(qAnalytics.responses as string[]).slice(0, 4).map((response, idx) => (
                         <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
                           <div className="flex items-start space-x-3">
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use server'
 
 import { FeedbackForm, Campaign, ICreateFeedbackForm, IUpdateFeedbackForm, ICreateCampaign, IAddQuestionsToForm, IUpdateFeedbackQuestion, ISubmitResponse } from "@/types/feedbackTypes";
