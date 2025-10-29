@@ -35,6 +35,34 @@ export async function getCurriculumFinancialSummary (curriculum_code: string, ac
     }
 }
 
+export async function getStudentFinancialSummary (student_user_code: string, academic_year_code: string) {
+    try {
+        const session = await verifySession();
+        const token = session.accessToken;
+        
+        const response = await axios.get(`${process.env.FINANCIAL_WORKER_ENDPOINT}/api/students/${student_user_code}/financial-summary`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            params: {
+                academic_year_code,
+            },
+        });
+        
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        };
+    } catch (error: unknown) {
+        console.error('-->getStudentFinancialSummary.error', error);
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+
 export async function recordDeposite(payload: IRecordDeposit) {
     try {
         const session = await verifySession();

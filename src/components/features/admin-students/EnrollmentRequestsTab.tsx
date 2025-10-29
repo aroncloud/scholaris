@@ -19,6 +19,7 @@ import {
   Eye,
   Download,
   Upload,
+  Edit,
 } from "lucide-react";
 import { getStatusColor, formatDateToText } from "@/lib/utils";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
@@ -38,6 +39,7 @@ type MyComponentProps = {
   enrollmentRequests: IGetEnrollmentRequest [];
   searchTerm: string;
   onCreateEnrollment?: () => void;
+  onUpdateEnrollment?: (application: IGetEnrollmentRequest) => void;
   loading: boolean;
 };
 
@@ -45,6 +47,7 @@ const EnrollmentRequests = ({
   enrollmentRequests,
   handleApproveRequest,
   onCreateEnrollment,
+  onUpdateEnrollment,
   loading
 }: MyComponentProps) => {
 
@@ -70,6 +73,9 @@ const EnrollmentRequests = ({
         <div>
           <div className="font-medium">
             {row.first_name} {row.last_name}
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {row.application_code}
           </div>
           <div className="text-sm text-muted-foreground">
             {row.email}
@@ -127,6 +133,18 @@ const EnrollmentRequests = ({
             >
               <Eye className="mr-2 h-4 w-4" /> Voir détails
             </DropdownMenuItem>
+
+            {row.application_status_code === "DRAFT" && onUpdateEnrollment && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdateEnrollment(row);
+                }}
+              >
+                <Edit className="mr-2 h-4 w-4" /> Modifier
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <FileText className="mr-2 h-4 w-4" /> Documents

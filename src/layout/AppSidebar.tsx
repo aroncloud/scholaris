@@ -62,6 +62,18 @@ const navItems: NavItem[] = [
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC", "DEPT_HEAD"],
   },
   {
+    icon: <UserSquare className="w-5 h-5" />,
+    name: "Feedback System",
+    path: "/dashboard/admin/feedback-system",
+    authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC", "DEPT_HEAD"],
+  },
+  {
+    icon: <UserSquare className="w-5 h-5" />,
+    name: "Feedback",
+    path: "/dashboard/student/feedback",
+    authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC", "STUDENT"],
+  },
+  {
     icon: <GraduationCap className="w-5 h-5" />,
     name: "Etudiants",
     path: "/dashboard/admin/students",

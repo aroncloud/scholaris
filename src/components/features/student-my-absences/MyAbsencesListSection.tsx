@@ -1,13 +1,6 @@
 'use client';
 
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,10 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, FileUp, Link2 } from "lucide-react";
+import { MoreHorizontal, Eye, FileUp } from "lucide-react";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 import { Absence } from "@/types/studentmyabsencesTypes";
 import { Badge } from "@/components/ui/badge";
+import ContentLayout from '@/layout/ContentLayout';
 
 interface MyAbsencesListSectionProps {
   filteredAbsences: Absence[];
@@ -113,31 +107,19 @@ export default function MyAbsencesListSection({
   ];
 
   return (
-    <div className="p-4 mt-6">
-      <Card className="shadow-sm">
-        <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div>
-              <CardTitle className="text-lg font-semibold">
-                Historique des Absences
-              </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Liste complète de vos absences par chronologie
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          <ResponsiveTable
-            columns={columns}
-            data={filteredAbsences}
-            searchKey={["course_unit_name", "session_title", "status_code"]}
-            locale="fr"
-            paginate={5}
-          />
-        </CardContent>
-      </Card>
+    <div className="p-6">
+      <ContentLayout
+        title={"Historique des Absences"}
+        description="Liste complète de vos absences par chronologie"
+      >
+        <ResponsiveTable
+          columns={columns}
+          data={filteredAbsences}
+          searchKey={["course_unit_name", "session_title", "status_code"]}
+          locale="fr"
+          paginate={5}
+        />
+      </ContentLayout>
     </div>
   );
 }

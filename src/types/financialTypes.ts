@@ -17,6 +17,14 @@ export interface IStudentGetFinancialInfo {
   debts: IDebt[];
 }
 
+export interface IGetStudentSummary {
+  total_due: number;
+  total_paid: number;
+  remaining_balance: number;
+  available_credit: number;
+  debts: IDebt[];
+}
+
 export interface IDebt {
   debt_code: string;
   enrollment_code: string;

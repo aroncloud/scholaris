@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { CreateApplicantRequest, FormData } from "@/types/requestSubmissionTypes";
+import type { CreateApplicantRequest, FormData } from "@/types/requestSubmissionTypes";
 import { submitAdmissionRequest, uploadApplicationDocuments } from "@/actions/requestSubmissionActions";
 
 

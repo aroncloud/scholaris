@@ -8,11 +8,11 @@ import MyAbsencesListSection from "@/components/features/student-my-absences/MyA
 import DialogMyAbsencesViewDetail from "@/components/features/student-my-absences/modal/DialogMyAbsencesViewDetail";
 import DialogCreateSubmitJustification from "@/components/features/student-my-absences/modal/DialogCreateSubmitJustification";
 import { useStudentAbsenceData } from "@/hooks/feature/student-my-absences/useStudentMyAbsenceData";
+import PageHeader from "@/layout/PageHeader";
 
 
 export default function MyAbsencesPage() {
-  const { absences, loading, error, refetch } = useStudentAbsenceData();
-  const [searchTerm, setSearchTerm] = useState("");
+  const { absences, loading, refetch } = useStudentAbsenceData();
   const [selectedAbsence, setSelectedAbsence] = useState<Absence | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isSubmitJustificationOpen, setIsSubmitJustificationOpen] = useState(false);
@@ -67,64 +67,42 @@ export default function MyAbsencesPage() {
     }
   };
 
-  const filteredAbsences = absences.filter(absence => {
-    const matchesSearch =
-      absence.course_unit_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      absence.session_title.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
-
-  // ✅ Updated: refetch absences from backend after successful justification
   const handleJustificationSuccess = async () => {
-    setSelectedAbsences([]); // reset selection
-    await refetch(); // fetch updated absences from database
+    setSelectedAbsences([]);
+    await refetch();
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="p-4 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            {/* Info étudiant */}
-            <div className="flex items-center space-x-3">
-              <div>
-                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
-                  Mes Absences
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  Tableau de bord d&apos;assiduité et gestion de vos justificatifs
-                </p>
-              </div>
-            </div>
+      <PageHeader
+        title="Mes Absences"
+        description="Tableau de bord d&apos;assiduité et gestion de vos justificatifs"
+      >
+        <div className="flex items-center space-x-3">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              await refetch();
+            }}
+            disabled={loading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+            />
+            {loading ? "Actualisation..." : "Actualiser"}
+          </Button>
 
-            {/* Actions */}
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  await refetch();
-                }}
-                disabled={loading}
-              >
-                <RefreshCw
-                  className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
-                />
-                {loading ? "Actualisation..." : "Actualiser"}
-              </Button>
-
-              <Button onClick={handleSubmitJustification} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Soumettre un justificatif
-              </Button>
-            </div>
-          </div>
+          <Button onClick={handleSubmitJustification} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Soumettre un justificatif
+          </Button>
         </div>
-      </div>
+      </PageHeader>
 
       {/* MyAbsencesListprops */}
       <MyAbsencesListSection
-        filteredAbsences={filteredAbsences}
+        filteredAbsences={absences}
         getStatutColor={getStatutColor}
         getStatutLabel={getStatutLabel}
         handleViewDetails={handleViewDetails}
@@ -148,7 +126,7 @@ export default function MyAbsencesPage() {
         absencesData={absences} 
         selectedAbsences={selectedAbsences}
         handleAbsenceSelection={handleAbsenceSelection}
-        onJustificationSubmitted={handleJustificationSuccess} // ✅ Updated DB: callback triggers refetch
+        onJustificationSubmitted={handleJustificationSuccess}
       />
     </div>
   );

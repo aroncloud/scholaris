@@ -4,10 +4,10 @@ import { cookies } from 'next/headers'
 
 // 👉 Routes autorisées par rôle
 const routeRoles: Record<string, string[]> = {
-  'STUDENT': ['/dashboard/student', '/dashboard/settings', '/dashboard/profile', '/dashboard/images'],
+  'STUDENT': ['/dashboard/student', '/dashboard/settings', '/dashboard/profile', '/dashboard/images', '/dashboard/feedback'],
   'TEACHER': ['/dashboard/teacher', '/dashboard/support', '/dashboard/settings', '/dashboard/profile', '/dashboard/images'],
-  'ADMIN_SUPER': ['/dashboard/admin', '/dashboard/settings', '/dashboard/profile', '/dashboard/images'],
-  'ADMIN_ACADEMIC': ['/dashboard/admin', '/dashboard/settings', '/dashboard/profile', '/dashboard/images'],
+  'ADMIN_SUPER': ['/dashboard/admin', '/dashboard/settings', '/dashboard/profile', '/dashboard/images', '/feedback-system'],
+  'ADMIN_ACADEMIC': ['/dashboard/admin', '/dashboard/settings', '/dashboard/profile', '/dashboard/images', '/dashboard/feedback-system'],
 };
 
 const publicRoutes = [

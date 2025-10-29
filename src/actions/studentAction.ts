@@ -2,7 +2,7 @@
 'use server'
 
 import { verifySession } from "@/lib/session";
-import { IInitiateStudentApplication } from "@/types/staffType";
+import { IInitiateStudentApplication, IUpdateStudentApplication } from "@/types/staffType";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
 import { IImportStudentApplicationInBulkJSON } from "@/types/userType";
@@ -36,6 +36,23 @@ export async function initiateStudentApplication(applicationData: IInitiateStude
     }
 }
 
+export async function updateStudentApplication(payload: IUpdateStudentApplication, application_code: string) {
+    try {
+        const session = await verifySession();
+        const token = session.accessToken;
+
+        const response = await axios.put(
+            `${process.env.APPLICATION_WORKER_ENDPOINT}/api/admin/student-applications/${application_code}`,
+            payload,
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+        );
+
+        return { code: "success", error: null, data: response.data };
+    } catch (error: unknown) {
+        console.log('-->updateStudentApplication.error')
+        return actionErrorHandler(error);
+    }
+}
 export async function getStudentApplication(applicationCode: string) {
     console.log('-->getStudentApplication', applicationCode)
     try {
@@ -250,6 +267,30 @@ export async function downloadDocument(documentUrl: string) {
         };
     } catch (error: unknown) {
         console.log('-->downloadDocument.error', error);
+        const errResult = actionErrorHandler(error);
+        return errResult;
+    }
+}
+
+export async function getCurriculumnEnrollments (curriculum_code: string, academic_year_code: string) {
+    try {
+        const session = await verifySession();
+        
+        const token = session.accessToken;
+        const response = await axios.get(`${process.env.STUDENT_WORKER_ENDPOINT}/api/students/enrollments/${curriculum_code}/years/${academic_year_code}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        return {
+            code: 'success',
+            error: null,
+            data: response.data
+        }
+    } catch (error: unknown) {
+        console.log('-->getCurriculumnEnrollments.error')
         const errResult = actionErrorHandler(error);
         return errResult;
     }

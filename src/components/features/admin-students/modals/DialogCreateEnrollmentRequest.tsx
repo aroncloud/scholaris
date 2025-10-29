@@ -129,9 +129,9 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {/* Numéro étudiant */}
+            {/* Matricule */}
             <div className="space-y-2">
-              <Label htmlFor="student_number">Numéro étudiant *</Label>
+              <Label htmlFor="student_number">Matricule *</Label>
               <Input
                 id="student_number"
                 placeholder="MA-2025-08-13-0008"

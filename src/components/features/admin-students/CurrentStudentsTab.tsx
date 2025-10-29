@@ -12,6 +12,7 @@ import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTabl
 import {  getStatusColor } from "@/lib/utils";
 import ContentLayout from "@/layout/ContentLayout";
 import ApplicationImportWizard, { FieldMapping } from "../students/ApplicationImportWizard";
+import { Avatar } from "@/components/custom-ui/Avatar";
 
 
 
@@ -55,13 +56,25 @@ const CurrentStudents = ({
       return false;
     };
   const columns: TableColumn<IListStudent>[] = [
-    { key: "student", label: "Étudiant", render: (_, row) => (
-      <div>
-        <div className="font-medium">{row.first_name} {row.last_name}</div>
-        <div className="text-sm text-muted-foreground">{row.student_number}</div>
-        <div className="text-sm text-muted-foreground">{row.email}</div>
-      </div>
-    )},
+    {
+      key: "first_name",
+      label: "Étudiant",
+      priority: 'high',
+      render: (_, data) => (
+        <div className="flex items-center gap-3">
+          <Avatar
+            fallback={`${data.first_name} ${data.last_name}`}
+            variant={"info"}
+          />
+          <div>
+            <div className="font-semibold text-gray-900">
+              {data.first_name} {data.last_name}
+            </div>
+            <div className="text-sm text-gray-500">{data.student_number}</div>
+          </div>
+        </div>
+      ),
+    },
     { key: "formation", label: "Formation", render: (_, row) => (
       <div>
         <div className="font-medium">{row.cirriculum.program_name}</div>

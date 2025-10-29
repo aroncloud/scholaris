@@ -457,7 +457,7 @@ export default function SessionDetailPage() {
                             N°
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                            Numéro Étudiant
+                            Matricule
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                             Nom et Prénom

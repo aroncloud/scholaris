@@ -155,14 +155,14 @@ export function DialogCreateStudent({
                 )}
               </div>
 
-              {/* Numéro étudiant */}
+              {/* Matricule */}
               <div className="space-y-1.5">
                 <Label htmlFor="student_number" className="font-medium text-gray-600">
-                  Numéro étudiant <span className="text-red-500">*</span>
+                  Matricule <span className="text-red-500">*</span>
                 </Label>
                 <SInput
                   id="student_number"
-                  {...register("student_number", { required: "Le numéro étudiant est requis" })}
+                  {...register("student_number", { required: "Le Matricule est requis" })}
                   disabled={isSubmitting}
                   className={errors.student_number ? "border-red-500 h-9" : "h-9"}
                 />

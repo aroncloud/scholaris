@@ -49,7 +49,7 @@ const SkeletonRow = ({ columnsCount }: { columnsCount: number }) => (
 );
 
 const SkeletonCard = () => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 animate-pulse">
+  <div className="bg-white dark:bg-gray-800 rounded-xl p-2 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700 animate-pulse">
     <div className="space-y-4">
       <div className="h-5 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded w-3/4"></div>
       <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded w-1/2"></div>
@@ -169,53 +169,59 @@ export const ResponsiveTable = <T extends Record<string, any>>({
   return (
     <div className="w-full space-y-6">
       {/* Barre recherche + filtres */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Barre de recherche - prend tout l'espace disponible */}
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500 pointer-events-none z-10" />
             <Input
               placeholder={locale === "fr" ? "Rechercher..." : "Search..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 h-10 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 transition-colors"
+              className="pl-11 pr-4 h-11 w-full border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:border-blue-400 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 transition-all shadow-sm"
               disabled={isLoading}
             />
           </div>
 
-          {filters.map((filter) => (
-            <div key={filter.key} className="w-full sm:w-auto min-w-[180px]">
-              <Combobox
-                value={selectedFilters[filter.key] || ""}
-                className="h-10"
-                onChange={(value) =>
-                  setSelectedFilters((prev) => ({
-                    ...prev,
-                    [filter.key]: value,
-                  }))
-                }
-                options={[
-                  { value: "", label: locale === "fr" ? "Tous" : "All" },
-                  ...filter.values
-                ]}
-                placeholder={
-                  locale === "fr"
-                    ? `Filtrer par ${filter.key}`
-                    : `Filter by ${filter.key}`
-                }
-              />
-            </div>
-          ))}
+          {/* Section Filtres - largeur fixe pour stabilité */}
+          {filters.length > 0 && (
+            <div className="flex flex-wrap sm:flex-nowrap gap-3 items-center">
+              {filters.map((filter) => (
+                <div key={filter.key} className="w-full sm:w-[240px] flex-shrink-0">
+                  <Combobox
+                    value={selectedFilters[filter.key] || ""}
+                    className="h-11"
+                    onChange={(value) =>
+                      setSelectedFilters((prev) => ({
+                        ...prev,
+                        [filter.key]: value,
+                      }))
+                    }
+                    options={[
+                      { value: "", label: locale === "fr" ? "Tous" : "All" },
+                      ...filter.values
+                    ]}
+                    placeholder={
+                      locale === "fr"
+                        ? `Filtrer par ${filter.key}`
+                        : `Filter by ${filter.key}`
+                    }
+                  />
+                </div>
+              ))}
 
-          {anyFilterActive && (
-            <Button
-              size="sm"
-              variant="outline-info"
-              className="h-9"
-              onClick={() => setSelectedFilters({})}
-            >
-              <Eraser className="w-4 h-4" />
-              {locale === "fr" ? "Réinitialiser" : "Reset"}
-            </Button>
+              {anyFilterActive && (
+                <Button
+                  size="sm"
+                  variant="outline-info"
+                  className="h-11 px-4 whitespace-nowrap flex-shrink-0"
+                  onClick={() => setSelectedFilters({})}
+                >
+                  <Eraser className="w-4 h-4 mr-2" />
+                  {locale === "fr" ? "Réinitialiser" : "Reset"}
+                </Button>
+              )}
+            </div>
           )}
         </div>
 
@@ -374,6 +380,59 @@ export const ResponsiveTable = <T extends Record<string, any>>({
           </tbody>
         </table>
       </div>
+
+      {/* Mobile View */}
+      <div className="md:hidden space-y-2">
+        {paginatedData.map((row) => (
+          <div
+            key={uuidv4()}
+            onClick={() => onRowClick?.(row)}
+            className="bg-white dark:bg-gray-800 rounded p-5 shadow-sm border dark:border-gray-600 my-2 space-y-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-500 ease-in-out"
+          >
+            <div className="space-y-2">
+              {highPriorityColumns.map((col) => (
+                <div key={uuidv4()} className="flex justify-between items-start">
+                  <span className=" font-medium text-gray-600 dark:text-gray-200">
+                    {col.label} :
+                  </span>
+                  <span className=" text-right text-gray-600 dark:text-white">
+                    {col.render ? col.render(row[col.key], row) : row[col.key]}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {mediumPriorityColumns.length > 0 && <hr className="border-t border-gray-200 dark:border-gray-700" />}
+            <div className="space-y-2">
+              {mediumPriorityColumns.map((col) => (
+                <div key={uuidv4()} className="flex justify-between items-start">
+                  <span className=" font-medium text-gray-600 dark:text-gray-300">
+                    {col.label} :
+                  </span>
+                  <span className=" text-right text-gray-600 dark:text-gray-200">
+                    {col.render ? col.render(row[col.key], row) : row[col.key]}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {lowPriorityColumns.length > 0 && <hr className="border-t border-gray-200 dark:border-gray-700" />}
+            {lowPriorityColumns.length > 0 && (
+              <div className="space-y-2">
+                {lowPriorityColumns.map((col) => (
+                  <div key={uuidv4()} className="flex justify-between items-start">
+                    <span className=" text-gray-500 dark:text-gray-300">
+                      {col.label} :
+                    </span>
+                    <span className=" text-right text-gray-600 dark:text-gray-200">
+                      {col.render ? col.render(row[col.key], row) : row[col.key]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
 
       {/* Pagination */}
       {!isLoading && paginate && totalPages > 1 && (

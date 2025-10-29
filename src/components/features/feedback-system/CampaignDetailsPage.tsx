@@ -1,0 +1,564 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client'
+
+import React, { useState } from 'react'
+import {
+  ArrowLeft,
+  Calendar,
+  Target,
+  Users,
+  Star,
+  BarChart3,
+  MessageSquare,
+  Download,
+  Share2,
+  CheckCircle2,
+  Clock,
+  TrendingUp,
+  FileText,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import PageHeader from '@/layout/PageHeader'
+import ContentLayout from '@/layout/ContentLayout'
+import { useRouter } from 'next/navigation'
+import {
+  IGetCampaignDetail,
+  ICampaignDetails,
+  INumericScaleResult,
+  IMultipleChoiceResult,
+  IQualitativeResult
+} from '@/types/feedbackTypes'
+
+// Status Badge Component
+const StatusBadge = ({ status }: { status: ICampaignDetails['status'] }) => {
+  const configs = {
+    PLANNED: {
+      label: 'Planifiée',
+      className: 'bg-blue-100 text-blue-700 border-blue-200',
+      icon: Clock
+    },
+    ONGOING: {
+      label: 'En cours',
+      className: 'bg-green-100 text-green-700 border-green-200',
+      icon: TrendingUp
+    },
+    COMPLETED: {
+      label: 'Terminée',
+      className: 'bg-gray-100 text-gray-700 border-gray-200',
+      icon: CheckCircle2
+    },
+    CANCELLED: {
+      label: 'Annulée',
+      className: 'bg-red-100 text-red-700 border-red-200',
+      icon: AlertCircle
+    }
+  }
+
+  const config = configs[status]
+  const Icon = config.icon
+
+  return (
+    <Badge className={`px-4 py-2 text-sm font-semibold rounded-full border ${config.className} flex items-center space-x-2`}>
+      <Icon className="w-4 h-4" />
+      <span>{config.label}</span>
+    </Badge>
+  )
+}
+
+// Numeric Scale Card Component
+const NumericScaleCard = ({ result }: { result: INumericScaleResult }) => {
+  const [expanded, setExpanded] = useState(true)
+
+  const getDistribution = () => {
+    const dist: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    const avg = result.average_score
+    const total = result.response_count
+
+    if (avg >= 4) {
+      dist[5] = Math.floor(total * 0.5)
+      dist[4] = Math.floor(total * 0.3)
+      dist[3] = Math.floor(total * 0.15)
+      dist[2] = Math.floor(total * 0.03)
+      dist[1] = total - dist[5] - dist[4] - dist[3] - dist[2]
+    } else if (avg >= 3) {
+      dist[4] = Math.floor(total * 0.4)
+      dist[3] = Math.floor(total * 0.35)
+      dist[5] = Math.floor(total * 0.15)
+      dist[2] = Math.floor(total * 0.07)
+      dist[1] = total - dist[5] - dist[4] - dist[3] - dist[2]
+    } else {
+      dist[3] = Math.floor(total * 0.4)
+      dist[2] = Math.floor(total * 0.3)
+      dist[4] = Math.floor(total * 0.2)
+      dist[1] = Math.floor(total * 0.07)
+      dist[5] = total - dist[4] - dist[3] - dist[2] - dist[1]
+    }
+
+    return dist
+  }
+
+  const distribution = getDistribution()
+
+  return (
+    <Card className="bg-white border border-slate-200 hover:shadow-lg transition-all duration-200">
+      <CardContent className="p-0">
+        {/* Header - Always visible */}
+        <div 
+          className="p-6 cursor-pointer hover:bg-slate-50 transition-colors duration-200"
+          onClick={() => setExpanded(!expanded)}
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex items-start space-x-4 flex-1">
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white font-bold shadow-lg shadow-blue-500/30 flex-shrink-0">
+                <Star className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-lg font-bold text-slate-900 mb-2 pr-4">{result.question_text}</h4>
+                <div className="flex items-center space-x-4 text-sm text-slate-500">
+                  <span className="flex items-center space-x-1">
+                    <Users className="w-4 h-4" />
+                    <span>{result.response_count} réponses</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Score moyen - Toujours visible */}
+            <div className="flex items-center space-x-4 ml-4">
+              <div className="text-right">
+                <div className="flex items-center space-x-2 mb-1">
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-5 h-5 ${
+                          star <= Math.round(result.average_score)
+                            ? 'text-yellow-400 fill-yellow-400'
+                            : 'text-slate-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-slate-900">
+                  {result.average_score.toFixed(1)}<span className="text-lg text-slate-500">/5</span>
+                </p>
+              </div>
+              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                {expanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Distribution - Collapsible */}
+        {expanded && (
+          <div className="px-6 pb-6 pt-2 border-t border-slate-100">
+            <p className="text-sm font-semibold text-slate-700 mb-4">Distribution détaillée</p>
+            <div className="space-y-3">
+              {[5, 4, 3, 2, 1].map((rating) => {
+                const count = distribution[rating]
+                const percentage = (count / result.response_count) * 100
+                return (
+                  <div key={rating} className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-1 w-16 flex-shrink-0">
+                      <span className="text-sm font-semibold text-slate-700">{rating}</span>
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="h-6 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-500"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="w-28 text-right flex-shrink-0">
+                      <span className="text-sm font-semibold text-slate-700">{count}</span>
+                      <span className="text-xs text-slate-500 ml-1">({percentage.toFixed(0)}%)</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// Multiple Choice Card Component
+const MultipleChoiceCard = ({ result }: { result: IMultipleChoiceResult }) => {
+  const totalResponses = result.distribution.reduce((sum, item) => sum + item.count, 0)
+
+  return (
+    <Card className="bg-white border border-slate-200 hover:shadow-lg transition-all duration-200">
+      <CardContent className="p-6">
+        <div className="flex items-start space-x-4 mb-6">
+          <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl text-white font-bold shadow-lg shadow-purple-500/30 flex-shrink-0">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-lg font-bold text-slate-900 mb-2">{result.question_text}</h4>
+            <div className="flex items-center space-x-1 text-sm text-slate-500">
+              <Users className="w-4 h-4" />
+              <span>{totalResponses} réponses</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {result.distribution.map((item, idx) => {
+            const percentage = (item.count / totalResponses) * 100
+            return (
+              <div key={idx} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-700 truncate flex-1 mr-4">{item.option}</span>
+                  <span className="text-sm font-semibold text-slate-900 flex-shrink-0">
+                    {item.count} ({percentage.toFixed(0)}%)
+                  </span>
+                </div>
+                <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-500"
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Qualitative Results Component
+const QualitativeResults = ({ results }: { results: IQualitativeResult[] }) => {
+  const [visibleCount, setVisibleCount] = useState(5)
+  const [expandedQuestions, setExpandedQuestions] = useState<{ [key: string]: boolean }>({})
+
+  const groupedByQuestion = results.reduce((acc, result) => {
+    if (!acc[result.question_code]) {
+      acc[result.question_code] = {
+        question_text: result.question_text,
+        answers: []
+      }
+    }
+    acc[result.question_code].answers.push(result.answer)
+    return acc
+  }, {} as { [key: string]: { question_text: string; answers: string[] } })
+
+  const toggleQuestion = (questionCode: string) => {
+    setExpandedQuestions(prev => ({
+      ...prev,
+      [questionCode]: !prev[questionCode]
+    }))
+  }
+
+  return (
+    <div className="space-y-4">
+      {Object.entries(groupedByQuestion).map(([questionCode, data]) => {
+        const isExpanded = expandedQuestions[questionCode] ?? true
+        const displayedAnswers = isExpanded ? data.answers : data.answers.slice(0, 3)
+
+        return (
+          <Card key={questionCode} className="bg-white border border-slate-200 hover:shadow-lg transition-all duration-200">
+            <CardContent className="p-0">
+              {/* Header */}
+              <div 
+                className="p-6 cursor-pointer hover:bg-slate-50 transition-colors duration-200 border-b border-slate-100"
+                onClick={() => toggleQuestion(questionCode)}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-4 flex-1">
+                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl text-white font-bold shadow-lg shadow-green-500/30 flex-shrink-0">
+                      <MessageSquare className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-lg font-bold text-slate-900 mb-2 pr-4">{data.question_text}</h4>
+                      <div className="flex items-center space-x-1 text-sm text-slate-500">
+                        <Users className="w-4 h-4" />
+                        <span>{data.answers.length} réponses</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors ml-4">
+                    {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Answers */}
+              {isExpanded && (
+                <div className="p-6 space-y-3">
+                  {displayedAnswers.map((answer, idx) => (
+                    <div key={idx} className="p-4 bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-lg hover:shadow-md transition-shadow duration-200">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-xs font-bold text-blue-600">#{idx + 1}</span>
+                        </div>
+                        <p className="text-sm text-slate-700 flex-1 leading-relaxed">{answer}</p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {data.answers.length > 3 && !isExpanded && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleQuestion(questionCode)
+                      }}
+                      className="w-full px-4 py-3 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200 border border-blue-200"
+                    >
+                      Voir toutes les réponses ({data.answers.length})
+                    </button>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )
+      })}
+    </div>
+  )
+}
+
+// Main Component
+export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail }) {
+  const router = useRouter()
+  const { campaign_details, summary, quantitative_results, qualitative_results } = data
+
+  const hasQuantitativeResults = quantitative_results.numeric_scale.length > 0 || quantitative_results.multiple_choice.length > 0
+  const hasQualitativeResults = qualitative_results.length > 0
+  const hasAnyResults = hasQuantitativeResults || hasQualitativeResults
+
+  return (
+    <>
+      <PageHeader
+        title={campaign_details.title}
+        description={`Analyse détaillée de la campagne • ${summary.total_responses} réponses collectées`}
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => router.back()}
+            className="flex-shrink-0"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Retour</span>
+          </Button>
+          <Button variant="secondary" className="flex-shrink-0">
+            <Share2 className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Partager</span>
+          </Button>
+          <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 flex-shrink-0">
+            <Download className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Exporter le rapport</span>
+            <span className="sm:hidden">Export</span>
+          </Button>
+        </div>
+      </PageHeader>
+
+      <div className="px-4 sm:px-6 py-6 space-y-6">
+        {/* Campaign Info Header */}
+        <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-200 overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <StatusBadge status={campaign_details.status} />
+              <div className="text-left sm:text-right">
+                <p className="text-xs sm:text-sm text-slate-600 mb-1">Code formulaire</p>
+                <p className="text-xs sm:text-sm font-mono font-semibold text-slate-900 break-all">{campaign_details.form_code}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-slate-600 font-medium">Début</p>
+                    <p className="text-sm font-bold text-slate-900 truncate">
+                      {new Date(campaign_details.start_date).toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-slate-600 font-medium">Fin</p>
+                    <p className="text-sm font-bold text-slate-900 truncate">
+                      {new Date(campaign_details.end_date).toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Users className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-slate-600 font-medium">Réponses</p>
+                    <p className="text-sm font-bold text-slate-900">{summary.total_responses}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Target className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-slate-600 font-medium">Niveau</p>
+                    <p className="text-sm font-bold text-slate-900 truncate">{campaign_details.target_level_code}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Stats Overview - Visible seulement si des résultats existent */}
+        {hasAnyResults && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-700 mb-1">Questions notées</p>
+                    <p className="text-3xl font-bold text-blue-900">
+                      {quantitative_results.numeric_scale.length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Star className="w-6 h-6 text-blue-700" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-purple-700 mb-1">Choix multiples</p>
+                    <p className="text-3xl font-bold text-purple-900">
+                      {quantitative_results.multiple_choice.length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="w-6 h-6 text-purple-700" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-700 mb-1">Avis textuels</p>
+                    <p className="text-3xl font-bold text-green-900">
+                      {qualitative_results.length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="w-6 h-6 text-green-700" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Quantitative Results - Numeric Scale */}
+        {quantitative_results.numeric_scale.length > 0 && (
+          <ContentLayout
+            title="📊 Résultats quantitatifs - Échelles de notation"
+            description={`${quantitative_results.numeric_scale.length} question${quantitative_results.numeric_scale.length > 1 ? 's' : ''} avec notation de 1 à 5 étoiles`}
+          >
+            <div className="space-y-4">
+              {quantitative_results.numeric_scale.map((result) => (
+                <NumericScaleCard key={result.question_code} result={result} />
+              ))}
+            </div>
+          </ContentLayout>
+        )}
+
+        {/* Quantitative Results - Multiple Choice */}
+        {quantitative_results.multiple_choice.length > 0 && (
+          <ContentLayout
+            title="✅ Résultats quantitatifs - Choix multiples"
+            description={`${quantitative_results.multiple_choice.length} question${quantitative_results.multiple_choice.length > 1 ? 's' : ''} à choix multiples avec distribution des réponses`}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+              {quantitative_results.multiple_choice.map((result) => (
+                <MultipleChoiceCard key={result.question_code} result={result} />
+              ))}
+            </div>
+          </ContentLayout>
+        )}
+
+        {/* Qualitative Results */}
+        {qualitative_results.length > 0 && (
+          <ContentLayout
+            title="💬 Résultats qualitatifs"
+            description={`${qualitative_results.length} commentaire${qualitative_results.length > 1 ? 's' : ''} détaillé${qualitative_results.length > 1 ? 's' : ''} des participants`}
+          >
+            <QualitativeResults results={qualitative_results} />
+          </ContentLayout>
+        )}
+
+        {/* Empty State - Plus visible et informatif */}
+        {!hasAnyResults && (
+          <Card className="bg-white border-2 border-dashed border-slate-300">
+            <CardContent className="p-12 text-center">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <BarChart3 className="w-12 h-12 text-blue-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-3">Aucune donnée disponible</h3>
+              <p className="text-slate-500 max-w-md mx-auto mb-6">
+                Les résultats de cette campagne seront disponibles une fois que des réponses auront été collectées par les participants.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Button variant="secondary" onClick={() => router.back()}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Retour aux campagnes
+                </Button>
+                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Partager la campagne
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </>
+  )
+}

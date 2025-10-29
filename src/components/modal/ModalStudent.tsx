@@ -99,9 +99,9 @@ const ModalStudent: React.FC<ModalStudentProps> = ({
           </div>
         }
 
-        {/* Numéro étudiant */}
+        {/* Matricule */}
         <div className="space-y-2">
-          <Label htmlFor="student_number">Numéro étudiant</Label>
+          <Label htmlFor="student_number">Matricule</Label>
           <Input
             id="student_number"
             value={formData.student_number || ""}

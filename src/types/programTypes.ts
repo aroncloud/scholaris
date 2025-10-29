@@ -137,15 +137,31 @@ export interface IGetUEForTeacher {
 export interface IGetUEPerModule {
   course_unit_code: string;
   module_code: string;
-  teacher_user_code: string | null;
+  teacher_user_code: string;
   course_unit_name: string;
   internal_code: string;
   lecture_hours: number;
   lab_tutorial_hours: number;
   coefficient: number;
-  is_mandatory: number; // 1 ou 0
-  is_module_coordinator: number; // 1 ou 0
-  status_code: string;
+  is_mandatory: number; // 1 = oui, 0 = non
+  is_module_coordinator: number; // 1 = oui, 0 = non
+  status_code: 'ACTIVE' | 'INACTIVE' | string; // peut être élargi selon les valeurs possibles
+  max_score: number;
+  teacher: ITeacher | null;
+}
+
+export interface ITeacher {
+  user_code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  gender: 'MALE' | 'FEMALE' | string;
+  teacher_number: string;
+  specialty: string;
+  qualifications: string;
+  hiring_date: string; // format ISO: "YYYY-MM-DD"
+  type_code: 'PERMANENT' | 'TEMPORARY' | string;
 }
 
 export interface IGetTrainingSequenceForCurriculum {

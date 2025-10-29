@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server'
 
 import { verifySession } from "@/lib/session";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
-import { SubmitJustificationPayload, JustificationFile, Absence } from "@/types/studentmyabsencesTypes";
+import { SubmitJustificationPayload, JustificationFile } from "@/types/studentmyabsencesTypes";
 import { useUserStore } from "@/store/useAuthStore";
 import { SessionPayload } from "@/types/authTypes";
 
@@ -12,11 +13,9 @@ import { uploadFile } from "@/lib/fileUpload";
 
 export async function fetchAndStoreUserProfile() {
   try {
-    // ✅ Step 1: Verify the active session
     const session = await verifySession();
     const token = session.accessToken;
 
-    // ✅ Step 2: Hit the /api/users/me endpoint
     const endpoint = `${process.env.AIM_WORKER_ENDPOINT}/api/users/me`;
 
     const response = await axios.get(endpoint, {
@@ -32,7 +31,6 @@ export async function fetchAndStoreUserProfile() {
       return null;
     }
 
-    // ✅ Step 3: Prepare a correctly typed SessionPayload object
     const payload: SessionPayload = {
       accessToken: token,
       refreshToken: session.refreshToken ?? "",
@@ -50,18 +48,16 @@ export async function fetchAndStoreUserProfile() {
       },
     };
 
-    // ✅ Step 4: Store the user in Zustand
     useUserStore.getState().setUser(payload);
 
     console.log("✅ User profile stored in Zustand:", payload.user.user_code);
 
     return userData;
   } catch (error: any) {
-    console.error("💥 Failed to fetch user profile:", error.message);
+    console.error("Failed to fetch user profile:", error.message);
     return null;
   }
 }
-// ✅ Submit Justification
 export async function submitJustification(
   payload: SubmitJustificationPayload,
   file: File,
@@ -72,11 +68,9 @@ export async function submitJustification(
       return { code: "USER_NOT_FOUND", error: "Utilisateur introuvable", data: null };
     }
 
-    // 1️⃣ Verify session and get token
     const session = await verifySession();
     const token = session.accessToken;
 
-    // 2️⃣ Upload the file
     const processName = "Justification";
     const absenceCode = payload.absence_codes[0];
     const fileName = `${file.name}`;
@@ -96,10 +90,8 @@ export async function submitJustification(
       content_url: `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${filePath}`,
       title:
         payload.files[0]?.title ||
-        (payload.files[0]?.type_code === "MEDICAL_CERTIFICATE"
-          ? "Certificat Médical"
-          : file.name),
-      type_code: payload.files[0]?.type_code || "OTHER",
+        (payload.files[0]?.type_code === "MEDICAL_CERTIFICATE" ? "Certificat Médical" : file.name),
+        type_code: payload.files[0]?.type_code || "OTHER",
     };
 
 
@@ -174,39 +166,3 @@ export async function getMyAbsencesList() {
     return errResult;
   }
 }
-
-
-
-
-// export async function submitJustification(payload: SubmitJustificationPayload) {
-//   console.log("--> submitJustification: starting with payload", payload);
-
-//   try {
-//     //  Verify session and get token
-//     const session = await verifySession();
-//     const token = session.accessToken;
-
-//     //  Define endpoint
-//     const endpoint = `${process.env.ATTENDACE_WORKER_ENDPOINT}/api/justifications`;
-
-//     //  Perform POST request
-//     const response = await axios.post(endpoint, payload, {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         "Content-Type": "application/json",
-//       },
-//     });
-
-//     console.log(" Justification submitted successfully:", response.data);
-
-//     return {
-//       code: "success",
-//       message: "Justification soumise avec succès",
-//       data: response.data,
-//     };
-//   } catch (error: any) {
-//     console.log(" submitJustification.error:", error.response?.data || error.message);
-//     const errResult = actionErrorHandler(error);
-//     return errResult;
-//   }
-// }

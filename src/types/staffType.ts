@@ -135,6 +135,17 @@ export interface IInitiateStudentApplication {
   gender: gender;
 }
 
+export interface IUpdateStudentApplication {
+  curriculum_code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  student_number: string;
+  gender: gender;
+}
+
+
 export type gender = 'FEMALE' | 'MALE';
 
 export interface ICurriculum {

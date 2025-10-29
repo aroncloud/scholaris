@@ -9,41 +9,34 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { v4 as uuidv4 } from "uuid";
 import {
-  ArrowLeft,
   GraduationCap,
   Calendar,
   FileText,
-  Clock,
   Code,
   BookOpen,
   ListOrdered,
   CalendarDays,
   Power,
   Settings,
-  Loader2,
   AlertCircle,
 } from "lucide-react";
 import { getStatusColor, formatDateToText } from "@/lib/utils";
 import { getCurriculumDetail, getListAcademicYearsSchedulesForCurriculum, getSemesterForCurriculum } from "@/actions/programsAction";
 import { IAcademicYearsSchedulesForCurriculum, IGetCurriculumDetail, IGetTrainingSequenceForCurriculum } from "@/types/programTypes";
 import { showToast } from "@/components/ui/showToast";
-import { Separator } from "@/components/ui/separator";
 import { DialogCreateAcademicYearSchedule } from "@/components/features/planification/Modal/DialogCreateAcademicYearSchedule";
 import { ICreateAcademicYearSchedules, ICreateValidationRule } from "@/types/planificationType";
 import { createAcademicYearSchedule, createValidationRule } from "@/actions/planificationAction";
-import { useAcademicYearSchedules } from "@/hooks/feature/planifincation/useAcademicYearSchedules";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { DialogCreateValidationRule } from "@/components/features/planification/DialogCreateValidationRule";
 import PageHeader from "@/layout/PageHeader";
+import { getCurriculumnEnrollments } from "@/actions/studentAction";
 
 // Composant de chargement
 const LoadingCard = () => (
@@ -133,7 +126,7 @@ export default function EnrollmentDetailPage() {
     const [currentAcademicYear, setCurrentAcademicYear] = useState('');
     const [academicYearsSchedulesForCurriculumList, setAcademicYearsSchedulesForCurriculumList] = useState<IAcademicYearsSchedulesForCurriculum[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const { academicYears } = useAcademicYearStore();
+    const { academicYears, selectedAcademicYear } = useAcademicYearStore();
 
     const handlePlanSequences = async (aysList: ICreateAcademicYearSchedules[]) => {
         console.log('aysList', aysList);
@@ -151,7 +144,6 @@ export default function EnrollmentDetailPage() {
                 description: `Les ${aysList.length} semestre(s) de l'année academique ${academicYears.find(ay => ay.academic_year_code === aysList[0].academic_year_code)?.year_code} ont été planifié(s).`,
                 position: 'top-center',
             });
-            // Recharger les données après création
             loadApplicationDetails();
         } else {
             showToast({
@@ -200,27 +192,32 @@ export default function EnrollmentDetailPage() {
     };
 
     const loadApplicationDetails = useCallback(async () => {
-        setIsLoading(true);
         try {
-            const result = await getCurriculumDetail(programCode);
-            const sequenceListResult = await getSemesterForCurriculum(programCode);
-            const historic = await getListAcademicYearsSchedulesForCurriculum(programCode);
-            console.log('historic', historic);
+            if(selectedAcademicYear) {
+                setIsLoading(true);
+                const result = await getCurriculumDetail(programCode);
+                const sequenceListResult = await getSemesterForCurriculum(programCode);
+                const historic = await getListAcademicYearsSchedulesForCurriculum(programCode);
+                const enrolledStudents = await getCurriculumnEnrollments(programCode, selectedAcademicYear);
+                console.log('-->Payload', selectedAcademicYear, programCode)
+                console.log('-->enrolledStudents', enrolledStudents)
+                console.log('historic', historic);
 
-            if (result.code === "success" && sequenceListResult.code === "success" && historic.code === "success") {
-                console.log("result", result);
-                console.log("sequenceListResult", sequenceListResult);
-                setCurriculum(result.data.body);
-                setSequenceList(sequenceListResult.data.body as IGetTrainingSequenceForCurriculum []);
-                setAcademicYearsSchedulesForCurriculumList(historic.data.body);
-            } else {
-                showToast({
-                    variant: "error-solid",
-                    message: "Erreur lors du chargement des détails",
-                    description:result.error ?? "Une erreur est survenue lors du chargement des détails, essayez encore ou veuillez contacter l'administrateur",
-                    position: 'top-center',
-                });
-                router.push("/dashboard/admin/programs");
+                if (result.code === "success" && sequenceListResult.code === "success" && historic.code === "success") {
+                    console.log("result", result);
+                    console.log("sequenceListResult", sequenceListResult);
+                    setCurriculum(result.data.body);
+                    setSequenceList(sequenceListResult.data.body as IGetTrainingSequenceForCurriculum []);
+                    setAcademicYearsSchedulesForCurriculumList(historic.data.body);
+                } else {
+                    showToast({
+                        variant: "error-solid",
+                        message: "Erreur lors du chargement des détails",
+                        description:result.error ?? "Une erreur est survenue lors du chargement des détails, essayez encore ou veuillez contacter l'administrateur",
+                        position: 'top-center',
+                    });
+                    router.push("/dashboard/admin/programs");
+                }
             }
         } catch (error) {
             showToast({
@@ -232,7 +229,7 @@ export default function EnrollmentDetailPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [programCode, router]);
+    }, [programCode, router, selectedAcademicYear]);
 
     const handleGoBack = () => {
         console.log('Navigation vers /dashboard/admin/programs');
@@ -331,225 +328,189 @@ export default function EnrollmentDetailPage() {
                     </Button>
                 </div>
             </PageHeader>
-            <div className="min-h-screen bg-background p-6">
-                <div className="space-y-4 sm:space-y-6">
-                    
-
-                    {/* Main Content */}
-                    <main className="container mx-auto px-4 sm:px-6 pb-8">
-                        <div className="space-y-6 sm:space-y-8">
-                            {/* Informations générales */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                                    Informations générales
-                                    </CardTitle>
-                                    <CardDescription className="otf">
-                                    Détails du curriculum et informations administratives
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        {/* Colonne de gauche */}
-                                        <div className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <Code className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                            <div className="flex-1">
-                                            <p className="otf font-medium text-gray-900">Code Curriculum</p>
-                                            <p className="otf text-gray-600 mt-0.5">
-                                                {curriculum.curriculum_code}
-                                            </p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="flex items-center gap-3">
-                                            <BookOpen className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                            <div className="flex-1">
-                                            <p className="otf font-medium text-gray-900">Code Programme</p>
-                                            <p className="otf text-gray-600 mt-0.5">
-                                                {curriculum.program_code}
-                                            </p>
-                                            </div>
-                                        </div>
-                                        </div>
-
-                                        {/* Colonne de droite */}
-                                        <div className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <GraduationCap className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                            <div className="flex-1">
-                                            <p className="otf font-medium text-gray-900">Niveau d'études</p>
-                                            <p className="otf text-gray-600 mt-0.5">
-                                                {curriculum.study_level}
-                                            </p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="flex items-center gap-3">
-                                            <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                            <div className="flex-1">
-                                            <p className="otf font-medium text-gray-900">Date de création</p>
-                                            <p className="otf text-gray-600 mt-0.5">
-                                                {formatDateToText(curriculum.created_at)}
-                                            </p>
-                                            </div>
-                                        </div>
-                                        </div>
+            
+            <main className="container mx-auto px-4 sm:px-6 py-6">
+                <div className="space-y-6 sm:space-y-5">
+                    {/* Informations générales */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <FileText className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                            Informations générales
+                            </CardTitle>
+                            <CardDescription className="otf">
+                            Détails du curriculum et informations administratives
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Colonne de gauche */}
+                                <div className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <Code className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                    <div className="flex-1">
+                                    <p className="otf font-medium text-gray-900">Code Curriculum</p>
+                                    <p className="otf text-gray-600 mt-0.5">
+                                        {curriculum.curriculum_code}
+                                    </p>
                                     </div>
-
-                                    {/* Section séparée pour les statistiques */}
-                                    <div className="border-t border-gray-100 mt-6 pt-4">
-                                        <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                            <span className="otf font-semibold text-blue-600">
-                                            {sequenceList.length}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <p className="otf font-medium text-gray-900">Séquences</p>
-                                            <p className="text-sm text-gray-500">Nombre total de séquence</p>
-                                        </div>
-                                        </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-3">
+                                    <BookOpen className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                    <div className="flex-1">
+                                    <p className="otf font-medium text-gray-900">Code Programme</p>
+                                    <p className="otf text-gray-600 mt-0.5">
+                                        {curriculum.program_code}
+                                    </p>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                </div>
 
-                            {/* Séquences de formation */}
-                            <Card>
-                                <CardHeader>
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                        <div>
-                                            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                                                <ListOrdered className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                                                Horaires Académiques
-                                            </CardTitle>
-                                            <CardDescription className="otf mt-1">
-                                                Historique des séquences anuelles associées à ce curriculum
-                                            </CardDescription>
-                                        </div>
-                                        {groupedSchedules.length > 0 && (
-                                            <Button 
-                                                variant="outline" 
-                                                onClick={() => setIsCreateAcademicYearScheduleDialogOpen(true)}
-                                                className="flex items-center gap-2 sm:hidden"
+                                {/* Colonne de droite */}
+                                <div className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <GraduationCap className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                    <div className="flex-1">
+                                    <p className="otf font-medium text-gray-900">Niveau d'études</p>
+                                    <p className="otf text-gray-600 mt-0.5">
+                                        {curriculum.study_level}
+                                    </p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-3">
+                                    <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                    <div className="flex-1">
+                                    <p className="otf font-medium text-gray-900">Date de création</p>
+                                    <p className="otf text-gray-600 mt-0.5">
+                                        {formatDateToText(curriculum.created_at)}
+                                    </p>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+
+                            {/* Section séparée pour les statistiques */}
+                            <div className="border-t border-gray-100 mt-6 pt-4">
+                                <div className="flex items-center gap-3">
+                                <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                                    <span className="otf font-semibold text-blue-600">
+                                    {sequenceList.length}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p className="otf font-medium text-gray-900">Séquences</p>
+                                    <p className="text-sm text-gray-500">Nombre total de séquence</p>
+                                </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Séquences de formation */}
+                    <Card>
+                        <CardHeader className="pb-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <CalendarDays className="h-4 w-4 flex-shrink-0" />
+                                    Horaires Académiques
+                                </CardTitle>
+                                {groupedSchedules.length > 0 && (
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={() => setIsCreateAcademicYearScheduleDialogOpen(true)}
+                                        className="flex items-center gap-1.5"
+                                    >
+                                        <CalendarDays className="h-3.5 w-3.5" />
+                                        Planifier
+                                    </Button>
+                                )}
+                            </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                            {groupedSchedules.length === 0 ? (
+                                <EmptyAcademicSchedules onPlanClick={() => setIsCreateAcademicYearScheduleDialogOpen(true)} />
+                            ) : (
+                                <div className="space-y-2">
+                                    {groupedSchedules.map((schedulesForYear) => {
+                                        const academicYear = schedulesForYear[0];
+                                        
+                                        return (
+                                            <div 
+                                                key={academicYear.academic_year_code} 
+                                                className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
                                             >
-                                                <CalendarDays className="h-4 w-4" />
-                                                Planifier
-                                            </Button>
-                                        )}
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    {groupedSchedules.length === 0 ? (
-                                        <EmptyAcademicSchedules onPlanClick={() => setIsCreateAcademicYearScheduleDialogOpen(true)} />
-                                    ) : (
-                                        <div className="space-y-4">
-                                            {groupedSchedules.map((schedulesForYear) => {
-                                                const academicYear = schedulesForYear[0];
-                                                
-                                                return (
-                                                    <Card 
-                                                        key={academicYear.academic_year_code} 
-                                                        className="border border-gray-200 hover:border-gray-300 transition-colors"
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    <Badge className={getStatusColor(academicYear.academic_year_status)} variant="outline">
+                                                        {academicYear.academic_year_status}
+                                                    </Badge>
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0 flex-1">
+                                                        <span className="font-medium text-gray-900 text-sm truncate">
+                                                            {academicYear.academic_year_name}
+                                                        </span>
+                                                        <span className="text-gray-500 text-xs">
+                                                            ({schedulesForYear.length} séquence{schedulesForYear.length > 1 ? 's' : ''})
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                {academicYear.academic_year_status === "IN_PROGRESS" && (
+                                                    <Button 
+                                                        className="inline-flex items-center gap-2"
+                                                        variant='outline'
+                                                        onClick={() => handlePlanRules(academicYear.academic_year_code)}
                                                     >
-                                                        <CardHeader className="pb-3">
-                                                            <div className="flex justify-between items-start">
-                                                                <div className="flex-1">
-                                                                    <CardTitle className="text-lg font-semibold text-gray-900">
-                                                                        {academicYear.academic_year_name}
-                                                                    </CardTitle>
-                                                                    <CardDescription className="otf text-gray-500 mt-1">
-                                                                        {formatDateToText(academicYear.academic_year_start)} - {formatDateToText(academicYear.academic_year_end)}
-                                                                    </CardDescription>
-                                                                </div>
-                                                                <div className="flex items-center gap-2 ml-4">
-                                                                    <Badge className={getStatusColor(academicYear.academic_year_status)}>
-                                                                        {academicYear.academic_year_status}
-                                                                    </Badge>
-                                                                    {academicYear.academic_year_status === "IN_PROGRESS" && (
-                                                                        <Button 
-                                                                            variant="info"
-                                                                            size="sm"
-                                                                            onClick={() => handlePlanRules(academicYear.academic_year_code)}
-                                                                            className="flex items-center gap-1"
-                                                                        >
-                                                                            <Settings className="h-3 w-3" />
-                                                                            <span className="hidden sm:inline">Règles de calcul</span>
-                                                                            <span className="sm:hidden">Règles</span>
-                                                                        </Button>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </CardHeader>
-
-                                                        <CardContent className="pt-0">
-                                                            <div className="border-t border-gray-100 pt-3">
-                                                                <div className="space-y-1">
-                                                                    {schedulesForYear.map((sequence) => (
-                                                                        <div 
-                                                                            key={uuidv4()} 
-                                                                            className="flex justify-between items-center py-1.5 otf hover:bg-gray-50 rounded px-2 -mx-2 transition-colors"
-                                                                        >
-                                                                            <span className="font-medium text-gray-800">
-                                                                                {sequence.sequence_name}
-                                                                            </span>
-                                                                            <span className="text-gray-500 text-sm sm:otf">
-                                                                                {formatDateToText(sequence.start_date)} - {formatDateToText(sequence.end_date)}
-                                                                            </span>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </main>
+                                                        <Settings className="h-3.5 w-3.5" />
+                                                        <span className="text-xs">Règles</span>
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
+            </main>
+            
+            <DialogCreateAcademicYearSchedule
+                open = {isCreateAcademicYearScheduleDialogOpen}
+                onSave={handlePlanSequences}
+                onOpenChange={setIsCreateAcademicYearScheduleDialogOpen}
+                sequenceList={sequenceList}
+            />
+            
+            {
+                (academicYears && academicYears.length > 0 && curriculum) && (() => {
+                    const selectedAcademicYear = academicYears.find(
+                    (ay) => ay.academic_year_code === currentAcademicYear
+                    );
 
-                <DialogCreateAcademicYearSchedule
-                    open = {isCreateAcademicYearScheduleDialogOpen}
-                    onSave={handlePlanSequences}
-                    onOpenChange={setIsCreateAcademicYearScheduleDialogOpen}
-                    sequenceList={sequenceList}
-                />
-                
-                {
-                    (academicYears && academicYears.length > 0 && curriculum) && (() => {
-                        const selectedAcademicYear = academicYears.find(
-                        (ay) => ay.academic_year_code === currentAcademicYear
-                        );
+                    if (!selectedAcademicYear) return null;
 
-                        if (!selectedAcademicYear) return null;
+                    return (
+                    <DialogCreateValidationRule
+                        academicYear={{
+                        code: selectedAcademicYear.academic_year_code,
+                        name:
+                            selectedAcademicYear.start_date +
+                            " / " +
+                            selectedAcademicYear.end_date,
+                        }}
+                        curriculum={{
+                        name: curriculum.curriculum_name,
+                        code: curriculum.curriculum_code,
+                        }}
+                        onOpenChange={setIsCreateValisationRuleDialogOpen}
+                        onSave={handleCreateValidationRule}
+                        open={isCreateValisationRuleDialogOpen}
+                    />
+                    );
+                })()
+            }
 
-                        return (
-                        <DialogCreateValidationRule
-                            academicYear={{
-                            code: selectedAcademicYear.academic_year_code,
-                            name:
-                                selectedAcademicYear.start_date +
-                                " / " +
-                                selectedAcademicYear.end_date,
-                            }}
-                            curriculum={{
-                            name: curriculum.curriculum_name,
-                            code: curriculum.curriculum_code,
-                            }}
-                            onOpenChange={setIsCreateValisationRuleDialogOpen}
-                            onSave={handleCreateValidationRule}
-                            open={isCreateValisationRuleDialogOpen}
-                        />
-                        );
-                    })()
-                }
-
-            </div>
         </>
     );
 }

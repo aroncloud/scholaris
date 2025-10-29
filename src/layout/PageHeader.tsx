@@ -85,7 +85,7 @@ const PageHeader = ({
                         )}
                         
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-lg shrink-0">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
                                 <Icon className="w-6 h-6 text-white" />
                             </div>
                             

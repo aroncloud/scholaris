@@ -13,14 +13,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ICreateStudent, IListStudent, IGetEnrollmentRequest } from "@/types/staffType";
+import { ICreateStudent, IListStudent, IGetEnrollmentRequest, IUpdateStudentApplication } from "@/types/staffType";
 import { createUser, getUserList, updateUser } from "@/actions/programsAction";
-import { getStudentApplicationList } from "@/actions/studentAction";
+import { getStudentApplicationList, updateStudentApplication } from "@/actions/studentAction";
 import { student_statuses } from "@/constant";
 import { showToast } from "@/components/ui/showToast";
 import ModalStudent from "@/components/modal/ModalStudent";
 import CreateEnrollmentDialog from "@/components/features/admin-students/modals/DialogCreateEnrollmentRequest";
 import { DialogCreateStudent } from "@/components/features/students/modal/DialogCreateStudent";
+import { DialogUpdateEnrollment } from "@/components/features/students/modal/DialogUpdateEnrollment";
 import CurrentStudents from "@/components/features/admin-students/CurrentStudentsTab";
 import Header from "@/components/features/admin-students/HeaderSection";
 import EnrollmentRequests from "@/components/features/admin-students/EnrollmentRequestsTab";
@@ -40,6 +41,8 @@ export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatut, setFilterStatut] = useState("all");
   const [isCreateEnrollmentOpen, setIsCreateEnrollmentOpen] = useState(false);
+  const [isUpdateEnrollmentOpen, setIsUpdateEnrollmentOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<IGetEnrollmentRequest | null>(null);
 
 
   
@@ -102,65 +105,6 @@ export default function StudentsPage() {
         description: result.error || "Erreur lors de la création de l'étudiant",
       });
     }
-    // try {
-    //   if (action === "CREATE") {
-    //     const payload = {
-    //       ...sturentFormData,
-    //     } as ICreateStudent;
-
-    //     const result = await createUser(payload);
-    //     console.log('result-->', result);
-        
-    //     if (result.code === 'success') {
-    //       showToast({
-    //         variant: 'success-solid',
-    //         message: 'Succès',
-    //         description: 'Étudiant créé avec succès',
-    //       });
-    //       await init();
-    //       setIsStudentModalOpen(false);
-    //       setStudentFormData({});
-    //     } else {
-    //       showToast({
-    //         variant: 'error-solid',
-    //         message: 'Erreur',
-    //         description: result.error || "Erreur lors de la création de l'étudiant",
-    //       });
-    //     }
-    //   } else {
-    //     const payload = {
-    //       ...sturentFormData,
-    //     } as ICreateStudent;
-
-    //     const result = await updateUser(payload);
-    //     console.log('result-->', result);
-        
-    //     if (result.code === 'success') {
-    //       showToast({
-    //         variant: 'success-solid',
-    //         message: 'Succès',
-    //         description: 'Étudiant mis à jour avec succès',
-    //       });
-    //       await init();
-    //       setIsStudentModalOpen(false);
-    //       setAction('CREATE');
-    //       setStudentFormData({});
-    //     } else {
-    //       showToast({
-    //         variant: 'error-solid',
-    //         message: 'Erreur',
-    //         description: result.error || "Erreur lors de la mise à jour de l'étudiant",
-    //       });
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.error('Error in handleCreateStudent:', error);
-    //   showToast({
-    //     variant: 'error-solid',
-    //     message: 'Erreur',
-    //     description: 'Une erreur inattendue est survenue',
-    //   });
-    // }
 
     return false
   };
@@ -230,6 +174,33 @@ export default function StudentsPage() {
     loadEnrollmentRequests();
   };
 
+  const handleUpdateEnrollment = (application: IGetEnrollmentRequest) => {
+    console.log('handleUpdateEnrollment.application', application)
+    setSelectedApplication(application);
+    setIsUpdateEnrollmentOpen(true);
+  };
+
+  const handleUpdateApplication = async (data: IUpdateStudentApplication, application_code: string) => {
+    const result = await updateStudentApplication(data, application_code);
+
+    if (result.code === 'success') {
+      showToast({
+        variant: 'success-solid',
+        message: 'Succès',
+        description: 'Demande d\'inscription mise à jour avec succès',
+      });
+      loadEnrollmentRequests();
+      return true;
+    } else {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: result.error || "Erreur lors de la mise à jour de la demande",
+      });
+      return false;
+    }
+  };
+
 
   return (
     <>
@@ -269,6 +240,7 @@ export default function StudentsPage() {
                 setFilterStatut={setFilterStatut}
                 setSearchTerm={setSearchTerm}
                 onCreateEnrollment={handleCreateEnrollment}
+                onUpdateEnrollment={handleUpdateEnrollment}
                 loading={loadingApplicationList}
               />
             </TabsContent>
@@ -324,6 +296,23 @@ export default function StudentsPage() {
           open={isCreateEnrollmentOpen}
           onOpenChange={setIsCreateEnrollmentOpen}
           onSuccess={handleEnrollmentSuccess}
+        />
+
+        {/* Update Enrollment Dialog */}
+        <DialogUpdateEnrollment
+          open={isUpdateEnrollmentOpen}
+          onOpenChange={setIsUpdateEnrollmentOpen}
+          application={selectedApplication ? {
+            application_code: selectedApplication.application_code,
+            curriculum_code: selectedApplication.curriculum_code,
+            first_name: selectedApplication.first_name,
+            last_name: selectedApplication.last_name,
+            email: selectedApplication.email,
+            phone_number: selectedApplication.phone_number,
+            student_number: selectedApplication.application_code,
+            gender: selectedApplication.gender as "MALE" | "FEMALE"
+          } : null}
+          onSave={handleUpdateApplication}
         />
 
       </div>

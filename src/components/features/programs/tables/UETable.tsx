@@ -80,6 +80,7 @@ const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
         description: `L'UE ${ues.find(u => u.course_unit_code === ueCode)?.course_unit_name} a été assignée à l'enseignant ${teacherList.find(t => t.user_code === teacherCode)?.first_name} ${teacherList.find(t => t.user_code === teacherCode)?.last_name}.`,
         position: 'top-center',
       });
+      refresh();
     } else {
       showToast({ 
         variant: "error-solid",
@@ -100,7 +101,6 @@ const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
             <TableHead>UE</TableHead>
             <TableHead>Code</TableHead>
             <TableHead>Heures (CM / TD)</TableHead>
-            <TableHead>Coef.</TableHead>
             <TableHead>Obligatoire</TableHead>
             <TableHead>Coord.</TableHead>
             <TableHead>Statut</TableHead>
@@ -125,14 +125,13 @@ const UETable: React.FC<UETableProps> = ({ ues, compact = true, refresh }) => {
                 </div>
               </TableCell>
 
-              <TableCell className="text-sm">{ue.coefficient}</TableCell>
 
               <TableCell>
                 <Badge variant={ue.is_mandatory === 1 ? "success" : "neutral"} size="sm" label={ue.is_mandatory === 1 ? "Oui" : "Non"} />
               </TableCell>
 
               <TableCell>
-                <Badge variant={ue.is_module_coordinator === 1 ? "success" : "neutral"} size="sm" label={ue.is_module_coordinator === 1 ? "Oui" : "Non"} />
+                <Badge size="sm" label={ ue.teacher ? ue.teacher.first_name + ' ' + ue.teacher.last_name : "N/A"} />
               </TableCell>
 
               <TableCell>
