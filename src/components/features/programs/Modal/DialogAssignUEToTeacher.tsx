@@ -209,7 +209,7 @@ export const DialogAssignUEToTeacher: React.FC<DialogAssignUEToTeacherProps> = (
                     Enseignant actuel: {currentTeacher.first_name} {currentTeacher.last_name}
                   </span>
                   {ue.is_module_coordinator === 1 && (
-                    <Badge variant="warning" size="sm" value="Coordinateur" />
+                    <Badge variant="warning" size="sm" value="Coordinateur" label={'Coordinateur'} />
                   )}
                 </div>
               </div>

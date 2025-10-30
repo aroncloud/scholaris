@@ -401,7 +401,6 @@ export default function EnrollmentDetailPage() {
                 <div className="space-y-6 sm:space-y-5">
                     {/* Informations générales */}
                     <ContentLayout
-                        icon={<FileText className="h-5 w-5 text-gray-500 flex-shrink-0" />}
                         title="Informations générales"
                         description="Détails du curriculum et informations administratives"
                         
@@ -472,7 +471,6 @@ export default function EnrollmentDetailPage() {
 
                     {/* Séquences de formation */}
                     <ContentLayout
-                        icon={<CalendarDays className="h-5 w-5 text-gray-500 flex-shrink-0" />}
                         title="Horaires Académiques"
                         
                         actions={
@@ -533,7 +531,6 @@ export default function EnrollmentDetailPage() {
 
                     {/* Enrolled Students */}
                     <ContentLayout
-                        icon={<Users className="h-5 w-5 text-gray-500 flex-shrink-0" />}
                         title="Étudiants inscrits"
                         description={`Liste des étudiants inscrits pour l'année académique ${selectedAcademicYear}`}
                         

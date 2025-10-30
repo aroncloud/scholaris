@@ -8,6 +8,7 @@ import {
   Download,
   Upload,
   Plus,
+  UserCheck,
 } from "lucide-react";
 
 import TeacherTab from "@/components/features/teachers/TeacherTab";
@@ -15,23 +16,6 @@ import ApplicantTab from "@/components/features/teachers/ApplicationsTab";
 import { useTeacherData } from "@/hooks/feature/teachers/useTeacherData";
 import PageHeader from "@/layout/PageHeader";
 
-const statsData= [
-  {
-    title: "Enseignants actifs",
-    value: 42,
-    description: "Personnel en activité",
-  },
-  {
-    title: "Candidatures",
-    value: 15,
-    description: "En attente de traitement",
-  },
-  {
-    title: "Heures d'enseignement",
-    value: 1250,
-    description: "Total annuel",
-  },
-];
 
 export default function TeachersPage() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -48,6 +32,7 @@ export default function TeachersPage() {
       <PageHeader
         title="Gestion des Enseignants"
         description="Gestion du personnel enseignant et des candidatures"
+        Icon={UserCheck}
       >
         <div className="flex flex-col md:flex-row md:space-x-2 space-y-2 md:space-y-0 w-full md:w-auto">
           <Button className="w-full md:w-auto" variant="outline">
@@ -80,11 +65,15 @@ export default function TeachersPage() {
 
         {/* Main Content */}
         <Tabs defaultValue="enseignants" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="enseignants">
+          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+            <TabsTrigger value="enseignants"
+              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+            >
               Enseignants ({teachers.length})
             </TabsTrigger>
-            <TabsTrigger value="candidatures">
+            <TabsTrigger value="candidatures"
+              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+            >
               Candidatures ({applications.length})
             </TabsTrigger>
           </TabsList>

@@ -9,6 +9,7 @@ import {
   Download,
   Upload,
   Plus,
+  BookOpen,
 } from "lucide-react";
 import { useProgramData } from "@/hooks/feature/programs/useProgramData";
 // import StatCard from "@/components/cards/StatCard";
@@ -57,6 +58,7 @@ export default function ProgramsPage() {
       <PageHeader
         title='Gestion des Programmes Académiques'
         description="Configuration des filières, maquettes et modules d&apos;enseignement"
+        Icon={BookOpen}
       >
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button variant="outline" className="text-sm w-full sm:w-fit">
@@ -99,12 +101,18 @@ export default function ProgramsPage() {
         {/* Main Content */}
         <div className="w-full">
           <Tabs defaultValue="maquettes" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="maquettes">Maquettes pédagogiques</TabsTrigger>
-              <TabsTrigger value="program">
+            <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+              <TabsTrigger value="maquettes"
+                className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+              >Maquettes pédagogiques</TabsTrigger>
+              <TabsTrigger value="program"
+                className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+              >
                 Filières ({programs.length})
               </TabsTrigger>
-              <TabsTrigger value="academic_year">Années académiques</TabsTrigger>
+              <TabsTrigger value="academic_year"
+                className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+              >Années académiques</TabsTrigger>
             </TabsList>
                 {/* Maquettes Tab */}
                 <TabsContent value="maquettes" className="space-y-4">

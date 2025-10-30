@@ -58,8 +58,11 @@ export async function getAbsencesList(payload: IGetAbsencesListRequest) {
       }
     );
 
+    console.log('-->response', response.data)
+
     return { code: "success", error: null, data: response.data };
   } catch (error: unknown) {
+    console.log('-->error', error)
     return actionErrorHandler(error);
   }
 }

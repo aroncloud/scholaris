@@ -47,9 +47,13 @@ export default function UsersPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="users" className="p-6">
-        <TabsList className="flex w-full">
-          <TabsTrigger value="users" className="w-full">Utilisateurs</TabsTrigger>
-          <TabsTrigger value="roles">Rôles et permissions</TabsTrigger>
+        <TabsList className="bg-white rounded-xl border border-slate-200 p-1 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+          <TabsTrigger value="users"
+            className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+          >Utilisateurs</TabsTrigger>
+          <TabsTrigger value="roles"
+            className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+          >Rôles et permissions</TabsTrigger>
         </TabsList>
         <TabsContents>
           <TabsContent value="users" className="space-y-4">

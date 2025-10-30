@@ -31,7 +31,8 @@ import {
   INumericScaleResult,
   IMultipleChoiceResult,
   IQualitativeResult
-} from '@/types/feedbackTypes'
+} from '@/types/feedbackTypes';
+import StatCard from '@/components/cards/StatCard'
 
 // Status Badge Component
 const StatusBadge = ({ status }: { status: ICampaignDetails['status'] }) => {
@@ -474,6 +475,7 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
         title="Résumé de la campagne"
         description={`Analyse détaillée de la campagne • ${summary.total_responses} réponses collectées`}
         backUrl='/dashboard/admin/feedback-system'
+        Icon={MessageSquare}
       >
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" className="flex-shrink-0">
@@ -490,76 +492,41 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
 
       <div className="px-4 sm:px-6 py-6 space-y-6">
         {/* Campaign Info Header */}
-        <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-200 overflow-hidden">
+        <Card className="border-blue-200 overflow-hidden">
           <CardContent className="">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <StatusBadge status={campaign_details.status} />
-              <div className="text-left sm:text-right">
+              <div className="text-right sm:text-left">
                 <p className="text-xs sm:text-sm text-slate-600 mb-1">Titre de la campagne</p>
-                <p className="text-xs sm:text-sm font-mono font-semibold text-slate-900 break-all">{campaign_details.title}</p>
+                <p className="text-xs sm:text-lg font-mono font-semibold text-slate-900 break-all">{campaign_details.title}</p>
               </div>
+              <StatusBadge status={campaign_details.status} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Calendar className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-slate-600 font-medium">Début</p>
-                    <p className="text-sm font-bold text-slate-900 truncate">
-                      {new Date(campaign_details.start_date).toLocaleDateString('fr-FR', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
 
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-slate-600 font-medium">Fin</p>
-                    <p className="text-sm font-bold text-slate-900 truncate">
-                      {new Date(campaign_details.end_date).toLocaleDateString('fr-FR', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Users className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-slate-600 font-medium">Réponses</p>
-                    <p className="text-sm font-bold text-slate-900">{summary.total_responses}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Target className="w-5 h-5 text-yellow-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-slate-600 font-medium">Niveau</p>
-                    <p className="text-sm font-bold text-slate-900 truncate">{campaign_details.target_level_code}</p>
-                  </div>
-                </div>
-              </div>
+              <StatCard title="Début"
+                value={new Date(campaign_details.start_date).toLocaleDateString('fr-FR', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric'
+                })}
+               icon={Calendar}
+               variant="info"
+               compact
+              />
+              <StatCard 
+                title="Fin" 
+                value={new Date(campaign_details.end_date).toLocaleDateString('fr-FR', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric'
+                })}
+                icon={Clock} 
+                variant="purple" 
+                compact
+              />
+              <StatCard title="Réponses" value={summary.total_responses} icon={Users} variant="success" compact main/>
+              <StatCard title="Niveau" value={campaign_details.target_level_code} icon={Target} variant="neutral" compact />
             </div>
           </CardContent>
         </Card>
@@ -567,53 +534,26 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
         {/* Stats Overview - Visible seulement si des résultats existent */}
         {hasAnyResults && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-blue-700 mb-1">Questions notées</p>
-                    <p className="text-3xl font-bold text-blue-900">
-                      {quantitative_results.numeric_scale.length}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Star className="w-6 h-6 text-blue-700" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              title="Questions notées"
+              value={quantitative_results.numeric_scale.length}
+              icon={Star}
+              variant="info"
+            />
 
-            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-purple-700 mb-1">Choix multiples</p>
-                    <p className="text-3xl font-bold text-purple-900">
-                      {quantitative_results.multiple_choice.length}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-purple-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-6 h-6 text-purple-700" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              title="Choix multiples"
+              value={quantitative_results.multiple_choice.length}
+              icon={CheckCircle2}
+              variant="purple"
+            />
 
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-green-700 mb-1">Avis textuels</p>
-                    <p className="text-3xl font-bold text-green-900">
-                      {qualitative_results.length}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MessageSquare className="w-6 h-6 text-green-700" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              title="Avis textuels"
+              value={qualitative_results.length}
+              icon={MessageSquare}
+              variant="success"
+            />
           </div>
         )}
 

@@ -26,6 +26,8 @@ import CurrentStudents from "@/components/features/admin-students/CurrentStudent
 import Header from "@/components/features/admin-students/HeaderSection";
 import EnrollmentRequests from "@/components/features/admin-students/EnrollmentRequestsTab";
 import ApplicationImportWizard from "@/components/features/students/ApplicationImportWizard";
+import PageHeader from "@/layout/PageHeader";
+import { GraduationCap } from "lucide-react";
 
 
 export default function StudentsPage() {
@@ -206,14 +208,24 @@ export default function StudentsPage() {
     <>
       
       {/* Header */}
-      <Header />
-      <div className="space-y-6 p-6">
+      <PageHeader
+        title='Gestion des Étudiants'
+        description='Gestion des inscriptions, étudiants actuels et diplômés'
+        Icon={GraduationCap}
+      >
+      </PageHeader>
+
+      <div className="space-y-6 p-2 md:px-6">
         <Tabs defaultValue="etudiants" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="etudiants">
+          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+            <TabsTrigger value="etudiants"
+              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+            >
               Étudiants actuels ({studentList.length})
             </TabsTrigger>
-            <TabsTrigger value="inscriptions">
+            <TabsTrigger value="inscriptions"
+              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+            >
               Demandes d'inscription ({enrollmentRequests.length})
             </TabsTrigger>
           </TabsList>

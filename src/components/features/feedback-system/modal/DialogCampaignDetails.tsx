@@ -240,19 +240,19 @@ export function DialogCampaignDetails({
             <Button
               onClick={() => onOpenChange(false)}
               variant="secondary"
-              className="px-6 py-2.5"
+              className="px-6 py-1.5"
             >
               Fermer
             </Button>
             <div className="flex items-center space-x-3">
               <Button
                 variant="secondary"
-                className="px-6 py-2.5"
+                className="px-6 py-1.5"
               >
                 Télécharger le rapport
               </Button>
               <Button
-                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+                className="px-6 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
               >
                 Exporter les données
               </Button>

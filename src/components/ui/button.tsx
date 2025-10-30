@@ -22,7 +22,7 @@ const buttonVariants = cva(
 
         
         info:
-          "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 active:from-blue-800 active:to-blue-700 transition-all duration-200 dark:from-blue-700 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-500 dark:active:from-blue-500 dark:active:to-blue-400 shadow-md hover:shadow-lg rounded-lg",
+          "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 transition-all duration-200 dark:from-blue-700 dark:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 dark:active:from-blue-500 dark:active:to-indigo-500 shadow-md hover:shadow-lg rounded-lg",
 
         danger:
           "bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 active:from-red-800 active:to-red-700 transition-all duration-200 dark:from-red-700 dark:to-red-600 dark:hover:from-red-600 dark:hover:to-red-500 dark:active:from-red-500 dark:active:to-red-400 shadow-md hover:shadow-lg rounded-lg",

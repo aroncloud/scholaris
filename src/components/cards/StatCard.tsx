@@ -10,6 +10,7 @@ interface StatCardProps {
   icon?: LucideIcon;
   variant?: StatCardVariant;
   main?: boolean;
+  compact?: boolean;
   children?: React.ReactNode;
   className?: string;
 }
@@ -22,6 +23,16 @@ interface VariantStyle {
   iconColor: string;
   circle: string;
   valueColor: string;
+}
+
+// Type pour les styles compacts
+interface CompactVariantStyle {
+  bg: string;
+  iconBg: string;
+  iconColor: string;
+  titleColor: string;
+  valueColor: string;
+  border: string;
 }
 
 // Typage explicite de variantStyles
@@ -136,6 +147,58 @@ const variantStyles: Record<StatCardVariant, { main: VariantStyle; secondary: Va
   },
 };
 
+// Styles pour le mode compact
+const compactVariantStyles: Record<StatCardVariant, CompactVariantStyle> = {
+  success: {
+    bg: 'bg-white/80 backdrop-blur-sm',
+    iconBg: 'bg-green-100',
+    iconColor: 'text-green-600',
+    titleColor: 'text-slate-600',
+    valueColor: 'text-slate-900',
+    border: 'border-green-200',
+  },
+  danger: {
+    bg: 'bg-white/80 backdrop-blur-sm',
+    iconBg: 'bg-red-100',
+    iconColor: 'text-red-600',
+    titleColor: 'text-slate-600',
+    valueColor: 'text-slate-900',
+    border: 'border-red-200',
+  },
+  warning: {
+    bg: 'bg-white/80 backdrop-blur-sm',
+    iconBg: 'bg-yellow-100',
+    iconColor: 'text-yellow-600',
+    titleColor: 'text-slate-600',
+    valueColor: 'text-slate-900',
+    border: 'border-yellow-200',
+  },
+  info: {
+    bg: 'bg-white/80 backdrop-blur-sm',
+    iconBg: 'bg-blue-100',
+    iconColor: 'text-blue-600',
+    titleColor: 'text-slate-600',
+    valueColor: 'text-slate-900',
+    border: 'border-blue-200',
+  },
+  neutral: {
+    bg: 'bg-white/80 backdrop-blur-sm',
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+    titleColor: 'text-slate-600',
+    valueColor: 'text-slate-900',
+    border: 'border-gray-200',
+  },
+  purple: {
+    bg: 'bg-white/80 backdrop-blur-sm',
+    iconBg: 'bg-purple-100',
+    iconColor: 'text-purple-600',
+    titleColor: 'text-slate-600',
+    valueColor: 'text-slate-900',
+    border: 'border-purple-200',
+  },
+};
+
 // Fonction pour obtenir une variante aléatoire
 const getRandomVariant = (): StatCardVariant => {
   const variants: StatCardVariant[] = ['success', 'danger', 'warning', 'info', 'neutral', 'purple'];
@@ -148,11 +211,37 @@ export const StatCard: React.FC<StatCardProps> = ({
   icon: Icon = TrendingUp,
   variant,
   main = false,
+  compact = false,
   children,
   className = '',
 }) => {
   const selectedVariant = useMemo(() => variant ?? getRandomVariant(), [variant]);
-  
+
+  // Mode compact
+  if (compact) {
+    const compactStyles = compactVariantStyles[selectedVariant];
+    
+    return (
+      <div className={`${compactStyles.bg} rounded-lg p-4 border ${compactStyles.border} ${className}`}>
+        <div className="flex items-center space-x-3">
+          <div className={`w-10 h-10 ${compactStyles.iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
+            <Icon className={`w-5 h-5 ${compactStyles.iconColor}`} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className={`text-xs ${compactStyles.titleColor} font-medium`}>{title}</p>
+            <p className={`text-sm font-bold ${compactStyles.valueColor} truncate`}>{value}</p>
+            {children && (
+              <div className="text-xs text-slate-500 mt-0.5">
+                {children}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mode normal
   const styles = main ? variantStyles[selectedVariant].main : variantStyles[selectedVariant].secondary;
   const circleSize = main ? 'w-32 h-32 -mr-16 -mt-16' : 'w-20 h-20 -mr-10 -mt-10';
 

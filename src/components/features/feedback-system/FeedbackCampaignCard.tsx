@@ -33,7 +33,7 @@ export function FeedbackCampaignCard({ campaign, onViewDetails }: FeedbackCampai
   return (
     <Card className="bg-white rounded-xl border border-slate-200 hover:border-blue-300 transition-all duration-200 hover:shadow-xl overflow-hidden">
       <CardContent className="p-0">
-        <div className="p-6 pb-0">
+        <div className=" pb-0">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-2">
@@ -88,16 +88,19 @@ export function FeedbackCampaignCard({ campaign, onViewDetails }: FeedbackCampai
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 p-6 pt-4 border-t border-slate-100">
+        <div className="flex items-center space-x-2 pt-4 border-t border-slate-100">
           <Button
             onClick={() => onViewDetails(campaign)}
-            className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 font-medium shadow-lg shadow-blue-500/30"
+            variant={'info'}
+            className='w-full'
+            size={'lg'}
           >
             <BarChart3 className="w-4 h-4 mr-2" />
             Voir les resultats
           </Button>
           {campaign.status === 'active' && (
-            <Button variant="secondary" className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all duration-200 font-medium">
+            <Button variant="outline" className='w-full'
+            size={'lg'}>
               Envoyer rappel
             </Button>
           )}

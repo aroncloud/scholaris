@@ -165,20 +165,22 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                                 
                                 {/* Carte justification */}
                                 <div className="space-y-3 rounded-lg border bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20 p-4 shadow-sm">
+                                    {justification.justification?.submitted_at && 
                                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                         <Clock className="h-3 w-3" />
-                                        Soumise le {formatDateToText(justification.justification.submitted_at)}
+                                        Soumise le {formatDateToText(justification.justification?.submitted_at)}
                                     </div>
+                                    }
                                     <div className="relative">
                                         <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary to-primary/30 rounded-full" />
                                         <blockquote className="pl-3 text-sm text-foreground/90 leading-relaxed">
-                                            {justification.justification.reason}
+                                            {justification.justification?.reason}
                                         </blockquote>
                                     </div>
                                 </div>
                                 
                                 {/* Documents */}
-                                {justification.justification.documents.length > 0 && (
+                                {justification.justification?.documents && justification.justification.documents?.length > 0 && (
                                     <div className="space-y-2.5">
                                         <div className="flex items-center gap-2">
                                             <Paperclip className="h-3.5 w-3.5 text-primary" />

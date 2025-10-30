@@ -222,7 +222,7 @@ export function DialogStudentFeedback({
                 onClick={handlePrevious}
                 disabled={currentQuestionIndex === 0 || isSubmitting}
                 variant="secondary"
-                className="px-6 py-2.5 text-slate-700 hover:bg-white border border-slate-300 rounded-lg transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-1.5 text-slate-700 hover:bg-white border border-slate-300 rounded-lg transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Précédent
@@ -234,7 +234,7 @@ export function DialogStudentFeedback({
                   onClick={handleClose}
                   disabled={isSubmitting}
                   variant="secondary"
-                  className="px-6 py-2.5 text-slate-700 hover:bg-white border border-slate-300 rounded-lg transition-all duration-200 font-medium"
+                  className="px-6 py-1.5 text-slate-700 hover:bg-white border border-slate-300 rounded-lg transition-all duration-200 font-medium"
                 >
                   Annuler
                 </Button>
@@ -243,7 +243,7 @@ export function DialogStudentFeedback({
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg shadow-blue-500/30 font-medium flex items-center space-x-2"
+                    className="px-6 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg shadow-blue-500/30 font-medium flex items-center space-x-2"
                   >
                     <Send className="w-4 h-4" />
                     <span>{isSubmitting ? 'Envoi...' : 'Soumettre'}</span>
@@ -253,7 +253,7 @@ export function DialogStudentFeedback({
                     type="button"
                     onClick={handleNext}
                     disabled={isSubmitting}
-                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg shadow-blue-500/30 font-medium flex items-center space-x-2"
+                    className="px-6 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg shadow-blue-500/30 font-medium flex items-center space-x-2"
                   >
                     <span>Suivant</span>
                     <ChevronRight className="w-4 h-4" />

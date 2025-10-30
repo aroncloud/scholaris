@@ -38,7 +38,7 @@ export function CampaignsTabContent({
       title="Campagnes de feedback"
       description="Planifiez et suivez vos campagnes d'evaluation"
       actions={
-        <Button onClick={onCreateNew} className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg shadow-blue-500/30 font-medium">
+        <Button onClick={onCreateNew} variant='info'>
           <Plus className="w-5 h-5 mr-2" />
           Nouvelle campagne
         </Button>
@@ -51,7 +51,7 @@ export function CampaignsTabContent({
           </div>
           <h3 className="text-2xl font-bold text-slate-900 mb-2">Aucune campagne</h3>
           <p className="text-slate-500 mb-6">Commencez par creer votre premiere campagne de feedback</p>
-          <Button onClick={onCreateNew} className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg shadow-blue-500/30 font-medium">
+          <Button onClick={onCreateNew} variant='info'>
             <Plus className="w-5 h-5 mr-2" />
             Nouvelle campagne
           </Button>

@@ -4,7 +4,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { ChevronDownIcon, HorizontaLDots } from "../icons/index";
-import {  BookOpen, GraduationCap, LayoutDashboard, Users, UserSquare, Calendar, Award, DollarSign, ClipboardList } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  BookOpen,
+  GraduationCap,
+  Calendar,
+  Award,
+  DollarSign,
+  MessageSquare,
+  CalendarCheck,
+  ClipboardCheck,
+  FileText,
+  UserCircle,
+  ClipboardX,
+  UserCheck,
+  FileSpreadsheet,
+} from 'lucide-react';
 import { useMemo } from "react";
 import { useUserStore } from "@/store/useAuthStore";
 
@@ -56,30 +72,31 @@ const navItems: NavItem[] = [
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
   },
   {
-    icon: <UserSquare className="w-5 h-5" />,
+    icon: <GraduationCap className="w-5 h-5" />,
+    name: "Etudiants",
+    path: "/dashboard/admin/students",
+    authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
+  },
+  {
+    icon: <UserCheck className="w-5 h-5" />,
     name: "Enseignants",
     path: "/dashboard/admin/teachers",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC", "DEPT_HEAD"],
   },
   {
-    icon: <UserSquare className="w-5 h-5" />,
+    icon: <MessageSquare className="w-5 h-5" />,
     name: "Feedback System",
     path: "/dashboard/admin/feedback-system",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC", "DEPT_HEAD"],
   },
   {
-    icon: <UserSquare className="w-5 h-5" />,
+    icon: <FileText className="w-5 h-5" />,
     name: "Feedback",
     path: "/dashboard/student/feedback",
     authorizedRoles: ["STUDENT"],
   },
   {
-    icon: <GraduationCap className="w-5 h-5" />,
-    name: "Etudiants",
-    path: "/dashboard/admin/students",
-    authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
-  },{
-    icon: <BookOpen className="w-5 h-5" />,
+    icon: <ClipboardX className="w-5 h-5" />,
     name: "Absences",
     path: "/dashboard/admin/absences",
     authorizedRoles: ["ADMIN_SUPER", "ADMIN_ACADEMIC"],
@@ -107,7 +124,7 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <Award className="w-5 h-5" />,
+    icon: <ClipboardCheck className="w-5 h-5" />,
     name: "Gestion des notes",
     path: "/dashboard/teacher/grade-management",
     authorizedRoles: ["TEACHER"],
@@ -124,18 +141,8 @@ const navItems: NavItem[] = [
     authorizedRoles: ["ADMIN_SUPER", "FINANCE"],
     subItems: [
       {
-        name: "Tableau de bord Financier",
-        path: "/dashboard/admin/financial-dashboard",
-        authorizedRoles: ["ADMIN_SUPER", "FINANCE"],
-      },
-      {
         name: "Gestion des Paiements",
         path: "/dashboard/admin/payment-management",
-        authorizedRoles: ["ADMIN_SUPER", "FINANCE"],
-      },
-      {
-        name: "Transactions Diverses",
-        path: "/dashboard/admin/transactions",
         authorizedRoles: ["ADMIN_SUPER", "FINANCE"],
       },
       {
@@ -146,19 +153,19 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <ClipboardList className="w-5 h-5" />,
+    icon: <FileSpreadsheet className="w-5 h-5" />,
     name: "Notes",
     path: "/dashboard/student/grades",
     authorizedRoles: ["STUDENT"],
   },
   {
-    icon: <ClipboardList className="w-5 h-5" />,
+    icon: <UserCircle className="w-5 h-5" />,
     name: "Profile",
     path: "/dashboard/student/profile",
     authorizedRoles: ["STUDENT"],
   },
   {
-    icon: <ClipboardList className="w-5 h-5" />,
+    icon: <CalendarCheck className="w-5 h-5" />,
     name: "Mes Absences",
     path: "/dashboard/student/my-absences",
     authorizedRoles: ["STUDENT"],
