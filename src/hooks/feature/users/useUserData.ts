@@ -3,14 +3,15 @@
 
 import { useState, useCallback } from "react";
 import {
-  createUser,
   deactivateUser,
   deleteUser,
   getUserDetail,
   getUserList,
+  hireExistingStaff,
   updateUser,
 } from "@/actions/userAction";
-import { ICreateUser, IGetUserDetail, IUpdateUserForm, IGetUser } from "@/types/staffType";
+import { IGetUserDetail, IUpdateUserForm, IGetUser } from "@/types/staffType";
+import { IHireExistingStaff } from "@/types/userType";
 
 export type OperationResult<T = void> = {
   success: boolean;
@@ -70,9 +71,9 @@ export function useUserData() {
   );
   
   const handleCreateUser = useCallback(
-    async (payload: ICreateUser): Promise<OperationResult> => {
+    async (payload: IHireExistingStaff): Promise<OperationResult> => {
       setIsProcessing(true);
-      const result = await createUser(payload);
+      const result = await hireExistingStaff(payload);
       setIsProcessing(false);
     
       

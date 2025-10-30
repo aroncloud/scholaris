@@ -148,7 +148,7 @@ const navItems: NavItem[] = [
       {
         name: "Frais universitaires",
         path: "/dashboard/admin/payment-setup",
-        authorizedRoles: ["ADMIN_SUPER", "ADMIN_HR", "ADMIN_ACADEMIC", "TEACHER"],
+        authorizedRoles: ["ADMIN_SUPER", "ADMIN_HR", "ADMIN_ACADEMIC", "TEACHER", "FINANCE"],
       },
     ],
   },

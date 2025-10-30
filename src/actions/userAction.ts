@@ -5,6 +5,7 @@ import { verifySession } from "@/lib/session";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
 import { ICreateUser, IUpdateUserForm } from "@/types/staffType";
+import { IHireExistingStaff } from "@/types/userType";
 
 
 
@@ -286,6 +287,22 @@ export async function createUser(user: ICreateUser) {
   }
 }
 
+export async function hireExistingStaff(payload: IHireExistingStaff) {
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.post(
+      `${process.env.AIM_WORKER_ENDPOINT}/api/staff/hire`,
+      {...payload, staff_number: "1234"},
+      { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+    );
+
+    return { code: "success", error: null, data: response.data };
+  } catch (error: unknown) {
+    return actionErrorHandler(error);
+  }
+}
 
 export async function getUserList(limit = 1000, offset = 0) {
   try {

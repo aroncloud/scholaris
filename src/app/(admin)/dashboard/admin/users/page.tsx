@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from "react";
 import { UserPlus, Upload, Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -8,16 +9,43 @@ import { Tabs, TabsContent, TabsContents, TabsList, TabsTrigger } from '@/compon
 import UserSection from "@/components/features/users/UserSection";
 import RoleAndPermission from "@/components/features/users/RoleAndPermission";
 import { useRoleData } from "@/hooks/feature/users/usePermissionData";
+import { useUserData } from "@/hooks/feature/users/useUserData";
 import PageHeader from "@/layout/PageHeader";
+import { DialogCreateUser } from "@/components/features/users/Modal/DialogCreateUser";
+import { showToast } from "@/components/ui/showToast";
+import { IHireExistingStaff } from "@/types/userType";
 
 // Component
 export default function UsersPage() {
   const { loadingRole, roles } = useRoleData()
+  const { handleCreateUser } = useUserData()
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const pageTitle = "Gestion des utilisateurs";
   const pageDescription = "Gérez les utilisateurs, rôles et permissions du système";
 
+  const handleSaveUser = async (userData: IHireExistingStaff): Promise<boolean> => {
+    const result = await handleCreateUser(userData);
 
-  
+    if (result.success) {
+      showToast({
+        variant: "success-solid",
+        message: 'Utilisateur créé',
+        description: 'L\'utilisateur a été créé avec succès.',
+        position: 'top-center',
+      });
+      return true;
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: 'Erreur',
+        description: result.error || 'Une erreur est survenue lors de la création de l\'utilisateur.',
+        position: 'top-center',
+      });
+      return false;
+    }
+  };
+
+
 
 
 
@@ -37,8 +65,7 @@ export default function UsersPage() {
           </Button>
           <Button
             variant="info"
-            onClick={() => {
-            }}
+            onClick={() => setCreateDialogOpen(true)}
           >
             <UserPlus className="h-4 w-4 mr-2" /> Nouvel utilisateur
           </Button>
@@ -65,7 +92,13 @@ export default function UsersPage() {
           </TabsContent>
         </TabsContents>
       </Tabs>
-    
+
+      {/* Create User Dialog */}
+      <DialogCreateUser
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSave={handleSaveUser}
+      />
     </div>
   );
 }

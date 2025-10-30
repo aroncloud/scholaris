@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { gender, marital_statuses } from "@/constant";
+
 // Interface pour les types de relation
 export interface IRelative {
   relationship_type_code: string;
@@ -245,4 +248,40 @@ export interface IGetEnrolledStudent {
   gender: 'MALE' | 'FEMALE' | string; // selon les valeurs possibles dans ton système
   student_number: string;
   inscription_paid: boolean;
+}
+
+
+export interface IHireExistingStaff {
+  password_plaintext: string;       // mot de passe en clair (gérer avec prudence)
+  email: string;
+  other_email?: string | null;
+
+  first_name: string;
+  last_name: string;
+  gender?: gender;
+  phone_number: string;
+  other_phone?: string | null;
+
+  job_title: string;
+  department?: string | null;
+  hiring_date: string; 
+  staff_number: string;             // ISO date string, ex: "2023-08-15"
+
+  salary?: number | null;
+
+  country?: string | null;
+  city?: string | null;
+  address_details?: string | null;
+
+  avatar_url?: string | null;
+
+  place_of_birth?: string | null;
+  date_of_birth?: string | null;    // ISO date string
+
+  ethnicity_code?: string | null;
+  marital_status_code?: marital_statuses | string | null;
+
+  cni_number?: string | null;
+  cni_issue_date?: string | null;   // ISO date string
+  cni_issue_location?: string | null;
 }

@@ -8,6 +8,7 @@ const routeRoles: Record<string, string[]> = {
   'TEACHER': ['/dashboard/teacher', '/dashboard/support', '/dashboard/settings', '/dashboard/profile', '/dashboard/images'],
   'ADMIN_SUPER': ['/dashboard/admin', '/dashboard/settings', '/dashboard/profile', '/dashboard/images', '/feedback-system'],
   'ADMIN_ACADEMIC': ['/dashboard/admin', '/dashboard/settings', '/dashboard/profile', '/dashboard/images', '/dashboard/feedback-system'],
+  'FINANCE': ['/dashboard/admin', '/dashboard/settings', '/dashboard/profile', '/dashboard/images', '/dashboard/feedback-system'],
 };
 
 const publicRoutes = [
