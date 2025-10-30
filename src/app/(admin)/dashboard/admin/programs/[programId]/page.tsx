@@ -548,9 +548,9 @@ export default function EnrollmentDetailPage() {
                                             students={enrolledStudents}
                                             curriculumName={curriculum?.curriculum_name || ''}
                                             academicYear={selectedAcademicYear || ''}
-                                            institutionName="Institut de Formation du Personnel Sanitaire"
+                                            institutionName="Ecole privée de formation des professionnels de la santé de meiganga"
                                             ministryName="Ministère de la Santé Publique"
-                                            hymn="Paix - Travail - Patrie"
+                                            hymn="Le travail est la clé du succès"
                                             // logoUrl="/path/to/institution-logo.png"
                                             // ministryLogoUrl="/path/to/ministry-logo.png"
                                         />

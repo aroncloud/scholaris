@@ -320,6 +320,9 @@ export const EnrolledStudentsPDF: React.FC<EnrolledStudentsPDFProps> = ({
             {ministryLogoUrl && <Image src={ministryLogoUrl} style={styles.logo} />}
             <Text style={styles.institutionName}>{ministryName}</Text>
             <Text style={styles.institutionSubtitle}>République du Cameroun</Text>
+            <Text style={[styles.institutionSubtitle, { marginTop: 4, fontStyle: 'italic' }]}>
+                Paix - Travail - Patrie
+            </Text>
           </View>
         </View>
 
