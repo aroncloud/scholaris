@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import {
   Card,
   CardContent,
@@ -43,6 +44,8 @@ import ContentLayout from "@/layout/ContentLayout";
 import { getCurriculumnEnrollments } from "@/actions/studentAction";
 import { IGetEnrolledStudent } from "@/types/userType";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
+import { Avatar } from "@/components/custom-ui/Avatar";
+import { EnrolledStudentsPDF } from "@/components/pdf/Enrolledstudentspdf";
 
 // Composant de chargement
 const LoadingCard = () => (
@@ -138,19 +141,23 @@ export default function EnrollmentDetailPage() {
     // Table columns for enrolled students
     const enrolledStudentsColumns = useMemo<TableColumn<IGetEnrolledStudent>[]>(() => [
         {
-            key: 'student_number',
-            label: 'Matricule',
+            key: "first_name",
+            label: "Étudiant",
             priority: 'high',
-        },
-        {
-            key: 'last_name',
-            label: 'Nom',
-            priority: 'high',
-        },
-        {
-            key: 'first_name',
-            label: 'Prénom',
-            priority: 'high',
+            render: (_, data) => (
+            <div className="flex items-center gap-3">
+                <Avatar
+                fallback={`${data.first_name} ${data.last_name}`}
+                variant={"info"}
+                />
+                <div>
+                <div className="font-semibold text-gray-900">
+                    {data.first_name} {data.last_name}
+                </div>
+                <div className="text-sm text-gray-500">{data.student_number}</div>
+                </div>
+            </div>
+            ),
         },
         {
             key: 'gender',
@@ -533,7 +540,37 @@ export default function EnrollmentDetailPage() {
                     <ContentLayout
                         title="Étudiants inscrits"
                         description={`Liste des étudiants inscrits pour l'année académique ${selectedAcademicYear}`}
-                        
+                        actions={
+                            enrolledStudents.length > 0 && (
+                                <PDFDownloadLink
+                                    document={
+                                        <EnrolledStudentsPDF
+                                            students={enrolledStudents}
+                                            curriculumName={curriculum?.curriculum_name || ''}
+                                            academicYear={selectedAcademicYear || ''}
+                                            institutionName="Institut de Formation du Personnel Sanitaire"
+                                            ministryName="Ministère de la Santé Publique"
+                                            hymn="Paix - Travail - Patrie"
+                                            // logoUrl="/path/to/institution-logo.png"
+                                            // ministryLogoUrl="/path/to/ministry-logo.png"
+                                        />
+                                    }
+                                    fileName={`Liste_Etudiants_${curriculum?.curriculum_code}_${selectedAcademicYear}.pdf`}
+                                >
+                                    {({ loading }) => (
+                                        <Button
+                                            variant="info"
+                                            size="sm"
+                                            disabled={loading}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <FileText className="h-4 w-4" />
+                                            {loading ? 'Génération...' : 'Exporter PDF'}
+                                        </Button>
+                                    )}
+                                </PDFDownloadLink>
+                            )
+                        }
                     >
                         <ResponsiveTable
                             columns={enrolledStudentsColumns}
