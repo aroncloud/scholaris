@@ -78,15 +78,17 @@ export function DialogCreateClassroom({
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Créer une nouvelle salle</DialogTitle>
-          <DialogDescription>
-            Remplissez les informations de la salle de classe
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="md:min-w-xl lg:min-w-2xl max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <div className="bg-slate-50 border-b shrink-0 p-4">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Créer une nouvelle salle</DialogTitle>
+            <DialogDescription>
+              Remplissez les informations de la salle de classe
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 p-4 md:p-6">
           <div className="space-y-1">
             <Label htmlFor="resource_name">Nom de la salle <span className="text-red-600">*</span></Label>
             <Input
@@ -140,13 +142,12 @@ export function DialogCreateClassroom({
             {errors.is_available && <p className="text-red-600 text-sm">{errors.is_available}</p>}
           </div>
         </div>
-
-        <DialogFooter>
+        <DialogFooter className="border-t bg-slate-50 px-6 py-4 shrink-0 flex gap-3">
           <Button variant="outline" onClick={handleCancel} disabled={isSubmitting}>
             Annuler
           </Button>
-          <Button onClick={handleSave} disabled={isSubmitting}>
-            {isSubmitting ? "Création..." : "Créer la salle"}
+          <Button onClick={handleSave} disabled={isSubmitting} variant={"info"}>
+            {isSubmitting ? "Création..." : "Créer la ressource"}
           </Button>
         </DialogFooter>
       </DialogContent>

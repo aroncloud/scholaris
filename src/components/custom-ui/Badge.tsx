@@ -37,14 +37,14 @@ const getVariantFromValue = (value: string): BadgeVariant => {
   // Statuts de succès/actifs (vert)
   if ([
     'APPROVED', 'ACTIVE', 'ENROLLED', 'TERMINATED', 'PAID', 
-    'ACTIF', 'IN_PROGRESS', 'JUSTIFIED'
+    'ACTIF', 'IN_PROGRESS', 'JUSTIFIED',
   ].includes(upperValue)) {
     return 'success';
   }
   
   // Statuts en attente (jaune)
   if ([
-    'PENDING', 'PENDING_APPROVAL', 'EN_ATTENTE', 'PENDING_REVIEW'
+    'PENDING', 'PENDING_APPROVAL', 'EN_ATTENTE', 'PENDING_REVIEW', 'READY_FOR_GRADING'
   ].includes(upperValue)) {
     return 'yellow';
   }

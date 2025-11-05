@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Search, CheckCircle2, Clock, Users, DollarSign, MoreVertical } from "lucide-react";
+import { Download, Search, CheckCircle2, Clock, Users, DollarSign, MoreVertical, Edit, DollarSignIcon } from "lucide-react";
 import ContentLayout from "@/layout/ContentLayout";
 import StatCard from "@/components/cards/StatCard";
 import { Combobox } from "@/components/ui/Combobox";
@@ -102,12 +102,13 @@ export default function ProgramsTabContent({
     {
       key: "enrollment.first_name",
       label: "Étudiant",
-      priority: 'high',
+      priority: 'medium',
       render: (_, data) => (
         <div className="flex items-center gap-3">
           <Avatar
             fallback={`${data.enrollment.first_name} ${data.enrollment.last_name}`}
             variant={data.isPaidOff ? 'success' : data.total_paid === 0 ? 'danger' : 'warning'}
+            className="hidden md:flex"
           />
           <div>
             <div className="font-semibold text-gray-900">
@@ -121,7 +122,7 @@ export default function ProgramsTabContent({
     {
       key: "total_due",
       label: "Total",
-      priority: 'high',
+      priority: 'medium',
       render: (_, data) => (
         <span>
           <span className="text-lg font-bold">{data.total_due}</span>{" "}
@@ -132,7 +133,7 @@ export default function ProgramsTabContent({
     {
       key: "total_paid",
       label: "Perçu",
-      priority: 'high',
+      priority: 'medium',
       render: (_, data) => (
         <span>
           <span className="text-lg font-bold">{data.total_paid}</span>{" "}
@@ -143,7 +144,7 @@ export default function ProgramsTabContent({
     {
       key: "remaining_balance",
       label: "Reste",
-      priority: 'high',
+      priority: 'medium',
       render: (_, data) => (
         <span>
           <span className="text-lg font-bold">{data.remaining_balance}</span>{" "}
@@ -154,7 +155,7 @@ export default function ProgramsTabContent({
     {
       key: "isPaidOff",
       label: "Statut",
-      priority: 'medium',
+      priority: 'low',
       render: (_, data) => (
         <Badge
           label={data.isPaidOff ? "Soldé" : "Non soldé"}
@@ -166,7 +167,7 @@ export default function ProgramsTabContent({
     {
       key: "actions",
       label: "Actions",
-      priority: 'medium',
+      priority: 'high',
       render: (_, data) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -179,15 +180,16 @@ export default function ProgramsTabContent({
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
                 onSelectStudent(data);
               }}
-              className="flex items-center gap-2 cursor-pointer"
+              className="flex flex-row flex-nowrap items-center gap-2 cursor-pointer"
             >
-              <span>Enregistrer un paiement</span>
+              <Edit className="mr-2 h-4 w-4"/>
+              <span className="whitespace-nowrap">Enregistrer un paiement</span>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
@@ -199,6 +201,7 @@ export default function ProgramsTabContent({
               }}
               className="gap-2 cursor-pointer"
             >
+              <DollarSignIcon className="mr-2 h-4 w-4"/>
               <span>Voir l&apos;historique</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

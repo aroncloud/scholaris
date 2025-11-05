@@ -123,3 +123,22 @@ export interface IInstallment {
   amount: number;
   due_date: string; // format ISO string : "YYYY-MM-DD"
 }
+
+export interface IUpdatePlan {
+  "total_amount"?: string,
+  "is_active"?: number
+}
+
+export interface IAddInstallmentToExistingPlan {
+  "fee_code": string,
+  "type_code": string,
+  "title": string,
+  "amount": number,
+  "due_date": string
+}
+
+export interface IUpdateInstallment {
+  "title"?: string,
+  "amount"?: number,
+  "due_date"?: string
+}

@@ -4,7 +4,7 @@ import { getEvaluationListForCurriculum, getEvaluationsForSchedule, getEvaluatio
 
 export function useEvaluationData() {
   const [examList, setExamList] = useState<IGetEvaluationsForCurriculum[]>([]);
-  const [isLoadingExam, setIsLoadingExam] = useState<boolean>(true);
+  const [isLoadingExam, setIsLoadingExam] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
 
@@ -44,6 +44,7 @@ export function useEvaluationData() {
     } finally {
       setIsLoadingExam(false);
     }
+    setIsLoadingExam(false);
   }, []);
   const fetchtEvaluationsForSchedule = useCallback(async (schedule_code: string) => {
     setIsLoadingExam(true);

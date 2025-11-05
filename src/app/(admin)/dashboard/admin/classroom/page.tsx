@@ -10,6 +10,8 @@ import { ICreateClassroom } from "@/types/classroomType";
 import { createClassroom } from "@/actions/classroomAction";
 import { showToast } from "@/components/ui/showToast";
 import { useClassroomData } from "@/hooks/feature/classroom/useClassroomData";
+import PageHeader from "@/layout/PageHeader";
+import { Calendar } from "lucide-react";
 
 export default function ClassroomPage() {
   const [isCreateClassroom, setIsCreateClassroomDialogOpen] = useState(false);
@@ -45,62 +47,57 @@ export default function ClassroomPage() {
     return false
   };
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Gestion des Ressources Matérielles
-          </h1>
-          <p className="text-gray-600">
-            Gérez les Ressources, Planning du système
-          </p>
-        </div>
-
+    <div>
+      <PageHeader
+        title="Gestion des Ressources Matérielles"
+        description="Gérez les Ressources, Planning du système"
+        Icon={Calendar}
+      >
         <Button
           onClick={() => setIsCreateClassroomDialogOpen(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white"
+          variant={"info"}
         >
           + Nouvelle ressource
         </Button>
+      </PageHeader>
+      <div className="px-2 pb-2 mt-4 md:px-6 md:pb-6 md:pt-0 mx-auto">
+        {/* Tabs */}
+        <Tabs defaultValue="resources">
+          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mb-2">
+            <TabsTrigger
+              value="resources"
+              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+            >
+              Ressources
+            </TabsTrigger>
+            <TabsTrigger
+              value="planning"
+              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+            >
+              Planning
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Resources Tab */}
+          <TabsContent value="resources">
+            <div>
+              <ResourcesTab
+                search={search}
+                filterType={filterType}
+                setSearch={setSearch}
+                setFilterType={setFilterType}
+              />
+            </div>
+          </TabsContent>
+
+          {/* Planning Tab */}
+          <TabsContent value="planning">
+            <div className="bg-white rounded-md shadow p-4">
+              <PlanningTab />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Tabs */}
-      <Tabs defaultValue="resources">
-        <TabsList className="bg-gray-100 rounded-md p-1 mb-4">
-          <TabsTrigger
-            value="resources"
-            className="px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 rounded-md"
-          >
-            Ressources
-          </TabsTrigger>
-          <TabsTrigger
-            value="planning"
-            className="px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 rounded-md"
-          >
-            Planning
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Resources Tab */}
-        <TabsContent value="resources">
-          <div>
-            <ResourcesTab
-              search={search}
-              filterType={filterType}
-              setSearch={setSearch}
-              setFilterType={setFilterType}
-            />
-          </div>
-        </TabsContent>
-
-        {/* Planning Tab */}
-        <TabsContent value="planning">
-          <div className="bg-white rounded-md shadow p-4">
-            <PlanningTab />
-          </div>
-        </TabsContent>
-      </Tabs>
 
       {/* Modal */}
       <DialogCreateClassroom

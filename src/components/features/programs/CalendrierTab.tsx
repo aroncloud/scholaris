@@ -84,6 +84,7 @@ const CalendrierTab = ({academicYears, fetchAcademicYear, isLoading} : MyProps) 
                 variant={year.status_code === "IN_PROGRESS" ? "success" : year.status_code === "COMPLETED" ? "info" : "neutral"}
                 size="sm"
                 value={year.status_code}
+                label={year.status_code}
             />
             ),
         },

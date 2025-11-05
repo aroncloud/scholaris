@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
@@ -6,25 +5,19 @@ import { DollarSign } from "lucide-react"
 import { useFactorizedProgramStore } from "@/store/programStore"
 import PageHeader from "@/layout/PageHeader"
 import { useFinancialData } from "@/hooks/feature/financial/useFinancialData"
-import { IRecordDeposit, IStudentGetFinancialInfo } from "@/types/financialTypes"
+import { IRecordDeposit } from "@/types/financialTypes"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import DialogRecordDeposit from "@/components/features/financial/DialogRecordDeposit"
 import { showToast } from "@/components/ui/showToast"
 import CurrentStudentsList from "@/components/features/financial/CurrentStudentsList"
 import ProgramsTabContent, { FinancialDataWrapper } from "@/components/features/financial/ProgramsTabContent"
-import { ICreateStudent, IListStudent } from "@/types/staffType"
-import { student_statuses } from "@/constant"
+import {  IListStudent } from "@/types/staffType"
 import { getUserList } from "@/actions/programsAction"
 
 export default function GestionScolaritePage() {
   const [selectedCurriculum, setSelectedCurriculum] = useState<string>("")
   const [selectedStudent, setSelectedStudent] = useState<FinancialDataWrapper | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [action, setAction] = useState<'CREATE' | 'UPDATE'>('CREATE')
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [isStudentModalOpen, setIsStudentModalOpen] = useState(false)
-  const [sturentFormData, setStudentFormData] = useState<Partial<ICreateStudent>>({})
-  const [studentToDelete, setStudentToDelete] = useState<string | null>(null)
   const [loadingStudentList, setLoadingStudentList] = useState(false)
   const [studentList, setStudentList] = useState<IListStudent[]>([])
 
@@ -82,10 +75,6 @@ export default function GestionScolaritePage() {
     setIsDialogOpen(true);
   };
 
-  const currentStudents = studentList.filter((student) => {
-    return student_statuses[student.status_code as keyof typeof student_statuses] != student_statuses.GRADUATED && 
-      student_statuses[student.status_code as keyof typeof student_statuses] != student_statuses.ENROLLED;
-  });
 
   const init = async () => {
     setLoadingStudentList(true)
@@ -107,13 +96,13 @@ export default function GestionScolaritePage() {
         title="Gestion des Paiements"
         description="Gérez les paiements de scolarité de vos étudiants"
       />
-      <div className="p-2 md:p-6">
+      <div className="px-2 pb-2 pt-0 md:px-6 md:pb-6 md:pt-0">
         <Tabs defaultValue="etudiants" className="">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="etudiants">
+          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+              <TabsTrigger value="etudiants" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">
                 Étudiants actuels 
               </TabsTrigger>
-              <TabsTrigger value="programs">
+              <TabsTrigger value="programs" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">
                 Programmes académiques 
               </TabsTrigger>
             </TabsList>
@@ -129,11 +118,6 @@ export default function GestionScolaritePage() {
 
             <TabsContent value="etudiants" className="space-y-4">
               <CurrentStudentsList
-                setAction={setAction}
-                setDeleteDialogOpen={setDeleteDialogOpen}
-                setIsStudentDialogOpen={setIsStudentModalOpen}
-                setFormData={setStudentFormData}
-                setStudentToDelete={setStudentToDelete}
                 studentList={studentList}
                 loading={loadingStudentList}
                 onRecordPayment={handleRecordDeposit}

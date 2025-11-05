@@ -14,15 +14,29 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CalendarDays, Check, ChevronsUpDown } from "lucide-react";
 import { useMemo } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 const AcademicYearSelector: React.FC = () => {
-  const router = useRouter();
-  const { academicYears, selectedAcademicYear, setSelectedAcademicYear } = useAcademicYearStore();
+  // const router = useRouter();
+  const { academicYears, selectedAcademicYear, setSelectedAcademicYear, isChangingYear, setIsChangingYear } = useAcademicYearStore();
 
   const handleSelectAcademicYear = (academicYearCode: string) => {
+    // Ne rien faire si c'est déjà l'année sélectionnée
+    if (academicYearCode === selectedAcademicYear) return;
+
+    const newYear = academicYears.find((ay) => ay.academic_year_code === academicYearCode);
+    if (!newYear) return;
+
+    const yearLabel = `${newYear.start_date.split('-')[0]} - ${newYear.end_date.split('-')[0]}`;
+
+    // Activer l'overlay global
+    setIsChangingYear(true, yearLabel);
     setSelectedAcademicYear(academicYearCode);
-    router.refresh();
+
+    // Petit délai pour que l'utilisateur voie l'overlay
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   const selectedYearLabel = useMemo(() => {
@@ -41,8 +55,9 @@ const AcademicYearSelector: React.FC = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost" 
+          variant="ghost"
           className="flex items-center gap-2 px-3 py-2 font-semibold text-white transition-colors h-auto bg-blue-500 hover:bg-blue-700 hover:text-white focus:ring-2 focus:ring-white/50"
+          disabled={isChangingYear}
         >
           <CalendarDays className="h-5 w-5 text-white/80" />
           <span className="hidden sm:inline">Année :</span>
@@ -58,6 +73,7 @@ const AcademicYearSelector: React.FC = () => {
             key={ay.academic_year_code}
             onSelect={() => handleSelectAcademicYear(ay.academic_year_code)}
             className="flex items-center justify-between"
+            disabled={isChangingYear}
           >
             <span>
               {`${ay.start_date.split('-')[0]} - ${ay.end_date.split('-')[0]}`}

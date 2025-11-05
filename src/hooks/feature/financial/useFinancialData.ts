@@ -1,8 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { getCurriculumFinancialSummary, getFeesTypes, getPlanList, recordDeposite as recordDepositeAction, createPlanWithInstallments as createPlanWithInstallmentsAction } from "@/actions/financialAction";
+import {
+  getCurriculumFinancialSummary,
+  getFeesTypes,
+  getPlanList,
+  recordDeposite as recordDepositeAction,
+  createPlanWithInstallments as createPlanWithInstallmentsAction,
+  updatePlan as updatePlanAction,
+  deletePlan as deletePlanAction,
+  addInstallmentToExistingPlan as addInstallmentToExistingPlanAction,
+  updateInstallment as updateInstallmentAction,
+  deleteInstallment as deleteInstallmentAction
+} from "@/actions/financialAction";
 import { showToast } from "@/components/ui/showToast";
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
-import { ICreateFeeTypes, IGetFeeType, IGetPlan, IRecordDeposit, IStudentGetFinancialInfo } from "@/types/financialTypes";
+import { ICreateFeeTypes, IGetFeeType, IGetPlan, IRecordDeposit, IStudentGetFinancialInfo, IUpdatePlan, IAddInstallmentToExistingPlan, IUpdateInstallment } from "@/types/financialTypes";
 import { useCallback, useEffect, useState } from "react";
 
 
@@ -83,6 +94,76 @@ export function useFinancialData() {
     return result;
   }
 
+  const updatePlan = async (fee_code: string, payload: IUpdatePlan) => {
+    setProcessingFinData(true);
+    const result = await updatePlanAction(fee_code, payload);
+
+    if(result.code != "success") {
+      setError(result.error || "Erreur lors de la mise à jour du plan");
+    } else {
+      // Rafraîchir la liste des plans après la mise à jour
+      await listAllPlan();
+    }
+    setProcessingFinData(false);
+    return result;
+  }
+
+  const deletePlan = async (fee_code: string) => {
+    setProcessingFinData(true);
+    const result = await deletePlanAction(fee_code);
+
+    if(result.code != "success") {
+      setError(result.error || "Erreur lors de la suppression du plan");
+    } else {
+      // Rafraîchir la liste des plans après la suppression
+      await listAllPlan();
+    }
+    setProcessingFinData(false);
+    return result;
+  }
+
+  const addInstallmentToExistingPlan = async (payload: IAddInstallmentToExistingPlan) => {
+    setProcessingFinData(true);
+    const result = await addInstallmentToExistingPlanAction(payload);
+
+    if(result.code != "success") {
+      setError(result.error || "Erreur lors de l'ajout de l'échéance");
+    } else {
+      // Rafraîchir la liste des plans après l'ajout
+      await listAllPlan();
+    }
+    setProcessingFinData(false);
+    return result;
+  }
+
+  const updateInstallment = async (installment_code: string, payload: IUpdateInstallment) => {
+    setProcessingFinData(true);
+    const result = await updateInstallmentAction(installment_code, payload);
+
+    if(result.code != "success") {
+      setError(result.error || "Erreur lors de la mise à jour de l'échéance");
+    } else {
+      // Rafraîchir la liste des plans après la mise à jour
+      await listAllPlan();
+    }
+    setProcessingFinData(false);
+    return result;
+  }
+
+  const deleteInstallment = async (installment_code: string) => {
+    setProcessingFinData(true);
+    const result = await deleteInstallmentAction(installment_code);
+
+    if(result.code != "success") {
+      setError(result.error || "Erreur lors de la suppression de l'échéance");
+    } else {
+      // Rafraîchir la liste des plans après la suppression
+      await listAllPlan();
+    }
+    setProcessingFinData(false);
+    return result;
+  }
+
   return {
     finData,
     loadingFinData,
@@ -96,6 +177,11 @@ export function useFinancialData() {
     planData,
     listAllFeeTypes,
     feeList,
-    createPlanWithInstallments
+    createPlanWithInstallments,
+    updatePlan,
+    deletePlan,
+    addInstallmentToExistingPlan,
+    updateInstallment,
+    deleteInstallment
   };
 }

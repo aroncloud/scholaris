@@ -8,6 +8,7 @@ import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import BarProvider from "@/context/BarContext";
 import ToastProvider from '@/components/ui/ToastProvider';
+import AcademicYearChangeOverlay from '@/components/layout/AcademicYearChangeOverlay';
 
 const SpaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -90,6 +91,7 @@ export default function RootLayout({
         </ThemeProvider>
         <Toaster />
       </BarProvider>
+      <AcademicYearChangeOverlay />
       </body>
     </html>
   );

@@ -5,33 +5,13 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 import { v4 as uuidv4 } from "uuid"
 import { 
   Plus,
-  X,
-  Save,
   DollarSign,
   Filter,
-  CheckCircle2,
-  AlertCircle,
 } from "lucide-react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { useFinancialData } from "@/hooks/feature/financial/useFinancialData"
 import { useFactorizedProgramStore } from "@/store/programStore"
 import PageHeader from "@/layout/PageHeader"
@@ -40,105 +20,40 @@ import ContentLayout from "@/layout/ContentLayout"
 import { useAcademicYearStore } from "@/store/useAcademicYearStore"
 import { Combobox } from "@/components/ui/Combobox"
 import DialogCreatePlan from "@/components/features/payment/DialogCreatePlan"
+import DialogEditPlan from "@/components/features/payment/DialogEditPlan"
+import DialogEditInstallment from "@/components/features/payment/DialogEditInstallment"
+import DialogAddInstallment from "@/components/features/payment/DialogAddInstallment"
 import { showToast } from "@/components/ui/showToast"
+import { IGetPlan, IInstallment } from "@/types/financialTypes"
 
-// Types
-interface Echeance {
-  id: string
-  libelle: string
-  pourcentage: number
-  dateEcheance: string
-}
-
-interface GrilleTarifaire {
-  id: string
-  filiere: string
-  niveau: string
-  anneeAcademique: string
-  montantTotal: number
-  echeances: Echeance[]
-  statut: "ACTIVE" | "BROUILLON"
-}
-
-const filieres = [
-  "Informatique", "Gestion", "Finance", "Marketing", "Commerce International",
-  "Droit", "Architecture", "Médecine", "Pharmacie", "Génie Civil",
-  "Génie Électrique", "Génie Mécanique", "Télécommunications", "Réseaux",
-  "Cybersécurité", "Data Science", "Intelligence Artificielle", "Design Graphique"
-]
-
-const niveaux = ["L1", "L2", "L3", "M1", "M2"]
-
-const anneesAcademiques = ["2024-2025", "2025-2026", "2026-2027"]
-
-// Données exemple
-const grillesInitiales: GrilleTarifaire[] = [
-  {
-    id: "1",
-    filiere: "Informatique",
-    niveau: "L1",
-    anneeAcademique: "2024-2025",
-    montantTotal: 400000,
-    statut: "ACTIVE",
-    echeances: [
-      { id: "e1", libelle: "Inscription", pourcentage: 40, dateEcheance: "2024-09-15" },
-      { id: "e2", libelle: "2ème Tranche", pourcentage: 30, dateEcheance: "2024-12-15" },
-      { id: "e3", libelle: "3ème Tranche", pourcentage: 30, dateEcheance: "2025-03-15" }
-    ]
-  },
-  {
-    id: "2",
-    filiere: "Informatique",
-    niveau: "L2",
-    anneeAcademique: "2024-2025",
-    montantTotal: 450000,
-    statut: "ACTIVE",
-    echeances: [
-      { id: "e4", libelle: "1ère Tranche", pourcentage: 50, dateEcheance: "2024-09-15" },
-      { id: "e5", libelle: "2ème Tranche", pourcentage: 50, dateEcheance: "2025-01-15" }
-    ]
-  },
-  {
-    id: "3",
-    filiere: "Gestion",
-    niveau: "L1",
-    anneeAcademique: "2024-2025",
-    montantTotal: 380000,
-    statut: "ACTIVE",
-    echeances: [
-      { id: "e6", libelle: "Inscription", pourcentage: 35, dateEcheance: "2024-09-10" },
-      { id: "e7", libelle: "2ème Tranche", pourcentage: 35, dateEcheance: "2024-12-10" },
-      { id: "e8", libelle: "3ème Tranche", pourcentage: 30, dateEcheance: "2025-03-10" }
-    ]
-  }
-]
-
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(montant) + ' FCFA'
-}
 
 export default function GrilleTarifairePage() {
-  const [grilles, setGrilles] = useState<GrilleTarifaire[]>(grillesInitiales)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingGrille, setEditingGrille] = useState<GrilleTarifaire | null>(null)
-  const { planData, listAllPlan, loadingFinData, listAllFeeTypes, feeList, createPlanWithInstallments, processingFinData } = useFinancialData()
-  
-
-  
-  // Form state
-  const [filiere, setFiliere] = useState("")
-  const [niveau, setNiveau] = useState("")
-  const [anneeAcademique, setAnneeAcademique] = useState("")
-  const [montantTotal, setMontantTotal] = useState("")
-  const [echeances, setEcheances] = useState<Echeance[]>([
-    { id: "1", libelle: "Inscription", pourcentage: 40, dateEcheance: "" },
-    { id: "2", libelle: "2ème Tranche", pourcentage: 30, dateEcheance: "" },
-    { id: "3", libelle: "3ème Tranche", pourcentage: 30, dateEcheance: "" }
-  ])
+  const {
+    planData,
+    listAllPlan,
+    loadingFinData,
+    listAllFeeTypes,
+    feeList,
+    createPlanWithInstallments,
+    processingFinData,
+    updatePlan,
+    deletePlan,
+    addInstallmentToExistingPlan,
+    updateInstallment,
+    deleteInstallment
+  } = useFinancialData()
   const [selectedProgramFilter, setSelectedProgramFilter] = useState<string>("")
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  // États pour les dialogs d'édition
+  const [isEditPlanDialogOpen, setIsEditPlanDialogOpen] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<IGetPlan | null>(null)
+
+  const [isEditInstallmentDialogOpen, setIsEditInstallmentDialogOpen] = useState(false)
+  const [selectedInstallment, setSelectedInstallment] = useState<IInstallment | null>(null)
+
+  const [isAddInstallmentDialogOpen, setIsAddInstallmentDialogOpen] = useState(false)
+  const [selectedFeeCode, setSelectedFeeCode] = useState<string>("")
 
 
   const { selectedAcademicYear, academicYears } = useAcademicYearStore();
@@ -166,67 +81,27 @@ export default function GrilleTarifairePage() {
   }));
 
   const handleAjouterEcheance = () => {
-    const newEcheance: Echeance = {
-      id: Date.now().toString(),
-      libelle: `${echeances.length + 1}ème Tranche`,
-      pourcentage: 0,
-      dateEcheance: ""
-    }
-    setEcheances([...echeances, newEcheance])
+    
   }
 
   const handleSupprimerEcheance = (id: string) => {
-    if (echeances.length > 1) {
-      setEcheances(echeances.filter(e => e.id !== id))
-    }
+
   }
 
-  const handleUpdateEcheance = (id: string, field: keyof Echeance, value: any) => {
-    setEcheances(echeances.map(e => 
-      e.id === id ? { ...e, [field]: value } : e
-    ))
+  const handleUpdateEcheance = (id: string) => {
+    
   }
 
   const calculerMontantEcheance = (pourcentage: number) => {
-    if (!montantTotal) return 0
-    return (parseFloat(montantTotal) * pourcentage) / 100
   }
 
-  const totalPourcentage = echeances.reduce((acc, e) => acc + (e.pourcentage || 0), 0)
-  const isFormValid = filiere && niveau && anneeAcademique && montantTotal && totalPourcentage === 100 && echeances.every(e => e.dateEcheance)
 
   const handleSauvegarder = () => {
-    const nouvelleGrille: GrilleTarifaire = {
-      id: editingGrille?.id || Date.now().toString(),
-      filiere,
-      niveau,
-      anneeAcademique,
-      montantTotal: parseFloat(montantTotal),
-      statut: "ACTIVE",
-      echeances: echeances
-    }
-
-    if (editingGrille) {
-      setGrilles(grilles.map(g => g.id === editingGrille.id ? nouvelleGrille : g))
-    } else {
-      setGrilles([...grilles, nouvelleGrille])
-    }
-
-    handleReset()
+    
   }
 
   const handleReset = () => {
-    setIsDialogOpen(false)
-    setEditingGrille(null)
-    setFiliere("")
-    setNiveau("")
-    setAnneeAcademique("")
-    setMontantTotal("")
-    setEcheances([
-      { id: "1", libelle: "Inscription", pourcentage: 40, dateEcheance: "" },
-      { id: "2", libelle: "2ème Tranche", pourcentage: 30, dateEcheance: "" },
-      { id: "3", libelle: "3ème Tranche", pourcentage: 30, dateEcheance: "" }
-    ])
+   
   }
 
   const handleCreatePlan = async (data: any) => {
@@ -256,11 +131,140 @@ export default function GrilleTarifairePage() {
     }
   }
 
-  const handleSupprimer = (id: string) => {
-    setGrilles(grilles.filter(g => g.id !== id))
+  const handleDeletePlan = async (fee_code: string) => {
+    // Confirmation avant suppression
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette grille tarifaire ? Cette action est irréversible.")) {
+      return;
+    }
+
+    const result = await deletePlan(fee_code);
+
+    if (result.code === "success") {
+      showToast({
+        variant: "success-solid",
+        message: "Suppression réussie",
+        description: "La grille tarifaire a été supprimée avec succès",
+        position: "top-center",
+      });
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Erreur",
+        description: result.error || "Erreur lors de la suppression de la grille tarifaire",
+        position: "top-center",
+      });
+    }
   }
 
+  const handleEditPlan = (plan: IGetPlan) => {
+    setSelectedPlan(plan);
+    setIsEditPlanDialogOpen(true);
+  }
 
+  const handleSubmitEditPlan = async (feeCode: string, data: { total_amount?: string; is_active?: number }) => {
+    const result = await updatePlan(feeCode, data);
+
+    if (result.code === "success") {
+      showToast({
+        variant: "success-solid",
+        message: "Plan mis à jour",
+        description: "Les modifications ont été enregistrées avec succès",
+        position: "top-center",
+      });
+      return true;
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Erreur",
+        description: result.error || "Erreur lors de la mise à jour du plan",
+        position: "top-center",
+      });
+      return false;
+    }
+  }
+
+  const handleEditInstallment = (installment: IInstallment) => {
+    setSelectedInstallment(installment);
+    setIsEditInstallmentDialogOpen(true);
+  }
+
+  const handleSubmitEditInstallment = async (
+    installmentCode: string,
+    data: { title?: string; amount?: number; due_date?: string }
+  ) => {
+    const result = await updateInstallment(installmentCode, data);
+
+    if (result.code === "success") {
+      showToast({
+        variant: "success-solid",
+        message: "Échéance mise à jour",
+        description: "Les modifications ont été enregistrées avec succès",
+        position: "top-center",
+      });
+      return true;
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Erreur",
+        description: result.error || "Erreur lors de la mise à jour de l'échéance",
+        position: "top-center",
+      });
+      return false;
+    }
+  }
+
+  const handleDeleteInstallment = async (installmentCode: string) => {
+    const result = await deleteInstallment(installmentCode);
+
+    if (result.code === "success") {
+      showToast({
+        variant: "success-solid",
+        message: "Échéance supprimée",
+        description: "L'échéance a été supprimée avec succès",
+        position: "top-center",
+      });
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Erreur",
+        description: result.error || "Erreur lors de la suppression de l'échéance",
+        position: "top-center",
+      });
+    }
+  }
+
+  const handleAddInstallment = (feeCode: string) => {
+    setSelectedFeeCode(feeCode);
+    setIsAddInstallmentDialogOpen(true);
+  }
+
+  const handleSubmitAddInstallment = async (data: {
+    fee_code: string;
+    type_code: string;
+    title: string;
+    amount: number;
+    due_date: string;
+  }) => {
+    const result = await addInstallmentToExistingPlan(data);
+
+    if (result.code === "success") {
+      showToast({
+        variant: "success-solid",
+        message: "Échéance ajoutée",
+        description: "Une nouvelle échéance a été ajoutée au plan",
+        position: "top-center",
+      });
+      return true;
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Erreur",
+        description: result.error || "Erreur lors de l'ajout de l'échéance",
+        position: "top-center",
+      });
+      return false;
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -314,6 +318,10 @@ export default function GrilleTarifairePage() {
               key={uuidv4()}
               plan={plan}
               curriculumName={curriculumList.find(item => item.curriculum_code ==  plan.curriculum_code)?.curriculum_name}
+              onEdit={handleEditPlan}
+              onDelete={handleDeletePlan}
+              onEditInstallment={handleEditInstallment}
+              onAddInstallment={handleAddInstallment}
             />
           ))}
         </div>
@@ -340,13 +348,45 @@ export default function GrilleTarifairePage() {
 
       </ContentLayout>
 
-      {/* Nouveau Dialog avec react-hook-form */}
+      {/* Dialog de création */}
       <DialogCreatePlan
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         curriculumList={curriculumList}
-        feeList={feeList}
         onSubmit={handleCreatePlan}
+        isLoading={processingFinData}
+      />
+
+      {/* Dialog d'édition d'un plan */}
+      <DialogEditPlan
+        open={isEditPlanDialogOpen}
+        onOpenChange={setIsEditPlanDialogOpen}
+        plan={selectedPlan}
+        curriculumName={
+          selectedPlan
+            ? curriculumList.find(item => item.curriculum_code === selectedPlan.curriculum_code)?.curriculum_name
+            : undefined
+        }
+        onSubmit={handleSubmitEditPlan}
+        isLoading={processingFinData}
+      />
+
+      {/* Dialog d'édition d'une échéance */}
+      <DialogEditInstallment
+        open={isEditInstallmentDialogOpen}
+        onOpenChange={setIsEditInstallmentDialogOpen}
+        installment={selectedInstallment}
+        onSubmit={handleSubmitEditInstallment}
+        onDelete={handleDeleteInstallment}
+        isLoading={processingFinData}
+      />
+
+      {/* Dialog d'ajout d'une échéance */}
+      <DialogAddInstallment
+        open={isAddInstallmentDialogOpen}
+        onOpenChange={setIsAddInstallmentDialogOpen}
+        feeCode={selectedFeeCode}
+        onSubmit={handleSubmitAddInstallment}
         isLoading={processingFinData}
       />
 

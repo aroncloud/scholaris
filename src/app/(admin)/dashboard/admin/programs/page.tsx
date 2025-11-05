@@ -80,7 +80,7 @@ export default function ProgramsPage() {
         </div>
       </PageHeader>
       
-      <div className="space-y-6 p-6">
+      <div className="px-2 pb-2 mt-4 md:px-6 md:pb-6 md:pt-0 mx-auto">
         {/* Header */}
         <div className="flex flex-col gap-4 w-full">
           {/* Stats Cards en responsive */}
@@ -101,7 +101,7 @@ export default function ProgramsPage() {
         {/* Main Content */}
         <div className="w-full">
           <Tabs defaultValue="maquettes" className="space-y-4">
-            <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+            <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mb-2">
               <TabsTrigger value="maquettes"
                 className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
               >Maquettes pédagogiques</TabsTrigger>

@@ -1,23 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import React, { useCallback, useEffect, useState } from 'react';
-import { BookOpen, Calendar, CheckCircle, Save, Download } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle, Save, Download, Award } from 'lucide-react';
 import { Combobox } from '@/components/ui/Combobox';
 import { useFactorizedProgramStore } from '@/store/programStore';
 import { useEvaluationData } from '@/hooks/feature/exam/useEvaluationData';
 import { getEvaluationSheet, submitGrades } from '@/actions/examAction';
 import { EvaluationSheet, IStudentEvaluationInfo } from '@/types/examTypes';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ResponsiveTable, TableColumn } from '@/components/tables/ResponsiveTable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { showToast } from '@/components/ui/showToast';
-import { getStatusColor } from '@/lib/utils';
 import { useAcademicYearStore } from '@/store/useAcademicYearStore';
 import { getListAcademicYearsSchedulesForCurriculum } from '@/actions/programsAction';
 import { IGetAcademicYearsSchedulesForCurriculum } from '@/types/planificationType';
+import PageHeader from '@/layout/PageHeader';
+import ContentLayout from '@/layout/ContentLayout';
+import Badge from '@/components/custom-ui/Badge';
 
 const ScoreInput: React.FC<{
   student: IStudentEvaluationInfo;
@@ -95,7 +96,7 @@ const Page = () => {
     const [studentGrades, setStudentGrades] = useState<Map<string, number>>(new Map());
 
     const { factorizedPrograms } = useFactorizedProgramStore();
-    const { examList, fetchtEvaluationsForSchedule, isLoadingExam } = useEvaluationData();
+    const { examList, fetchtEvaluationsForSchedule } = useEvaluationData();
     const { selectedAcademicYear } = useAcademicYearStore();
 
     const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
@@ -215,6 +216,7 @@ const Page = () => {
                         {studentNumber}
                     </div>
                 ),
+                priority: 'medium',
             },
             {
                 key: "first_name",
@@ -226,19 +228,21 @@ const Page = () => {
                         </div>
                     </div>
                 ),
+                priority: 'medium',
             },
             {
                 key: "graded",
                 label: "Statut",
                 render: (graded: boolean, student: IStudentEvaluationInfo) => {
                     return (
-                        <Badge 
-                            className={getStatusColor(student.graded ? "APPROVED" : "PENDING")}
-                        >
-                            {student.graded ? "NOTÉ" : "NON NOTÉ"}
-                        </Badge>
+                        <Badge
+                            value={student.graded ? "APPROVED" : "PENDING"}
+                            label={student.graded ? "APPROVED" : "PENDING"}
+                            size='sm'
+                        />
                     );
                 },
+                priority: 'low',
             },
             {
                 key: "score",
@@ -260,105 +264,107 @@ const Page = () => {
                         </span>
                     </div>
                 ),
+                priority: 'high',
             },
         ];
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <>
             {/* Header */}
-            <div className="bg-white border-b border-gray-200">
-                <div className="mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-semibold text-gray-900">Saisie des Notes</h1>
-                            <p className="text-sm text-gray-600 mt-1">Interface de gestion des évaluations</p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <Button variant="outline">
-                                <Download className="w-4 h-4 mr-2" />
-                                Exporter
-                            </Button>
-                            <Button 
-                                onClick={handleSaveGrades}
-                                disabled={modifiedStudents.size === 0 || isSaving}
-                            >
-                                {isSaving ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                        Sauvegarde...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="w-4 h-4 mr-2" />
-                                        Sauvegarder
-                                    </>
-                                )}
-                            </Button>
-                        </div>
-                    </div>
+            <PageHeader
+                title='Saisie des Notes'
+                description='Module de gestion des évaluations'
+                Icon={Award}
+            >
+                <div className="flex items-center space-x-3 w-full">
+                    <Button variant="outline" className='flex-1'>
+                        <Download className="w-4 h-4 mr-2" />
+                        Exporter
+                    </Button>
+                    <Button 
+                        onClick={handleSaveGrades}
+                        disabled={modifiedStudents.size === 0 || isSaving}
+                        variant={'info'}
+                        className='flex-1'
+                    >
+                        {isSaving ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                Sauvegarde...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="w-4 h-4 mr-2" />
+                                Sauvegarder
+                            </>
+                        )}
+                    </Button>
                 </div>
-            </div>
+            </PageHeader>
 
-            <div className="mx-auto p-6">
+            <div className="px-2 pb-2 mt-4 md:px-6 md:pb-6 md:pt-0 mx-auto">
                 {/* Selection Panel */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <ContentLayout
+                    title='Curriculum'
+                >
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-2 md:px-0">
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <BookOpen className="w-4 h-4 inline mr-2" />
-                                Curriculum
-                            </label>
-                            <Combobox
-                                options={curriculumList.map(curriculum => ({ 
-                                    value: curriculum.curriculum_code, 
-                                    label: curriculum.curriculum_name
-                                }))}
-                                value={selectedCurriculum}
-                                onChange={setSelectedCurriculum}
-                                placeholder="Sélectionner un cours"
-                                className='py-5'
-                            />
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <BookOpen className="w-4 h-4 inline mr-2" />
+                                    Curriculum
+                                </label>
+                                <Combobox
+                                    options={curriculumList.map(curriculum => ({ 
+                                        value: curriculum.curriculum_code, 
+                                        label: curriculum.curriculum_name
+                                    }))}
+                                    value={selectedCurriculum}
+                                    onChange={setSelectedCurriculum}
+                                    placeholder="Sélectionner un curriculum"
+                                    className='py-5'
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <BookOpen className="w-4 h-4 inline mr-2" />
-                                Trimestre/Semestre
-                            </label>
-                            <Combobox
-                                options={scheduleList.map(sch => ({ 
-                                    value: sch.schedule_code, 
-                                    label: sch.sequence_name
-                                }))}
-                                value={selectedSchedule}
-                                onChange={setSelectedSchedule}
-                                placeholder="Sélectionner un cours"
-                                className='py-5'
-                            />
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <BookOpen className="w-4 h-4 inline mr-2" />
+                                    Trimestre/Semestre
+                                </label>
+                                <Combobox
+                                    options={scheduleList.map(sch => ({ 
+                                        value: sch.schedule_code, 
+                                        label: sch.sequence_name
+                                    }))}
+                                    value={selectedSchedule}
+                                    onChange={setSelectedSchedule}
+                                    placeholder="Sélectionner un trimestre/semestre"
+                                    className='py-5'
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <Calendar className="w-4 h-4 inline mr-2" />
-                                Évaluation
-                            </label>
-                            <Combobox
-                                options={examList.map(exam => ({ 
-                                    value: exam.evaluation_code, 
-                                    label: exam.title
-                                }))}
-                                value={selectedExam}
-                                onChange={setSelectedExam}
-                                placeholder={isLoadingExam ? "Chargement des données ..." : "Sélectionner une évaluation"}
-                                className='py-5'
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <Calendar className="w-4 h-4 inline mr-2" />
+                                    Évaluation
+                                </label>
+                                <Combobox
+                                    options={examList.map(exam => ({ 
+                                        value: exam.evaluation_code, 
+                                        label: exam.title
+                                    }))}
+                                    value={selectedExam}
+                                    onChange={setSelectedExam}
+                                    placeholder={"Sélectionner une évaluation"}
+                                    className='py-5'
+                                />
+                            </div>
                         </div>
-                    </div>
 
                     {selectedCurriculum && selectedExam && examSheet?.evaluation&& examSheet?.students  && (
-                        <div className="mt-6 p-4 bg-blue-50 rounded-md border border-blue-200">
+                        <div className="mt-6 p-4 bg-blue-50 rounded-md border border-blue-200 px-2">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <CheckCircle className="w-5 h-5 text-blue-600 mr-2" />
@@ -374,45 +380,65 @@ const Page = () => {
                             </div>
                         </div>
                     )}
-                </div>
-
+                    </>
+                </ContentLayout>
                 {/* Students Table */}
                 {examSheet && (
-                    <Card className="w-full shadow-md rounded-2xl border">
+                    <Card className="w-full pt-0 overflow-hidden my-6">
                         {/* Header */}
-                        <CardHeader className="rounded-t-2xl border-b">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="text-lg flex flex-nowrap gap-2">
+                        <CardHeader className="flex flex-col space-y-4 pt-4 border-b bg-gray-50 px-4 md:px-6">
+                            {/* Ligne 1: Titre et Badge de statut */}
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                                    <CardTitle className="text-xl lg:text-2xl font-bold tracking-tight">
                                         {examSheet.evaluation.title}
-                                        <Badge>{examSheet.evaluation.status}</Badge>
                                     </CardTitle>
-                                    <CardDescription>
-                                        <div className="flex flex-wrap items-center gap-4 mt-1 text-sm text-muted-foreground">
-                                            <span>
-                                            Date d&apos;évaluation:{" "}
-                                            {examSheet.evaluation.evaluation_date
-                                                ? new Date(examSheet.evaluation.evaluation_date).toLocaleDateString()
-                                                : "Non programmée"}
-                                            </span>
-                                            <Separator orientation="vertical" className="h-4" />
-                                            <span>Note maximale: {examSheet.evaluation.max_score}</span>
-                                            <Separator orientation="vertical" className="h-4" />
-                                            <span>Coefficient: {examSheet.evaluation.coefficient}</span>
-                                        </div>
-                                    </CardDescription>
+                                    <Badge
+                                        value={examSheet.evaluation.status}
+                                        label={examSheet.evaluation.status}
+                                        size='sm'
+                                    />
                                 </div>
-
+                                
+                                {/* Badge de modifications - visible sur tous les écrans */}
                                 {modifiedStudents.size > 0 && (
-                                    <Badge variant="outline" className="bg-yellow-50 text-yellow-800">
-                                        {modifiedStudents.size} modification(s)
-                                    </Badge>
+                                    <Badge
+                                        value='modification'
+                                        label={`${modifiedStudents.size} modification(s)`}
+                                        variant='neutral'
+                                        size='sm'
+                                        className="shrink-0"
+                                    />
                                 )}
                             </div>
+
+                            {/* Ligne 2: Informations de l'évaluation */}
+                            <CardDescription>
+                                <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
+                                    <span className="flex items-center gap-2">
+                                        Date d&apos;évaluation:{" "}
+                                        {examSheet.evaluation.evaluation_date
+                                            ? new Date(examSheet.evaluation.evaluation_date).toLocaleDateString()
+                                            : "Non programmée"}
+                                    </span>
+                                    
+                                    <Separator orientation="vertical" className="hidden sm:block h-4" />
+                                    
+                                    <span className="flex items-center gap-2">
+                                        Note maximale: {examSheet.evaluation.max_score}
+                                    </span>
+                                    
+                                    <Separator orientation="vertical" className="hidden sm:block h-4" />
+                                    
+                                    <span className="flex items-center gap-2">
+                                        Coefficient: {examSheet.evaluation.coefficient}
+                                    </span>
+                                </div>
+                            </CardDescription>
                         </CardHeader>
 
                         {/* Table */}
-                        <CardContent className="px-6">
+                        <CardContent className="px-2 md:px-6">
                             <ResponsiveTable
                                 columns={createColumns()}
                                 data={examSheet.students}
@@ -426,7 +452,7 @@ const Page = () => {
 
                 )}
             </div>
-        </div>
+        </>
     );
 };
 

@@ -65,8 +65,8 @@ const PageHeader = ({
 
     return (
         <div className="bg-white border-b border-gray-200">
-            <div className="mx-auto px-6 py-5">
-                <div className="flex items-center justify-between gap-4">
+            <div className="mx-auto px-2 md:px-6 py-3.5">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     {/* Partie gauche avec bouton retour optionnel */}
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                         {backUrl && (
@@ -85,16 +85,16 @@ const PageHeader = ({
                         )}
                         
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                            <div className="hidden w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl md:flex items-center justify-center shadow-lg shadow-blue-500/30">
                                 <Icon className="w-6 h-6 text-white" />
                             </div>
                             
                             <div className="flex flex-col min-w-0 flex-1">
-                                <h1 className="text-3xl font-bold text-gray-900 tracking-tight break-words">
+                                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight break-words">
                                     {title}
                                 </h1>
                                 {description && (
-                                    <p className="text-gray-600 font-medium break-words">{description}</p>
+                                    <p className="text-sm md:text-lg text-gray-600 font-medium break-words">{description}</p>
                                 )}
                             </div>
                         </div>
@@ -103,7 +103,7 @@ const PageHeader = ({
                     {/* Status et actions alignés */}
                     <div className="flex items-center gap-3 shrink-0">
                         {status && (
-                            <div className="shrink-0">
+                            <div className="hidden md:block shrink-0">
                                 {status}
                             </div>
                         )}

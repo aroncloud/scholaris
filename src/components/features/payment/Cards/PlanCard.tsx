@@ -10,14 +10,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { GraduationCap, MoreVertical, Edit2, Trash2, Calendar, DollarSign } from "lucide-react"
-import { IGetPlan } from "@/types/financialTypes"
+import { GraduationCap, MoreVertical, Edit2, Trash2, Calendar, DollarSign, Plus } from "lucide-react"
+import { IGetPlan, IInstallment } from "@/types/financialTypes"
 
 interface PlanCardProps {
   plan: IGetPlan;
   curriculumName?: string;
   onEdit?: (plan: IGetPlan) => void;
   onDelete?: (feeCode: string) => void;
+  onEditInstallment?: (installment: IInstallment) => void;
+  onAddInstallment?: (feeCode: string) => void;
 }
 
 const formatMontant = (montant: number) => {
@@ -47,11 +49,13 @@ const getInstallmentColor = (index: number) => {
   return colors[index % colors.length]
 }
 
-export default function PlanCard({ 
-  plan, 
+export default function PlanCard({
+  plan,
   curriculumName,
-  onEdit, 
-  onDelete 
+  onEdit,
+  onDelete,
+  onEditInstallment,
+  onAddInstallment
 }: PlanCardProps) {
   return (
     <Card className="border-2 border-slate-200 hover:shadow-xl transition-all duration-300 group overflow-hidden">
@@ -127,15 +131,28 @@ export default function PlanCard({
 
         {/* Liste des échéances */}
         <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            Échéancier de paiement
-          </h4>
-          
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Échéancier de paiement
+            </h4>
+            {onAddInstallment && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onAddInstallment(plan.fee_code)}
+                className="h-7 text-xs gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+              >
+                <Plus className="w-3 h-3" />
+                Ajouter
+              </Button>
+            )}
+          </div>
+
           <div className="space-y-2">
             {plan.installments.map((installment, index) => (
-              <div 
-                key={installment.installment_code} 
+              <div
+                key={installment.installment_code}
                 className="group/item flex items-center justify-between p-3 rounded-lg border-2 border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -152,11 +169,23 @@ export default function PlanCard({
                     </p>
                   </div>
                 </div>
-                <div className="text-right ml-3">
-                  <Badge variant="neutral" size="sm" value={formatMontant(installment.amount)} />
-                  <p className="text-xs text-slate-500 mt-1">
-                    {((installment.amount / plan.total_amount) * 100).toFixed(0)}%
-                  </p>
+                <div className="flex items-center gap-2">
+                  <div className="text-right">
+                    <Badge variant="neutral" size="sm" value={formatMontant(installment.amount)} label={formatMontant(installment.amount)} />
+                    <p className="text-xs text-slate-500 mt-1">
+                      {((installment.amount / plan.total_amount) * 100).toFixed(0)}%
+                    </p>
+                  </div>
+                  {onEditInstallment && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEditInstallment(installment)}
+                      className="h-7 w-7 p-0 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                    >
+                      <Edit2 className="h-3 w-3 text-blue-600" />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -164,11 +193,9 @@ export default function PlanCard({
         </div>
 
         {/* Badge statut */}
-        {plan.is_active === 1 && (
-          <div className="mt-4 pt-4 border-t">
-            <Badge variant="success" size="sm" value="✓ Plan actif" />
-          </div>
-        )}
+        <div className="mt-4 pt-4 border-t">
+          <Badge size="sm" value={plan.is_active === 1 ? 'ACTIVE' : 'INACTIVE'} label={plan.is_active === 1 ? 'Actif' : 'Inactif'} />
+        </div>
 
         {/* Actions */}
         <div className="flex gap-2 mt-5">

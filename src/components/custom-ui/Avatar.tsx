@@ -51,14 +51,14 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <div
-      className={`${sizeClass} rounded-full flex items-center justify-center font-bold text-white shadow-md overflow-hidden relative ${bgColor} ${className}`}
+      className={`${sizeClass} rounded-full flex items-center justify-center font-bold text-white shadow-md overflow-hidden relative aspect-square flex-shrink-0 ${bgColor} ${className}`}
     >
       {url && !imageError && (
         <Image
           src={url}
           alt="Avatar"
           fill
-          className={`object-cover transition-opacity duration-300 ${
+          className={`object-cover rounded-full transition-opacity duration-300 ${
             imageLoading ? 'opacity-0' : 'opacity-100'
           }`}
           onLoad={handleImageLoad}

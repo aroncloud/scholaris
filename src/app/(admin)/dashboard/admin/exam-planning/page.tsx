@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFactorizedProgramStore } from '@/store/programStore';
-import { BookOpen, Calendar, GraduationCap, Info, Loader2, AlertCircle, Clock, BookMarked, Target, Download, MoreVertical, Edit, Trash2, Copy, TrendingUp, CheckCircle2, XCircle, Clock3 } from 'lucide-react';
+import { BookOpen, Calendar, GraduationCap, Info, Loader2, AlertCircle, Clock, BookMarked, Target, Download, MoreVertical, Edit, Trash2, Copy, TrendingUp, CheckCircle2, XCircle, Clock3, ClipboardList } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +21,7 @@ import ContentLayout from '@/layout/ContentLayout';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { ResponsiveTable, TableColumn } from '@/components/tables/ResponsiveTable';
+import StatCard from '@/components/cards/StatCard';
 
 type FilterType = 'all' | 'CC' | 'EXAM_SEQ';
 type FilterStatus = 'all' | 'active' | 'pending' | 'completed' | 'cancelled';
@@ -289,10 +290,6 @@ export default function Page() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={handleEdit}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Éditer
-                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleDuplicate}>
                             <Copy className="mr-2 h-4 w-4" />
                             Dupliquer
@@ -378,40 +375,45 @@ export default function Page() {
                 {statistics && (
                     <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
                         <StatCard 
-                            icon={<BookMarked className="w-4 h-4" />}
-                            label="Total"
+                            icon={BookMarked}
+                            title='Total'
                             value={statistics.total}
-                            color="blue"
+                            variant='info'
+                            compact
                         />
                         <StatCard 
-                            icon={<CheckCircle2 className="w-4 h-4" />}
-                            label="Actives"
+                            icon={CheckCircle2}
+                            title="Actives"
                             value={statistics.active}
-                            color="green"
+                            variant='success'
+                            compact
                         />
                         <StatCard 
-                            icon={<Clock3 className="w-4 h-4" />}
-                            label="En attente"
+                            icon={Clock3}
+                            title="En attente"
                             value={statistics.pending}
-                            color="yellow"
+                            variant='warning'
+                            compact
                         />
                         <StatCard 
-                            icon={<CheckCircle2 className="w-4 h-4" />}
-                            label="Terminées"
+                            icon={CheckCircle2}
+                            title="Terminées"
                             value={statistics.completed}
-                            color="indigo"
+                            variant='neutral'
+                            compact
                         />
                         <StatCard 
-                            icon={<Target className="w-4 h-4" />}
-                            label="CC"
+                            icon={Target}
+                            title="CC"
                             value={statistics.cc}
-                            color="purple"
+                            variant='purple'
+                            compact
                         />
                         <StatCard 
-                            icon={<GraduationCap className="w-4 h-4" />}
-                            label="Examens"
+                            icon={GraduationCap}
+                            title="Examens"
                             value={statistics.exam}
-                            color="pink"
+                            compact
                         />
                     </div>
                 )}
@@ -419,20 +421,18 @@ export default function Page() {
                 <ContentLayout
                     title='Liste des Évaluations Programmées'
                     description={`Curriculum sélectionné: ${curriculumList.find(c => c.curriculum_code === selectedCurriculum)?.curriculum_name} • ${filteredEvaluations.length} évaluation(s) affichée(s)`}
+                    actions ={
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleExport}
+                        >
+                            <Download className="h-4 w-4 mr-2" />
+                            Exporter
+                        </Button>
+                    }
                 >
                     <>
-                        {/* Bouton d'export */}
-                        <div className="flex justify-end mb-6">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleExport}
-                            >
-                                <Download className="h-4 w-4 mr-2" />
-                                Exporter
-                            </Button>
-                        </div>
-
                         {/* Vérifier s'il y a des résultats après filtrage */}
                         {filteredEvaluations.length === 0 && (filterType !== 'all' || filterStatus !== 'all') ? (
                             <div className="text-center py-12 bg-muted/10 rounded-lg">
@@ -455,14 +455,14 @@ export default function Page() {
                             </div>
                         ) : (
                             <Tabs defaultValue={scheduleList[0]?.schedule_code} className="w-full">
-                                <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${scheduleList.length}, minmax(0, 1fr))` }}>
+                                <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2" style={{ gridTemplateColumns: `repeat(${scheduleList.length}, minmax(0, 1fr))` }}>
                                     {scheduleList.map((schedule) => {
                                         const evaluationCount = evaluationsBySchedule[schedule.schedule_code]?.length || 0;
                                         return (
                                             <TabsTrigger
                                                 key={schedule.schedule_code}
                                                 value={schedule.schedule_code}
-                                                className="text-sm"
+                                                className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
                                             >
                                                 {schedule.sequence_name}
                                                 {evaluationCount > 0 && (
@@ -482,7 +482,7 @@ export default function Page() {
                                         <TabsContent key={schedule.schedule_code} value={schedule.schedule_code} className="mt-6">
                                             <div className="space-y-4">
                                                 {/* Informations du trimestre */}
-                                                <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-lg p-4 border border-primary/20">
+                                                <div className="bg-blue-500/10 rounded-lg p-4 border border-blue-500/20">
                                                     <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
                                                         <Calendar className="w-5 h-5 text-primary" />
                                                         {schedule.sequence_name}
@@ -535,59 +535,50 @@ export default function Page() {
         <>
             <PageHeader
                 title="Gestion des Evaluations"
+                Icon={ClipboardList}
                 description="Programmer la date buttoir de depot des notes de CC et de SN"
             />
             <div className="container mx-auto p-6 space-y-6">
                 {/* Sélecteur de Curriculum */}
-                <Card>
-                    <CardHeader className='flex justify-between items-start'>
-                        <div>
-                            <CardTitle className="flex items-center gap-2">
-                                <BookOpen className="w-5 h-5" />
-                                Sélection du Curriculum
-                            </CardTitle>
-                            <CardDescription className='mt-2'>
-                                Choisissez le programme académique pour lequel vous souhaitez gérer les Examens
-                            </CardDescription>
+                <ContentLayout
+                    title='Sélection du Curriculum'
+                    description="Choisissez le programme académique pour lequel vous souhaitez gérer les Examens"
+                    actions = {
+                        <div className="w-full sm:w-auto flex justify-end">
+                            <Button
+                                variant="info"
+                                onClick={() => { setIplannificationDialogOpen(true) }}
+                                disabled={!selectedCurriculum}
+                            >
+                                <Calendar className="w-4 h-4 mr-2" />
+                                Planifier évaluation
+                            </Button>
                         </div>
-                        <CardAction>
-                            <div className="w-full sm:w-auto flex justify-end">
-                                <Button
-                                    variant="info"
-                                    onClick={() => { setIplannificationDialogOpen(true) }}
-                                    disabled={!selectedCurriculum}
-                                >
-                                    <Calendar className="w-4 h-4 mr-2" />
-                                    Planifier évaluation
-                                </Button>
-                            </div>
-                        </CardAction>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="curriculum-select">
-                                    Curriculum <span className="text-red-600">*</span>
-                                </Label>
-                                <Select
-                                    value={selectedCurriculum}
-                                    onValueChange={setSelectedCurriculum}
-                                >
-                                    <SelectTrigger className="w-full" id="curriculum-select">
-                                        <SelectValue placeholder="Sélectionner un curriculum" />
-                                    </SelectTrigger>
-                                    <SelectContent className="w-full">
-                                        {curriculumList.map((c) => (
-                                            <SelectItem key={c.curriculum_code} value={c.curriculum_code}>
-                                                {c.curriculum_name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                    }
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="curriculum-select">
+                                Curriculum <span className="text-red-600">*</span>
+                            </Label>
+                            <Select
+                                value={selectedCurriculum}
+                                onValueChange={setSelectedCurriculum}
+                            >
+                                <SelectTrigger className="w-full" id="curriculum-select">
+                                    <SelectValue placeholder="Sélectionner un curriculum" />
+                                </SelectTrigger>
+                                <SelectContent className="w-full">
+                                    {curriculumList.map((c) => (
+                                        <SelectItem key={c.curriculum_code} value={c.curriculum_code}>
+                                            {c.curriculum_name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </ContentLayout>
 
                 {/* Contenu conditionnel */}
                 {!selectedCurriculum ? (
@@ -609,26 +600,6 @@ export default function Page() {
 }
 
 // Composant StatCard
-const StatCard = ({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: number; color: string }) => {
-    const colorClasses = {
-        blue: 'bg-blue-50 text-blue-600 border-blue-200',
-        green: 'bg-green-50 text-green-600 border-green-200',
-        yellow: 'bg-yellow-50 text-yellow-600 border-yellow-200',
-        indigo: 'bg-indigo-50 text-indigo-600 border-indigo-200',
-        purple: 'bg-purple-50 text-purple-600 border-purple-200',
-        pink: 'bg-pink-50 text-pink-600 border-pink-200',
-    };
-
-    return (
-        <div className={`p-4 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}>
-            <div className="flex items-center justify-between mb-2">
-                {icon}
-                <span className="text-2xl font-bold">{value}</span>
-            </div>
-            <p className="text-xs font-medium">{label}</p>
-        </div>
-    );
-};
 
 const WelcomeMessage = () => (
     <Card>

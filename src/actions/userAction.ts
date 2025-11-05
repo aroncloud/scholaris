@@ -507,12 +507,15 @@ export async function getFullRoles() {
 }
 
 export async function assignRolesToUser(user_code: string, roleList: string[]) {
+  const _payload = roleList.map(role => ({role_code: role}));
+  console.log('-->_payload', _payload)
   try {
     const session = await verifySession();
+  console.log('-->assignRolesToUser', user_code, roleList)
     
     const token = session.accessToken;
     
-    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/role`, roleList, {
+    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/role`, _payload, {
       headers: {
           Authorization: `Bearer ${token}`,
       },
@@ -530,12 +533,15 @@ export async function assignRolesToUser(user_code: string, roleList: string[]) {
 }
 
 export async function removeUserRoles (user_code: string, roleList: string[]) {
+  const _payload = roleList.map(role => ({role_code: role}));
+  console.log('-->removeUserRoles', user_code, roleList)
+  console.log('-->_payload', _payload)
   try {
     const session = await verifySession();
     
     const token = session.accessToken;
     
-    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/role`, roleList, {
+    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/role`, _payload, {
       headers: {
           Authorization: `Bearer ${token}`,
       },

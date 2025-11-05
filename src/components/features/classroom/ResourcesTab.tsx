@@ -48,33 +48,34 @@ export default function ResourcesTab({ search, filterType, setSearch, setFilterT
   });
 
   // Open edit modal
-  const handleUpdateClassroom = async (classroom: ICreateClassroom) => {
-    if (selectedClassroom) {
-      const result = await updateClassroom(
-        classroom,
-        selectedClassroom.resource_code
-      );
-      console.log("Update classroom result:", result);
+  const handleUpdateClassroom = async (classroom: ICreateClassroom): Promise<boolean> => {
+    if (!selectedClassroom) return false;
 
-      if (result.code === "success") {
-        setIsEditClassRoomDialogOpen(false);
-        showToast({
-          variant: "success-solid",
-          message: "Salle mise à jour avec succès",
-          description: `${classroom.resource_name} a été mise à jour.`,
-          position: "top-center",
-        });
-        await refresh();
-      } else {
-        showToast({
-          variant: "error-solid",
-          message: "Impossible de mettre à jour la salle",
-          description:
-            result.error ??
-            "Une erreur est survenue, essayez encore ou contactez l'administrateur",
-          position: "top-center",
-        });
-      }
+    const result = await updateClassroom(
+      classroom,
+      selectedClassroom.resource_code
+    );
+    console.log("Update classroom result:", result);
+
+    if (result.code === "success") {
+      showToast({
+        variant: "success-solid",
+        message: "Salle mise à jour avec succès",
+        description: `${classroom.resource_name} a été mise à jour.`,
+        position: "top-center",
+      });
+      await refresh();
+      return true;
+    } else {
+      showToast({
+        variant: "error-solid",
+        message: "Impossible de mettre à jour la salle",
+        description:
+          result.error ??
+          "Une erreur est survenue, essayez encore ou contactez l'administrateur",
+        position: "top-center",
+      });
+      return false;
     }
   };
 
@@ -229,14 +230,12 @@ const handleDeleteClassroom = async () => {
         </CardContent>
       </Card>
 
-      {selectedClassroom && (
-        <DialogUpdateClassroom
-          open={isEditClassRoomDialogOpen}
-          onOpenChange={setIsEditClassRoomDialogOpen}
-          classroom={selectedClassroom}
-          onSave={handleUpdateClassroom}
-        />
-      )}
+      <DialogUpdateClassroom
+        open={isEditClassRoomDialogOpen}
+        onOpenChange={setIsEditClassRoomDialogOpen}
+        classroom={selectedClassroom}
+        onSave={handleUpdateClassroom}
+      />
 
       
       <DialogDeleteGeneric

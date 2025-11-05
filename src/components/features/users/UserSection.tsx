@@ -27,9 +27,10 @@ import { Avatar } from "@/components/custom-ui/Avatar";
 
 interface MyProps {
   roles: IGetRole[];
+  userData: ReturnType<typeof useUserData>;
 }
 
-export default function UserSection({ roles }: MyProps) {
+export default function UserSection({ roles, userData }: MyProps) {
   const [roleModal, setRoleModal] = useState<{ user: IGetUser | null; open: boolean }>({
     user: null,
     open: false,
@@ -38,7 +39,7 @@ export default function UserSection({ roles }: MyProps) {
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState("")
-  
+
   const {
     handleDeactivateUser,
     handleDeleteUser,
@@ -47,7 +48,7 @@ export default function UserSection({ roles }: MyProps) {
     loadingUserData,
     userList,
     fetchUserList
-  } = useUserData();
+  } = userData;
   
   const handleUpdateUserRole = async (userId: string, _rolesToRemove: string[], _rolesToAdd: string[]) => {
     console.log("-->_roleToRemove", _rolesToRemove)
@@ -116,6 +117,7 @@ export default function UserSection({ roles }: MyProps) {
           <Avatar
             fallback={(user.first_name + " " + user.last_name)}
             variant={"info"}
+            className="hidden sm:flex"
           />
         <div>
         <div className="font-medium">{user.first_name} {user.last_name}</div>
@@ -123,6 +125,7 @@ export default function UserSection({ roles }: MyProps) {
         </div>
         </div>
       ),
+      priority: "low"
     },
     {
       key: "profiles",
@@ -137,69 +140,72 @@ export default function UserSection({ roles }: MyProps) {
       ) : (
         <div className="text-center">-</div>
       ),
+      priority: "low"
     },
     {
       key: "status_code",
       label: "Statut",
       render: value => <Badge size="sm" value={value} label={value} />,
+      priority: "low"
     },
     {
       key: "actions",
       label: "Actions",
       render: (_, user) => (
         <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-        <MoreHorizontal className="h-4 w-4" />
-        </Button>
-        </DropdownMenuTrigger>
-        
-        <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem asChild>
-        <Link
-        href={`/dashboard/admin/users/${user.user_code}`}
-        className="flex items-center cursor-pointer"
-        >
-        <Edit className="mr-2 h-4 w-4" /> Plus de détail
-        </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem
-        onClick={() => {
-          console.log("-->user", user)
-          setSelectedUser(user.user_code)
-          setRoleModal({ user, open: true })
-        }}
-        className="flex items-center cursor-pointer"
-        >
-        <Shield className="mr-2 h-4 w-4" /> Gérer les rôles
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={() => {
-          setDeactivateDialogOpen(true)
-          setSelectedUser(user.user_code)}
-        }>
-        {user.status_code === "ACTIVE" ? (
-          <><UserX className="mr-2 h-4 w-4" /> Désactiver</>
-        ) : (
-          <><UserCheck className="mr-2 h-4 w-4" /> Activer</>
-        )}
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem className="text-red-600" onClick={() => {
-          setSelectedUser(user.user_code)
-          setDeleteDialogOpen(true)
-        }}>
-        <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-        </DropdownMenuItem>
-        </DropdownMenuContent>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+              <Link
+              href={`/dashboard/admin/users/${user.user_code}`}
+              className="flex items-center cursor-pointer"
+              >
+                <Edit className="mr-2 h-4 w-4" /> Plus de détail
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem
+              onClick={() => {
+                console.log("-->user", user)
+                setSelectedUser(user.user_code)
+                setRoleModal({ user, open: true })
+              }}
+              className="flex items-center cursor-pointer"
+            >
+              <Shield className="mr-2 h-4 w-4" /> Gérer les rôles
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            
+              <DropdownMenuItem onClick={() => {
+                setDeactivateDialogOpen(true)
+                setSelectedUser(user.user_code)}
+              }>
+                {user.status_code === "ACTIVE" ? (
+                  <><UserX className="mr-2 h-4 w-4" /> Désactiver</>
+                ) : (
+                  <><UserCheck className="mr-2 h-4 w-4" /> Activer</>
+                )}
+              </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            
+            <DropdownMenuItem className="text-red-600" onClick={() => {
+              setSelectedUser(user.user_code)
+              setDeleteDialogOpen(true)
+            }}>
+              <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
       ),
+      priority: "high"
     },
   ], []);
   
@@ -253,16 +259,16 @@ export default function UserSection({ roles }: MyProps) {
   return (
     <>
       <ContentLayout
-        title={`Utilisateurs (${userList.filter((user: IGetUser) => 
-                user.profiles?.some(profile => profile.role_code != "STUDENT")).length})`}
+        title={`Utilisateurs (${userList.filter((user: IGetUser) =>
+                !user.profiles?.some(profile => profile.role_code === "STUDENT")).length})`}
         description="Liste de tous les utilisateurs du système"
         actions
       >
-      
+
         <ResponsiveTable
           columns={userColumns}
-          data={userList.filter((user: IGetUser) => 
-                user.profiles?.some(profile => profile.role_code != "STUDENT"))}
+          data={userList.filter((user: IGetUser) =>
+                !user.profiles?.some(profile => profile.role_code === "STUDENT"))}
           searchKey={["first_name", "last_name", "email"]}
           paginate={10}
           isLoading={loadingUserData}

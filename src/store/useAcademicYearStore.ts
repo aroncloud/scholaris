@@ -10,6 +10,8 @@ interface AcademicYearStoreState {
   loading: boolean;
   error: string | null;
   selectedAcademicYear: string | null;
+  isChangingYear: boolean;
+  newYearLabel: string;
 
   setAcademicYears: (data: IGetAcademicYears[]) => void;
   addAcademicYear: (data: IGetAcademicYears) => void;
@@ -22,6 +24,7 @@ interface AcademicYearStoreState {
 
   setSelectedAcademicYear: (yearCode: string) => void;
   clearSelectedAcademicYear: () => void;
+  setIsChangingYear: (isChanging: boolean, yearLabel?: string) => void;
 }
 
 export const useAcademicYearStore = create<AcademicYearStoreState>()(
@@ -31,6 +34,8 @@ export const useAcademicYearStore = create<AcademicYearStoreState>()(
       loading: false,
       error: null,
       selectedAcademicYear: null,
+      isChangingYear: false,
+      newYearLabel: "",
 
       setAcademicYears: (data) => set({ academicYears: data }),
       addAcademicYear: (data) =>
@@ -82,6 +87,10 @@ export const useAcademicYearStore = create<AcademicYearStoreState>()(
       clearSelectedAcademicYear: () => {
         set({ selectedAcademicYear: null });
         console.log("[AcademicYearStore] Cleared selected year");
+      },
+      setIsChangingYear: (isChanging, yearLabel = "") => {
+        set({ isChangingYear: isChanging, newYearLabel: yearLabel });
+        console.log(`[AcademicYearStore] Changing year state: ${isChanging}, label: ${yearLabel}`);
       },
     }),
     {

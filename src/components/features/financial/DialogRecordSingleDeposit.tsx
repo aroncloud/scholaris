@@ -102,7 +102,7 @@ export default function DialogRecordSingleDeposit({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="md:min-w-xl lg:min-w-2xl max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-6 text-white shrink-0">
+        <div className="bg-slate-50 px-6 py-6 border-b shrink-0">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">
               Enregistrer un paiement
@@ -123,7 +123,7 @@ export default function DialogRecordSingleDeposit({
                 <Label className="flex items-center gap-2">
                   <span>Étudiant</span>
                   {studentSummary && studentSummary.remaining_balance === 0 && (
-                    <Badge value="Soldé" variant="success" size="sm" />
+                    <Badge value="Soldé" variant="success" size="sm" label={"Soldé"}/>
                   )}
                 </Label>
                 <Input

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { Dispatch, SetStateAction, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import Badge from '@/components/custom-ui/Badge';
 import {
@@ -12,9 +12,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Eye, Plus, Download, Upload } from "lucide-react";
+import { MoreHorizontal, Edit, Eye, Download, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ICreateStudent, IListStudent } from "@/types/staffType";
+import { IListStudent } from "@/types/staffType";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 import ContentLayout from "@/layout/ContentLayout";
 import ApplicationImportWizard, { FieldMapping } from "../students/ApplicationImportWizard";
@@ -24,21 +24,13 @@ import { IRecordDeposit } from "@/types/financialTypes";
 import { useFactorizedProgramStore } from "@/store/programStore";
 
 type CurrentStudentsListProps = {
-  setIsStudentDialogOpen: Dispatch<SetStateAction<boolean>>;
-  setStudentToDelete: Dispatch<SetStateAction<string | null>>;
-  setDeleteDialogOpen: Dispatch<SetStateAction<boolean>>;
   studentList: IListStudent[];
-  setAction: Dispatch<SetStateAction<"CREATE" | "UPDATE">>;
-  setFormData: Dispatch<React.SetStateAction<Partial<ICreateStudent>>>;
   loading: boolean;
   onRecordPayment?: (deposit: IRecordDeposit) => Promise<boolean>;
 };
 
 export default function CurrentStudentsList({
-  setFormData,
-  setIsStudentDialogOpen,
   studentList,
-  setAction,
   loading,
   onRecordPayment
 }: CurrentStudentsListProps) {
@@ -95,7 +87,7 @@ export default function CurrentStudentsList({
           <Avatar
             fallback={`${data.first_name} ${data.last_name}`}
             variant={"info"}
-            className="hidden md:block"
+            className="hidden md:flex"
           />
           <div>
             <div className="font-semibold text-gray-900">
@@ -125,18 +117,18 @@ export default function CurrentStudentsList({
         <Badge size="sm" value={row.status_code} label={row.status_code} />
       )
     },
-    {
-      key: "financial_status",
-      label: "Financier",
-      priority: 'high',
-      render: (_, row) => (
-        <Badge size="sm" value={row.financial_status ?? "N/A"} label={row.financial_status ?? "N/A"}/>
-      )
-    },
+    // {
+    //   key: "financial_status",
+    //   label: "Financier",
+    //   priority: 'high',
+    //   render: (_, row) => (
+    //     <Badge size="sm" value={row.financial_status ?? "N/A"} label={row.financial_status ?? "N/A"}/>
+    //   )
+    // },
     {
       key: "actions",
       label: "Actions",
-      priority: 'medium',
+      priority: 'high',
       render: (_, row) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -146,13 +138,13 @@ export default function CurrentStudentsList({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-[200px]">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => handleViewStudentDetails(row.user_code)}>
-              <Eye className="mr-2 h-4 w-4"/>
-              Voir dossier complet
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleOpenPaymentDialog(row)}>
               <Edit className="mr-2 h-4 w-4"/>
               Enregistrer un paiement
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleViewStudentDetails(row.user_code)}>
+              <Eye className="mr-2 h-4 w-4"/>
+              Voir dossier complet
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -166,29 +158,7 @@ export default function CurrentStudentsList({
         title="Étudiants actuels"
         description="Liste des étudiants actuellement inscrits"
         actions={
-          <div className="mt-4 md:mt-0 space-x-3">
-            <Button
-              onClick={() => {
-                setAction("CREATE");
-                setFormData({
-                  password_plaintext: "",
-                  email: "",
-                  first_name: "",
-                  last_name: "",
-                  gender: "MALE",
-                  phone_number: "",
-                  curriculum_code: "",
-                  student_number: "",
-                  education_level_code: "LICENCE"
-                });
-                setIsStudentDialogOpen(true);
-              }}
-              variant="info"
-              className="ml-4"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nouvel étudiant
-            </Button>
+          <div className="mt-4 md:mt-0 space-x-3 flex flex-row justify-between md:block w-full">
             <Button variant="outline" className="text-sm w-full sm:w-fit flex-1 sm:flex-none">
               <Download className="h-4 w-4 mr-2" />
               Exporter

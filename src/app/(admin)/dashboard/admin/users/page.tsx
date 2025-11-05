@@ -18,7 +18,8 @@ import { IHireExistingStaff } from "@/types/userType";
 // Component
 export default function UsersPage() {
   const { loadingRole, roles } = useRoleData()
-  const { handleCreateUser } = useUserData()
+  const userData = useUserData()
+  const { handleCreateUser } = userData
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const pageTitle = "Gestion des utilisateurs";
   const pageDescription = "Gérez les utilisateurs, rôles et permissions du système";
@@ -56,7 +57,7 @@ export default function UsersPage() {
         title={pageTitle}
         description={pageDescription}
       >
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row gap-2 space-x-2 w-full">
           <Button variant="outline">
             <Upload className="h-4 w-4 mr-2" /> Importer
           </Button>
@@ -73,7 +74,7 @@ export default function UsersPage() {
       </PageHeader>
 
       {/* Tabs */}
-      <Tabs defaultValue="users" className="p-6">
+      <Tabs defaultValue="users" className="px-2 md:px-6 pb-6">
         <TabsList className="bg-white rounded-xl border border-slate-200 p-1 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
           <TabsTrigger value="users"
             className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
@@ -84,7 +85,7 @@ export default function UsersPage() {
         </TabsList>
         <TabsContents>
           <TabsContent value="users" className="space-y-4">
-            <UserSection roles={roles} />
+            <UserSection roles={roles} userData={userData} />
           </TabsContent>
 
           <TabsContent value="roles" className="space-y-4">

@@ -21,9 +21,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { IHireExistingStaff } from "@/types/userType";
-import { User, Briefcase, Lock, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { User, Briefcase, Lock, ChevronRight, ChevronLeft } from "lucide-react";
 import { MARITAl_STATUS } from "@/constant";
 import { DatePicker } from "@/components/DatePicker";
+import { useConfigStore } from "@/lib/store/configStore";
+import { Combobox } from "@/components/ui/Combobox";
 
 interface DialogCreateUserProps {
   open: boolean;
@@ -40,6 +42,8 @@ const STEPS = [
 export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUserProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { getEthnicities } = useConfigStore();
+  const ethnicities = getEthnicities();
 
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue, control } = useForm<IHireExistingStaff>();
 
@@ -47,12 +51,7 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
     console.log("-->data", data)
     setIsSubmitting(true);
     try {
-      // Add default staff_number value
-      const payload = {
-        ...data,
-        staff_number: "123"
-      };
-      const success = await onSave(payload as any);
+      const success = await onSave(data);
 
       // Only close and reset if successful
       if (success) {
@@ -124,7 +123,10 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
                     selected={field.value ? new Date(field.value) : undefined}
                     onChange={(date) => {
                       if (date) {
-                        field.onChange(date.toISOString().split('T')[0]);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        field.onChange(`${year}-${month}-${day}`);
                       } else {
                         field.onChange(undefined);
                       }
@@ -141,9 +143,19 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
             </div>
 
             <div className="space-y-2">
+              <Label>Email secondaire</Label>
+              <Input type="email" {...register("other_email")} placeholder="autre@email.com" />
+            </div>
+
+            <div className="space-y-2">
               <Label>Téléphone <span className="text-red-500">*</span></Label>
               <Input {...register("phone_number", { required: true })} placeholder="+237 6 77 12 34 00" />
               {errors.phone_number && <p className="text-xs text-red-500">Téléphone requis</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Téléphone secondaire</Label>
+              <Input {...register("other_phone")} placeholder="+237 6 99 88 77 66" />
             </div>
 
             <div className="space-y-2">
@@ -164,6 +176,7 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
               <Label>Lieu de naissance</Label>
               <Input {...register("place_of_birth")} placeholder="Yaoundé" />
             </div>
+
           </div>
         );
 
@@ -193,7 +206,10 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
                     selected={field.value ? new Date(field.value) : undefined}
                     onChange={(date) => {
                       if (date) {
-                        field.onChange(date.toISOString().split('T')[0]);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        field.onChange(`${year}-${month}-${day}`);
                       } else {
                         field.onChange(undefined);
                       }
@@ -216,13 +232,67 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
             </div>
 
             <div className="space-y-2">
+              <Label>Date de délivrance CNI</Label>
+              <Controller
+                control={control}
+                name="cni_issue_date"
+                render={({ field }) => (
+                  <DatePicker
+                    label=""
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onChange={(date) => {
+                      if (date) {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        field.onChange(`${year}-${month}-${day}`);
+                      } else {
+                        field.onChange(undefined);
+                      }
+                    }}
+                  />
+                )}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Lieu de délivrance CNI</Label>
+              <Input {...register("cni_issue_location")} placeholder="Yaoundé" />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Ethnie</Label>
+              <Controller
+                name="ethnicity_code"
+                control={control}
+                render={({ field }) => (
+                  <Combobox
+                    options={ethnicities.map(eth => ({
+                      value: eth.ethnicity_code,
+                      label: eth.ethnicity_name
+                    }))}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    placeholder="Sélectionner une ethnie"
+                    className='py-5'
+                  />
+                )}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label>Ville</Label>
               <Input {...register("city")} placeholder="Yaoundé" />
             </div>
 
-            <div className="space-y-2">
-              <Label>Adresse</Label>
+            <div className="space-y-2 col-span-2">
+              <Label>Adresse de résidence</Label>
               <Input {...register("address_details")} placeholder="Quartier Bastos" />
+            </div>
+
+            <div className="space-y-2 col-span-2">
+              <Label>URL Avatar</Label>
+              <Input {...register("avatar_url")} placeholder="https://exemple.com/avatar.jpg" />
             </div>
           </div>
         );
@@ -248,31 +318,14 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="md:min-w-2xl">
         <DialogHeader>
           <DialogTitle>Créer un nouvel utilisateur</DialogTitle>
           <DialogDescription>Étape {currentStep} sur {STEPS.length}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex justify-between mb-6">
-          {STEPS.map((step, index) => {
-            const Icon = step.icon;
-            const isActive = currentStep === step.id;
-            const isCompleted = currentStep > step.id;
 
-            return (
-              <div key={step.id} className="flex items-center flex-1">
-                <div className="flex flex-col items-center flex-1">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${isActive ? "border-blue-600 bg-blue-600 text-white" : isCompleted ? "border-green-600 bg-green-600 text-white" : "border-gray-300"}`}>
-                    {isCompleted ? <Check className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
-                  </div>
-                  <p className={`text-xs mt-2 ${isActive ? "text-blue-600 font-medium" : "text-gray-600"}`}>{step.title}</p>
-                </div>
-                {index < STEPS.length - 1 && <div className={`h-0.5 w-full ${isCompleted ? "bg-green-600" : "bg-gray-300"}`} />}
-              </div>
-            );
-          })}
-        </div>
+
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="py-4">{renderStepContent()}</div>

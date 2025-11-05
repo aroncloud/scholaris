@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Search, ListCollapse, Inbox, Eraser } from "lucide-react";
+import { Search, ListCollapse, Inbox, Eraser, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ interface FilterOption {
 interface DataTableProps<T> {
   columns: TableColumn<T>[];
   data: T[];
-  searchKey?: string | string[]; // Changé : accepte des strings pour les chemins imbriqués
+  searchKey?: string | string[];
   paginate?: number;
   showMore?: ShowMoreOption;
   onRowClick?: (row: T) => void;
@@ -109,6 +109,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const highPriorityColumns = columns.filter((col) => col.priority === 'high');
   const mediumPriorityColumns = columns.filter((col) => col.priority === 'medium');
@@ -135,7 +136,6 @@ export const ResponsiveTable = <T extends Record<string, any>>({
       const sel = selectedFilters[f.key];
       if (sel && sel !== "") {
         const valStr = String(getValueByKey(row, f.key)).toLowerCase();
-        // Comparaison stricte pour les booléens
         if (sel === "true" || sel === "false") {
           if (valStr !== sel) return false;
         } else {
@@ -167,69 +167,90 @@ export const ResponsiveTable = <T extends Record<string, any>>({
   const anyFilterActive = Object.values(selectedFilters).some((v) => v && v !== "");
 
   return (
-    <div className="w-full space-y-6">
-      {/* Barre recherche + filtres */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Barre de recherche - prend tout l'espace disponible */}
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500 pointer-events-none z-10" />
+    <div className="w-full space-y-4">
+      {/* Barre recherche + filtres compacte - Mobile uniquement */}
+      <div className="md:hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div className="space-y-3">
+          {/* Barre de recherche */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none z-10" />
             <Input
               placeholder={locale === "fr" ? "Rechercher..." : "Search..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-11 pr-4 h-11 w-full border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:bg-white dark:focus:bg-gray-800 focus:border-blue-400 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 transition-all shadow-sm"
+              className="pl-10 pr-4 h-10 w-full text-sm"
               disabled={isLoading}
             />
           </div>
 
-          {/* Section Filtres - largeur fixe pour stabilité */}
+          {/* Toggle filtres */}
           {filters.length > 0 && (
-            <div className="flex flex-wrap sm:flex-nowrap gap-3 items-center">
-              {filters.map((filter) => (
-                <div key={filter.key} className="w-full sm:w-[240px] flex-shrink-0">
-                  <Combobox
-                    value={selectedFilters[filter.key] || ""}
-                    className="h-11"
-                    onChange={(value) =>
-                      setSelectedFilters((prev) => ({
-                        ...prev,
-                        [filter.key]: value,
-                      }))
-                    }
-                    options={[
-                      { value: "", label: locale === "fr" ? "Tous" : "All" },
-                      ...filter.values
-                    ]}
-                    placeholder={
-                      locale === "fr"
-                        ? `Filtrer par ${filter.key}`
-                        : `Filter by ${filter.key}`
-                    }
-                  />
-                </div>
-              ))}
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full h-9"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <ChevronDown className={`w-4 h-4 mr-2 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                {locale === "fr" ? "Filtres" : "Filters"}
+                {anyFilterActive && (
+                  <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
+                    {Object.values(selectedFilters).filter(v => v && v !== "").length}
+                  </span>
+                )}
+              </Button>
 
-              {anyFilterActive && (
-                <Button
-                  size="sm"
-                  variant="outline-info"
-                  className="h-11 px-4 whitespace-nowrap flex-shrink-0"
-                  onClick={() => setSelectedFilters({})}
-                >
-                  <Eraser className="w-4 h-4 mr-2" />
-                  {locale === "fr" ? "Réinitialiser" : "Reset"}
-                </Button>
+              {showFilters && (
+                <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                  {filters.map((filter) => (
+                    <Combobox
+                      key={filter.key}
+                      value={selectedFilters[filter.key] || ""}
+                      className="h-9 text-sm"
+                      onChange={(value) =>
+                        setSelectedFilters((prev) => ({
+                          ...prev,
+                          [filter.key]: value,
+                        }))
+                      }
+                      options={[
+                        { value: "", label: locale === "fr" ? "Tous" : "All" },
+                        ...filter.values
+                      ]}
+                      placeholder={
+                        locale === "fr"
+                          ? `Filtrer par ${filter.key}`
+                          : `Filter by ${filter.key}`
+                      }
+                    />
+                  ))}
+                  {anyFilterActive && (
+                    <Button
+                      size="sm"
+                      variant="outline-info"
+                      className="w-full h-9"
+                      onClick={() => {
+                        setSelectedFilters({});
+                        setShowFilters(false);
+                      }}
+                    >
+                      <Eraser className="w-4 h-4 mr-2" />
+                      {locale === "fr" ? "Réinitialiser" : "Reset"}
+                    </Button>
+                  )}
+                </div>
               )}
+            </>
+          )}
+
+          {/* Compteur résultats */}
+          {(searchTerm || anyFilterActive) && (
+            <div className="text-xs text-gray-600 dark:text-gray-400">
+              <span className="font-medium text-gray-900 dark:text-gray-100">{filteredData.length}</span> {locale === "fr" ? "résultat" : "result"}{filteredData.length !== 1 ? "s" : ""}
             </div>
           )}
         </div>
-
-        {searchTerm && (
-          <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-            <span className="font-medium text-gray-900 dark:text-gray-100">{filteredData.length}</span> {locale === "fr" ? "résultat" : "result"}{filteredData.length !== 1 ? "s" : ""} {locale === "fr" ? "trouvé" : "found"}{filteredData.length !== 1 ? "s" : ""}
-          </div>
-        )}
       </div>
 
       {/* Vue Mobile - Cartes */}
@@ -312,15 +333,82 @@ export const ResponsiveTable = <T extends Record<string, any>>({
         )}
       </div>
 
-      {/* Vue Desktop - Tableau */}
+      {/* Vue Desktop - Tableau avec recherche intégrée */}
       <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead>
+            {/* Ligne de recherche et filtres */}
+            <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+              <th colSpan={columns.length} className="px-6 py-3">
+                <div className="flex items-center gap-3">
+                  {/* Barre de recherche compacte */}
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none z-10" />
+                    <Input
+                      placeholder={locale === "fr" ? "Rechercher..." : "Search..."}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 h-9 w-full text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600"
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  {/* Filtres en ligne */}
+                  {filters.length > 0 && (
+                    <div className="flex items-center gap-2 flex-1">
+                      {filters.map((filter) => (
+                        <div key={filter.key} className="w-44">
+                          <Combobox
+                            value={selectedFilters[filter.key] || ""}
+                            className="h-9 text-sm"
+                            onChange={(value) =>
+                              setSelectedFilters((prev) => ({
+                                ...prev,
+                                [filter.key]: value,
+                              }))
+                            }
+                            options={[
+                              { value: "", label: locale === "fr" ? "Tous" : "All" },
+                              ...filter.values
+                            ]}
+                            placeholder={
+                              locale === "fr"
+                                ? `${filter.key}`
+                                : `${filter.key}`
+                            }
+                          />
+                        </div>
+                      ))}
+
+                      {anyFilterActive && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-9 px-3"
+                          onClick={() => setSelectedFilters({})}
+                        >
+                          <Eraser className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Compteur de résultats */}
+                  {(searchTerm || anyFilterActive) && (
+                    <div className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">{filteredData.length}</span> {locale === "fr" ? "résultat" : "result"}{filteredData.length !== 1 ? "s" : ""}
+                    </div>
+                  )}
+                </div>
+              </th>
+            </tr>
+
+            {/* Ligne d'en-têtes de colonnes */}
             <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
               {columns.map((col) => (
                 <th
                   key={uuidv4()}
-                  className="px-6 py-4 text-left font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide text-xs"
+                  className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide text-xs"
                 >
                   {isLoading ? (
                     <div className="h-4 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-500 rounded w-24 animate-pulse"></div>
@@ -380,59 +468,6 @@ export const ResponsiveTable = <T extends Record<string, any>>({
           </tbody>
         </table>
       </div>
-
-      {/* Mobile View */}
-      <div className="md:hidden space-y-2">
-        {paginatedData.map((row) => (
-          <div
-            key={uuidv4()}
-            onClick={() => onRowClick?.(row)}
-            className="bg-white dark:bg-gray-800 rounded p-5 shadow-sm border dark:border-gray-600 my-2 space-y-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-500 ease-in-out"
-          >
-            <div className="space-y-2">
-              {highPriorityColumns.map((col) => (
-                <div key={uuidv4()} className="flex justify-between items-start">
-                  <span className=" font-medium text-gray-600 dark:text-gray-200">
-                    {col.label} :
-                  </span>
-                  <span className=" text-right text-gray-600 dark:text-white">
-                    {col.render ? col.render(row[col.key], row) : row[col.key]}
-                  </span>
-                </div>
-              ))}
-            </div>
-            {mediumPriorityColumns.length > 0 && <hr className="border-t border-gray-200 dark:border-gray-700" />}
-            <div className="space-y-2">
-              {mediumPriorityColumns.map((col) => (
-                <div key={uuidv4()} className="flex justify-between items-start">
-                  <span className=" font-medium text-gray-600 dark:text-gray-300">
-                    {col.label} :
-                  </span>
-                  <span className=" text-right text-gray-600 dark:text-gray-200">
-                    {col.render ? col.render(row[col.key], row) : row[col.key]}
-                  </span>
-                </div>
-              ))}
-            </div>
-            {lowPriorityColumns.length > 0 && <hr className="border-t border-gray-200 dark:border-gray-700" />}
-            {lowPriorityColumns.length > 0 && (
-              <div className="space-y-2">
-                {lowPriorityColumns.map((col) => (
-                  <div key={uuidv4()} className="flex justify-between items-start">
-                    <span className=" text-gray-500 dark:text-gray-300">
-                      {col.label} :
-                    </span>
-                    <span className=" text-right text-gray-600 dark:text-gray-200">
-                      {col.render ? col.render(row[col.key], row) : row[col.key]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
 
       {/* Pagination */}
       {!isLoading && paginate && totalPages > 1 && (

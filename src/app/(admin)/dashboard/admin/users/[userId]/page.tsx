@@ -154,18 +154,20 @@ const UserDetailPage = () => {
           backLabel='Utilisateurs'
           backUrl='/dashboard/admin/users'
           status={<Badge className={getStatusColor(userDetail.status_code)}>{userDetail.status_code}</Badge>}
+          description="Detail de l'utilisateur"
         >
 
-          <div className="flex items-center space-x-3 shrink-0">
-            <Button onClick={handleEdit} variant="outline-info" className="shrink-0" disabled={processing}>
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+            <Button onClick={handleEdit} variant="info" className="flex-1 w-full" disabled={processing}>
               <Edit className="h-4 w-4 mr-2" />
               Modifier
             </Button>
 
             <Button 
-              variant={userDetail.status_code === 'ACTIVE' ? 'outline-danger' : 'outline-success'}
+              variant={userDetail.status_code === 'ACTIVE' ? 'danger' : 'success'}
               onClick={() => setDeactivateDialogOpen(true)}
-               disabled={processing}
+              disabled={processing}
+              className=' flex-1 w-full'
             >
               <XCircle className="h-4 w-4 mr-2" />
               {userDetail.status_code === 'ACTIVE' ? 'Désactiver' : 'Activer'}
@@ -174,8 +176,8 @@ const UserDetailPage = () => {
             <Button 
               onClick={() => setDeleteDialogOpen(true)} 
               variant="danger" 
-              className="shrink-0"
-               disabled={processing}
+              className="flex-1 w-full"
+              disabled={processing}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Supprimer
@@ -227,9 +229,15 @@ const UserDetailPage = () => {
                     <dd className="mt-1 text-sm text-gray-900">{userDetail.marital_status_code || 'Non renseigné'}</dd>
                   </div>
                 </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Ethnie</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{userDetail.ethnicity_code || 'Non renseigné'}</dd>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">Ethnie</dt>
+                    <dd className="mt-1 text-sm text-gray-900">{userDetail.ethnicity_code || 'Non renseigné'}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">Statut</dt>
+                    <dd className="mt-1 text-sm text-gray-900">{userDetail.status_code || 'Non renseigné'}</dd>
+                  </div>
                 </div>
               </CardContent>
             </Card>

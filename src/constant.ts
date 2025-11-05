@@ -24,6 +24,24 @@ export const PLANIFICATION_FILTER = [
   { value: PlanificationStatus.RESSOURCE, label: "Ressource" },
 ];
 
+export const INSTALLMENT_TYPES_LIST = [
+  {
+    "value": "INSCRIPTION",
+    "title": "Frais d'Inscription",
+    order: 1,
+  },
+  {
+    "value": "TRANCHE_1",
+    "title": "Première Tranche Scolarité",
+    order: 2,
+  },
+  {
+    "value": "TRANCHE_2",
+    "title": "Deuxième Tranche Scolarité",
+    order: 3,
+  }
+]
+
 
 export const USER_ROLE = [
   {

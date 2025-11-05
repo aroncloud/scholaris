@@ -96,8 +96,7 @@ export default function StudentDetailPage() {
             }
           >
             <div className="flex items-center justify-end space-x-3">
-              {!['ENROLLED', 'PROMOTED'].includes(student?.student_status_code || '') && (
-                <Button
+              <Button
                   onClick={finalizeInscription}
                   className="bg-primary hover:bg-primary/90 text-white"
                   variant={"info"}
@@ -105,7 +104,6 @@ export default function StudentDetailPage() {
                 >
                   {isProcessing ? "Finaliser en cours ..." : "Finaliser l'inscription"}
                 </Button>
-              )}
             </div>
           </PageHeader>
 

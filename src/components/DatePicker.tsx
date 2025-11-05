@@ -41,8 +41,16 @@ export function DatePicker({
   }, [selected])
 
   const handleSelect = (selectedDate: Date | undefined) => {
-    setDate(selectedDate)
-    if (onChange) onChange(selectedDate)
+    // Normalize the date to noon local time to avoid timezone issues
+    // when converting to ISO string
+    let normalizedDate = selectedDate
+    if (selectedDate) {
+      normalizedDate = new Date(selectedDate)
+      normalizedDate.setHours(12, 0, 0, 0)
+    }
+
+    setDate(normalizedDate)
+    if (onChange) onChange(normalizedDate)
     setOpen(false)
   }
 
