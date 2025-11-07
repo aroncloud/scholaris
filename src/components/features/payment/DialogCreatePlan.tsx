@@ -202,21 +202,9 @@ export default function DialogCreatePlan({
       if (success) {
         reset()
         onOpenChange(false)
-        showToast({
-          variant: "success-solid",
-          message: "Succès",
-          description: "La grille tarifaire a été créée avec succès",
-          position: "top-center",
-        })
       }
     } catch (error) {
       console.error(error)
-      showToast({
-        variant: "error-solid",
-        message: "Erreur",
-        description: "Une erreur est survenue lors de la création",
-        position: "top-center",
-      })
     }
   }
 

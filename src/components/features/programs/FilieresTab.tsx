@@ -1,27 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
-import { useState, useMemo } from "react";
-import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle
-} from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Badge from '@/components/custom-ui/Badge';
-import { TabsContent } from "@/components/ui/tabs";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from "@/components/ui/table";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from "@/components/ui/select";
 
 import {
-  FileText, Search, MoreHorizontal, Edit,
+  FileText, MoreHorizontal, Edit,
   Trash2, Plus, Eye, Clock
 } from "lucide-react";
 
@@ -85,21 +74,21 @@ const FilieresTab = ({
     const response = await updateProgram(program);
     console.log("Update program response:", response);
     if (response.code === 'success') {
-        setIsCreateProgramOpen(false);
-        showToast({
-            variant: "success-solid",
-            message: 'Filière mise a jourr avec succès',
-            description: `${program.program_name} a été mis a jour.`,
-            position: 'top-center',
-        })
-        refresh()
+      setIsCreateProgramOpen(false);
+      showToast({
+          variant: "success-solid",
+          message: 'Filière mise a jourr avec succès',
+          description: `${program.program_name} a été mis a jour.`,
+          position: 'top-center',
+      })
+      refresh()
     } else {
-        showToast({
-            variant: "error-solid",
-            message: "Impossible de mettre a jour la filière",
-            description: response.code,
-            position: 'top-center',
-        })
+      showToast({
+          variant: "error-solid",
+          message: "Impossible de mettre a jour la filière",
+          description: response.code,
+          position: 'top-center',
+      })
     }
   }
 
@@ -115,6 +104,7 @@ const FilieresTab = ({
           </div>
         </div>
       ),
+      priority: "medium",
     },
     {
       key: "curriculums",
@@ -125,13 +115,15 @@ const FilieresTab = ({
           <span>{filiere.curriculums.length} ans</span>
         </div>
       ),
+      priority: "medium",
     },
     {
       key: "curriculums",
       label: "Maquettes",
       render: (_, filiere) => (
-        <Badge variant="neutral" size="sm" label={`${filiere.curriculums.length} maquette(s)`} value="curriculum"/>
+        <Badge variant="info" size="sm" label={`${filiere.curriculums.length} maquette(s)`} value="curriculum"/>
       ),
+      priority: "low",
     },
     {
       key: "actions",
@@ -182,6 +174,7 @@ const FilieresTab = ({
           </DropdownMenuContent>
         </DropdownMenu>
       ),
+      priority: "high",
     },
   ];
 

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
-import React, { useCallback, useEffect, useState } from 'react';
-import { BookOpen, Calendar, CheckCircle, Save, Download, Award } from 'lucide-react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { BookOpen, Calendar, CheckCircle, Save, Download, Award, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Combobox } from '@/components/ui/Combobox';
 import { useFactorizedProgramStore } from '@/store/programStore';
 import { useEvaluationData } from '@/hooks/feature/exam/useEvaluationData';
@@ -9,7 +9,6 @@ import { getEvaluationSheet, submitGrades } from '@/actions/examAction';
 import { EvaluationSheet, IStudentEvaluationInfo } from '@/types/examTypes';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ResponsiveTable, TableColumn } from '@/components/tables/ResponsiveTable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { showToast } from '@/components/ui/showToast';
@@ -20,34 +19,42 @@ import PageHeader from '@/layout/PageHeader';
 import ContentLayout from '@/layout/ContentLayout';
 import Badge from '@/components/custom-ui/Badge';
 
-const ScoreInput: React.FC<{
-  student: IStudentEvaluationInfo;
+// Composant mémorisé pour éviter les re-renders
+const ScoreInput = React.memo<{
+  enrollmentCode: string;
+  initialScore: number | null | undefined;
   maxScore: number;
   onScoreChange: (studentCode: string, score: number) => void;
   isModified: boolean;
+  isGraded: boolean;
   locale: "fr" | "en";
-}> = ({ student, maxScore, onScoreChange, isModified, locale }) => {
-  const [localScore, setLocalScore] = useState(student.score?.toString() || '');
+}>(({ enrollmentCode, initialScore, maxScore, onScoreChange, isModified, isGraded, locale }) => {
+  const [localScore, setLocalScore] = useState(initialScore?.toString() || '');
   const [isValid, setIsValid] = useState(true);
+
+  // Synchroniser avec le score initial
+  useEffect(() => {
+    setLocalScore(initialScore?.toString() || '');
+  }, [initialScore]);
 
   const handleChange = (value: string) => {
     setLocalScore(value);
-    
+
     if (value === '') {
       setIsValid(true);
-      onScoreChange(student.enrollment_code, 0);
+      onScoreChange(enrollmentCode, 0);
       return;
     }
-    
+
     const numericValue = parseFloat(value);
-    
+
     if (isNaN(numericValue) || numericValue < 0 || numericValue > maxScore) {
       setIsValid(false);
       return;
     }
-    
+
     setIsValid(true);
-    onScoreChange(student.enrollment_code, numericValue);
+    onScoreChange(enrollmentCode, numericValue);
   };
 
   const getInputClassName = () => {
@@ -56,7 +63,7 @@ const ScoreInput: React.FC<{
       baseClass += " border-red-500 focus:border-red-500";
     } else if (isModified) {
       baseClass += " border-yellow-500 bg-yellow-50";
-    } else if (student.graded) {
+    } else if (isGraded) {
       baseClass += " border-green-500 bg-green-50";
     }
     return baseClass;
@@ -81,7 +88,77 @@ const ScoreInput: React.FC<{
       )}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Ne re-render que si ces propriétés changent
+  return (
+    prevProps.enrollmentCode === nextProps.enrollmentCode &&
+    prevProps.initialScore === nextProps.initialScore &&
+    prevProps.maxScore === nextProps.maxScore &&
+    prevProps.isModified === nextProps.isModified &&
+    prevProps.isGraded === nextProps.isGraded &&
+    prevProps.onScoreChange === nextProps.onScoreChange
+  );
+});
+
+ScoreInput.displayName = 'ScoreInput';
+
+// Composant ligne du tableau mémorisé
+const StudentRow = React.memo<{
+  student: IStudentEvaluationInfo;
+  maxScore: number;
+  currentScore: number | null | undefined;
+  isModified: boolean;
+  onScoreChange: (studentCode: string, score: number) => void;
+}>(({ student, maxScore, currentScore, isModified, onScoreChange }) => {
+  return (
+    <tr className="border-b hover:bg-gray-50">
+      <td className="px-4 py-3">
+        <div className="font-mono text-sm font-medium">
+          {student.student_number}
+        </div>
+      </td>
+      <td className="px-4 py-3">
+        <div className="font-medium">
+          {student.first_name} {student.last_name}
+        </div>
+      </td>
+      <td className="px-4 py-3">
+        <Badge
+          value={student.graded ? "APPROVED" : "PENDING"}
+          label={student.graded ? "APPROVED" : "PENDING"}
+          size='sm'
+        />
+      </td>
+      <td className="px-4 py-3">
+        <div className="flex items-center space-x-2">
+          <ScoreInput
+            enrollmentCode={student.enrollment_code}
+            initialScore={currentScore}
+            maxScore={maxScore}
+            onScoreChange={onScoreChange}
+            isModified={isModified}
+            isGraded={student.graded}
+            locale="fr"
+          />
+          <span className="text-sm text-muted-foreground">
+            / {maxScore}
+          </span>
+        </div>
+      </td>
+    </tr>
+  );
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.student.enrollment_code === nextProps.student.enrollment_code &&
+    prevProps.currentScore === nextProps.currentScore &&
+    prevProps.maxScore === nextProps.maxScore &&
+    prevProps.isModified === nextProps.isModified &&
+    prevProps.student.graded === nextProps.student.graded &&
+    prevProps.onScoreChange === nextProps.onScoreChange
+  );
+});
+
+StudentRow.displayName = 'StudentRow';
 
 const Page = () => {
     const [selectedCurriculum, setSelectedCurriculum] = useState<string>('');
@@ -95,6 +172,11 @@ const Page = () => {
     const [modifiedStudents, setModifiedStudents] = useState<Set<string>>(new Set());
     const [studentGrades, setStudentGrades] = useState<Map<string, number>>(new Map());
 
+    // États pour la recherche et la pagination
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
+
     const { factorizedPrograms } = useFactorizedProgramStore();
     const { examList, fetchtEvaluationsForSchedule } = useEvaluationData();
     const { selectedAcademicYear } = useAcademicYearStore();
@@ -105,6 +187,7 @@ const Page = () => {
         const result = await getListAcademicYearsSchedulesForCurriculum(curriculum_code, academic_year_code);
         setScheduleList(result.data.body)
     }
+
     const updateStudentScore = useCallback((userCode: string, score: number) => {
         setStudentGrades(prev => new Map(prev.set(userCode, score)));
         setModifiedStudents(prev => new Set(prev).add(userCode));
@@ -129,11 +212,13 @@ const Page = () => {
             if(result.code == "success") {
                 const updatedStudents = examSheet.students.map(student => {
                     const newScore = studentGrades.get(student.enrollment_code);
-                    return newScore !== undefined 
+                    return newScore !== undefined
                         ? { ...student, score: newScore, graded: true }
                         : student;
-                });            setExamSheet({
-                ...examSheet,
+                });
+
+                setExamSheet({
+                    ...examSheet,
                     students: updatedStudents,
                 });
 
@@ -177,9 +262,9 @@ const Page = () => {
                         }
                     });
                 }
-                
+
                 setStudentGrades(existingGrades);
-                setModifiedStudents(new Set()); 
+                setModifiedStudents(new Set());
             }
         } catch (error) {
             console.error('Error fetching evaluation:', error);
@@ -204,70 +289,32 @@ const Page = () => {
         getEvaluationInfo();
     }, [getEvaluationInfo, selectedExam]);
 
-    const createColumns = (): TableColumn<IStudentEvaluationInfo>[] => {
-        if (!examSheet) return [];
+    // Filtrage et pagination
+    const filteredStudents = useMemo(() => {
+        if (!examSheet?.students) return [];
 
-        return [
-            {
-                key: "student_number",
-                label: "N° Étudiant",
-                render: (studentNumber: string) => (
-                    <div className="font-mono text-sm font-medium">
-                        {studentNumber}
-                    </div>
-                ),
-                priority: 'medium',
-            },
-            {
-                key: "first_name",
-                label: "Nom Complet",
-                render: (_, student: IStudentEvaluationInfo) => (
-                    <div>
-                        <div className="font-medium">
-                            {student.first_name} {student.last_name}
-                        </div>
-                    </div>
-                ),
-                priority: 'medium',
-            },
-            {
-                key: "graded",
-                label: "Statut",
-                render: (graded: boolean, student: IStudentEvaluationInfo) => {
-                    return (
-                        <Badge
-                            value={student.graded ? "APPROVED" : "PENDING"}
-                            label={student.graded ? "APPROVED" : "PENDING"}
-                            size='sm'
-                        />
-                    );
-                },
-                priority: 'low',
-            },
-            {
-                key: "score",
-                label: `Note (/${examSheet.evaluation.max_score})`,
-                render: (score: number, student: IStudentEvaluationInfo) => (
-                    <div className="flex items-center space-x-2">
-                        <ScoreInput
-                            student={{
-                                ...student,
-                                score: studentGrades.get(student.enrollment_code) ?? student.score
-                            }}
-                            maxScore={examSheet.evaluation.max_score}
-                            onScoreChange={updateStudentScore}
-                            isModified={modifiedStudents.has(student.enrollment_code)}
-                            locale="fr"
-                        />
-                        <span className="text-sm text-muted-foreground">
-                            / {examSheet.evaluation.max_score}
-                        </span>
-                    </div>
-                ),
-                priority: 'high',
-            },
-        ];
-    };
+        if (!searchQuery) return examSheet.students;
+
+        const query = searchQuery.toLowerCase();
+        return examSheet.students.filter(student =>
+            student.first_name.toLowerCase().includes(query) ||
+            student.last_name.toLowerCase().includes(query) ||
+            student.student_number.toLowerCase().includes(query)
+        );
+    }, [examSheet?.students, searchQuery]);
+
+    const paginatedStudents = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return filteredStudents.slice(startIndex, endIndex);
+    }, [filteredStudents, currentPage, itemsPerPage]);
+
+    const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+
+    // Réinitialiser à la page 1 quand la recherche change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery]);
 
     return (
         <>
@@ -282,7 +329,7 @@ const Page = () => {
                         <Download className="w-4 h-4 mr-2" />
                         Exporter
                     </Button>
-                    <Button 
+                    <Button
                         onClick={handleSaveGrades}
                         disabled={modifiedStudents.size === 0 || isSaving}
                         variant={'info'}
@@ -317,8 +364,8 @@ const Page = () => {
                                     Curriculum
                                 </label>
                                 <Combobox
-                                    options={curriculumList.map(curriculum => ({ 
-                                        value: curriculum.curriculum_code, 
+                                    options={curriculumList.map(curriculum => ({
+                                        value: curriculum.curriculum_code,
                                         label: curriculum.curriculum_name
                                     }))}
                                     value={selectedCurriculum}
@@ -334,8 +381,8 @@ const Page = () => {
                                     Trimestre/Semestre
                                 </label>
                                 <Combobox
-                                    options={scheduleList.map(sch => ({ 
-                                        value: sch.schedule_code, 
+                                    options={scheduleList.map(sch => ({
+                                        value: sch.schedule_code,
                                         label: sch.sequence_name
                                     }))}
                                     value={selectedSchedule}
@@ -351,8 +398,8 @@ const Page = () => {
                                     Évaluation
                                 </label>
                                 <Combobox
-                                    options={examList.map(exam => ({ 
-                                        value: exam.evaluation_code, 
+                                    options={examList.map(exam => ({
+                                        value: exam.evaluation_code,
                                         label: exam.title
                                     }))}
                                     value={selectedExam}
@@ -382,6 +429,7 @@ const Page = () => {
                     )}
                     </>
                 </ContentLayout>
+
                 {/* Students Table */}
                 {examSheet && (
                     <Card className="w-full pt-0 overflow-hidden my-6">
@@ -399,7 +447,7 @@ const Page = () => {
                                         size='sm'
                                     />
                                 </div>
-                                
+
                                 {/* Badge de modifications - visible sur tous les écrans */}
                                 {modifiedStudents.size > 0 && (
                                     <Badge
@@ -421,15 +469,15 @@ const Page = () => {
                                             ? new Date(examSheet.evaluation.evaluation_date).toLocaleDateString()
                                             : "Non programmée"}
                                     </span>
-                                    
+
                                     <Separator orientation="vertical" className="hidden sm:block h-4" />
-                                    
+
                                     <span className="flex items-center gap-2">
                                         Note maximale: {examSheet.evaluation.max_score}
                                     </span>
-                                    
+
                                     <Separator orientation="vertical" className="hidden sm:block h-4" />
-                                    
+
                                     <span className="flex items-center gap-2">
                                         Coefficient: {examSheet.evaluation.coefficient}
                                     </span>
@@ -438,18 +486,98 @@ const Page = () => {
                         </CardHeader>
 
                         {/* Table */}
-                        <CardContent className="px-2 md:px-6">
-                            <ResponsiveTable
-                                columns={createColumns()}
-                                data={examSheet.students}
-                                searchKey={["first_name", "last_name", "student_number"]}
-                                paginate={20}
-                                locale="fr"
-                                isLoading={isLoadingExamDetail || isSaving}
-                            />
-                        </CardContent>
-                        </Card>
+                        <CardContent className="px-2 md:px-6 pt-6">
+                            {/* Barre de recherche */}
+                            <div className="mb-4 flex items-center gap-2">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <Input
+                                        type="text"
+                                        placeholder="Rechercher par nom ou numéro d'étudiant..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="pl-10"
+                                    />
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                    {filteredStudents.length} étudiant{filteredStudents.length > 1 ? 's' : ''}
+                                </div>
+                            </div>
 
+                            {/* Tableau */}
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-gray-50 border-b">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">N° Étudiant</th>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Nom Complet</th>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Statut</th>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                                                Note (/{examSheet.evaluation.max_score})
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {isLoadingExamDetail || isSaving ? (
+                                            <tr>
+                                                <td colSpan={4} className="px-4 py-8 text-center">
+                                                    <div className="flex justify-center items-center">
+                                                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : paginatedStudents.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                                                    {searchQuery ? 'Aucun étudiant trouvé' : 'Aucun étudiant'}
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            paginatedStudents.map((student) => (
+                                                <StudentRow
+                                                    key={student.enrollment_code}
+                                                    student={student}
+                                                    maxScore={examSheet.evaluation.max_score}
+                                                    currentScore={studentGrades.get(student.enrollment_code) ?? student.score}
+                                                    isModified={modifiedStudents.has(student.enrollment_code)}
+                                                    onScoreChange={updateStudentScore}
+                                                />
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                                    <div className="text-sm text-gray-500">
+                                        Page {currentPage} sur {totalPages}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                            disabled={currentPage === 1}
+                                        >
+                                            <ChevronLeft className="h-4 w-4" />
+                                            Précédent
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            Suivant
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
                 )}
             </div>
         </>

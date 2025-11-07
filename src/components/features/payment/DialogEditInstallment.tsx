@@ -142,7 +142,7 @@ export default function DialogEditInstallment({
       <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-white z-10">
           <DialogTitle className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Calendar className="h-6 w-6 text-purple-600" />
+            <Calendar className="h-6 w-6 text-blue-600" />
             Modifier l&apos;échéance
           </DialogTitle>
           <DialogDescription className="text-sm text-slate-500 mt-1">
@@ -188,7 +188,7 @@ export default function DialogEditInstallment({
               <p className="text-red-500 text-xs">{errors.amount}</p>
             )}
             {formData.amount && !errors.amount && (
-              <p className="text-sm text-purple-600 font-medium">
+              <p className="text-sm text-blue-600 font-medium">
                 {formatMontant(parseFloat(formData.amount))}
               </p>
             )}
@@ -216,7 +216,7 @@ export default function DialogEditInstallment({
           </div>
         </div>
 
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+        <DialogFooter className="px-6 py-4 border-t border-slate-200 bg-slate-50">
           <div className="flex items-center justify-between w-full">
             <div>
               {onDelete && (
@@ -242,7 +242,7 @@ export default function DialogEditInstallment({
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30"
+                variant={"info"}
               >
                 <Save className="w-4 h-4 mr-2" />
                 {isSubmitting ? "Enregistrement..." : "Enregistrer"}

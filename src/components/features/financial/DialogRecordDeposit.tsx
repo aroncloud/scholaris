@@ -92,7 +92,7 @@ export default function DialogRecordDeposit({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="md:min-w-xl lg:min-w-2xl max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+      <DialogContent className="max-w-sm md:min-w-xl lg:min-w-2xl md:max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
         {/* Header */}
         <div className="bg-slate-50 px-6 py-6 border-b shrink-0">
           <DialogHeader>
