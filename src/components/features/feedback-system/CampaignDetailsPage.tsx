@@ -509,6 +509,7 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
                   day: '2-digit',
                   month: 'short',
                   year: 'numeric'
+                  
                 })}
                icon={Calendar}
                variant="info"
@@ -525,8 +526,19 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
                 variant="purple" 
                 compact
               />
-              <StatCard title="Réponses" value={summary.total_responses} icon={Users} variant="success" compact main/>
-              <StatCard title="Niveau" value={campaign_details.target_level_code} icon={Target} variant="neutral" compact />
+              <StatCard 
+              title="Réponses" 
+              value={summary.total_responses} 
+              icon={Users} 
+              variant="success" 
+              main
+              />
+              <StatCard 
+              title="Niveau" 
+              value={campaign_details.target_level_code} 
+              icon={Target} 
+              variant="neutral" 
+              compact />
             </div>
           </CardContent>
         </Card>

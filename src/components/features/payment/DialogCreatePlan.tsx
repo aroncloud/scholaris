@@ -6,6 +6,8 @@ import { useForm, Controller, useWatch } from "react-hook-form"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -171,7 +173,7 @@ export default function DialogCreatePlan({
     for (let i = 0; i < data.installments.length - 1; i++) {
       const currentDate = new Date(data.installments[i].due_date!)
       const nextDate = new Date(data.installments[i + 1].due_date!)
-      
+
       if (currentDate >= nextDate) {
         showToast({
           variant: "error-solid",
@@ -225,7 +227,7 @@ export default function DialogCreatePlan({
     onOpenChange(false)
   }
 
-  const curriculumOptions = useMemo(() => 
+  const curriculumOptions = useMemo(() =>
     curriculumList.map(curriculum => ({
       value: curriculum.curriculum_code,
       label: curriculum.curriculum_name
@@ -240,21 +242,22 @@ export default function DialogCreatePlan({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="md:min-w-2xl max-w-3xl max-h-[95vh] overflow-hidden p-0">
-        
+      <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
         {/* Header */}
-        <div className="bg-slate-50 px-6 py-6 border-b border-slate-200">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              Nouvelle grille tarifaire
-            </DialogTitle>
-          </DialogHeader>
-        </div>
 
-        <form onSubmit={handleSubmit(onSubmitForm)}>
-          {/* Contenu */}
-          <div className="overflow-y-auto max-h-[calc(95vh-200px)] px-6 py-6 space-y-6">
-            
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
+          <DialogTitle className="text-2xl font-bold text-slate-900">
+            Nouvelle grille tarifaire
+          </DialogTitle>
+
+          <DialogDescription className="text-sm text-slate-500 mt-1">Remplissez le formulaire d&apos;une grille tarifaire</DialogDescription>
+        </DialogHeader>
+
+        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
+          <form onSubmit={handleSubmit(onSubmitForm)}>
+            {/* Contenu */}
+
+
             {/* Curriculum & Montant */}
             <div className="space-y-4">
               <div>
@@ -388,9 +391,8 @@ export default function DialogCreatePlan({
 
             {/* Résumé */}
             {totalAmount > 0 && (
-              <Card className={`border-2 ${
-                isBalanced ? 'border-emerald-500 bg-emerald-50' : 'border-amber-500 bg-amber-50'
-              }`}>
+              <Card className={`border-2 ${isBalanced ? 'border-emerald-500 bg-emerald-50' : 'border-amber-500 bg-amber-50'
+                }`}>
                 <CardContent className="py-4">
                   <div className="flex items-start gap-3">
                     {isBalanced ? (
@@ -399,14 +401,12 @@ export default function DialogCreatePlan({
                       <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className={`font-semibold text-sm ${
-                        isBalanced ? 'text-emerald-900' : 'text-amber-900'
-                      }`}>
+                      <p className={`font-semibold text-sm ${isBalanced ? 'text-emerald-900' : 'text-amber-900'
+                        }`}>
                         {isBalanced ? 'Montants équilibrés ✓' : 'Attention: Montants non équilibrés'}
                       </p>
-                      <p className={`text-xs mt-1 ${
-                        isBalanced ? 'text-emerald-700' : 'text-amber-700'
-                      }`}>
+                      <p className={`text-xs mt-1 ${isBalanced ? 'text-emerald-700' : 'text-amber-700'
+                        }`}>
                         Total échéances: {formatMontant(totalInstallments)} / Montant total: {formatMontant(totalAmount)}
                       </p>
                       {!isBalanced && totalAmount > 0 && (
@@ -419,31 +419,32 @@ export default function DialogCreatePlan({
                 </CardContent>
               </Card>
             )}
-          </div>
 
-          {/* Footer */}
-          <div className="border-t bg-slate-50 px-6 py-4 flex gap-3">
+          </form>
+        </div>
+
+        {/* Footer */}
+        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3">
             <Button
               type="button"
               variant="outline"
               onClick={handleCancel}
-              className="flex-1"
               disabled={isLoading}
             >
-              <X className="h-4 w-4 mr-2" />
               Annuler
             </Button>
             <Button
               type="submit"
               disabled={!isBalanced || isLoading}
-              className="flex-1"
               variant={"info"}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
             >
               <Save className="h-4 w-4 mr-2" />
               {isLoading ? "Enregistrement..." : "Enregistrer"}
             </Button>
           </div>
-        </form>
+        </DialogFooter>
 
       </DialogContent>
     </Dialog>

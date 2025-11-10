@@ -100,7 +100,7 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
-        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-white z-10">
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
           <DialogTitle className="text-2xl font-bold text-slate-900">Nouvelle demande d&apos;inscription</DialogTitle>
           <DialogDescription className="text-sm text-slate-500 mt-1">
             Créer une nouvelle demande d&apos;inscription étudiant

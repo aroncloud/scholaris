@@ -1,50 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription, 
-  DialogFooter,
-  DialogClose
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogClose
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar } from '@/components/custom-ui/Avatar';
-import { 
-  Loader2, 
-  User, 
-  Calendar, 
-  BookOpen, 
-  Paperclip, 
-  Download,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Info,
-  FileText
+import {
+    Loader2,
+    User,
+    Calendar,
+    BookOpen,
+    Paperclip,
+    Download,
+    CheckCircle,
+    XCircle,
+    Clock,
+    Info,
+    FileText
 } from 'lucide-react';
 import { formatDateToText } from '@/lib/utils';
 import { IGetStudentAbsence } from '@/types/absenceTypes';
 import { IGetJustificationDetail } from '@/types/planificationType';
 
 interface DialogReviewJustificationProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  absence: IGetStudentAbsence;
-  justification: IGetJustificationDetail | null;
-  isLoading?: boolean;
-  onSubmit: (action: 'APPROVE' | 'REJECT', comment: string) => Promise<void>;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    absence: IGetStudentAbsence;
+    justification: IGetJustificationDetail | null;
+    isLoading?: boolean;
+    onSubmit: (action: 'APPROVE' | 'REJECT', comment: string) => Promise<void>;
 }
 
 export const DialogReviewJustification: React.FC<DialogReviewJustificationProps> = ({
-  open,
-  onOpenChange,
-  absence,
-  justification,
-  isLoading = false,
-  onSubmit,
+    open,
+    onOpenChange,
+    absence,
+    justification,
+    isLoading = false,
+    onSubmit,
 }) => {
     const [comment, setComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,7 +52,7 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
 
     useEffect(() => {
         if (open) {
-        setComment('');
+            setComment('');
         }
     }, [open]);
 
@@ -61,12 +61,12 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
             alert("Le commentaire est requis pour rejeter une justification.");
             return;
         }
-        
+
         setIsSubmitting(true);
         await onSubmit(action, comment);
         setIsSubmitting(false);
     };
-  
+
     const InfoLine = ({
         icon,
         label,
@@ -76,31 +76,31 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
         label: string;
         value: string | React.ReactNode;
     }) => (
-    <div className="flex items-center gap-2.5 py-1.5 transition-colors hover:bg-accent/50 rounded-md px-2.5 -mx-2.5">
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-            {icon}
+        <div className="flex items-center gap-2.5 py-1.5 transition-colors hover:bg-accent/50 rounded-md px-2.5 -mx-2.5">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                {icon}
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-muted-foreground">{label}</p>
+                <p className="text-sm font-semibold truncate">{value}</p>
+            </div>
         </div>
-        <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-muted-foreground">{label}</p>
-            <p className="text-sm font-semibold truncate">{value}</p>
-        </div>
-    </div>
     );
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-4xl p-0 overflow-hidden">
+            <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
                 {/* Header */}
-                <DialogHeader className="px-5 py-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b">
-                    <DialogTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
+                    <DialogTitle className="text-2xl font-bold text-slate-900">
                         Examiner la justification
                     </DialogTitle>
-                    <DialogDescription className="text-sm">
+                    <DialogDescription className="text-sm text-slate-500 mt-1">
                         Pour l&apos;absence de <span className="font-semibold text-foreground/80">{fullName}</span> au cours de{' '}
                         <span className="font-semibold text-foreground/80">{absence.course_unit_name}</span>
                     </DialogDescription>
                 </DialogHeader>
-            
+
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-12 space-y-3">
                         <div className="relative">
@@ -130,7 +130,7 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                                     <User className="h-4 w-4" />
                                     <h3 className="font-semibold text-base">Informations de l&apos;étudiant</h3>
                                 </div>
-                                
+
                                 {/* Carte étudiant */}
                                 <div className="relative overflow-hidden rounded-lg border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 shadow-sm hover:shadow-md transition-shadow">
                                     <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl -mr-12 -mt-12" />
@@ -146,7 +146,7 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {/* Détails de la séance */}
                                 <div className="space-y-0.5 rounded-lg border bg-card/50 p-4 shadow-sm">
                                     <InfoLine icon={<BookOpen className="h-3.5 w-3.5" />} label="Cours" value={justification.session.course_unit_name} />
@@ -155,21 +155,21 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                                     <InfoLine icon={<User className="h-3.5 w-3.5" />} label="Enseignant" value={justification.session.teacher_name} />
                                 </div>
                             </div>
-                        
+
                             {/* Colonne 2: Justification */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-primary">
                                     <FileText className="h-4 w-4" />
                                     <h3 className="font-semibold text-base">Justification soumise</h3>
                                 </div>
-                                
+
                                 {/* Carte justification */}
                                 <div className="space-y-3 rounded-lg border bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20 p-4 shadow-sm">
-                                    {justification.justification?.submitted_at && 
-                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                        <Clock className="h-3 w-3" />
-                                        Soumise le {formatDateToText(justification.justification?.submitted_at)}
-                                    </div>
+                                    {justification.justification?.submitted_at &&
+                                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <Clock className="h-3 w-3" />
+                                            Soumise le {formatDateToText(justification.justification?.submitted_at)}
+                                        </div>
                                     }
                                     <div className="relative">
                                         <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary to-primary/30 rounded-full" />
@@ -178,7 +178,7 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                                         </blockquote>
                                     </div>
                                 </div>
-                                
+
                                 {/* Documents */}
                                 {justification.justification?.documents && justification.justification.documents?.length > 0 && (
                                     <div className="space-y-2.5">
@@ -191,12 +191,12 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                                         </div>
                                         <ul className="space-y-1.5">
                                             {justification.justification.documents.map(doc => (
-                                                <li key={doc.content_code} 
+                                                <li key={doc.content_code}
                                                     className="group flex items-center justify-between rounded-md border bg-card p-2.5 hover:border-primary/50 hover:bg-accent/50 transition-all duration-200">
                                                     <span className="text-sm font-medium truncate pr-2 group-hover:text-primary transition-colors">{doc.title}</span>
                                                     <a href={doc.content_url} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
                                                         <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs">
-                                                            <Download className="h-3 w-3"/>
+                                                            <Download className="h-3 w-3" />
                                                             Voir
                                                         </Button>
                                                     </a>
@@ -207,7 +207,7 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                                 )}
                             </div>
                         </div>
-                        
+
                         {/* Zone de décision */}
                         <div className="bg-gradient-to-r from-muted/80 to-muted/40 px-5 py-4 border-t">
                             <div className="space-y-2">
@@ -227,31 +227,35 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                         </div>
                     </div>
                 )}
-                
+
                 {/* Footer */}
-                <DialogFooter className="px-5 py-3.5 bg-muted/30 flex-col-reverse sm:flex-row sm:justify-between gap-2">
-                    <DialogClose asChild>
-                        <Button variant="outline" disabled={isSubmitting} className="sm:w-auto w-full">
-                            Annuler
-                        </Button>
-                    </DialogClose>
+                <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+                    <div className="flex items-center space-x-3">
+                        <DialogClose asChild>
+                            <Button variant="outline" disabled={isSubmitting} className="sm:w-auto w-full">
+                                Annuler
+                            </Button>
+                        </DialogClose>
+
+
+                    </div>
                     {justification && !isLoading && (
                         <div className='flex gap-2 sm:w-auto w-full'>
-                            <Button 
-                                variant="danger" 
-                                onClick={() => handleSubmit('REJECT')} 
+                            <Button
+                                variant="danger"
+                                onClick={() => handleSubmit('REJECT')}
                                 disabled={isSubmitting}
                                 className="flex-1 sm:flex-none gap-2"
                             >
-                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin"/> : <XCircle className="h-4 w-4"/>}
+                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
                                 Rejeter
                             </Button>
-                            <Button 
-                                onClick={() => handleSubmit('APPROVE')} 
+                            <Button
+                                onClick={() => handleSubmit('APPROVE')}
                                 disabled={isSubmitting}
                                 variant="success"
                             >
-                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin"/> : <CheckCircle className="h-4 w-4"/>}
+                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
                                 Approuver
                             </Button>
                         </div>

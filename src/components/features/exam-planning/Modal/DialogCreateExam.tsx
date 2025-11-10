@@ -20,11 +20,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFactorizedProgramStore } from "@/store/programStore";
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ICreateEvaluation } from "@/types/examTypes";
 import { getListAcademicYearsSchedulesForCurriculum } from "@/actions/programsAction";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -61,7 +61,7 @@ export default function DialogCreateExam({
     formState: { errors, isSubmitting },
   } = useForm<ICreateEvaluation>({
     defaultValues: {
-      target_level: "COURSE_UNIT" ,
+      target_level: "COURSE_UNIT",
       schedule_code: "",
       evaluation_type_code: "CC",
       title: "",
@@ -84,14 +84,14 @@ export default function DialogCreateExam({
 
 
   useEffect(() => {
-    if(curriculum_code){
+    if (curriculum_code) {
       setValue("curriculum_code", curriculum_code);
     }
   }, [curriculum_code, setValue]);
 
 
   useEffect(() => {
-    if(selectedCurriculum && selectedAcademicYear){
+    if (selectedCurriculum && selectedAcademicYear) {
       fetchListAcademicYearsSchedulesForCurriculum(selectedCurriculum, selectedAcademicYear);
     }
   }, [setValue, selectedAcademicYear, selectedCurriculum]);
@@ -116,7 +116,7 @@ export default function DialogCreateExam({
     console.log('-->data', data)
     const title = data.evaluation_type_code + ' ' + data.curriculum_code;
 
-    const result = await onSave({...data, title });
+    const result = await onSave({ ...data, title });
     if (!result) return;
 
     reset();
@@ -138,129 +138,144 @@ export default function DialogCreateExam({
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Créer une nouvelle évaluation</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
+          <DialogTitle className="text-2xl font-bold text-slate-900">Créer une nouvelle évaluation</DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-1">
             Remplissez les informations de l&apos;évaluation
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-          {/* Curriculum */}
-          <div className="space-y-1 col-span-2">
-            <Label>Curriculum</Label>
-            <Controller
-              name="curriculum_code"
-              control={control}
-              rules={{ required: "Curriculum requis" }}
-              render={({ field, fieldState }) => (
-                <>
+        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
+          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+
+            {/* Schedule */}
+            <div className="space-y-1">
+              <Label>Programme / Séquence</Label>
+              <Controller
+                name="schedule_code"
+                control={control}
+                rules={{ required: "Séquence requise" }}
+                render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner un curriculum" />
+                      <SelectValue placeholder="Sélectionner une séquence" />
                     </SelectTrigger>
                     <SelectContent>
-                      {curriculumList.map((c) => (
-                        <SelectItem key={c.curriculum_code} value={c.curriculum_code}>
-                          {c.curriculum_name}
+                      {scheduleList.map((s) => (
+                        <SelectItem key={s.schedule_code} value={s.schedule_code}>
+                          {s.sequence_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {fieldState.error && <p className="text-red-600 text-sm">{fieldState.error.message}</p>}
-                </>
-              )}
-            />
-          </div>
+                )}
+              />
+            </div>
+
+            {/* Type d’évaluation */}
+            <div className="space-y-1">
+              <Label>Type d’évaluation</Label>
+              <Controller
+                name="evaluation_type_code"
+                control={control}
+                rules={{ required: "Type requis" }}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionner un type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CC">Contrôle Continu</SelectItem>
+                      <SelectItem value="EXAM_SEQ">Examen de Séquence</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
 
 
-          {/* Schedule */}
-          <div className="space-y-1">
-            <Label>Programme / Séquence</Label>
-            <Controller
-              name="schedule_code"
-              control={control}
-              rules={{ required: "Séquence requise" }}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Sélectionner une séquence" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {scheduleList.map((s) => (
-                      <SelectItem key={s.schedule_code} value={s.schedule_code}>
-                        {s.sequence_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
+            {/* Deadline */}
+            <div className="space-y-1">
+              <Label>Date limite de depot des notes</Label>
+              <Controller
+                name="deadline"
+                control={control}
+                rules={{ required: "Date limite requise" }}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(new Date(field.value), "dd/MM/yyyy") : <span>Sélectionner une date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value ? new Date(field.value) : undefined}
+                        onSelect={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+            </div>
 
-          {/* Type d’évaluation */}
-          <div className="space-y-1">
-            <Label>Type d’évaluation</Label>
-            <Controller
-              name="evaluation_type_code"
-              control={control}
-              rules={{ required: "Type requis" }}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Sélectionner un type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CC">Contrôle Continu</SelectItem>
-                    <SelectItem value="EXAM_SEQ">Examen de Séquence</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
+            {/* Curriculum */}
+            <div className="space-y-1 col-span-2">
+              <Label>Curriculum</Label>
+              <Controller
+                name="curriculum_code"
+                control={control}
+                rules={{ required: "Curriculum requis" }}
+                render={({ field, fieldState }) => (
+                  <>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Sélectionner un curriculum" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {curriculumList.map((c) => (
+                          <SelectItem key={c.curriculum_code} value={c.curriculum_code}>
+                            {c.curriculum_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.error && <p className="text-red-600 text-sm">{fieldState.error.message}</p>}
+                  </>
+                )}
+              />
+            </div>
 
+          </form>
+        </div>
 
-          {/* Deadline */}
-          <div className="col-span-2 space-y-1">
-            <Label>Date limite de depot des notes</Label>
-            <Controller
-              name="deadline"
-              control={control}
-              rules={{ required: "Date limite requise" }}
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(new Date(field.value), "dd/MM/yyyy") : <span>Sélectionner une date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            />
-          </div>
-
-          {/* Footer */}
-          <DialogFooter className="col-span-2 mt-5">
-            <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>
+        {/* Footer */}
+        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isSubmitting}
+            >
               Annuler
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+            >
+              <Save className="w-4 h-4 mr-2" />
               {isSubmitting ? "Création..." : "Créer l'évaluation"}
             </Button>
-          </DialogFooter>
-        </form>
+          </div>
+        </DialogFooter>
 
       </DialogContent>
     </Dialog>
