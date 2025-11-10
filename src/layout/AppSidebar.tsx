@@ -159,15 +159,15 @@ const navItems: NavItem[] = [
     authorizedRoles: ["STUDENT"],
   },
   {
-    icon: <UserCircle className="w-5 h-5" />,
-    name: "Profile",
-    path: "/dashboard/student/profile",
-    authorizedRoles: ["STUDENT"],
-  },
-  {
     icon: <CalendarCheck className="w-5 h-5" />,
     name: "Mes Absences",
     path: "/dashboard/student/my-absences",
+    authorizedRoles: ["STUDENT"],
+  },
+  {
+    icon: <UserCircle className="w-5 h-5" />,
+    name: "Profile",
+    path: "/dashboard/student/profile",
     authorizedRoles: ["STUDENT"],
   }
 ];

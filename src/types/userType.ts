@@ -406,3 +406,31 @@ export interface IGradeDetail {
   graded_by_last_name?: string | null;
   graded_by_phone_number?: string | null;
 }
+
+export interface ISelfUpdate {
+  // Champs optionnels ou obligatoires selon ton besoin
+  last_name: string;
+  phone_number: string;
+  other_email?: string;
+  other_phone?: string;
+  country: string;
+  city: string;
+  address_details?: string;
+  avatar_url?: string;
+  place_of_birth?: string;
+  date_of_birth?: string; // format "YYYY-MM-DD"
+  ethnicity_code?: string;
+
+  // Champs facultatifs actuellement commentés
+  marital_status_code?: string;
+  cni_number?: string;
+  cni_issue_date?: string; // format "YYYY-MM-DD"
+  cni_issue_location?: string;
+}
+
+
+export interface IResetPassword {
+  "email": string,
+  "otp": string,
+  "newPassword": string
+}

@@ -1,462 +1,674 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { 
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
   User,
-  CreditCard, 
-  Calendar, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Edit3, 
-  Download, 
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  TrendingUp,
-  GraduationCap,
-  Wallet,
-  DollarSign,
-  BookOpen,
-  Award
+  Mail,
+  Phone,
+  MapPin,
+  Save,
+  X,
+  Camera,
+  Lock,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
 import PageHeader from '@/layout/PageHeader';
 import Badge from '@/components/custom-ui/Badge';
-import StatCard from '@/components/cards/StatCard';
 import { useUserStore } from '@/store/useAuthStore';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import ContentLayout from '@/layout/ContentLayout';
+import { forgotPassword, resetPassword, selfUpdate } from '@/actions/userAction';
+import { showToast } from '@/components/ui/showToast';
+import { DatePicker } from '@/components/DatePicker';
 
-const StudentProfileDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-
+const StudentProfilePage: React.FC = () => {
   const { user } = useUserStore();
+  const [activeTab, setActiveTab] = useState('personal');
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
 
-  // Données du profil étudiant
-  const studentProfile = {
-    personal: {
-      name: 'Marie DUBOIS',
-      studentId: '2024-INF-001',
-      photo: '/api/placeholder/150/150',
-      dateOfBirth: '1999-03-15',
-      placeOfBirth: 'Yaoundé, Cameroun',
-      nationality: 'Camerounaise',
-      address: 'Quartier Nlongkak, Yaoundé',
-      phone: '+237 6XX XXX XXX',
-      email: 'marie.dubois@student.edu',
-      emergencyContact: {
-        name: 'Paul DUBOIS',
-        relationship: 'Père',
-        phone: '+237 6XX XXX XXX'
+  // États pour les informations personnelles
+  const [personalInfo, setPersonalInfo] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    dateOfBirth: '',
+    placeOfBirth: '',
+    country: '',
+    city: '',
+    addressDetails: '',
+  });
+
+  // États pour le changement de mot de passe
+  const [passwordData, setPasswordData] = useState({
+    otp: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  // Charger les données utilisateur au montage
+  useEffect(() => {
+    const loadUserData = async () => {
+      setIsLoading(true);
+      // Simuler un petit délai pour montrer le loader (tu peux l'enlever si tu fetch depuis l'API)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setPersonalInfo({
+        firstName: user?.user.first_name || '',
+        lastName: user?.user.last_name || '',
+        email: user?.user.email || '',
+        phone: user?.userDetailled?.phone_number || '',
+        dateOfBirth: user?.userDetailled?.date_of_birth || '',
+        placeOfBirth: user?.userDetailled?.place_of_birth || '',
+        country: user?.userDetailled?.country || '',
+        city: user?.userDetailled?.city || '',
+        addressDetails: user?.userDetailled?.address_details || '',
+      });
+      
+      setIsLoading(false);
+    };
+
+    loadUserData();
+  }, [user]);
+
+  const handlePersonalInfoChange = (field: string, value: string) => {
+    setPersonalInfo(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePasswordChange = (field: string, value: string) => {
+    setPasswordData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSavePersonalInfo = async () => {
+    setIsSaving(true);
+
+    try {
+      const payload = {
+        last_name: personalInfo.lastName,
+        first_name: personalInfo.firstName,
+        email: personalInfo.email,
+        phone_number: personalInfo.phone,
+        country: personalInfo.country,
+        city: personalInfo.city,
+        address_details: personalInfo.addressDetails,
+        place_of_birth: personalInfo.placeOfBirth,
+        date_of_birth: personalInfo.dateOfBirth,
+      };
+
+      console.log('--->payload', payload)
+
+      const result = await selfUpdate(payload);
+
+      if (result.code === 'success') {
+        showToast({
+          variant: 'success-solid',
+          message: 'Profil mis à jour',
+          description: 'Vos modifications ont été enregistrées avec succès',
+          position: 'top-center',
+        });
+        setIsEditing(false);
+      } else {
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
+          description: result.error || 'Une erreur est survenue lors de la mise à jour',
+          position: 'top-center',
+        });
       }
-    },
-    academic: {
-      program: 'Formation Infirmier',
-      specialization: 'Soins Généraux',
-      currentLevel: 'Licence 2',
-      currentSemester: 'Semestre 3',
-      academicYear: '2024-2025',
-      startDate: '2023-09-01',
-      expectedGraduation: '2026-06-30',
-      status: 'ACTIVE',
-      advisor: 'Dr. NGONO Marie Claire'
-    },
-    financial: {
-      totalFees: 850000, // FCFA
-      paidAmount: 650000,
-      remainingBalance: 200000,
-      nextPaymentDue: '2025-01-15',
-      paymentPlan: 'Trimestriel',
-      scholarship: {
-        amount: 200000,
-        sponsor: 'Bourse d\'Excellence Gouvernementale',
-        status: 'ACTIVE'
-      },
-      transactions: [
-        {
-          id: 'TXN-001',
-          date: '2024-09-15',
-          description: 'Frais de scolarité S3',
-          amount: 425000,
-          type: 'PAYMENT',
-          status: 'COMPLETED'
-        },
-        {
-          id: 'TXN-002',
-          date: '2024-09-20',
-          description: 'Bourse gouvernementale',
-          amount: -200000,
-          type: 'CREDIT',
-          status: 'COMPLETED'
-        },
-        {
-          id: 'TXN-003',
-          date: '2024-12-10',
-          description: 'Frais examens',
-          amount: 25000,
-          type: 'PAYMENT',
-          status: 'COMPLETED'
-        }
-      ]
-    },
-    academics: {
-      currentGPA: 14.2,
-      totalCredits: 90,
-      completedCredits: 82,
-      remainingCredits: 8,
-      semesters: [
-        { name: 'Semestre 1', gpa: 13.5, credits: 30, status: 'COMPLETED' },
-        { name: 'Semestre 2', gpa: 13.8, credits: 30, status: 'COMPLETED' },
-        { name: 'Semestre 3', gpa: 14.2, credits: 22, status: 'IN_PROGRESS' }
-      ]
+    } catch {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Une erreur inattendue est survenue',
+        position: 'top-center',
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XAF',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount).replace('XAF', 'FCFA');
-  };
+  const handleRequestOTP = async () => {
+    if (!user?.user?.email) {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Email utilisateur non trouvé',
+        position: 'top-center',
+      });
+      return;
+    }
 
-  const getPaymentStatus = () => {
-    const { remainingBalance, nextPaymentDue } = studentProfile.financial;
-    const dueDate = new Date(nextPaymentDue);
-    const today = new Date();
-    const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+    setIsSaving(true);
 
-    if (remainingBalance === 0) {
-      return { status: 'paid', color: 'text-green-600', icon: CheckCircle, message: 'Paiements à jour' };
-    } else if (daysUntilDue < 0) {
-      return { status: 'overdue', color: 'text-red-600', icon: AlertTriangle, message: 'Paiement en retard' };
-    } else if (daysUntilDue <= 7) {
-      return { status: 'due', color: 'text-yellow-600', icon: Clock, message: `Échéance dans ${daysUntilDue} jours` };
-    } else {
-      return { status: 'upcoming', color: 'text-blue-600', icon: Calendar, message: `Prochaine échéance: ${daysUntilDue} jours` };
+    try {
+      const result = await forgotPassword(user.user.email);
+
+      if (result.code === 'success') {
+        setOtpSent(true);
+        showToast({
+          variant: 'success-solid',
+          message: 'Code OTP envoyé',
+          description: 'Un code de vérification a été envoyé à votre adresse email',
+          position: 'top-center',
+        });
+      } else {
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
+          description: result.error || "Impossible d'envoyer le code OTP",
+          position: 'top-center',
+        });
+      }
+    } catch {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Une erreur inattendue est survenue',
+        position: 'top-center',
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const paymentStatus = getPaymentStatus();
-  const PaymentIcon = paymentStatus.icon;
+  const handleSavePassword = async () => {
+    if (!user?.user?.email) {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Email utilisateur non trouvé',
+        position: 'top-center',
+      });
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Les mots de passe ne correspondent pas',
+        position: 'top-center',
+      });
+      return;
+    }
+
+    if (!passwordData.otp) {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Veuillez entrer le code OTP',
+        position: 'top-center',
+      });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Le mot de passe doit contenir au moins 8 caractères',
+        position: 'top-center',
+      });
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const result = await resetPassword({
+        email: user.user.email,
+        otp: passwordData.otp,
+        newPassword: passwordData.newPassword,
+      });
+
+      if (result.code === 'success') {
+        setPasswordData({ otp: '', newPassword: '', confirmPassword: '' });
+        setOtpSent(false);
+        showToast({
+          variant: 'success-solid',
+          message: 'Mot de passe modifié',
+          description: 'Votre mot de passe a été mis à jour avec succès',
+          position: 'top-center',
+        });
+      } else {
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
+          description: result.error || 'Impossible de modifier le mot de passe',
+          position: 'top-center',
+        });
+      }
+    } catch {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Une erreur inattendue est survenue',
+        position: 'top-center',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    // Réinitialiser les valeurs
+    setPersonalInfo({
+      firstName: user?.user.first_name || '',
+      lastName: user?.user.last_name || '',
+      email: user?.user.email || '',
+      phone: user?.userDetailled?.phone_number || '',
+      dateOfBirth: user?.userDetailled?.date_of_birth || '',
+      placeOfBirth: user?.userDetailled?.place_of_birth || '',
+      country: user?.userDetailled?.country || '',
+      city: user?.userDetailled?.city || '',
+      addressDetails: user?.userDetailled?.address_details || '',
+    });
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      console.log('Uploading photo:', file);
+      // Logique d'upload de photo
+    }
+  };
+
+  // Composant de skeleton loader
+  const SkeletonLoader = () => (
+    <div className="space-y-8 animate-pulse">
+      {/* Photo de profil skeleton */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-6 border-b border-gray-200">
+        <div className="w-24 h-24 rounded-full bg-gray-200"></div>
+        <div className="space-y-2 flex-1">
+          <div className="h-6 bg-gray-200 rounded w-48"></div>
+          <div className="h-4 bg-gray-200 rounded w-64"></div>
+        </div>
+      </div>
+
+      {/* Champs skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-24"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+          </div>
+        ))}
+      </div>
+
+      {/* Textarea skeleton */}
+      <div className="space-y-2">
+        <div className="h-4 bg-gray-200 rounded w-32"></div>
+        <div className="h-20 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+  );
 
   return (
     <>
       {/* Header */}
       <PageHeader
         Icon={User}
-        title={studentProfile.personal.name}
-        description={`${studentProfile.personal.studentId} • ${studentProfile.academic.program}`}
-        status={<Badge size='sm' value={studentProfile.academic.status} label={studentProfile.academic.status} icon={CheckCircle} />}
+        title="Mon Profil"
+        description="Gérez vos informations personnelles et vos préférences"
+        status={<Badge size='sm' value="ACTIVE" label="Actif" />}
       >
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm">
-            <Edit3 className="w-4 h-4 mr-2" />
-            Modifier
-          </Button>
-          <Button size="sm" variant={"info"}>
-            <Download className="w-4 h-4 mr-2" />
-            Certificat
-          </Button>
-        </div>
-      </PageHeader> 
+      </PageHeader>
 
-      <div className="p-4 md:p-6">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <StatCard title='Crédits Validés' value={`${studentProfile.academics.completedCredits}/${studentProfile.academics.totalCredits}`} icon={BookOpen} variant='success' main />
-
-          <StatCard title='Solde Scolarité' value={`${formatCurrency(studentProfile.financial.remainingBalance)}`} icon={Wallet} variant='purple' />
-
-          <StatCard title='Statut Paiement' value={paymentStatus.message} icon={PaymentIcon} variant='danger' />
-        </div>
-
-        {/* Main Content */}
+      <div className="px-4 pb-4 md:px-6 md:pb-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
-            <TabsTrigger value="overview" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">Vue d&apos;ensemble</TabsTrigger>
-            <TabsTrigger value="personal" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">Profil</TabsTrigger>
-            <TabsTrigger value="academic" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">Académique</TabsTrigger>
-            <TabsTrigger value="financial" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">Financier</TabsTrigger>
+            <TabsTrigger value="personal" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">
+              Informations Personnelles
+            </TabsTrigger>
+            <TabsTrigger value="security" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">
+              Sécurité
+            </TabsTrigger>
           </TabsList>
 
-          {/* Vue d'ensemble */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Progression académique */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <TrendingUp className="w-5 h-5 mr-2" />
-                    Progression Académique
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span>Crédits complétés</span>
-                        <span>{studentProfile.academics.completedCredits}/{studentProfile.academics.totalCredits}</span>
-                      </div>
-                      <Progress value={(studentProfile.academics.completedCredits / studentProfile.academics.totalCredits) * 100} />
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      {studentProfile.academics.semesters.map((semester, index) => (
-                        <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                          <div className="font-medium text-sm">{semester.name}</div>
-                          <div className="text-lg font-bold text-blue-600">{semester.gpa}/20</div>
-                          <Badge size='sm' value={semester.status} label={semester.status} icon={CheckCircle} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Situation financière */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <DollarSign className="w-5 h-5 mr-2" />
-                    Situation Financière
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Frais totaux</span>
-                      <span className="font-semibold">{formatCurrency(studentProfile.financial.totalFees)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Montant payé</span>
-                      <span className="font-semibold text-green-600">{formatCurrency(studentProfile.financial.paidAmount)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Solde restant</span>
-                      <span className="font-semibold text-red-600">{formatCurrency(studentProfile.financial.remainingBalance)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Prochaines échéances */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Prochaines Échéances</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Calendar className="w-5 h-5 text-yellow-600" />
-                      <div>
-                        <div className="font-medium">Paiement Scolarité</div>
-                        <div className="text-sm text-gray-600">Échéance: {new Date(studentProfile.financial.nextPaymentDue).toLocaleDateString('fr-FR')}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-yellow-600">{formatCurrency(studentProfile.financial.remainingBalance)}</div>
-                      <Button size="sm" className="mt-2">Payer maintenant</Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Profil Personnel */}
+          {/* Onglet Informations Personnelles */}
           <TabsContent value="personal">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informations Personnelles</CardTitle>
-                <CardDescription>Vos données personnelles et contacts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Nom complet</label>
-                      <p className="mt-1 text-sm text-gray-900">{user?.user.first_name} {user?.user.last_name}</p>
+            <ContentLayout 
+              title='Informations Personnelles' 
+              description='Gérez vos informations personnelles et vos préférences'
+              actions={
+                !isLoading && !isEditing ? (
+                  <Button onClick={() => setIsEditing(true)} variant={"info"}>
+                    <User className="w-4 h-4 mr-2" />
+                    Modifier le profil
+                  </Button>
+                ) : null
+              }
+            >
+              {isLoading ? (
+                <SkeletonLoader />
+              ) : (
+                <div className="space-y-8">
+                  {/* Photo de profil */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-6 border-b border-gray-200">
+                    <div className="relative">
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold">
+                        {personalInfo.firstName.charAt(0)}{personalInfo.lastName.charAt(0)}
+                      </div>
+                      {isEditing && (
+                        <label htmlFor="photo-upload" className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg cursor-pointer hover:bg-gray-50 border border-gray-200">
+                          <Camera className="w-4 h-4 text-gray-600" />
+                          <input
+                            id="photo-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handlePhotoUpload}
+                          />
+                        </label>
+                      )}
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Date de naissance</label>
-                      <p className="mt-1 text-sm text-gray-900">{user?.userDetailled?.date_of_birth ? user?.userDetailled?.date_of_birth : "N/A"}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Lieu de naissance</label>
-                      <p className="mt-1 text-sm text-gray-900">{user?.userDetailled?.place_of_birth ? user?.userDetailled?.place_of_birth : "N/A"}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Nationalité</label>
-                      <p className="mt-1 text-sm text-gray-900">{user?.userDetailled?.country ? user?.userDetailled?.country : "N/A"}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Adresse</label>
-                      <p className="mt-1 text-sm text-gray-900 flex items-center">
-                        <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                        {user?.userDetailled?.address_details ? user?.userDetailled?.address_details : "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Téléphone</label>
-                      <p className="mt-1 text-sm text-gray-900 flex items-center">
-                        <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                        {user?.userDetailled?.phone_number ? user?.userDetailled?.phone_number : "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Email</label>
-                      <p className="mt-1 text-sm text-gray-900 flex items-center">
-                        <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                        {user?.userDetailled?.phone_number ? user?.userDetailled?.email : "N/A"}
-                      </p>
+                      <h3 className="font-semibold text-lg">{personalInfo.firstName} {personalInfo.lastName}</h3>
+                      <p className="text-sm text-gray-600">{personalInfo.email}</p>
+                      {isEditing && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          Cliquez sur l&apos;icône pour changer votre photo de profil
+                        </p>
+                      )}
                     </div>
                   </div>
-                </div>
-                {/* <Separator className="my-6" />
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-4">Contact d&apos;urgence</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Nom</label>
-                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.emergencyContact.name}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Lien de parenté</label>
-                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.emergencyContact.relationship}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Téléphone</label>
-                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.emergencyContact.phone}</p>
-                    </div>
-                  </div>
-                </div> */}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          {/* Informations Académiques */}
-          <TabsContent value="academic">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Parcours Académique</CardTitle>
-                </CardHeader>
-                <CardContent>
+                  {/* Informations de base */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Programme d&apos;études</label>
-                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.program}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Spécialisation</label>
-                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.specialization}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Niveau actuel</label>
-                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.currentLevel}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Conseiller pédagogique</label>
-                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.advisor}</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">Prénom *</Label>
+                      <Input
+                        id="firstName"
+                        value={personalInfo.firstName}
+                        onChange={(e) => handlePersonalInfoChange('firstName', e.target.value)}
+                        disabled={!isEditing}
+                        className={!isEditing ? 'bg-gray-50' : ''}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Nom *</Label>
+                      <Input
+                        id="lastName"
+                        value={personalInfo.lastName}
+                        onChange={(e) => handlePersonalInfoChange('lastName', e.target.value)}
+                        disabled={!isEditing}
+                        className={!isEditing ? 'bg-gray-50' : ''}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                        <Input
+                          id="email"
+                          type="email"
+                          value={personalInfo.email}
+                          onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
+                          disabled={!isEditing}
+                          className={`pl-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                        />
                       </div>
                     </div>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Année académique</label>
-                        <p className="mt-1 text-sm text-gray-900">{studentProfile.academic.academicYear}</p>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Téléphone *</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={personalInfo.phone}
+                          onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
+                          disabled={!isEditing}
+                          className={`pl-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                        />
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Date de début</label>
-                        <p className="mt-1 text-sm text-gray-900">{new Date(studentProfile.academic.startDate).toLocaleDateString('fr-FR')}</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="dateOfBirth">Date de naissance</Label>
+                      <div className="relative">
+                        <DatePicker
+                          label=""
+                          minDate={new Date(1900, 0, 1)}
+                          onChange={(e) => {
+                            if(e){
+                              handlePersonalInfoChange("dateOfBirth", e?.toJSON().split('T')[0])
+                              }
+                          }}
+                          selected={personalInfo.dateOfBirth ? new Date(personalInfo.dateOfBirth) : undefined}
+                        />
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Diplômation prévue</label>
-                        <p className="mt-1 text-sm text-gray-900">{new Date(studentProfile.academic.expectedGraduation).toLocaleDateString('fr-FR')}</p>
-                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="placeOfBirth">Lieu de naissance</Label>
+                      <Input
+                        id="placeOfBirth"
+                        value={personalInfo.placeOfBirth}
+                        onChange={(e) => handlePersonalInfoChange('placeOfBirth', e.target.value)}
+                        disabled={!isEditing}
+                        className={!isEditing ? 'bg-gray-50' : ''}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="country">Pays</Label>
+                      <Input
+                        id="country"
+                        value={personalInfo.country}
+                        onChange={(e) => handlePersonalInfoChange('country', e.target.value)}
+                        disabled={!isEditing}
+                        className={!isEditing ? 'bg-gray-50' : ''}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="city">Ville de résidence</Label>
+                      <Input
+                        id="city"
+                        value={personalInfo.city}
+                        onChange={(e) => handlePersonalInfoChange('city', e.target.value)}
+                        disabled={!isEditing}
+                        className={!isEditing ? 'bg-gray-50' : ''}
+                      />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+
+                  {/* Adresse complète */}
+                  <div className="space-y-2">
+                    <Label htmlFor="addressDetails">Adresse complète</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                      <Textarea
+                        id="addressDetails"
+                        value={personalInfo.addressDetails}
+                        onChange={(e) => handlePersonalInfoChange('addressDetails', e.target.value)}
+                        disabled={!isEditing}
+                        className={`pl-10 min-h-[80px] ${!isEditing ? 'bg-gray-50' : ''}`}
+                        placeholder="Quartier, rue, numéro..."
+                      />
+                    </div>
+                  </div>
+
+                  {/* Boutons d'action */}
+                  {isEditing && (
+                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                      <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
+                        <X className="w-4 h-4 mr-2" />
+                        Annuler
+                      </Button>
+                      <Button onClick={handleSavePersonalInfo} disabled={isSaving} variant={"info"}>
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Enregistrement...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Enregistrer
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </ContentLayout>
           </TabsContent>
 
-          {/* Informations Financières */}
-          <TabsContent value="financial">
-            <div className="space-y-6">
-              {/* Résumé financier */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Résumé Financier</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{formatCurrency(studentProfile.financial.totalFees)}</div>
-                      <div className="text-sm text-gray-600">Frais totaux</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">{formatCurrency(studentProfile.financial.paidAmount)}</div>
-                      <div className="text-sm text-gray-600">Montant payé</div>
-                    </div>
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <div className="text-2xl font-bold text-red-600">{formatCurrency(studentProfile.financial.remainingBalance)}</div>
-                      <div className="text-sm text-gray-600">Solde restant</div>
-                    </div>
-                  </div>
-                  <div className="mt-6">
-                    <Progress value={(studentProfile.financial.paidAmount / studentProfile.financial.totalFees) * 100} className="h-2" />
-                    <div className="flex justify-between text-sm text-gray-600 mt-2">
-                      <span>0%</span>
-                      <span>{Math.round((studentProfile.financial.paidAmount / studentProfile.financial.totalFees) * 100)}% payé</span>
-                      <span>100%</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Onglet Sécurité */}
+          <TabsContent value="security">
+            <ContentLayout
+              title='Changer le mot de passe'
+              description='Modifiez votre mot de passe pour sécuriser votre compte'
+            >
+              <div className="space-y-4">
+                {/* Étape 1 : Demander l'OTP */}
+                {!otpSent ? (
+                  <div className="space-y-4">
+                    <Alert className="bg-blue-50 border-blue-200">
+                      <AlertCircle className="h-4 w-4 text-blue-600" />
+                      <AlertDescription className="text-blue-800">
+                        Pour des raisons de sécurité, un code de vérification sera envoyé à votre adresse email <strong>{user?.user?.email}</strong>
+                      </AlertDescription>
+                    </Alert>
 
-              {/* Historique des transactions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Historique des Transactions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {studentProfile.financial.transactions.map((transaction) => (
-                      <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`p-2 rounded-full ${transaction.type === 'PAYMENT' ? 'bg-red-100' : 'bg-green-100'}`}>
-                            {transaction.type === 'PAYMENT' ? (
-                              <CreditCard className={`w-4 h-4 ${transaction.type === 'PAYMENT' ? 'text-red-600' : 'text-green-600'}`} />
-                            ) : (
-                              <DollarSign className="w-4 h-4 text-green-600" />
-                            )}
-                          </div>
-                          <div>
-                            <div className="font-medium">{transaction.description}</div>
-                            <div className="text-sm text-gray-600">{new Date(transaction.date).toLocaleDateString('fr-FR')}</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`font-semibold ${transaction.type === 'PAYMENT' ? 'text-red-600' : 'text-green-600'}`}>
-                            {transaction.type === 'PAYMENT' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
-                          </div>
-                          <Badge size='sm' value={transaction.status} label={transaction.status} icon={CheckCircle} />
-                        </div>
-                      </div>
-                    ))}
+                    <div className="flex justify-center pt-4">
+                      <Button onClick={handleRequestOTP} disabled={isSaving} variant="info">
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Envoi en cours...
+                          </>
+                        ) : (
+                          <>
+                            <Mail className="w-4 h-4 mr-2" />
+                            Envoyer le code de vérification
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                ) : (
+                  <>
+                    {/* Étape 2 : Entrer l'OTP et le nouveau mot de passe */}
+                    <Alert className="bg-green-50 border-green-200">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <AlertDescription className="text-green-800">
+                        Un code de vérification a été envoyé à votre email. Vérifiez votre boîte de réception.
+                      </AlertDescription>
+                    </Alert>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="otp">Code de vérification (OTP) *</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                        <Input
+                          id="otp"
+                          type="text"
+                          placeholder="Entrez le code reçu par email"
+                          value={passwordData.otp}
+                          onChange={(e) => handlePasswordChange('otp', e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">Nouveau mot de passe *</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                        <Input
+                          id="newPassword"
+                          type={showPassword ? 'text' : 'password'}
+                          value={passwordData.newPassword}
+                          onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                          className="pl-10 pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Minimum 8 caractères avec lettres, chiffres et symboles
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                        <Input
+                          id="confirmPassword"
+                          type={showPassword ? 'text' : 'password'}
+                          value={passwordData.confirmPassword}
+                          onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    {passwordData.newPassword && passwordData.confirmPassword &&
+                      passwordData.newPassword !== passwordData.confirmPassword && (
+                      <Alert className="bg-red-50 border-red-200">
+                        <AlertCircle className="h-4 w-4 text-red-600" />
+                        <AlertDescription className="text-red-800">
+                          Les mots de passe ne correspondent pas
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setOtpSent(false);
+                          setPasswordData({ otp: '', newPassword: '', confirmPassword: '' });
+                        }}
+                        disabled={isSaving}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Annuler
+                      </Button>
+                      <Button onClick={handleSavePassword} disabled={isSaving} variant="info">
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Modification...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Changer le mot de passe
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </ContentLayout>
           </TabsContent>
         </Tabs>
       </div>
@@ -464,4 +676,4 @@ const StudentProfileDashboard: React.FC = () => {
   );
 };
 
-export default StudentProfileDashboard;
+export default StudentProfilePage;

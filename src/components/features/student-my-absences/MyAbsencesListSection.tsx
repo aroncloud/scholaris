@@ -13,23 +13,21 @@ import {
 import { MoreHorizontal, Eye, FileUp } from "lucide-react";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 import { Absence } from "@/types/studentmyabsencesTypes";
-import { Badge } from "@/components/ui/badge";
 import ContentLayout from '@/layout/ContentLayout';
+import Badge from '@/components/custom-ui/Badge';
 
 interface MyAbsencesListSectionProps {
   filteredAbsences: Absence[];
-  getStatutColor: (status: string) => string;
-  getStatutLabel: (status: string) => string;
   handleViewDetails: (absence: Absence) => void;
   handleSubmitJustification: () => void;
+  loading: boolean;
 }
 
 export default function MyAbsencesListSection({
   filteredAbsences,
-  getStatutColor,
-  getStatutLabel,
   handleViewDetails,
   handleSubmitJustification,
+  loading
 }: MyAbsencesListSectionProps) {
 
   const columns: TableColumn<Absence>[] = [
@@ -40,6 +38,7 @@ export default function MyAbsencesListSection({
         row.recorded_at
           ? new Date(row.recorded_at).toLocaleDateString("fr-FR")
           : "—",
+      priority: "medium"
     },
 
     {
@@ -51,6 +50,7 @@ export default function MyAbsencesListSection({
           <div className="text-sm text-muted-foreground">{row.session_title || "—"}</div>
         </div>
       ),
+      priority: "medium"
     },
     {
       key: "horaire",
@@ -58,15 +58,15 @@ export default function MyAbsencesListSection({
       render: (_, row) =>
         `${row.start_time ? new Date(row.start_time).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "—"} - ${row.end_time ? new Date(row.end_time).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "—"
         }`,
+      priority: "medium"
     },
     {
       key: "status_code",
       label: "Statut",
       render: (_, row) => (
-        <Badge variant="secondary" className={getStatutColor(row.status_code)}>
-          {getStatutLabel(row.status_code)}
-        </Badge>
+        <Badge value={row.status_code} label={row.status_code} size="sm"/>
       ),
+      priority: "low"
     },
     {
       key: "actions",
@@ -93,21 +93,15 @@ export default function MyAbsencesListSection({
                 </DropdownMenuItem>
               </>
             )}
-
-            {/** Optional: if justification_id exists in future API */}
-            {/** row.justification_id && (
-              <DropdownMenuItem>
-                <Link2 className="mr-2 h-4 w-4" /> Voir justificatif lié
-              </DropdownMenuItem>
-            ) **/}
           </DropdownMenuContent>
         </DropdownMenu>
       ),
+      priority: "high"
     },
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-2 md:p-4 lg:p-6">
       <ContentLayout
         title={"Historique des Absences"}
         description="Liste complète de vos absences par chronologie"
@@ -118,6 +112,7 @@ export default function MyAbsencesListSection({
           searchKey={["course_unit_name", "session_title", "status_code"]}
           locale="fr"
           paginate={5}
+          isLoading={loading}
         />
       </ContentLayout>
     </div>

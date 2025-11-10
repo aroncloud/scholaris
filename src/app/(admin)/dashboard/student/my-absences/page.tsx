@@ -18,37 +18,7 @@ export default function MyAbsencesPage() {
   const [isSubmitJustificationOpen, setIsSubmitJustificationOpen] = useState(false);
   const [selectedAbsences, setSelectedAbsences] = useState<number[]>([]);
 
-  const getStatutColor = (statut: string) => {
-    switch (statut) {
-      case "JUSTIFIED":
-      case "justifiee":
-        return "bg-green-100 text-green-800";
-      case "PENDING_REVIEW":
-      case "en_attente":
-        return "bg-yellow-100 text-yellow-800";
-      case "UNJUSTIFIED":
-      case "non_justifiee":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
-  const getStatutLabel = (statut: string) => {
-    switch (statut) {
-      case "JUSTIFIED":
-      case "justifiee":
-        return "JUSTIFIED";
-      case "PENDING_REVIEW":
-      case "en_attente":
-        return "PENDING_REVIEW";
-      case "UNJUSTIFIED":
-      case "non_justifiee":
-        return "UNJUSTIFIED";
-      default:
-        return statut;
-    }
-  };
 
   const handleViewDetails = (absence: Absence) => {
     setSelectedAbsence(absence);
@@ -73,19 +43,19 @@ export default function MyAbsencesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       {/* Header */}
       <PageHeader
         title="Mes Absences"
         description="Tableau de bord d&apos;assiduité et gestion de vos justificatifs"
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 w-full">
           <Button
             variant="outline"
             onClick={async () => {
               await refetch();
             }}
-            disabled={loading}
+            disabled={loading} className="flex-1"
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
@@ -93,7 +63,7 @@ export default function MyAbsencesPage() {
             {loading ? "Actualisation..." : "Actualiser"}
           </Button>
 
-          <Button onClick={handleSubmitJustification} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleSubmitJustification} variant={"info"} className="flex-1">
             <Plus className="h-4 w-4 mr-2" />
             Soumettre un justificatif
           </Button>
@@ -103,10 +73,9 @@ export default function MyAbsencesPage() {
       {/* MyAbsencesListprops */}
       <MyAbsencesListSection
         filteredAbsences={absences}
-        getStatutColor={getStatutColor}
-        getStatutLabel={getStatutLabel}
         handleViewDetails={handleViewDetails}
         handleSubmitJustification={handleSubmitJustification}
+        loading = {loading}
       />
 
       {/* ViewDetailprops */}
@@ -114,8 +83,6 @@ export default function MyAbsencesPage() {
         isDetailsDialogOpen={isDetailsDialogOpen}
         setIsDetailsDialogOpen={setIsDetailsDialogOpen}
         selectedAbsence={selectedAbsence}
-        getStatutColor={getStatutColor}
-        getStatutLabel={getStatutLabel}
         handleSubmitJustification={handleSubmitJustification}
       />
 
@@ -128,6 +95,6 @@ export default function MyAbsencesPage() {
         handleAbsenceSelection={handleAbsenceSelection}
         onJustificationSubmitted={handleJustificationSuccess}
       />
-    </div>
+    </>
   );
 }

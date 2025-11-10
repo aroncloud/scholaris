@@ -13,12 +13,12 @@ export function useStudentAbsenceData() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ Get the current user_code from the auth store
+  //Get the current user_code from the auth store
   const user = useUserStore((state) => state.user);
 
   useEffect(() => {
-    console.log("🧠 User data from store:", user);
-    console.log("🧩 User code:", user?.user?.user_code);
+    console.log("User data from store:", user);
+    console.log("User code:", user?.user?.user_code);
   }, [user]);
 
   const fetchData = useCallback(async () => {
@@ -27,7 +27,7 @@ export function useStudentAbsenceData() {
       console.log('useStudentAbsenceData - Fetching absences...');
 
       const result = await getMyAbsencesList();
-      console.log('✅ API response:', result);
+      console.log('API response:', result);
 
       if (
         result &&
@@ -38,7 +38,7 @@ export function useStudentAbsenceData() {
         setAbsences((result as AbsenceHistoryResponse).body);
         setError(null);
       } else {
-        console.error('❌ API returned failure:', result);
+        console.error('API returned failure:', result);
         setAbsences([]);
         setError(
           (result && 'message' in result && result.message) ||
@@ -47,7 +47,7 @@ export function useStudentAbsenceData() {
         );
       }
     } catch (err: any) {
-      console.error('💥 Fetch failed:', err);
+      console.error(' Fetch failed:', err);
       setAbsences([]);
       setError(err.message || 'Erreur inconnue');
     } finally {

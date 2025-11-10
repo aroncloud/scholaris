@@ -5,7 +5,7 @@ import { verifySession } from "@/lib/session";
 import axios from "axios";
 import { actionErrorHandler } from "./errorManagement";
 import { ICreateUser, IUpdateUserForm } from "@/types/staffType";
-import { IHireExistingStaff } from "@/types/userType";
+import { IHireExistingStaff, IResetPassword, ISelfUpdate } from "@/types/userType";
 
 
 
@@ -553,6 +553,87 @@ export async function removeUserRoles (user_code: string, roleList: string[]) {
         data: response.data
     }
   } catch (error: unknown) {
+      const errResult = actionErrorHandler(error);
+      return errResult;
+  }
+}
+
+export async function selfUpdate(payload: ISelfUpdate) {
+  
+  try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.put(
+      `${process.env.AIM_WORKER_ENDPOINT}/api/users`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("-->selfUpdate.result", response.data);
+    return {
+      code: "success",
+      error: null,
+      data: response.data,
+    };
+  } catch (error: unknown) {
+    console.log("-->selfUpdate.error");
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
+}
+
+
+//STEP 1 : Initiates the password reset process by sending an OTP to the user's email.
+export async function forgotPassword (email: string) {
+  try {
+    const session = await verifySession();
+    
+    const token = session.accessToken;
+    
+    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/auth/forgot-password`, {email}, {
+      headers: {
+          Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    return {
+        code: 'success',
+        error: null,
+        data: response.data
+    }
+  } catch (error: unknown) {
+    console.log('-->forgotPassword.error')
+      const errResult = actionErrorHandler(error);
+      return errResult;
+  }
+}
+
+//STEP 2 : Sets a new password for the user if the provided OTP is valid and not expired.
+export async function resetPassword (payload: IResetPassword) {
+  try {
+    const session = await verifySession();
+    
+    const token = session.accessToken;
+    
+    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/auth/forgot-password`, payload, {
+      headers: {
+          Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    return {
+        code: 'success',
+        error: null,
+        data: response.data
+    }
+  } catch (error: unknown) {
+    console.log('-->forgotPassword.error')
       const errResult = actionErrorHandler(error);
       return errResult;
   }

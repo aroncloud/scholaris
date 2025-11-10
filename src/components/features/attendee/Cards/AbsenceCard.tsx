@@ -1,30 +1,23 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+"use client"
 
-import { Absence } from "@/app/(admin)/dashboard/admin/my-absences/page";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Calendar, Clock, Eye, MapPin, Send, User } from "lucide-react";
-import { useState } from "react";
-
+import { IAbsenceRecord } from "@/types/absenceTypes"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { BookOpen, Calendar, Clock, Eye, MapPin, Send, User } from "lucide-react"
+import { formatDateToText } from "@/lib/utils"
 
 interface AbsenceCardProps {
-  absence: Absence;
-  onOpenJustification: (a: Absence) => void; // ouvre modal de justification / édition
-  onViewJustification: (a: Absence) => void; // voir seulement
-  formatDateToText: (d: string) => string;
+  absence: IAbsenceRecord
+  onOpenJustification: (a: IAbsenceRecord) => void
+  onViewJustification: (a: IAbsenceRecord) => void
 }
-
 export function AbsenceCard({
   absence,
   onOpenJustification,
   onViewJustification,
-  formatDateToText,
 }: AbsenceCardProps) {
-  const [expanded, setExpanded] = useState(false);
-
   return (
-    <Card className=" shadow-sm hover:shadow-md transition-shadow">
+    <Card className="shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
           {/* LEFT: contenu principal */}
@@ -38,7 +31,7 @@ export function AbsenceCard({
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h4 className=" font-semibold text-slate-900 truncate">
+                      <h4 className="font-semibold text-slate-900 truncate">
                         {absence.course_name}
                       </h4>
                       <span className="text-sm text-slate-500 truncate">
@@ -62,8 +55,6 @@ export function AbsenceCard({
                         <User className="h-3 w-3" />
                         {absence.instructor_name ?? "—"}
                       </span>
-                      {/* Statut intégré dans la meta */}
-                      {/* <StatusBadge status={absence.justification_status} /> */}
                     </div>
                   </div>
                 </div>
@@ -72,16 +63,12 @@ export function AbsenceCard({
 
             {/* Justification */}
             {absence.justification_status !== "NOT_SUBMITTED" && (
-              <div
-                className={`mt-3 pl-3 border-l-2 border-slate-100 ${
-                  expanded ? "pb-3" : "pb-0"
-                }`}
-              >
+              <div className="mt-3 pl-3 border-l-2 border-slate-100">
                 <div className="min-w-0">
-                  <div className=" text-slate-700 font-medium truncate">
+                  <div className="text-slate-700 font-medium truncate">
                     {absence.justification_reason ?? "Motif non spécifié"}
                   </div>
-                  <div className=" text-slate-600 mt-1 line-clamp-3">
+                  <div className="text-slate-600 mt-1 line-clamp-3">
                     {absence.justification_details ?? "Aucun détail fourni."}
                   </div>
                   {absence.submitted_at && (
@@ -94,7 +81,7 @@ export function AbsenceCard({
                 {/* réponse (approbation/rejet) */}
                 {absence.reviewer_comment && (
                   <div
-                    className={`mt-3 p-3 rounded-md  ${
+                    className={`mt-3 p-3 rounded-md ${
                       absence.justification_status === "APPROVED"
                         ? "bg-green-50 text-green-800"
                         : "bg-red-50 text-red-800"
@@ -104,26 +91,6 @@ export function AbsenceCard({
                     <p className="mt-1">{absence.reviewer_comment}</p>
                   </div>
                 )}
-
-                {/* expand toggle */}
-                {/* <div className="mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setExpanded((s) => !s)}
-                    className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
-                    aria-expanded={expanded}
-                  >
-                    {expanded ? (
-                      <>
-                        <ChevronsUp className="h-3 w-3" /> Masquer
-                      </>
-                    ) : (
-                      <>
-                        <ChevronsDown className="h-3 w-3" /> Lire la suite
-                      </>
-                    )}
-                  </button>
-                </div> */}
               </div>
             )}
           </div>
