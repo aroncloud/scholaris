@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { IHireExistingStaff } from "@/types/userType";
-import { User, Briefcase, Lock, ChevronRight, ChevronLeft } from "lucide-react";
+import { User, Briefcase, Lock, ChevronRight, ChevronLeft, Save } from "lucide-react";
 import { MARITAl_STATUS } from "@/constant";
 import { DatePicker } from "@/components/DatePicker";
 import { useConfigStore } from "@/lib/store/configStore";
@@ -158,10 +158,10 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
               <Input {...register("other_phone")} placeholder="+237 6 99 88 77 66" />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 ">
               <Label>Statut marital</Label>
               <Select onValueChange={(value) => setValue("marital_status_code", value)}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full ">
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
                 <SelectContent className="w-full">
@@ -318,38 +318,79 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
-      <DialogContent className="md:min-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Créer un nouvel utilisateur</DialogTitle>
-          <DialogDescription>Étape {currentStep} sur {STEPS.length}</DialogDescription>
+      <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+        {/* HEADER */}
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-white z-10">
+          <DialogTitle className="text-2xl font-bold text-slate-900">
+            Créer un nouvel utilisateur
+          </DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-1">
+            Étape {currentStep} sur {STEPS.length}
+          </DialogDescription>
         </DialogHeader>
 
 
 
+        {/*  MAIN CONTENT WITH SCROLL */}
+        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Keep your existing step form */}
+            <div className="py-2">
+              {renderStepContent()}
+            </div>
+          </form>
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="py-4">{renderStepContent()}</div>
+        {/* FOOTER */}
+        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center justify-between w-full">
 
-          <DialogFooter className="flex justify-between">
-            <Button type="button" variant="outline" onClick={() => setCurrentStep(currentStep - 1)} disabled={currentStep === 1}>
-              <ChevronLeft className="h-4 w-4 mr-2" /> Précédent
-            </Button>
+            {/* Left text or nothing */}
+            <p className="text-sm text-slate-600">
+              Étape {currentStep}/{STEPS.length}
+            </p>
 
-            <div className="flex gap-2">
-              <Button type="button" variant="ghost" onClick={handleCancel}>Annuler</Button>
+            <div className="flex items-center space-x-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+
               {currentStep < STEPS.length ? (
-                <Button type="button" onClick={() => setCurrentStep(currentStep + 1)} disabled={!validateStep()}>
-                  Suivant <ChevronRight className="h-4 w-4 ml-2" />
+                <Button
+                  type="button"
+                  onClick={() => setCurrentStep(currentStep + 1)}
+                  disabled={!validateStep()}
+                  className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+                >
+                  Suivant
+                  <ChevronRight className="ml-2 w-4 h-4" />
                 </Button>
               ) : (
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+                >
+                  <Save className="w-4 h-4 mr-2" />
                   {isSubmitting ? "Création..." : "Créer"}
                 </Button>
               )}
             </div>
-          </DialogFooter>
-        </form>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
+
+
+
+
+
+

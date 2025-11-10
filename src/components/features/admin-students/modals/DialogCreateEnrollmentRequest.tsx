@@ -26,6 +26,7 @@ import { initiateStudentApplication } from "@/actions/studentAction";
 import { useFactorizedProgramStore } from '@/store/programStore';
 import { IInitiateStudentApplication } from "@/types/staffType";
 import { Combobox } from '@/components/ui/Combobox';
+import { Save } from 'lucide-react';
 
 interface CreateEnrollmentDialogProps {
   open: boolean;
@@ -69,9 +70,9 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
 
       if (result.code === 'success') {
         showToast({
-        variant: 'success-solid', 
-        message: 'Succès', 
-        description: "Demande d'inscription créée avec succès" 
+          variant: 'success-solid',
+          message: 'Succès',
+          description: "Demande d'inscription créée avec succès"
         });
         onOpenChange(false);
         reset();
@@ -98,98 +99,99 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Nouvelle demande d&apos;inscription</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-white z-10">
+          <DialogTitle className="text-2xl font-bold text-slate-900">Nouvelle demande d&apos;inscription</DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-1">
             Créer une nouvelle demande d&apos;inscription étudiant
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
-          {/* Prénom + Nom */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="first_name">Prénom *</Label>
-              <Input
-                id="first_name"
-                placeholder="Prénom"
-                {...register("first_name", { required: "Le prénom est obligatoire" })}
-              />
-              {errors.first_name && <p className="text-red-500 text-sm">{errors.first_name.message}</p>}
+        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
+            {/* Prénom + Nom */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="first_name">Prénom *</Label>
+                <Input
+                  id="first_name"
+                  placeholder="Prénom"
+                  {...register("first_name", { required: "Le prénom est obligatoire" })}
+                />
+                {errors.first_name && <p className="text-red-500 text-sm">{errors.first_name.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Nom *</Label>
+                <Input
+                  id="last_name"
+                  placeholder="Nom de famille"
+                  {...register("last_name", { required: "Le nom est obligatoire" })}
+                />
+                {errors.last_name && <p className="text-red-500 text-sm">{errors.last_name.message}</p>}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="last_name">Nom *</Label>
-              <Input
-                id="last_name"
-                placeholder="Nom de famille"
-                {...register("last_name", { required: "Le nom est obligatoire" })}
-              />
-              {errors.last_name && <p className="text-red-500 text-sm">{errors.last_name.message}</p>}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {/* Matricule */}
-            <div className="space-y-2">
-              <Label htmlFor="student_number">Matricule *</Label>
-              <Input
-                id="student_number"
-                placeholder="MA-2025-08-13-0008"
-                {...register("student_number", { required: "Matricule obligatoire" })}
-              />
-              {errors.student_number && <p className="text-red-500 text-sm">{errors.student_number.message}</p>}
-            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Matricule */}
+              <div className="space-y-2">
+                <Label htmlFor="student_number">Matricule *</Label>
+                <Input
+                  id="student_number"
+                  placeholder="MA-2025-08-13-0008"
+                  {...register("student_number", { required: "Matricule obligatoire" })}
+                />
+                {errors.student_number && <p className="text-red-500 text-sm">{errors.student_number.message}</p>}
+              </div>
 
 
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="email@exemple.com"
-                {...register("email", { required: "L'email est obligatoire" })}
-              />
-              {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="email@exemple.com"
+                  {...register("email", { required: "L'email est obligatoire" })}
+                />
+                {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+              </div>
             </div>
-          </div>
-          {/* Téléphone + Genre */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="phone_number">Téléphone *</Label>
-              <Input
-                id="phone_number"
-                placeholder="+237..."
-                {...register("phone_number", { required: "Le téléphone est obligatoire" })}
-              />
-              {errors.phone_number && <p className="text-red-500 text-sm">{errors.phone_number.message}</p>}
+            {/* Téléphone + Genre */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone_number">Téléphone *</Label>
+                <Input
+                  id="phone_number"
+                  placeholder="+237..."
+                  {...register("phone_number", { required: "Le téléphone est obligatoire" })}
+                />
+                {errors.phone_number && <p className="text-red-500 text-sm">{errors.phone_number.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="gender">Genre *</Label>
+                <Select
+                  defaultValue="MALE"
+                  onValueChange={(value) => setValue("gender", value as "MALE" | "FEMALE")}
+                >
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder="Sélectionner le genre" />
+                  </SelectTrigger>
+                  <SelectContent className='w-full'>
+                    <SelectItem value="MALE">Masculin</SelectItem>
+                    <SelectItem value="FEMALE">Féminin</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.gender && <p className="text-red-500 text-sm">{errors.gender.message}</p>}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="gender">Genre *</Label>
-              <Select
-                defaultValue="MALE"
-                onValueChange={(value) => setValue("gender", value as "MALE" | "FEMALE")}
-              >
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder="Sélectionner le genre" />
-                </SelectTrigger>
-                <SelectContent className='w-full'>
-                  <SelectItem value="MALE">Masculin</SelectItem>
-                  <SelectItem value="FEMALE">Féminin</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.gender && <p className="text-red-500 text-sm">{errors.gender.message}</p>}
-            </div>
-          </div>
-          {/* Curriculum */}
-          <div >
-            <div>
-              <Label htmlFor="curriculum_code">Curriculum *</Label>
-              <Controller
+            {/* Curriculum */}
+            <div >
+              <div>
+                <Label htmlFor="curriculum_code">Curriculum *</Label>
+                <Controller
                   name="curriculum_code"
                   control={control}
                   render={({ field }) => (
-                  <Combobox
+                    <Combobox
                       options={curriculumList.map(item => {
                         return {
                           value: item.curriculum_code,
@@ -200,15 +202,18 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
                       onChange={field.onChange}
                       placeholder="Sélectionner le statut"
                       className='py-5'
-                  />
-                )}
-              />
-              
-              {errors.curriculum_code && <p className="text-red-500 text-sm">{errors.curriculum_code.message}</p>}
-            </div>
-          </div>
+                    />
+                  )}
+                />
 
-          <DialogFooter>
+                {errors.curriculum_code && <p className="text-red-500 text-sm">{errors.curriculum_code.message}</p>}
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3">
             <Button
               type="button"
               variant="outline"
@@ -217,11 +222,16 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
             >
               Annuler
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+            >
+              <Save className="w-4 h-4 mr-2" />
               {isLoading ? "Création..." : "Créer la demande"}
             </Button>
-          </DialogFooter>
-        </form>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

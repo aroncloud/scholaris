@@ -24,7 +24,7 @@ import { ICreateStudent } from "@/types/staffType";
 import { useFactorizedProgramStore } from "@/store/programStore";
 import { Combobox } from "@/components/ui/Combobox";
 import { useState } from "react";
-import { EyeClosedIcon, EyeIcon } from "lucide-react";
+import { EyeClosedIcon, EyeIcon, Save } from "lucide-react";
 
 interface DialogCreateStudentProps {
   open: boolean;
@@ -57,7 +57,7 @@ export function DialogCreateStudent({
       education_level_code: "",
     },
   });
-    const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { factorizedPrograms } = useFactorizedProgramStore();
   const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
@@ -79,59 +79,52 @@ export function DialogCreateStudent({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl md:min-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-white z-10">
           {/* --- Titre fixe pour la création --- */}
-          <DialogTitle>Créer un nouvel étudiant</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl font-bold text-slate-900">Créer un nouvel étudiant</DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-1">
             Remplissez les informations ci-dessous pour créer un nouveau profil étudiant.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Section: Informations personnelles */}
-          <div className="space-y-4">
-            {/* <div className="border-b pb-2">
-              <h3 className="font-semibold text-gray-700 uppercase tracking-wide">
-                Informations personnelles
-              </h3>
-            </div> */}
-            <div className="grid grid-cols-2 gap-4">
+        <div className="p-6 max-h-[calc(95vh-180px)] overflow-y-auto">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+
+            {/* SECTION: Informations personnelles */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
               {/* Prénom */}
-              <div className="space-y-1.5">
-                <Label htmlFor="first_name" className="font-medium text-gray-600">
+              <div className="space-y-1">
+                <Label htmlFor="first_name" className="font-medium text-gray-700">
                   Prénom <span className="text-red-500">*</span>
                 </Label>
                 <SInput
                   id="first_name"
                   {...register("first_name", { required: "Le prénom est requis" })}
                   disabled={isSubmitting}
-                  className={errors.first_name ? "border-red-500 h-9" : "h-9"}
+                  className={errors.first_name ? "border-red-500 h-10" : "h-10"}
                 />
-                {errors.first_name && (
-                  <p className="text-red-500 text-sm">{errors.first_name.message}</p>
-                )}
+                {errors.first_name && <p className="text-red-500 text-sm">{errors.first_name.message}</p>}
               </div>
 
               {/* Nom */}
-              <div className="space-y-1.5">
-                <Label htmlFor="last_name" className="font-medium text-gray-600">
+              <div className="space-y-1">
+                <Label htmlFor="last_name" className="font-medium text-gray-700">
                   Nom <span className="text-red-500">*</span>
                 </Label>
                 <SInput
                   id="last_name"
                   {...register("last_name", { required: "Le nom est requis" })}
                   disabled={isSubmitting}
-                  className={errors.last_name ? "border-red-500 h-9" : "h-9"}
+                  className={errors.last_name ? "border-red-500 h-10" : "h-10"}
                 />
-                {errors.last_name && (
-                  <p className="text-red-500 text-sm">{errors.last_name.message}</p>
-                )}
+                {errors.last_name && <p className="text-red-500 text-sm">{errors.last_name.message}</p>}
               </div>
 
               {/* Genre */}
-              <div className="space-y-1.5">
-                <Label className="font-medium text-gray-600">
+              <div className="space-y-1">
+                <Label className="font-medium text-gray-700">
                   Genre <span className="text-red-500">*</span>
                 </Label>
                 <Controller
@@ -140,7 +133,7 @@ export function DialogCreateStudent({
                   rules={{ required: "Le genre est requis" }}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
-                      <SelectTrigger className={errors.gender ? "border-red-500 h-9 w-full" : "h-9 w-full"}>
+                      <SelectTrigger className={errors.gender ? "border-red-500 h-10 w-full" : "h-10 w-full"}>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
                       <SelectContent>
@@ -150,125 +143,163 @@ export function DialogCreateStudent({
                     </Select>
                   )}
                 />
-                {errors.gender && (
-                  <p className="text-red-500 text-sm">{errors.gender.message}</p>
-                )}
+                {errors.gender && <p className="text-red-500 text-sm">{errors.gender.message}</p>}
               </div>
 
               {/* Matricule */}
-              <div className="space-y-1.5">
-                <Label htmlFor="student_number" className="font-medium text-gray-600">
+              <div className="space-y-1">
+                <Label htmlFor="student_number" className="font-medium text-gray-700">
                   Matricule <span className="text-red-500">*</span>
                 </Label>
                 <SInput
                   id="student_number"
                   {...register("student_number", { required: "Le Matricule est requis" })}
                   disabled={isSubmitting}
-                  className={errors.student_number ? "border-red-500 h-9" : "h-9"}
+                  className={errors.student_number ? "border-red-500 h-10" : "h-10"}
                 />
-                {errors.student_number && (
-                  <p className="text-red-500 text-sm">{errors.student_number.message}</p>
+                {errors.student_number && <p className="text-red-500 text-sm">{errors.student_number.message}</p>}
+              </div>
+
+            </div>
+
+            {/* SECTION: Coordonnées */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              {/* Email */}
+              <div className="space-y-1">
+                <Label>Email <span className="text-red-500">*</span></Label>
+                <SInput
+                  id="email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email requis",
+                    pattern: { value: /^\S+@\S+$/i, message: "Email invalide" }
+                  })}
+                  className={errors.email ? "border-red-500 h-10" : "h-10"}
+                />
+                {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+              </div>
+
+              {/* Téléphone */}
+              <div className="space-y-1">
+                <Label>Téléphone</Label>
+                <SInput id="phone_number" type="tel" {...register("phone_number")} className="h-10" />
+              </div>
+
+            </div>
+
+            {/* SECTION: Informations académiques */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* SECTION: Sécurité */}
+              <div className="space-y-1">
+                <Label htmlFor="password_plaintext" className="font-medium text-gray-700">
+                  Mot de passe <span className="text-red-500">*</span>
+                </Label>
+
+                <div className="relative">
+                  <Controller
+                    name="password_plaintext"
+                    control={control}
+                    rules={{
+                      required: "Le mot de passe est requis",
+                      minLength: { value: 8, message: "Le mot de passe doit contenir au moins 8 caractères" }
+                    }}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        error={!!errors.password_plaintext}
+                        className="h-10"
+                      />
+                    )}
+                  />
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeIcon className="text-gray-600 h-5" />
+                    ) : (
+                      <EyeClosedIcon className="text-gray-400 h-5" />
+                    )}
+                  </span>
+                </div>
+
+                {errors.password_plaintext && (
+                  <p className="text-red-500 text-sm">{errors.password_plaintext.message}</p>
                 )}
               </div>
-            </div>
-          </div>
 
-          {/* Section: Coordonnées */}
-          <div className="space-y-4">
-             {/* <div className="border-b pb-2">
-                <h3 className="font-semibold text-gray-700 uppercase tracking-wide">
-                    Coordonnées
-                </h3>
-            </div> */}
-            <div className="grid grid-cols-2 gap-4">
-                {/* ... autres champs ... */}
-                <div className="space-y-1.5">
-                    <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
-                    <SInput id="email" type="email" {...register("email", { required: "Email requis", pattern: { value: /^\S+@\S+$/i, message: "Email invalide" }})} />
-                    {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-                </div>
-                <div className="space-y-1.5">
-                    <Label htmlFor="phone_number">Téléphone</Label>
-                    <SInput id="phone_number" type="tel" {...register("phone_number")} />
-                </div>
-            </div>
-          </div>
-          
-          {/* Section: Informations académiques */}
-          <div className="space-y-4">
-            {/* <div className="border-b pb-2">
-                <h3 className="font-semibold text-gray-700 uppercase tracking-wide">
-                    Informations académiques
-                </h3>
-            </div> */}
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5 col-span-2">
-                    <Label>Niveau <span className="text-red-500">*</span></Label>
-                     <Controller name="curriculum_code" control={control} rules={{ required: "Le niveau est requis" }} render={({ field }) => (
-                        <Combobox options={curriculumList.map(item => ({ value: item.curriculum_code, label: item.curriculum_name }))} value={field.value} onChange={field.onChange} placeholder="Sélectionner le niveau" />
-                    )} />
-                    {errors.curriculum_code && <p className="text-red-500 text-sm">{errors.curriculum_code.message}</p>}
-                </div>
-                <div className="space-y-1.5">
-                    <Label>Diplôme d&apos;entrée <span className="text-red-500">*</span></Label>
-                    <Controller name="education_level_code" control={control} rules={{ required: "Diplôme d'entrée requis" }} render={({ field }) => (
-                        <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger className="w-full"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                            <SelectContent className="w-full">
-                                <SelectItem value="BACCALAUREAT">Baccalauréat</SelectItem>
-                                <SelectItem value="LICENCE">Licence</SelectItem>
-                                <SelectItem value="MASTER">Master</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    )} />
-                    {errors.education_level_code && <p className="text-red-500 text-sm">{errors.education_level_code.message}</p>}
-                </div>
-            </div>
-          </div>
+              {/* Diplôme d'entrée */}
+              <div className="space-y-1">
+                <Label>Diplôme d'entrée <span className="text-red-500">*</span></Label>
+                <Controller
+                  name="education_level_code"
+                  control={control}
+                  rules={{ required: "Diplôme d'entrée requis" }}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="h-10 w-full"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BACCALAUREAT">Baccalauréat</SelectItem>
+                        <SelectItem value="LICENCE">Licence</SelectItem>
+                        <SelectItem value="MASTER">Master</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.education_level_code && <p className="text-red-500 text-sm">{errors.education_level_code.message}</p>}
+              </div>
 
-          {/* Section: Sécurité */}
-          <div className="space-y-4">
-            {/* <div className="border-b pb-2">
-              <h3 className="font-semibold text-gray-700 uppercase tracking-wide">
-                Sécurité
-              </h3>
-            </div> */}
-            <div className="space-y-1.5">
-                <Label htmlFor="password_plaintext" className="font-medium text-gray-600">
-                    Mot de passe <span className="text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                    <Controller
-                        name="password_plaintext"
-                        control={control}
-                        rules={{
-                        required: "Le mot de passe est requis",
-                        minLength: { value: 8, message: "Le mot de passe doit contenir au moins 8 caractères" }
-                        }}
-                        render={({ field }) => (
-                        <Input {...field} type={showPassword ? "text" : "password"} placeholder="Enter your password" error={!!errors.password_plaintext?.message} />
-                        )}
-                    />
-                    <span onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer">
-                        {showPassword ? <EyeIcon className="text-gray-600 h-5 w-h-5" /> : <EyeClosedIcon className="text-gray-400 h-5 w-h-5" />}
-                    </span>
-                </div>
-                {errors.password_plaintext && (
-                    <p className="text-red-500 text-sm">{errors.password_plaintext.message}</p>
+            </div>
+
+            {/* Niveau — FULL WIDTH */}
+            <div className="space-y-1 md:col-span-2">
+              <Label>Niveau <span className="text-red-500">*</span></Label>
+              <Controller
+                name="curriculum_code"
+                control={control}
+                rules={{ required: "Le niveau est requis" }}
+                render={({ field }) => (
+                  <Combobox
+                    options={curriculumList.map(item => ({
+                      value: item.curriculum_code,
+                      label: item.curriculum_name
+                    }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Sélectionner le niveau"
+                  />
                 )}
+              />
+              {errors.curriculum_code && <p className="text-red-500 text-sm">{errors.curriculum_code.message}</p>}
             </div>
-          </div>
+          </form>
+        </div>
 
-          <DialogFooter>
-            <Button variant="outline" type="button" onClick={handleClose} disabled={isSubmitting}>
+        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
               Annuler
             </Button>
             {/* --- Bouton fixe pour la création --- */}
-            <Button type="submit" disabled={isSubmitting} variant="info">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              variant="info"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+            >
+              <Save className="w-4 h-4 mr-2" />
               {isSubmitting ? "Création en cours..." : "Créer l'étudiant"}
             </Button>
-          </DialogFooter>
-        </form>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

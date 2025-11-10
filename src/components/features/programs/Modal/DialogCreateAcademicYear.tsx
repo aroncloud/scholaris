@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -89,68 +89,82 @@ export default function DialogCreateAcademicYear({
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
-      <DialogContent className="max-w-2xl md:min-w-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Créer une nouvelle année académique</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-white z-10">
+          <DialogTitle className="text-2xl font-bold text-slate-900">Créer une nouvelle année académique</DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-1">
             Remplissez les informations pour définir une nouvelle année académique.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-          {/* Dates */}
-          <div className="space-y-1">
-            <Label>Date de début</Label>
-            <Controller
-              name="start_date"
-              control={control}
-              rules={{ required: "Date de début requise" }}
-              render={({ field }) => (
-                <DatePicker
-                  label=""
-                  minDate={new Date(1900, 0, 1)}
-                  onChange={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
-                  disabled={isSubmitting}
-                />
-              )}
-            />
-            {errors.start_date && <p className="text-red-600 text-sm">{errors.start_date.message}</p>}
-          </div>
+        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
 
-          <div className="space-y-1">
-            <Label>Date de fin</Label>
-            <Controller
-              name="end_date"
-              control={control}
-              rules={{ required: "Date de fin requise" }}
-              render={({ field }) => (
-                <DatePicker
-                  label=""
-                  minDate={new Date(1900, 0, 1)}
-                  onChange={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
-                  disabled={isSubmitting}
-                />
-              )}
-            />
-            {errors.end_date && <p className="text-red-600 text-sm">{errors.end_date.message}</p>}
-          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+            {/* Dates */}
+            <div className="space-y-1">
+              <Label>Date de début</Label>
+              <Controller
+                name="start_date"
+                control={control}
+                rules={{ required: "Date de début requise" }}
+                render={({ field }) => (
+                  <DatePicker
+                    label=""
+                    minDate={new Date(1900, 0, 1)}
+                    onChange={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
+              {errors.start_date && <p className="text-red-600 text-sm">{errors.start_date.message}</p>}
+            </div>
 
-          <div className="space-y-1">
-            <Label>Code Année</Label>
-            <Input {...register("year_code")} />
-          </div>
+            <div className="space-y-1">
+              <Label>Date de fin</Label>
+              <Controller
+                name="end_date"
+                control={control}
+                rules={{ required: "Date de fin requise" }}
+                render={({ field }) => (
+                  <DatePicker
+                    label=""
+                    minDate={new Date(1900, 0, 1)}
+                    onChange={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
+              {errors.end_date && <p className="text-red-600 text-sm">{errors.end_date.message}</p>}
+            </div>
 
+            <div className="space-y-1">
+              <Label>Code Année</Label>
+              <Input {...register("year_code")} />
+            </div>
+          </form>
 
-          {/* Footer */}
-          <DialogFooter className="col-span-2 mt-5">
-            <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>
+        </div>
+        {/* Footer */}
+        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isSubmitting}
+            >
               Annuler
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+            >
+              <Save className="w-4 h-4 mr-2" />
               {isSubmitting ? "Création..." : "Créer l'année académique"}
             </Button>
-          </DialogFooter>
-        </form>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
