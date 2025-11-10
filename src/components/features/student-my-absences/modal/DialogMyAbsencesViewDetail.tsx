@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileUp } from "lucide-react";
+import { FileUp, Save } from "lucide-react";
 import { Absence } from "@/types/studentmyabsencesTypes";
 
 interface DialogMyAbsencesViewDetailProps {
@@ -41,16 +41,16 @@ export default function DialogMyAbsencesViewDetail({
 
     return (
         <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
-            <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                    <DialogTitle>Détails de l&apos;Absence</DialogTitle>
-                    <DialogDescription>
+            <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+                 <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
+                    <DialogTitle className="text-2xl font-bold text-slate-900">Détails de l&apos;Absence</DialogTitle>
+                   <DialogDescription></DialogDescription>   <DialogDescription>
                         Informations complètes sur cette absence
                     </DialogDescription>
                 </DialogHeader>
 
                 {selectedAbsence && (
-                    <div className="space-y-4">
+                    <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label className="text-sm font-medium">Date</Label>
@@ -96,13 +96,17 @@ export default function DialogMyAbsencesViewDetail({
                     </div>
                 )}
 
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
-                        Fermer
+                <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+                    <Button 
+                    variant="outline" 
+                    onClick={() => setIsDetailsDialogOpen(false)}
+                    >
+                        Annuler
                     </Button>
                     {selectedAbsence?.status_code === "UNJUSTIFIED" && (
                         <Button onClick={handleSubmitJustification} className="bg-blue-600 hover:bg-blue-700">
-                            <FileUp className="h-4 w-4 mr-2" />
+                            {/* <FileUp className="h-4 w-4 mr-2" /> */}
+                            <Save className="h-4 w-4 mr-2" />
                             Soumettre justificatif
                         </Button>
                     )}

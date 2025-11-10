@@ -25,17 +25,18 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import type { Absence } from "@/types/studentmyabsencesTypes";
-import { 
-  Upload, 
-  FileUp, 
-  X, 
+import {
+  Upload,
+  FileUp,
+  X,
   FileText,
   Clock,
   Stethoscope,
   Users,
   Bus,
   Briefcase,
-  FileCheck
+  FileCheck,
+  Save
 } from "lucide-react";
 import { submitJustification } from "@/actions/studentMyAbsencesAction";
 import { showToast } from "@/components/ui/showToast";
@@ -136,15 +137,15 @@ export default function DialogCreateSubmitJustification({
 
   return (
     <Dialog open={isSubmitJustificationOpen} onOpenChange={setIsSubmitJustificationOpen}>
-      <DialogContent className="max-w-3xl md:min-w-2xl max-h-[85vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Soumettre un justificatif</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
+          <DialogTitle className="text-2xl font-bold text-slate-900">Soumettre un justificatif</DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 mt-1">
             Sélectionnez le type, joignez le document et choisissez les absences concernées
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-4">
+        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
           {/* Type de justificatif */}
           <div className="space-y-2">
             <Label htmlFor="type">Type de justificatif <span className="text-red-500">*</span></Label>
@@ -171,7 +172,7 @@ export default function DialogCreateSubmitJustification({
           {/* File Upload */}
           <div className="space-y-2">
             <Label>Document <span className="text-red-500">*</span></Label>
-            
+
             {!selectedFile ? (
               <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
                 <Input
@@ -235,7 +236,7 @@ export default function DialogCreateSubmitJustification({
                 <Badge variant="secondary">{selectedAbsences.length}</Badge>
               )}
             </div>
-            
+
             <div className="border rounded-lg max-h-60 overflow-y-auto">
               {absencesData.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
@@ -247,17 +248,16 @@ export default function DialogCreateSubmitJustification({
                   {absencesData.map((absence, index) => {
                     const isDisabled = absence.status_code !== "UNJUSTIFIED";
                     const isSelected = selectedAbsences.includes(index);
-                    
+
                     return (
                       <label
                         key={index}
-                        className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${
-                          isDisabled 
-                            ? 'bg-gray-50 cursor-not-allowed opacity-60' 
-                            : isSelected 
-                              ? 'bg-blue-50' 
+                        className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${isDisabled
+                            ? 'bg-gray-50 cursor-not-allowed opacity-60'
+                            : isSelected
+                              ? 'bg-blue-50'
                               : 'hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         <Checkbox
                           checked={isSelected}
@@ -287,32 +287,35 @@ export default function DialogCreateSubmitJustification({
         </div>
 
         {/* Footer */}
-        <DialogFooter className="mt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setIsSubmitJustificationOpen(false)}
-            disabled={loading}
-          >
-            Annuler
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!selectedFile || !selectedType || selectedAbsences.length === 0 || loading}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {loading ? (
-              <>
-                <div className="h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Envoi...
-              </>
-            ) : (
-              <>
-                <FileUp className="h-4 w-4 mr-2" />
-                Soumettre
-              </>
-            )}
-          </Button>
+        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsSubmitJustificationOpen(false)}
+              disabled={loading}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={!selectedFile || !selectedType || selectedAbsences.length === 0 || loading}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+            >
+              {loading ? (
+                <>
+                  <div className="h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Envoi...
+                </>
+              ) : (
+                <>
+                  {/* <FileUp className="h-4 w-4 mr-2" /> */}
+                  <Save className="h-4 w-4 mr-2" />
+                  Soumettre
+                </>
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
