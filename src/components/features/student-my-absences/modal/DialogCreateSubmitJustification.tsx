@@ -291,7 +291,7 @@ export default function DialogCreateSubmitJustification({
             disabled={loading}
             className="flex-1"
           >
-            Annuler
+            Fermer
           </Button>
           <Button
             onClick={handleSubmit}
