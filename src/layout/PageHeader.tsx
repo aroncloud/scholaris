@@ -66,7 +66,7 @@ const PageHeader = ({
     return (
         <div className="bg-white border-b border-gray-200">
             <div className="mx-auto px-2 md:px-6 py-3.5">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                     {/* Partie gauche avec bouton retour optionnel */}
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                         {backUrl && (
@@ -94,7 +94,7 @@ const PageHeader = ({
                                     {title}
                                 </h1>
                                 {description && (
-                                    <p className="text-sm md:text-lg text-gray-600 font-medium break-words">{description}</p>
+                                    <p className="text-sm md:text-base text-gray-600 font-medium break-words">{description}</p>
                                 )}
                             </div>
                         </div>

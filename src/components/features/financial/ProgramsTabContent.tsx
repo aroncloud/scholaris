@@ -263,7 +263,7 @@ export default function ProgramsTabContent({
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <StatCard title="Étudiants" value={stats.students} icon={Users} variant="info" />
             <StatCard
               title="Montant Perçu"

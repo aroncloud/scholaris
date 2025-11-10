@@ -9,7 +9,6 @@ import { MoreHorizontal, Edit, Eye, Plus, Download, Upload } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { ICreateStudent, IListStudent } from "@/types/staffType";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
-import {  getStatusColor } from "@/lib/utils";
 import ContentLayout from "@/layout/ContentLayout";
 import ApplicationImportWizard, { FieldMapping } from "../students/ApplicationImportWizard";
 import { Avatar } from "@/components/custom-ui/Avatar";
@@ -75,7 +74,8 @@ const CurrentStudents = ({
         </div>
       ),
     },
-    { key: "formation", label: "Formation", render: (_, row) => (
+    {
+      key: "formation", label: "Formation", render: (_, row) => (
       <div>
         <div className="font-medium">{row.cirriculum.program_name}</div>
         <div className="text-sm text-muted-foreground">{row.cirriculum.study_level}</div>

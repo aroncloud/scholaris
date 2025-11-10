@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -41,7 +42,7 @@ interface DataTableProps<T> {
 const SkeletonRow = ({ columnsCount }: { columnsCount: number }) => (
   <tr>
     {Array.from({ length: columnsCount }).map((_, index) => (
-      <td key={index} className="px-6 py-4">
+      <td key={uuidv4()} className="px-6 py-4">
         <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded animate-pulse"></div>
       </td>
     ))}
@@ -205,7 +206,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
                 <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                   {filters.map((filter) => (
                     <Combobox
-                      key={filter.key}
+                      key={uuidv4()}
                       value={selectedFilters[filter.key] || ""}
                       className="h-9 text-sm"
                       onChange={(value) =>
@@ -257,7 +258,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
       <div className={`md:hidden space-y-3 transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
         {isLoading ? (
           Array.from({ length: paginate || 5 }).map((_, index) => (
-            <SkeletonCard key={index} />
+            <SkeletonCard key={uuidv4()} />
           ))
         ) : paginatedData.length === 0 && data.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -280,13 +281,13 @@ export const ResponsiveTable = <T extends Record<string, any>>({
         ) : (
           paginatedData.map((row) => (
             <div
-              key={row[keyField] || uuidv4()}
+              key={uuidv4()}
               onClick={() => onRowClick?.(row)}
               className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-800 cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="space-y-3">
                 {highPriorityColumns.map((col) => (
-                  <div key={col.key} className="flex justify-between items-start gap-3">
+                  <div key={uuidv4()} className="flex justify-between items-start gap-3">
                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-fit">
                       {col.label}:
                     </span>
@@ -301,7 +302,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
               )}
               <div className="space-y-2">
                 {mediumPriorityColumns.map((col) => (
-                  <div key={col.key} className="flex justify-between items-start gap-3">
+                  <div key={uuidv4()} className="flex justify-between items-start gap-3">
                     <span className="text-sm font-medium text-gray-600 dark:text-gray-400 min-w-fit">
                       {col.label}:
                     </span>
@@ -316,7 +317,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
                   <div className="border-t border-gray-100 dark:border-gray-700 my-3"></div>
                   <div className="space-y-2">
                     {lowPriorityColumns.map((col) => (
-                      <div key={col.key} className="flex justify-between items-start gap-3">
+                      <div key={uuidv4()} className="flex justify-between items-start gap-3">
                         <span className="text-xs text-gray-500 dark:text-gray-400 min-w-fit">
                           {col.label}:
                         </span>
@@ -357,10 +358,10 @@ export const ResponsiveTable = <T extends Record<string, any>>({
                   {filters.length > 0 && (
                     <div className="flex items-center gap-2 flex-1">
                       {filters.map((filter) => (
-                        <div key={filter.key} className="w-44">
+                        <div key={uuidv4()} className="w-44">
                           <Combobox
                             value={selectedFilters[filter.key] || ""}
-                            className="h-9 text-sm"
+                            className="h-9 text-sm w-96"
                             onChange={(value) =>
                               setSelectedFilters((prev) => ({
                                 ...prev,
@@ -423,7 +424,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
           <tbody className={`divide-y divide-gray-100 dark:divide-gray-700 transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {isLoading ? (
               Array.from({ length: paginate || 5 }).map((_, index) => (
-                <SkeletonRow key={index} columnsCount={columns.length} />
+                <SkeletonRow key={uuidv4()} columnsCount={columns.length} />
               ))
             ) : paginatedData.length === 0 && data.length === 0 ? (
               <tr>
@@ -450,7 +451,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
             ) : (
               paginatedData.map((row) => (
                 <tr
-                  key={row[keyField] || uuidv4()}
+                  key={uuidv4()}
                   className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/10 dark:hover:to-indigo-900/10 cursor-pointer transition-all duration-200"
                   onClick={() => onRowClick?.(row)}
                 >

@@ -65,69 +65,74 @@ const CalendrierTab = ({academicYears, fetchAcademicYear, isLoading} : MyProps) 
                 <div className="text-sm text-muted-foreground">{year.academic_year_code}</div>
             </div>
             ),
+            priority: "medium",
         },
         {
             key: "start_date",
             label: "Date de début",
             render: (_, year) => formatDateToText(year.start_date),
+      priority: "medium",
         },
         {
             key: "end_date",
             label: "Date de fin",
             render: (_, year) => formatDateToText(year.end_date),
+      priority: "medium",
         },
         {
             key: "status_code",
             label: "Statut",
             render: (_, year) => (
             <Badge
-                variant={year.status_code === "IN_PROGRESS" ? "success" : year.status_code === "COMPLETED" ? "info" : "neutral"}
+                variant={year.status_code === "IN_PROGRESS" ? "success" : year.status_code === "PLANNED" ? "info" : "neutral"}
                 size="sm"
                 value={year.status_code}
                 label={year.status_code}
             />
             ),
+            priority: "low",
         },
         {
             key: "actions",
             label: "Actions",
             render: (_, year) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem>
-                    <Eye className="mr-2 h-4 w-4" /> Voir détails
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                    <Edit className="mr-2 h-4 w-4" /> Modifier
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                    <FileText className="mr-2 h-4 w-4" /> Générer rapport
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                    <Calendar className="mr-2 h-4 w-4" /> Calendrier
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {year.status_code === "IN_PROGRESS" ? (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem>
+                        <Eye className="mr-2 h-4 w-4" /> Voir détails
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <Edit className="mr-2 h-4 w-4" /> Modifier
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <FileText className="mr-2 h-4 w-4" /> Générer rapport
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <Calendar className="mr-2 h-4 w-4" /> Calendrier
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {year.status_code === "IN_PROGRESS" ? (
+                        <DropdownMenuItem className="text-red-600">
+                        <Lock className="mr-2 h-4 w-4" /> Clôturer
+                        </DropdownMenuItem>
+                    ) : (
+                        <DropdownMenuItem className="text-green-600">
+                        <Unlock className="mr-2 h-4 w-4" /> Rouvrir
+                        </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem className="text-red-600">
-                    <Lock className="mr-2 h-4 w-4" /> Clôturer
+                        <Trash2 className="mr-2 h-4 w-4" /> Supprimer
                     </DropdownMenuItem>
-                ) : (
-                    <DropdownMenuItem className="text-green-600">
-                    <Unlock className="mr-2 h-4 w-4" /> Rouvrir
-                    </DropdownMenuItem>
-                )}
-                <DropdownMenuItem className="text-red-600">
-                    <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             ),
+            priority: "high",
         },
     ];
 
@@ -141,7 +146,7 @@ const CalendrierTab = ({academicYears, fetchAcademicYear, isLoading} : MyProps) 
                     <>
                     <Button
                         onClick={() => setIsCreateYearDialogOpen(true)}
-                        className="text-sm w-full sm:w-fit"
+                        className="text-sm sm:w-fit"
                         variant={"info"}
                     >
                         <Plus className="h-4 w-4 mr-2" />

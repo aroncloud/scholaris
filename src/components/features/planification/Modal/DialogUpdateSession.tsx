@@ -371,7 +371,7 @@ export function DialogUpdateSession({
               </Button>
             </div>
             <Button variant="danger" type="button" onClick={handleCancelSessionClick} disabled={isDisabled}>
- n              {isCanceling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+               {isCanceling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isCanceling ? "Annulation..." : "Annuler la session"}
             </Button>
           </DialogFooter>

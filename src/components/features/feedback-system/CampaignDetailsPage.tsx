@@ -527,11 +527,11 @@ export default function CampaignDetailsPage({ data }: { data: IGetCampaignDetail
                 compact
               />
               <StatCard 
-              title="Réponses" 
-              value={summary.total_responses} 
-              icon={Users} 
-              variant="success" 
-              main
+                title="Réponses" 
+                value={summary.total_responses} 
+                icon={Users} 
+                variant="success" 
+                compact
               />
               <StatCard 
               title="Niveau" 

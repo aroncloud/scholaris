@@ -1,9 +1,10 @@
 'use server'
-import { createSession } from "@/lib/session";
+import { createSession, verifySession } from "@/lib/session";
 import { SessionPayload } from "@/types/authTypes";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ILoginForm } from "@/types/staffType";
 import axios from "axios";
+import { actionErrorHandler } from "./errorManagement";
 export async function login (data: ILoginForm) {
     console.log('-->Data', data);
     console.log('-->URL', `${process.env.AIM_WORKER_ENDPOINT}/api/auth/login`)
@@ -38,4 +39,20 @@ export async function login (data: ILoginForm) {
             data: null
         };
     }
+}
+
+export async function getMyProfile() {
+    try {
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.get(
+      `${process.env.AIM_WORKER_ENDPOINT}/api/users/me`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    return { code: "success", error: null, data: response.data };
+  } catch (error: unknown) {
+    return actionErrorHandler(error);
+  }
 }

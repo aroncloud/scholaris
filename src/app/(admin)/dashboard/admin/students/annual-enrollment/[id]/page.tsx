@@ -14,14 +14,14 @@ import PageHeader from '@/layout/PageHeader';
 import { formatDateToText, getStatusColor } from '@/lib/utils';
 import { useAcademicYearStore } from '@/store/useAcademicYearStore';
 import { useRouter } from '@bprogress/next/app';
-import { 
-  ArrowLeft, 
-  Award, 
-  Calendar, 
-  Clock, 
-  User, 
-  Mail, 
-  Phone, 
+import {
+  ArrowLeft,
+  Award,
+  Calendar,
+  Clock,
+  User,
+  Mail,
+  Phone,
   MapPin,
   CreditCard,
   GraduationCap,
@@ -33,19 +33,23 @@ import {
   User2
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { ConfirmActionDialog } from '@/components/ConfirmActionDialog';
+import { useState } from 'react';
 
 export default function StudentDetailPage() {
   const params = useParams();
   const studentId = params.id;
   const router = useRouter();
   const {  selectedAcademicYear } = useAcademicYearStore();
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   const { student, isLoading, history, isHistoryLoading, handleFinalizeInscription, isProcessing } = useStudentDetails(studentId as string);
-  
+
 
   const finalizeInscription = async () => {
     const result = await handleFinalizeInscription();
     if(result?.success) {
+      setConfirmDialogOpen(false);
       showToast({
         variant: "success-solid",
         message: 'Inscription finalisée avec succès',
@@ -53,11 +57,11 @@ export default function StudentDetailPage() {
         position: 'top-center',
       });
     } else {
-      
+      setConfirmDialogOpen(false);
       showToast({
-        variant: "success-solid",
+        variant: "error-solid",
         message: "Erreur lors de l'Inscription de l'étudiant",
-        description: `Une erreur est survenue lors de l'inscription de l'étudiant ${student?.first_name} ${student?.last_name} a été inscris avec succès en classe de ${student?.cirriculum.curriculum_name}.`,
+        description: `Une erreur est survenue lors de l'inscription de l'étudiant ${student?.first_name} ${student?.last_name}.`,
         position: 'top-center',
       });
     }
@@ -97,12 +101,12 @@ export default function StudentDetailPage() {
           >
             <div className="flex items-center justify-end space-x-3">
               <Button
-                  onClick={finalizeInscription}
+                  onClick={() => setConfirmDialogOpen(true)}
                   className="bg-primary hover:bg-primary/90 text-white"
                   variant={"info"}
                   disabled={isProcessing}
                 >
-                  {isProcessing ? "Finaliser en cours ..." : "Finaliser l'inscription"}
+                  Finaliser l'inscription
                 </Button>
             </div>
           </PageHeader>
@@ -396,7 +400,7 @@ export default function StudentDetailPage() {
           </div>
         </div>
       
-      : 
+      :
         <div className="min-h-screen bg-gray-50/50 p-6 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-gray-900">Etudiant introuvable</h2>
@@ -408,6 +412,20 @@ export default function StudentDetailPage() {
           </div>
         </div>
       }
+
+      {/* Dialog de confirmation */}
+      <ConfirmActionDialog
+        open={confirmDialogOpen}
+        onOpenChange={setConfirmDialogOpen}
+        onConfirm={finalizeInscription}
+        title="Confirmer la finalisation de l'inscription"
+        description={`Êtes-vous sûr de vouloir finaliser l'inscription de ${student?.first_name} ${student?.last_name} en ${student?.cirriculum?.curriculum_name} ? Cette action est irréversible.`}
+        confirmLabel="Oui, finaliser"
+        cancelLabel="Annuler"
+        variant="success"
+        loading={isProcessing}
+        loadingText="Finalisation en cours..."
+      />
     </>
   );}
 }

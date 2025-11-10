@@ -91,7 +91,7 @@ export default function RootLayout({
         </ThemeProvider>
         <Toaster />
       </BarProvider>
-      <AcademicYearChangeOverlay />
+      {/* <AcademicYearChangeOverlay /> */}
       </body>
     </html>
   );

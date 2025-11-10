@@ -115,7 +115,6 @@ export default function GrilleTarifairePage() {
         position: "top-center",
       });
 
-      // Rafraîchir la liste des plans
       listAllPlan();
 
       return true;
@@ -280,7 +279,7 @@ export default function GrilleTarifairePage() {
           variant={"info"}
           onClick={() => setIsDialogOpen(true)}
         >
-          <Plus className="h-5 w-5" />
+          <Plus className="h-5 w-5"/>
           Nouvelle Grille
         </Button>
       </PageHeader>
@@ -288,10 +287,10 @@ export default function GrilleTarifairePage() {
       <ContentLayout
         title={academicYears.find(item => (item.academic_year_code ==  selectedAcademicYear))?.year_code}
         description = {filteredPlanData.length + " grille(s) configurée(s)"}
-        className="p-6"
+        className="p-2 md:p-6"
         actions = {
           <div className="mb-6">
-            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="flex flex-row gap-3 items-center sm:items-center">
               <Label className="text-sm font-medium text-slate-700 whitespace-nowrap">
                 Filtrer par programme :
               </Label>

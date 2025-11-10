@@ -1,3 +1,5 @@
+import { IUserDetailedInfo } from "./userType";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type SignInSuccess = {
     user: {
@@ -58,6 +60,7 @@ export type SessionPayload = {
   roles: string[];
   expiresAt: Date;
   user: IUserSession;
+  userDetailled?: IUserDetailedInfo | null;
 }
 
 

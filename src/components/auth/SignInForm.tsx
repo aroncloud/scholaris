@@ -8,7 +8,7 @@ import Checkbox from "@/components/form/input/Checkbox";
 import { Button } from "../ui/button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import { ILoginForm } from "@/types/staffType";
-import { login } from "@/actions/authAction";
+import { getMyProfile, login } from "@/actions/authAction";
 import { showToast } from "../ui/showToast";
 import { useRouter } from "@bprogress/next/app";
 import { useUserStore } from "@/store/useAuthStore";
@@ -36,7 +36,10 @@ export default function SignInForm() {
     const result = await login(data);
     console.log('-->result', result)
     if(result.code === 'success') {
+      const meResult = await getMyProfile();
+      console.log('-->meResult', meResult);
       const roles = result.data.body.roles as string [];
+      console.log('-->roles', roles);
       setUser({
         accessToken: result.data.body.accessToken,
         refreshToken: result.data.body.refreshToken,
@@ -44,6 +47,7 @@ export default function SignInForm() {
         email: data.username,
         expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000),
         user: result.data.body.user,
+        userDetailled: meResult.code === 'success' ? meResult.data.body : null,
       });
 
       showToast({
