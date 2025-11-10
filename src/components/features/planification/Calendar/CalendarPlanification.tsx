@@ -42,8 +42,8 @@ export function convertIntoFullCalendarFormat(sessions: IGetSchedule[]): IFullCa
   return sessions.filter(session => (session.status_code != SESSION_STATUS_TERMINATED)).map((session) => ({
     id: session.session_code,
     title: session.session_title,
-    start: new Date(session.start_time).toJSON(),
-    end: new Date(session.end_time).toJSON(),
+    start: session.start_time,
+    end: session.end_time,
     classroom: session.resource_code,
     teacher: session.teacher_user_code,
     extendedProps: {
@@ -157,12 +157,7 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
   const handleSaveEvent = async (session: IUpdateSessionForm) => {
     console.log('handleSaveEvent.session', session)
     if(selectedEvent) {
-      const result = await updateSession({
-        ... session,
-        start_time: new Date(session.end_time).toJSON().split("T")[0] ?? "",
-        end_time: new Date(session.start_time).toJSON().split("T")[0] ?? ""
-
-      }, selectedEvent.id);
+      const result = await updateSession(session, selectedEvent.id);
       console.log("handleSaveEvent result:", result);
 
       if (result.code === 'success') {
@@ -198,7 +193,7 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
           
           // Configuration pour le format 24h et français
           locale={frLocale}
-          timeZone="local"
+          timeZone="UTC"
           slotLabelFormat={{
             hour: '2-digit',
             minute: '2-digit',

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAcademicYearStore } from "@/store/useAcademicYearStore";
-import { CalendarDays, Loader2 } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 
 const AcademicYearChangeOverlay: React.FC = () => {
   const { isChangingYear, newYearLabel } = useAcademicYearStore();
@@ -14,7 +14,6 @@ const AcademicYearChangeOverlay: React.FC = () => {
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
             <CalendarDays className="h-16 w-16 text-blue-500" />
-            <Loader2 className="h-8 w-8 text-blue-600 animate-spin absolute -bottom-1 -right-1" />
           </div>
 
           <div className="text-center space-y-2">

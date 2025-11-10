@@ -1,6 +1,9 @@
 'use server';
 
+import { verifySession } from '@/lib/session';
 import { EvaluationKind, GradeEntry, Student, TeacherCourse, GradesStats } from '@/types/gradeTypes';
+import axios from 'axios';
+import { actionErrorHandler } from './errorManagement';
 
 // ---- MOCK DATA ----
 const mockTeacherCourses: TeacherCourse[] = [
@@ -92,3 +95,32 @@ export async function getGradesStats(courseId?: string): Promise<GradesStats> {
 }
 
 
+export async function getStudentReport(academic_year_code: string) {
+  try {
+    console.log("-->getStudentReport.academic_year_code", academic_year_code);
+    const session = await verifySession();
+    const token = session.accessToken;
+
+    const response = await axios.get(
+      `${process.env.GRADE_WORKER_ENDPOINT}/api/students/my-results`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          academic_year_code,
+        },
+      }
+    );
+
+    return {
+      code: "success",
+      error: null,
+      data: response.data,
+    };
+  } catch (error: unknown) {
+    console.log("-->getStudentReport.error");
+    const errResult = actionErrorHandler(error);
+    return errResult;
+  }
+}

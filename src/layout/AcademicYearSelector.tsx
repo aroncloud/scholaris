@@ -14,14 +14,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CalendarDays, Check, ChevronsUpDown } from "lucide-react";
 import { useMemo } from "react";
-// import { useRouter } from "next/navigation";
 
 const AcademicYearSelector: React.FC = () => {
-  // const router = useRouter();
   const { academicYears, selectedAcademicYear, setSelectedAcademicYear, isChangingYear, setIsChangingYear } = useAcademicYearStore();
 
   const handleSelectAcademicYear = (academicYearCode: string) => {
-    // Ne rien faire si c'est déjà l'année sélectionnée
     if (academicYearCode === selectedAcademicYear) return;
 
     const newYear = academicYears.find((ay) => ay.academic_year_code === academicYearCode);
@@ -29,11 +26,9 @@ const AcademicYearSelector: React.FC = () => {
 
     const yearLabel = `${newYear.start_date.split('-')[0]} - ${newYear.end_date.split('-')[0]}`;
 
-    // Activer l'overlay global
     setIsChangingYear(true, yearLabel);
     setSelectedAcademicYear(academicYearCode);
 
-    // Petit délai pour que l'utilisateur voie l'overlay
     setTimeout(() => {
       window.location.reload();
     }, 500);

@@ -285,3 +285,124 @@ export interface IHireExistingStaff {
   cni_issue_date?: string | null;   // ISO date string
   cni_issue_location?: string | null;
 }
+
+export interface IUserDetailedInfo {
+  user_code: string;
+  roles: string[];
+  user_name: string;
+  email: string;
+  first_name: string;
+  gender: "MALE" | "FEMALE" | string;
+  last_name: string;
+  other_email?: string | null;
+  other_phone?: string | null;
+  phone_number?: string | null;
+  country?: string | null;
+  city?: string | null;
+  street?: string | null;
+  address_details?: string | null;
+  status_code: "ACTIVE" | "INACTIVE" | string;
+  avatar_url?: string | null;
+  place_of_birth?: string | null;
+  date_of_birth?: string | null;
+  ethnicity_code?: string | null;
+  marital_status_code?: "SINGLE" | "MARRIED" | string;
+  cni_number?: string | null;
+  cni_issue_date?: string | null;
+  cni_issue_location?: string | null;
+  is_verified: number;
+  created_at: number;
+  updated_at: number;
+  last_login_at?: number | null;
+  job_title?: string | null;
+  department?: string | null;
+  hiring_date?: string | null;
+  salary?: number | null;
+  data: {
+    profiles: string[];
+    student?: {
+      user_code: string;
+      curriculum_code: string;
+      student_number: string;
+      status_code: string;
+      enrollment_date: string;
+      education_level_code: string;
+      financial_status: string;
+      academic_year_code: string;
+    };
+  };
+}
+
+
+
+
+
+export interface IGetStudentReport {
+  student: {
+    user_code: string;
+  };
+  enrollment_details: {
+    enrollment_code: string;
+    student_user_code: string;
+    academic_year_code: string;
+    curriculum_code: string;
+    status_code: string;
+    enrollment_date: string;
+    notes?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
+  };
+  annual_result: {
+    enrollment_code: string;
+    verdict_code: string;
+    mention?: string | null;
+    jury_notes?: string | null;
+    status_code?: string | null;
+    recorded_by_user_code?: string | null;
+    academic_year_code: string;
+    curriculum_code: string;
+    published_at?: string | null;
+    result_code?: string | null;
+  };
+  grades_by_schedule: IGradesBySchedule[];
+}
+
+export interface IGradesBySchedule {
+  schedule_code: string;
+  academic_year_code: string;
+  sequence_code: string;
+  unique_code: string;
+  start_date: string;
+  end_date: string;
+  status_code: string;
+  sequence_name: string;
+  curriculum_code: string;
+  grades_by_module: IGradesByModule[];
+}
+
+export interface IGradesByModule {
+  module_name: string;
+  schedule_code: string;
+  result: string | null;
+  details: IGradeDetail[];
+}
+
+export interface IGradeDetail {
+  score: number;
+  grade_status: string;
+  comments?: string | null;
+  evaluation_title: string;
+  evaluation_date: string;
+  max_score: number;
+  coefficient: number;
+  evaluation_type: string;
+  evaluation_type_code: string;
+  course_unit_name: string;
+  course_unit_code: string;
+  schedule_code: string;
+  module_name: string;
+  module_code: string;
+  graded_by_first_name?: string | null;
+  graded_by_last_name?: string | null;
+  graded_by_phone_number?: string | null;
+}

@@ -94,7 +94,7 @@ const PageHeader = ({
                                     {title}
                                 </h1>
                                 {description && (
-                                    <p className="text-sm md:text-lg text-gray-600 font-medium break-words">{description}</p>
+                                    <p className="text-sm md:text-base text-gray-600 font-medium break-words">{description}</p>
                                 )}
                             </div>
                         </div>

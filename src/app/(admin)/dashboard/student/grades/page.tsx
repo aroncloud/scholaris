@@ -1,340 +1,214 @@
 "use client"
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Download, FileText, TrendingUp, Award } from "lucide-react"
-
-// Types
-interface Epreuve {
-  id: string
-  nom: string
-  note: number
-  coefficient: number
-  date: string
-}
-
-interface Module {
-  id: string
-  nom: string
-  code: string
-  epreuves: Epreuve[]
-  coefficient: number
-}
-
-interface ReleveNotes {
-  etudiant: {
-    nom: string
-    prenom: string
-    matricule: string
-    niveau: string
-    filiere: string
-  }
-  anneeAcademique: string
-  semestre: string
-  modules: Module[]
-  moyenneGenerale: number
-  decision: "ADMIS" | "AJOURNÉ" | "REDOUBLE"
-  mention?: string
-}
-
-const calculerMoyenneModule = (module: Module): number => {
-  const sommeNotes = module.epreuves.reduce((acc, epreuve) => {
-    return acc + (epreuve.note * epreuve.coefficient)
-  }, 0)
-  const sommeCoefficients = module.epreuves.reduce((acc, epreuve) => {
-    return acc + epreuve.coefficient
-  }, 0)
-  return sommeCoefficients > 0 ? sommeNotes / sommeCoefficients : 0
-}
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Download, FileText } from "lucide-react"
+import PageHeader from "@/layout/PageHeader"
+import { IGetStudentReport } from "@/types/userType"
+import { showToast } from "@/components/ui/showToast"
+import { useUserStore } from "@/store/useAuthStore"
+import { getStudentReport } from "@/actions/gradesAction"
+import { useAcademicYearStore } from "@/store/useAcademicYearStore"
+import { PageLoadingSkeleton } from "@/components/features/grades/skeleton/GradeSkeletons"
+import { EmptyState } from "@/components/common/EmptyState"
+import { SidebarInfo } from "@/components/features/grades/SidebarInfo"
+import { ModuleCard } from "@/components/features/grades/ModuleCard"
 
 const getDecisionStyle = (decision: string) => {
-  switch (decision) {
+  switch (decision?.toUpperCase()) {
     case "ADMIS":
+    case "APPROVED":
+    case "PASSED":
       return "bg-emerald-500/10 text-emerald-700 border-emerald-500/20"
     case "AJOURNÉ":
+    case "AJOURNE":
+    case "PENDING":
       return "bg-amber-500/10 text-amber-700 border-amber-500/20"
     case "REDOUBLE":
+    case "FAILED":
       return "bg-rose-500/10 text-rose-700 border-rose-500/20"
     default:
       return "bg-slate-500/10 text-slate-700 border-slate-500/20"
   }
 }
 
-const getNoteColor = (note: number): string => {
-  if (note >= 16) return "text-emerald-600 font-semibold"
-  if (note >= 14) return "text-blue-600 font-semibold"
-  if (note >= 12) return "text-slate-700 font-medium"
-  if (note >= 10) return "text-amber-600 font-medium"
-  return "text-rose-600 font-medium"
-}
-
-const releveNotesData: ReleveNotes = {
-  etudiant: {
-    nom: "KAMGA",
-    prenom: "Jean-Pierre",
-    matricule: "21A001CM",
-    niveau: "Licence 2",
-    filiere: "Informatique"
-  },
-  anneeAcademique: "2024-2025",
-  semestre: "Semestre 1",
-  modules: [
-    {
-      id: "1",
-      nom: "Programmation Orientée Objet",
-      code: "INF201",
-      coefficient: 3,
-      epreuves: [
-        { id: "1", nom: "Contrôle Continu", note: 14.5, coefficient: 1, date: "15/01/2025" },
-        { id: "2", nom: "Travaux Pratiques", note: 16, coefficient: 1, date: "20/01/2025" },
-        { id: "3", nom: "Examen Final", note: 13, coefficient: 2, date: "10/02/2025" }
-      ]
-    },
-    {
-      id: "2",
-      nom: "Base de Données",
-      code: "INF202",
-      coefficient: 3,
-      epreuves: [
-        { id: "4", nom: "Contrôle Continu", note: 12, coefficient: 1, date: "18/01/2025" },
-        { id: "5", nom: "Projet", note: 15.5, coefficient: 2, date: "25/01/2025" },
-        { id: "6", nom: "Examen Final", note: 11, coefficient: 2, date: "12/02/2025" }
-      ]
-    },
-    {
-      id: "3",
-      nom: "Mathématiques pour l'Informatique",
-      code: "MAT201",
-      coefficient: 2,
-      epreuves: [
-        { id: "7", nom: "Contrôle Continu", note: 10.5, coefficient: 1, date: "22/01/2025" },
-        { id: "8", nom: "Examen Final", note: 12, coefficient: 2, date: "14/02/2025" }
-      ]
-    }
-  ],
-  moyenneGenerale: 13.02,
-  decision: "ADMIS",
-  mention: "Assez Bien"
-}
 
 export default function ReleveNotesPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+  const [reportData, setReportData] = useState<IGetStudentReport | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<string>("")
+  const { user } = useUserStore()
+  const { selectedAcademicYear } = useAcademicYearStore()
+
+  const fetchReport = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      if (selectedAcademicYear) {
+        const result = await getStudentReport(selectedAcademicYear)
         
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-slate-600" />
-                <span className="text-sm font-medium text-slate-600 tracking-wide uppercase">
-                  Relevé de Notes Officiel
-                </span>
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
-                {releveNotesData.anneeAcademique}
-              </h1>
-              <p className="text-slate-600 mt-1">{releveNotesData.semestre}</p>
-            </div>
-            <Button size="lg" className="gap-2 shadow-sm">
-              <Download className="h-4 w-4" />
-              Télécharger
-            </Button>
-          </div>
+        if (result.code === "success" && result.data) {
+          setReportData(result.data.body)
+          if (result.data.body.grades_by_schedule.length > 0) {
+            setActiveTab(result.data.body.grades_by_schedule[0].schedule_code)
+          }
+        } else {
+          showToast({
+            variant: "error-solid",
+            message: "Erreur de chargement",
+            description: result.error || "Impossible de charger le relevé de notes",
+            position: 'top-center',
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching report:', error)
+      showToast({
+        variant: "error-solid",
+        message: "Erreur",
+        description: "Une erreur est survenue lors du chargement",
+        position: 'top-center',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedAcademicYear])
+
+  useEffect(() => {
+    fetchReport()
+  }, [fetchReport, selectedAcademicYear])
+
+  if (isLoading) {
+    return (
+      <>
+        <PageHeader
+          title="Relevé de Notes Officiel"
+          description="Consultez vos notes officielles"
+          Icon={FileText}
+        />
+        <PageLoadingSkeleton />
+      </>
+    )
+  }
+
+  if (!reportData || !reportData.grades_by_schedule || reportData.grades_by_schedule.length === 0) {
+    return (
+      <>
+        <PageHeader
+          title="Relevé de Notes Officiel"
+          description="Consultez vos notes officielles"
+          Icon={FileText}
+        />
+        <div className="p-4 md:p-6">
+          <EmptyState
+            title="Aucune donnée disponible"
+            description="Aucun relevé de notes n'a été trouvé pour l'année académique sélectionnée. Veuillez sélectionner une autre année ou contacter le service de scolarité."
+            showAction
+            onActionClick={fetchReport}
+            actionLabel="Réessayer"
+          />
         </div>
+      </>
+    )
+  }
 
+  return (
+    <>
+      <PageHeader
+        title="Relevé de Notes Officiel"
+        description="Consultez vos notes officielles"
+        Icon={FileText}
+      >
+        <Button size="lg" className="gap-2" variant="info">
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">Télécharger</span>
+        </Button>
+      </PageHeader>
+
+      <div className="p-4 md:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Main Content - Left Side */}
+          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            
-            {/* Student Info Card */}
-            <Card className="border-slate-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
-                      Étudiant
-                    </p>
-                    <p className="text-base font-semibold text-slate-900">
-                      {releveNotesData.etudiant.prenom} {releveNotesData.etudiant.nom}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
-                      Matricule
-                    </p>
-                    <p className="text-base font-semibold text-slate-900">
-                      {releveNotesData.etudiant.matricule}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
-                      Filière
-                    </p>
-                    <p className="text-base font-semibold text-slate-900">
-                      {releveNotesData.etudiant.filiere}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
-                      Niveau
-                    </p>
-                    <p className="text-base font-semibold text-slate-900">
-                      {releveNotesData.etudiant.niveau}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList
+                className="bg-white w-full grid h-auto p-1 rounded-xl border border-slate-200 gap-1 shadow-sm mb-2 overflow-x-auto"
+                style={{ gridTemplateColumns: `repeat(${reportData.grades_by_schedule.length}, minmax(120px, 1fr))` }}
+              >
+                {reportData.grades_by_schedule.map((schedule) => (
+                  <TabsTrigger
+                    key={schedule.schedule_code}
+                    value={schedule.schedule_code}
+                    className="px-2 sm:px-4 py-2.5 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+                  >
+                    <span className="flex flex-col items-center gap-1">
+                      <span className="font-semibold">{schedule.sequence_name}</span>
+                      {/* <span className="text-[10px] sm:text-xs font-normal opacity-90">
+                        {formatDate(schedule.start_date)}
+                      </span> */}
+                    </span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-            {/* Modules */}
-            <div className="space-y-4">
-              {releveNotesData.modules.map((module) => {
-                const moyenneModule = calculerMoyenneModule(module)
-                return (
-                  <Card key={module.id} className="border-slate-200 shadow-sm overflow-hidden">
-                    <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-1">
-                            <Badge variant="outline" className="font-mono text-xs">
-                              {module.code}
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              Coef. {module.coefficient}
-                            </Badge>
-                          </div>
-                          <h3 className="text-lg font-semibold text-slate-900 mt-2">
-                            {module.nom}
-                          </h3>
-                        </div>
-                        <div className="text-right ml-4">
-                          <p className="text-xs text-slate-500 mb-1 uppercase tracking-wider">
-                            Moyenne
+              {reportData.grades_by_schedule.map((schedule) => (
+                <TabsContent key={schedule.schedule_code} value={schedule.schedule_code} className="mt-0 space-y-4">
+                  {/* Info Semestre
+                  <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                    <CardContent className="pt-6">
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <p className="text-xs text-slate-600 mb-1 uppercase tracking-wider">
+                            Période
                           </p>
-                          <p className={`text-2xl font-bold ${getNoteColor(moyenneModule)}`}>
-                            {moyenneModule.toFixed(2)}
+                          <p className="text-xs sm:text-sm font-medium text-slate-900">
+                            {formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}
                           </p>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <div className="divide-y divide-slate-100">
-                        {module.epreuves.map((epreuve) => (
-                          <div 
-                            key={epreuve.id} 
-                            className="px-6 py-4 hover:bg-slate-50/50 transition-colors"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <p className="font-medium text-slate-900">
-                                  {epreuve.nom}
-                                </p>
-                                <div className="flex items-center gap-4 mt-1">
-                                  <p className="text-sm text-slate-500">
-                                    {epreuve.date}
-                                  </p>
-                                  <span className="text-slate-300">•</span>
-                                  <p className="text-sm text-slate-500">
-                                    Coef. {epreuve.coefficient}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="text-right ml-4">
-                                <p className={`text-xl ${getNoteColor(epreuve.note)}`}>
-                                  {epreuve.note.toFixed(2)}
-                                </p>
-                                <p className="text-xs text-slate-400">/ 20</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                        <div>
+                          <p className="text-xs text-slate-600 mb-1 uppercase tracking-wider">
+                            Statut
+                          </p>
+                          <Badge value={schedule.status_code} label={schedule.status_code} size="sm" className="text-xs sm:text-sm" />
+                        </div>
                       </div>
                     </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
+                  </Card> */}
+
+                  {/* Modules */}
+                  {schedule.grades_by_module.length > 0 ? (
+                    schedule.grades_by_module.map((module, idx) => (
+                      <ModuleCard
+                        key={`${module.module_name}-${idx}`}
+                        moduleName={module.module_name}
+                        moduleCode={module.details[0]?.module_code}
+                        result={module.result}
+                        details={module.details}
+                      />
+                    ))
+                  ) : (
+                    <EmptyState
+                      title="Aucune note"
+                      description="Aucune note n'est disponible pour ce semestre."
+                      showAction={false}
+                    />
+                  )}
+                </TabsContent>
+              ))}
+            </Tabs>
           </div>
 
-          {/* Sidebar - Right Side */}
+          {/* Sidebar */}
           <div className="space-y-6">
-            
-            {/* Results Summary */}
-            <Card className="border-slate-200 shadow-sm sticky top-6">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-2 text-slate-600">
-                  <TrendingUp className="h-4 w-4" />
-                  <span className="text-sm font-medium uppercase tracking-wider">
-                    Résultats
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                
-                {/* Moyenne Générale */}
-                <div className="text-center p-6 bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl">
-                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
-                    Moyenne Générale
-                  </p>
-                  <p className="text-5xl font-bold text-white mb-1">
-                    {releveNotesData.moyenneGenerale.toFixed(2)}
-                  </p>
-                  <p className="text-slate-400 text-sm">/ 20</p>
-                </div>
-
-                <Separator />
-
-                {/* Mention */}
-                {releveNotesData.mention && (
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                      <Award className="h-4 w-4 text-slate-600" />
-                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                        Mention
-                      </p>
-                    </div>
-                    <Badge 
-                      variant="outline" 
-                      className="text-base px-4 py-2 border-slate-300"
-                    >
-                      {releveNotesData.mention}
-                    </Badge>
-                  </div>
-                )}
-
-                <Separator />
-
-                {/* Décision */}
-                <div className="text-center">
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">
-                    Décision du Jury
-                  </p>
-                  <Badge 
-                    className={`text-lg px-6 py-3 border ${getDecisionStyle(releveNotesData.decision)}`}
-                  >
-                    {releveNotesData.decision}
-                  </Badge>
-                </div>
-
-                <Separator />
-
-                {/* Info Note */}
-                <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                  <p className="text-xs text-blue-900 leading-relaxed">
-                    Ce document est officiel. Pour toute contestation, 
-                    contactez le service de la scolarité sous 15 jours.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <SidebarInfo
+              reportData={reportData}
+              user={user}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              getDecisionStyle={getDecisionStyle}
+            />
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

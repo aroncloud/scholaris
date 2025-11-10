@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -25,9 +25,15 @@ import {
   BookOpen,
   Award
 } from 'lucide-react';
+import PageHeader from '@/layout/PageHeader';
+import Badge from '@/components/custom-ui/Badge';
+import StatCard from '@/components/cards/StatCard';
+import { useUserStore } from '@/store/useAuthStore';
 
 const StudentProfileDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
+
+  const { user } = useUserStore();
 
   // Données du profil étudiant
   const studentProfile = {
@@ -139,114 +145,43 @@ const StudentProfileDashboard: React.FC = () => {
   const PaymentIcon = paymentStatus.icon;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div>
-          <div className="py-4 px-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                    <User className="w-8 h-8 text-white" />
-                  </div>
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{studentProfile.personal.name}</h1>
-                  <p className="text-sm text-gray-600">{studentProfile.personal.studentId} • {studentProfile.academic.program}</p>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <Badge variant="outline" className="text-green-600 border-green-200">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      {studentProfile.academic.status}
-                    </Badge>
-                    <Badge variant="secondary">
-                      {studentProfile.academic.currentLevel}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Button variant="outline" size="sm">
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Modifier
-                </Button>
-                <Button size="sm">
-                  <Download className="w-4 h-4 mr-2" />
-                  Certificat
-                </Button>
-              </div>
-            </div>
-          </div>
+      <PageHeader
+        Icon={User}
+        title={studentProfile.personal.name}
+        description={`${studentProfile.personal.studentId} • ${studentProfile.academic.program}`}
+        status={<Badge size='sm' value={studentProfile.academic.status} label={studentProfile.academic.status} icon={CheckCircle} />}
+      >
+        <div className="flex items-center space-x-3">
+          <Button variant="outline" size="sm">
+            <Edit3 className="w-4 h-4 mr-2" />
+            Modifier
+          </Button>
+          <Button size="sm" variant={"info"}>
+            <Download className="w-4 h-4 mr-2" />
+            Certificat
+          </Button>
         </div>
-      </div>
+      </PageHeader> 
 
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="p-4 md:p-6">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <GraduationCap className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Moyenne Générale</p>
-                  <p className="text-2xl font-bold text-blue-600">{studentProfile.academics.currentGPA}/20</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <StatCard title='Crédits Validés' value={`${studentProfile.academics.completedCredits}/${studentProfile.academics.totalCredits}`} icon={BookOpen} variant='success' main />
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <BookOpen className="w-5 h-5 text-green-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Crédits Validés</p>
-                  <p className="text-2xl font-bold text-green-600">{studentProfile.academics.completedCredits}/{studentProfile.academics.totalCredits}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard title='Solde Scolarité' value={`${formatCurrency(studentProfile.financial.remainingBalance)}`} icon={Wallet} variant='purple' />
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Wallet className="w-5 h-5 text-purple-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Solde Scolarité</p>
-                  <p className="text-2xl font-bold text-purple-600">{formatCurrency(studentProfile.financial.remainingBalance)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className={`p-2 rounded-lg ${paymentStatus.status === 'paid' ? 'bg-green-100' : paymentStatus.status === 'overdue' ? 'bg-red-100' : 'bg-yellow-100'}`}>
-                  <PaymentIcon className={`w-5 h-5 ${paymentStatus.color}`} />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Statut Paiement</p>
-                  <p className={`text-sm font-semibold ${paymentStatus.color}`}>{paymentStatus.message}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard title='Statut Paiement' value={paymentStatus.message} icon={PaymentIcon} variant='danger' />
         </div>
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Vue d&apos;ensemble</TabsTrigger>
-            <TabsTrigger value="personal">Profil</TabsTrigger>
-            <TabsTrigger value="academic">Académique</TabsTrigger>
-            <TabsTrigger value="financial">Financier</TabsTrigger>
+          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+            <TabsTrigger value="overview" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">Vue d&apos;ensemble</TabsTrigger>
+            <TabsTrigger value="personal" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">Profil</TabsTrigger>
+            <TabsTrigger value="academic" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">Académique</TabsTrigger>
+            <TabsTrigger value="financial" className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30">Financier</TabsTrigger>
           </TabsList>
 
           {/* Vue d'ensemble */}
@@ -274,9 +209,7 @@ const StudentProfileDashboard: React.FC = () => {
                         <div key={index} className="p-3 bg-gray-50 rounded-lg">
                           <div className="font-medium text-sm">{semester.name}</div>
                           <div className="text-lg font-bold text-blue-600">{semester.gpa}/20</div>
-                          <Badge variant={semester.status === 'COMPLETED' ? 'default' : 'secondary'} className="text-xs">
-                            {semester.status === 'COMPLETED' ? 'Terminé' : 'En cours'}
-                          </Badge>
+                          <Badge size='sm' value={semester.status} label={semester.status} icon={CheckCircle} />
                         </div>
                       ))}
                     </div>
@@ -305,15 +238,6 @@ const StudentProfileDashboard: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Solde restant</span>
                       <span className="font-semibold text-red-600">{formatCurrency(studentProfile.financial.remainingBalance)}</span>
-                    </div>
-                    <Separator />
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Award className="w-4 h-4 text-blue-600" />
-                        <span className="text-sm font-medium">Bourse active</span>
-                      </div>
-                      <div className="text-sm text-gray-600 mt-1">{studentProfile.financial.scholarship.sponsor}</div>
-                      <div className="text-lg font-bold text-blue-600">{formatCurrency(studentProfile.financial.scholarship.amount)}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -357,19 +281,19 @@ const StudentProfileDashboard: React.FC = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-gray-600">Nom complet</label>
-                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.name}</p>
+                      <p className="mt-1 text-sm text-gray-900">{user?.user.first_name} {user?.user.last_name}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Date de naissance</label>
-                      <p className="mt-1 text-sm text-gray-900">{new Date(studentProfile.personal.dateOfBirth).toLocaleDateString('fr-FR')}</p>
+                      <p className="mt-1 text-sm text-gray-900">{user?.userDetailled?.date_of_birth ? user?.userDetailled?.date_of_birth : "N/A"}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Lieu de naissance</label>
-                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.placeOfBirth}</p>
+                      <p className="mt-1 text-sm text-gray-900">{user?.userDetailled?.place_of_birth ? user?.userDetailled?.place_of_birth : "N/A"}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Nationalité</label>
-                      <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.nationality}</p>
+                      <p className="mt-1 text-sm text-gray-900">{user?.userDetailled?.country ? user?.userDetailled?.country : "N/A"}</p>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -377,26 +301,26 @@ const StudentProfileDashboard: React.FC = () => {
                       <label className="text-sm font-medium text-gray-600">Adresse</label>
                       <p className="mt-1 text-sm text-gray-900 flex items-center">
                         <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                        {studentProfile.personal.address}
+                        {user?.userDetailled?.address_details ? user?.userDetailled?.address_details : "N/A"}
                       </p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Téléphone</label>
                       <p className="mt-1 text-sm text-gray-900 flex items-center">
                         <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                        {studentProfile.personal.phone}
+                        {user?.userDetailled?.phone_number ? user?.userDetailled?.phone_number : "N/A"}
                       </p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Email</label>
                       <p className="mt-1 text-sm text-gray-900 flex items-center">
                         <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                        {studentProfile.personal.email}
+                        {user?.userDetailled?.phone_number ? user?.userDetailled?.email : "N/A"}
                       </p>
                     </div>
                   </div>
                 </div>
-                <Separator className="my-6" />
+                {/* <Separator className="my-6" />
                 <div>
                   <h4 className="font-medium text-gray-900 mb-4">Contact d&apos;urgence</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -413,7 +337,7 @@ const StudentProfileDashboard: React.FC = () => {
                       <p className="mt-1 text-sm text-gray-900">{studentProfile.personal.emergencyContact.phone}</p>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           </TabsContent>
@@ -525,9 +449,7 @@ const StudentProfileDashboard: React.FC = () => {
                           <div className={`font-semibold ${transaction.type === 'PAYMENT' ? 'text-red-600' : 'text-green-600'}`}>
                             {transaction.type === 'PAYMENT' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
                           </div>
-                          <Badge variant={transaction.status === 'COMPLETED' ? 'default' : 'secondary'}>
-                            {transaction.status === 'COMPLETED' ? 'Terminé' : 'En attente'}
-                          </Badge>
+                          <Badge size='sm' value={transaction.status} label={transaction.status} icon={CheckCircle} />
                         </div>
                       </div>
                     ))}
@@ -538,7 +460,7 @@ const StudentProfileDashboard: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </>
   );
 };
 
