@@ -189,11 +189,13 @@ const CalendarPlanification: React.FC<CalendarPlanificationProps> = ({ events: p
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          
+          initialView="timeGridWeek"
+
           // Configuration pour le format 24h et français
           locale={frLocale}
           timeZone="UTC"
+          slotMinTime="06:00:00"
+          slotMaxTime="18:30:00"
           slotLabelFormat={{
             hour: '2-digit',
             minute: '2-digit',
