@@ -11,9 +11,8 @@ import { Button } from '@/components/ui/button';
 import Badge from '@/components/custom-ui/Badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Avatar } from '@/components/custom-ui/Avatar';
-import { Shield, Plus, Minus, Save, X } from 'lucide-react';
+import { Shield, Plus, Minus, Save } from 'lucide-react';
 import { IGetRole, IGetUser } from '@/types/staffType';
 
 interface DialogManageUserRoleProps {
@@ -84,7 +83,7 @@ export default function DialogManageUserRole({
           </DialogTitle>
 
           <DialogDescription className="text-sm text-slate-500 mt-1">
-            Gérer les rôles associés à l'utilisateur
+            Gérer les rôles associés à l&apos;utilisateur
           </DialogDescription>
         </DialogHeader>
 

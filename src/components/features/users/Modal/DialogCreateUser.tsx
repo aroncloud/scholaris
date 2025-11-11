@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { IHireExistingStaff } from "@/types/userType";
-import { User, Briefcase, Lock, ChevronRight, ChevronLeft, Save } from "lucide-react";
+import { User, Briefcase, Lock, ChevronRight, Save } from "lucide-react";
 import { MARITAl_STATUS } from "@/constant";
 import { DatePicker } from "@/components/DatePicker";
 import { useConfigStore } from "@/lib/store/configStore";

@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Combobox } from "@/components/ui/Combobox"
 import { DatePicker } from "@/components/DatePicker"
-import { Save, X, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Save, AlertCircle, CheckCircle2 } from "lucide-react"
 import { ICurriculumDetail } from "@/types/programTypes"
 import { INSTALLMENT_TYPES_LIST } from "@/constant"
 import { showToast } from "@/components/ui/showToast"
@@ -80,9 +80,9 @@ export default function DialogCreatePlan({
   })
 
   // Watch form values for validation
-  const watchedValues = useWatch({ control })
-  const totalAmount = watchedValues.total_amount || 0
-  const installments = watchedValues.installments || []
+    const watchedValues = useWatch({ control })
+    const totalAmount = watchedValues.total_amount || 0
+    const installments = useMemo(() => watchedValues.installments || [], [watchedValues.installments])
 
   // Calculate total installments
   const totalInstallments = useMemo(() => {

@@ -233,7 +233,7 @@ export function DialogCreateStudent({
 
               {/* Diplôme d'entrée */}
               <div className="space-y-1">
-                <Label>Diplôme d'entrée <span className="text-red-500">*</span></Label>
+                <Label>Diplôme d&apos;entrée <span className="text-red-500">*</span></Label>
                 <Controller
                   name="education_level_code"
                   control={control}

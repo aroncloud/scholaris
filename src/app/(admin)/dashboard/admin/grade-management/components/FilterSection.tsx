@@ -1,13 +1,13 @@
 import React from "react";
 import { BookOpen, Calendar, AlertCircle } from "lucide-react";
 import { Combobox } from "@/components/ui/Combobox";
-import { IGetCurriculum } from "@/types/programTypes";
+import { ICurriculumDetail } from "@/types/programTypes";
 import { IGetAcademicYearsSchedulesForCurriculum } from "@/types/planificationType";
-import { IGetEvaluationsForScheduleResponse } from "@/types/examTypes";
+import { IGetEvaluationsForCurriculum } from "@/types/examTypes";
 
 interface FilterSectionProps {
   // Curriculum
-  curriculumList: IGetCurriculum[];
+  curriculumList: ICurriculumDetail[];
   selectedCurriculum: string;
   onCurriculumChange: (value: string) => void;
 
@@ -18,7 +18,7 @@ interface FilterSectionProps {
   isLoadingSchedules: boolean;
 
   // Exam
-  examList: IGetEvaluationsForScheduleResponse[];
+  examList: IGetEvaluationsForCurriculum[];
   selectedExam: string;
   onExamChange: (value: string) => void;
   isLoadingExams: boolean;

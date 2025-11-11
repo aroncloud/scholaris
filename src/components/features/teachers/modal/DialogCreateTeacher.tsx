@@ -234,7 +234,7 @@ export function DialogCreateTeacher({
             {/* Date d'embauche */}
             <div className="space-y-1">
               <Label htmlFor="hiring_date">
-                Date d'embauche <span className="text-red-600">*</span>
+                Date d&apos;embauche <span className="text-red-600">*</span>
               </Label>
 
               <DatePicker
