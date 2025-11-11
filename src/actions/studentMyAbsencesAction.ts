@@ -105,7 +105,7 @@ export async function submitJustification(
     console.log("➡️ Payload sent to backend:", JSON.stringify(fullPayload, null, 2));
 
     // 4️⃣ Send POST request
-    const endpoint = `${process.env.NEXT_PUBLIC_ATTENDANCE_WORKER_ENDPOINT}/api/justifications`;
+    const endpoint = `${process.env.ATTENDACE_WORKER_ENDPOINT}/api/justifications`;
     console.log("🚀 Sending final payload to API:", fullPayload);
     console.log("🔗 Endpoint:", endpoint);
 
@@ -138,7 +138,7 @@ export async function getMyAbsencesList() {
     const session = await verifySession();
     const token = session.accessToken;
 
-    const endpoint = `${process.env.NEXT_PUBLIC_ATTENDANCE_WORKER_ENDPOINT}/api/absences`;
+    const endpoint = `${process.env.ATTENDACE_WORKER_ENDPOINT}/api/absences`;
     const response = await axios.get(endpoint, {
       headers: {
         Authorization: `Bearer ${token}`,
