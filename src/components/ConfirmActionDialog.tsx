@@ -106,7 +106,7 @@ export function ConfirmActionDialog({
           </Button>
           <Button
             type="button"
-            variant={config.buttonVariant}
+            variant={"info"}
             onClick={handleConfirm}
             disabled={loading}
             className="min-w-[120px]"

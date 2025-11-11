@@ -53,13 +53,15 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
     formState: { errors },
   } = useForm<IInitiateStudentApplication>({
     defaultValues: {
-      curriculum_code: "",
       first_name: "",
       last_name: "",
+      place_of_birth: "",
+      date_of_birth: "",
+      curriculum_code: "",
       email: "",
       phone_number: "",
       student_number: "",
-      gender: "MALE",
+      gender: undefined,
     },
   });
 

@@ -51,17 +51,18 @@ export const useStudentDetails = (studentId: string) => {
         }
     }, [router, fetchHistory]);
 
-    const handleFinalizeInscription = async () => {
+    const handleFinalizeInscription = async (curriculumCode?: string) => {
         if(student && selectedAcademicYear) {
             setIsProcessing(true);
-            const result = await createNewAnnualEnrollment(student.user_code, selectedAcademicYear, student.curriculum_code)
+            const curriculumToUse = curriculumCode || student.curriculum_code;
+            const result = await createNewAnnualEnrollment(student.user_code, selectedAcademicYear, curriculumToUse)
             setIsProcessing(false);
             if(result.code ==  "success") {
-                return { success: true, data: 'Utilisateur désactivé avec succès' };
+                return { success: true, data: 'Inscription finalisée avec succès' };
             } else {
-                return { 
-                    success: false, 
-                    data: result.error ?? "Erreur lors de la désactivation de l'utilisateur" 
+                return {
+                    success: false,
+                    data: result.error ?? "Erreur lors de la finalisation de l'inscription"
                 };
             }
         }

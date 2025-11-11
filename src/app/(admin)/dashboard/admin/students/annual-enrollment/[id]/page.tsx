@@ -33,8 +33,9 @@ import {
   User2
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { ConfirmActionDialog } from '@/components/ConfirmActionDialog';
 import { useState } from 'react';
+import { useFactorizedProgramStore } from '@/store/programStore';
+import { DialogFinalizeEnrollment } from '@/components/features/admin-students/modals/DialogFinalizeEnrollment';
 
 export default function StudentDetailPage() {
   const params = useParams();
@@ -44,24 +45,33 @@ export default function StudentDetailPage() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   const { student, isLoading, history, isHistoryLoading, handleFinalizeInscription, isProcessing } = useStudentDetails(studentId as string);
+  const { factorizedPrograms } = useFactorizedProgramStore();
 
-
-  const finalizeInscription = async () => {
-    const result = await handleFinalizeInscription();
+  const finalizeInscription = async (curriculumCode: string) => {
+    const result = await handleFinalizeInscription(curriculumCode);
     if(result?.success) {
       setConfirmDialogOpen(false);
+
+      // Trouver le nom du curriculum sélectionné
+      const selectedProgram = factorizedPrograms.find(fp =>
+        fp.curriculums.some(c => c.curriculum_code === curriculumCode)
+      );
+      const curriculum = selectedProgram?.curriculums.find(
+        c => c.curriculum_code === curriculumCode
+      );
+
       showToast({
         variant: "success-solid",
         message: 'Inscription finalisée avec succès',
-        description: `L'étudiant ${student?.first_name} ${student?.last_name} a été inscris avec succès en classe de ${student?.cirriculum.curriculum_name}.`,
+        description: `L'étudiant ${student?.first_name} ${student?.last_name} a été inscrit avec succès en classe de ${curriculum?.curriculum_name || 'curriculum sélectionné'}.`,
         position: 'top-center',
       });
     } else {
       setConfirmDialogOpen(false);
       showToast({
         variant: "error-solid",
-        message: "Erreur lors de l'Inscription de l'étudiant",
-        description: `Une erreur est survenue lors de l'inscription de l'étudiant ${student?.first_name} ${student?.last_name}.`,
+        message: "Erreur lors de l'inscription de l'étudiant",
+        description: result?.data || `Une erreur est survenue lors de l'inscription de l'étudiant ${student?.first_name} ${student?.last_name}.`,
         position: 'top-center',
       });
     }
@@ -413,19 +423,19 @@ export default function StudentDetailPage() {
         </div>
       }
 
-      {/* Dialog de confirmation */}
-      <ConfirmActionDialog
-        open={confirmDialogOpen}
-        onOpenChange={setConfirmDialogOpen}
-        onConfirm={finalizeInscription}
-        title="Confirmer la finalisation de l'inscription"
-        description={`Êtes-vous sûr de vouloir finaliser l'inscription de ${student?.first_name} ${student?.last_name} en ${student?.cirriculum?.curriculum_name} ? Cette action est irréversible.`}
-        confirmLabel="Oui, finaliser"
-        cancelLabel="Annuler"
-        variant="success"
-        loading={isProcessing}
-        loadingText="Finalisation en cours..."
-      />
+      {/* Dialog de finalisation avec sélection de curriculum */}
+      {student && (
+        <DialogFinalizeEnrollment
+          isOpen={confirmDialogOpen}
+          onClose={() => setConfirmDialogOpen(false)}
+          studentName={`${student.first_name} ${student.last_name}`}
+          currentCurriculumCode={student.curriculum_code}
+          currentCurriculumName={student.cirriculum?.curriculum_name || ''}
+          currentProgramCode={student.cirriculum?.program_code || ''}
+          onConfirm={finalizeInscription}
+          loading={isProcessing}
+        />
+      )}
     </>
   );}
 }
