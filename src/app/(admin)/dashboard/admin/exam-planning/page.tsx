@@ -381,7 +381,7 @@ export default function Page() {
                             title='Total'
                             value={statistics.total}
                             variant='info'
-                            compact
+                            main
                         />
                         <StatCard 
                             icon={CheckCircle2}

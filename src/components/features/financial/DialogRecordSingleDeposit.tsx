@@ -1,13 +1,13 @@
 "use client"
 
 import { Controller, useForm } from "react-hook-form"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { IRecordDeposit, IGetStudentSummary } from "@/types/financialTypes"
 import { useEffect, useState } from "react"
-import { DollarSign, Calendar, FileText, Wallet, Loader2 } from "lucide-react"
+import { DollarSign, Calendar, FileText, Wallet, Loader2, Save } from "lucide-react"
 import Badge from "@/components/custom-ui/Badge"
 import { DatePicker } from "@/components/DatePicker"
 import { getStudentFinancialSummary } from "@/actions/financialAction"
@@ -100,18 +100,18 @@ export default function DialogRecordSingleDeposit({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="md:min-w-xl lg:min-w-2xl max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+       <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
         {/* Header */}
-        <div className="bg-slate-50 px-6 py-6 border-b shrink-0">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
+         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
+            <DialogTitle className="text-2xl font-bold text-slate-900">
               Enregistrer un paiement
             </DialogTitle>
+            <DialogDescription className="text-sm text-slate-500 mt-1">Remplissez les informations d&apos;un Paiement</DialogDescription>
           </DialogHeader>
-        </div>
+    
 
         {/* Contenu avec scroll */}
-        <div className="overflow-y-auto px-6 py-4">
+         <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -274,29 +274,31 @@ export default function DialogRecordSingleDeposit({
         </div>
 
         {/* Footer */}
-        <div className="border-t bg-slate-50 px-6 py-4 shrink-0 flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              onOpenChange(false)
-              reset()
-              setStudentSummary(null)
-            }}
-            className="flex-1"
-            disabled={isSubmitting || loading}
-          >
-            Annuler
-          </Button>
-          <Button
-            type="submit"
-            form="payment-form"
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            disabled={isSubmitting || loading}
-          >
-            {isSubmitting ? "Enregistrement..." : "Enregistrer"}
+        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                onOpenChange(false)
+                reset()
+                setStudentSummary(null)
+              }}
+              disabled={isSubmitting || loading}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="submit"
+              form="payment-form"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+              disabled={isSubmitting || loading}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isSubmitting ? "Enregistrement..." : "Enregistrer"}
           </Button>
         </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

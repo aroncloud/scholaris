@@ -95,7 +95,7 @@ export function DialogUpdateCurriculum({
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
       <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
-        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-white z-10">
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
           <DialogTitle className="text-2xl font-bold text-slate-900">Mise à jour du curriculum</DialogTitle>
           <DialogDescription className="text-sm text-slate-500 mt-1">
             Modifiez les informations du curriculum

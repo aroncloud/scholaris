@@ -1,14 +1,14 @@
 "use client"
 
 import { Controller, useForm } from "react-hook-form"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Combobox } from "@/components/ui/Combobox"
 import { IRecordDeposit, IStudentGetFinancialInfo } from "@/types/financialTypes"
 import { useEffect, useMemo } from "react"
-import { DollarSign, Calendar, FileText, Wallet } from "lucide-react"
+import { DollarSign, Calendar, FileText, Wallet, Save } from "lucide-react"
 import Badge from "@/components/custom-ui/Badge"
 import { DatePicker } from "@/components/DatePicker"
 
@@ -27,9 +27,9 @@ interface DialogRecordDepositProps {
 
 const PAYMENT_METHODS = [
   { value: "BANK_DEPOSIT", label: "Dépôt bancaire" },
-  { value: "CASH", label: "Espèces"},
-  { value: "MOBILE_MONEY", label: "Mobile Money"},
-  { value: "CHECK", label: "Chèque"},
+  { value: "CASH", label: "Espèces" },
+  { value: "MOBILE_MONEY", label: "Mobile Money" },
+  { value: "CHECK", label: "Chèque" },
 ]
 
 const formatMontant = (montant: number) => {
@@ -39,21 +39,21 @@ const formatMontant = (montant: number) => {
   }).format(montant) + ' FCFA'
 }
 
-export default function DialogRecordDeposit({ 
-  open, 
-  onOpenChange, 
-  selectedStudent, 
+export default function DialogRecordDeposit({
+  open,
+  onOpenChange,
+  selectedStudent,
   allStudents,
-  onSave 
+  onSave
 }: DialogRecordDepositProps) {
-  
+
   const { register, handleSubmit, reset, setValue, watch, control, formState: { errors, isSubmitting } } = useForm<IRecordDeposit>()
-  
+
   const studentUserCode = watch("student_user_code")
   const amount = watch("amount")
   const paymentMethod = watch("payment_method")
 
-  const currentStudent = useMemo(() => 
+  const currentStudent = useMemo(() =>
     allStudents.find(s => s.enrollment.user_code === studentUserCode),
     [allStudents, studentUserCode]
   )
@@ -75,7 +75,7 @@ export default function DialogRecordDeposit({
       amount: Number(data.amount)
     };
     const result = await onSave(payload);
-    if(result) {
+    if (result) {
       reset();
       onOpenChange(false);
     }
@@ -86,7 +86,7 @@ export default function DialogRecordDeposit({
     label: `${s.enrollment.first_name} ${s.enrollment.last_name} - ${s.enrollment.student_number}`
   }))
 
-  const newBalance = currentStudent 
+  const newBalance = currentStudent
     ? Math.max(0, currentStudent.remaining_balance - (amount || 0))
     : 0
 
@@ -94,23 +94,23 @@ export default function DialogRecordDeposit({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm md:min-w-xl lg:min-w-2xl md:max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
         {/* Header */}
-        <div className="bg-slate-50 px-6 py-6 border-b shrink-0">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              Enregistrer un paiement
-            </DialogTitle>
-          </DialogHeader>
-        </div>
+        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
+          <DialogTitle className="text-2xl font-bold text-slate-900">
+            Enregistrer un paiement
+          </DialogTitle>
+
+          <DialogDescription className="text-sm text-slate-500 mt-1">Remplissez le formulaire d&apos;un Paiement</DialogDescription>
+        </DialogHeader>
 
         {/* Contenu avec scroll */}
-        <div className="overflow-y-auto px-6 py-4">
+        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
           <form id="payment-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Sélection étudiant */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <span>Étudiant</span>
                 {currentStudent?.isPaidOff && (
-                  <Badge value="Soldé" variant="success" size="sm" label="Soldé"/>
+                  <Badge value="Soldé" variant="success" size="sm" label="Soldé" />
                 )}
               </Label>
               <Combobox
@@ -149,12 +149,12 @@ export default function DialogRecordDeposit({
                 <Input
                   type="number"
                   {...register("amount", {
-                    valueAsNumber: true, 
-                    required: "Montant requis", 
+                    valueAsNumber: true,
+                    required: "Montant requis",
                     min: { value: 1, message: "Le montant doit être supérieur à 0" },
-                    max: currentStudent ? { 
-                      value: currentStudent.remaining_balance, 
-                      message: "Le montant ne peut pas dépasser le solde restant" 
+                    max: currentStudent ? {
+                      value: currentStudent.remaining_balance,
+                      message: "Le montant ne peut pas dépasser le solde restant"
                     } : undefined
                   })}
                   placeholder="0"
@@ -166,7 +166,7 @@ export default function DialogRecordDeposit({
                 </span>
               </div>
               {errors.amount && <p className="text-sm text-red-500">{errors.amount.message}</p>}
-              
+
               {currentStudent && currentStudent.remaining_balance > 0 && amount !== currentStudent.remaining_balance && (
                 <Button
                   type="button"
@@ -226,11 +226,10 @@ export default function DialogRecordDeposit({
                     key={method.value}
                     type="button"
                     onClick={() => setValue("payment_method", method.value)}
-                    className={`p-2.5 rounded-lg border transition-all text-left ${
-                      paymentMethod === method.value
+                    className={`p-2.5 rounded-lg border transition-all text-left ${paymentMethod === method.value
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <span className="text-sm font-medium">{method.label}</span>
                   </button>
@@ -255,28 +254,30 @@ export default function DialogRecordDeposit({
         </div>
 
         {/* Footer */}
-        <div className="border-t bg-slate-50 px-6 py-4 shrink-0 flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              onOpenChange(false)
-              reset()
-            }}
-            className="flex-1"
-            disabled={isSubmitting}
-          >
-            Annuler
-          </Button>
-          <Button
-            type="submit"
-            form="payment-form"
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Enregistrement..." : "Enregistrer"}
-          </Button>
-        </div>
+         <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                onOpenChange(false)
+                reset()
+              }}
+              disabled={isSubmitting}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="submit"
+              form="payment-form"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+              disabled={isSubmitting}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isSubmitting ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
