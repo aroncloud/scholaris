@@ -358,7 +358,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
                   {filters.length > 0 && (
                     <div className="flex items-center gap-2 flex-1">
                       {filters.map((filter) => (
-                        <div key={uuidv4()} className="w-44">
+                        <div key={uuidv4()}>
                           <Combobox
                             value={selectedFilters[filter.key] || ""}
                             className="h-9 text-sm w-96"
@@ -384,8 +384,8 @@ export const ResponsiveTable = <T extends Record<string, any>>({
                       {anyFilterActive && (
                         <Button
                           size="sm"
-                          variant="ghost"
-                          className="h-9 px-3"
+                          variant="neutral"
+                          className="h-9 px-3 "
                           onClick={() => setSelectedFilters({})}
                         >
                           <Eraser className="w-4 h-4" />

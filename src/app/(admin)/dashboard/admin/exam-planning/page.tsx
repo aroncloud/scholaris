@@ -197,13 +197,13 @@ export default function Page() {
         {
             key: "title",
             label: "Évaluation",
-            priority: 'high',
+            priority: 'medium',
             render: (_, evaluation) => {
                 const statusConfig = getStatusConfig(evaluation.status);
                 return (
                     <div>
                         <div className="font-semibold text-lg text-foreground mb-2">{evaluation.title}</div>
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="hidden md:flex flex-wrap items-center gap-2">
                             <Badge className={`${statusConfig.color} flex items-center gap-1`}>
                                 {statusConfig.icon}
                                 {statusConfig.label}
@@ -219,17 +219,19 @@ export default function Page() {
         {
             key: "target_code",
             label: "Code UE",
-            priority: 'high',
+            priority: 'medium',
             render: (_, evaluation) => (
                 <div className="space-y-1">
                     <div className="flex items-center gap-2">
                         <BookMarked className="w-4 h-4 text-muted-foreground" />
                         <span className="font-medium">{evaluation.target_code}</span>
                     </div>
-                    <Badge variant="secondary" className="flex items-center gap-1 w-fit">
-                        <Target className="w-3 h-3" />
-                        {getTargetLevelLabel(evaluation.target_level)}
-                    </Badge>
+                    <div className='hidden md:block'>
+                        <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                            <Target className="w-3 h-3" />
+                            {getTargetLevelLabel(evaluation.target_level)}
+                        </Badge>
+                    </div>    
                 </div>
             ),
         },
@@ -258,7 +260,7 @@ export default function Page() {
         {
             key: "deadline_date",
             label: "Date limite",
-            priority: 'high',
+            priority: 'low',
             render: (_, evaluation) => {
                 const daysUntil = getDaysUntilDeadline(evaluation.deadline_date);
                 return (
@@ -536,9 +538,9 @@ export default function Page() {
             <PageHeader
                 title="Gestion des Evaluations"
                 Icon={ClipboardList}
-                description="Programmer la date buttoir de depot des notes de CC et de SN"
+                description="Programmer la date buttoir de depot des notes de Controle continu et de Session normale"
             />
-            <div className="container mx-auto p-6 space-y-6">
+            <div className="container mx-auto xl:p-6 space-y-6">
                 {/* Sélecteur de Curriculum */}
                 <ContentLayout
                     title='Sélection du Curriculum'
@@ -549,6 +551,7 @@ export default function Page() {
                                 variant="info"
                                 onClick={() => { setIplannificationDialogOpen(true) }}
                                 disabled={!selectedCurriculum}
+                                className=''
                             >
                                 <Calendar className="w-4 h-4 mr-2" />
                                 Planifier évaluation
@@ -606,7 +609,7 @@ const WelcomeMessage = () => (
         <CardContent>
             <div className="flex flex-col items-center justify-center py-12 px-4">
                 <div className="text-center space-y-6 max-w-xl">
-                    <div className="mx-auto w-20 h-20 bg-gradient-to-br from-primary to-primary/50 rounded-full flex items-center justify-center shadow-lg">
+                    <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
                         <GraduationCap className="w-10 h-10 text-white" />
                     </div>
 

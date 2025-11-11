@@ -285,6 +285,31 @@ export default function ProgramsTabContent({
               variant="neutral"
             />
           </div>
+          <div className="md:hidden grid grid-cols-1 gap-2 mb-3">
+            <StatCard title="Étudiants" value={stats.students} icon={Users} variant="info" compact />
+            <StatCard
+              title="Montant Perçu"
+              value={formatMontant(stats.paid)}
+              icon={CheckCircle2}
+              variant="success"
+              main
+              compact
+            />
+            <StatCard
+              title="Reste à Percevoir"
+              value={formatMontant(stats.remaining)}
+              icon={Clock}
+              variant="warning"
+              compact
+            />
+            <StatCard
+              title="Montant Total"
+              value={formatMontant(stats.total)}
+              icon={DollarSign}
+              variant="neutral"
+              compact
+            />
+          </div>
 
           <ResponsiveTable
             columns={columns}

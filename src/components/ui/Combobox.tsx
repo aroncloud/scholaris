@@ -30,6 +30,7 @@ interface ComboboxProps {
   value?: string | null
   onChange: (value: string) => void
   className?: string
+  disabled?: boolean
 }
 
 export function Combobox({
@@ -39,6 +40,7 @@ export function Combobox({
   value,
   onChange,
   className,
+  disabled
 }: ComboboxProps) {
   const [open, setOpen] = useState(false)
 
@@ -62,7 +64,7 @@ export function Combobox({
 
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <Command>
-          <CommandInput placeholder="Search..." className="h-9" />
+          <CommandInput placeholder="Search..." className="h-9" disabled={disabled} />
           <CommandList>
             <CommandEmpty>{emptyMessage}</CommandEmpty>
             <CommandGroup>

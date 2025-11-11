@@ -29,9 +29,9 @@ const AcademicYearSelector: React.FC = () => {
     setIsChangingYear(true, yearLabel);
     setSelectedAcademicYear(academicYearCode);
 
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    // setTimeout(() => {
+    //   window.location.reload();
+    // }, 500);
   };
 
   const selectedYearLabel = useMemo(() => {
@@ -68,7 +68,6 @@ const AcademicYearSelector: React.FC = () => {
             key={ay.academic_year_code}
             onSelect={() => handleSelectAcademicYear(ay.academic_year_code)}
             className="flex items-center justify-between"
-            disabled={isChangingYear}
           >
             <span>
               {`${ay.start_date.split('-')[0]} - ${ay.end_date.split('-')[0]}`}
