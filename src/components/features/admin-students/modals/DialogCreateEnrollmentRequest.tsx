@@ -58,7 +58,6 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
       place_of_birth: "",
       date_of_birth: "",
       curriculum_code: "",
-      email: "",
       phone_number: "",
       student_number: "",
       gender: undefined,
@@ -190,16 +189,6 @@ const CreateEnrollmentDialog: React.FC<CreateEnrollmentDialogProps> = ({
                   {...register("student_number")}
                 />
                 {errors.student_number && <p className="text-red-500 text-sm">{errors.student_number.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="email@exemple.com"
-                  {...register("email")}
-                />
-                {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
               </div>
             </div>
 

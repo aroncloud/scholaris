@@ -132,7 +132,6 @@ export interface IInitiateStudentApplication {
   date_of_birth: string;
 
   curriculum_code?: string;
-  email?: string;
   phone_number?: string;
   student_number?: string;
   gender?: gender;
