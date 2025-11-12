@@ -162,6 +162,9 @@ const AdmissionRequestContent: React.FC = () => {
   }, [matricule, searchParams, router]);
 
   const handleSeachMatricule = async () => {
+    // Marquer comme recherche manuelle pour éviter le double appel
+    setHasAutoSearched(true);
+
     // Mettre à jour l'URL avec le paramètre 'code'
     const params = new URLSearchParams(searchParams.toString());
     params.set('code', matriculeInput);
