@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, CheckCircle, FileText, User, MapPin, Phone, GraduationCap, Loader2 } from "lucide-react";
@@ -70,7 +70,7 @@ const STEPS = [
   },
 ];
 
-const AdmissionRequest: React.FC = () => {
+const AdmissionRequestContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -367,6 +367,24 @@ const AdmissionRequest: React.FC = () => {
         </div>
       </main>
     </div>
+  );
+};
+
+const AdmissionRequest: React.FC = () => {
+  return (
+    <Suspense fallback={
+      <div className="landing-page">
+        <main>
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="h-8 w-8 animate-spin text-[#ff9900]" />
+            </div>
+          </div>
+        </main>
+      </div>
+    }>
+      <AdmissionRequestContent />
+    </Suspense>
   );
 };
 
