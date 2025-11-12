@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, CheckCircle, FileText, User, MapPin, Phone, GraduationCap, Loader2 } from "lucide-react";
-
+import { useSearchParams, useRouter } from "next/navigation";
 
 import { useAdmissionForm } from "@/hooks/useAdmissionForm";
 import {
@@ -71,12 +71,16 @@ const STEPS = [
 ];
 
 const AdmissionRequest: React.FC = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [currentStep, setCurrentStep] = useState(1);
   const [matriculeInput, setMatriculeInput] = useState<string>('');
   const [matricule, setMatricule] = useState<ISeachMatricule | null>(null);
   const [loading, setLoading] = useState(false);
   const [configs, setConfigs] = useState<IConfig | null>(null);
   const [program, setProgram] = useState<IFactorizedProgram[]>([]);
+  const [hasAutoSearched, setHasAutoSearched] = useState(false);
 
 
 
@@ -105,11 +109,12 @@ const AdmissionRequest: React.FC = () => {
     handleSubmit,
   } = useAdmissionForm();
 
-  const handleSeachMatricule = async () => {
+  // Fonction pour effectuer la recherche par matricule
+  const searchMatricule = React.useCallback(async (code: string) => {
     try {
       setLoading(true);
-      const result = await searchStudentByMatricule(matriculeInput);
-      console.log('result', result)
+      const result = await searchStudentByMatricule(code);
+      console.log('result', result);
       if (result.code === 'success' && result.data) {
         setMatricule(result.data.body);
         handleInputChange('nom', result.data.body.last_name || '');
@@ -121,6 +126,33 @@ const AdmissionRequest: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  }, [handleInputChange]);
+
+  // Lire le paramètre 'code' de l'URL et lancer la recherche automatiquement
+  useEffect(() => {
+    const codeParam = searchParams.get('code');
+    if (codeParam && !hasAutoSearched) {
+      setMatriculeInput(codeParam);
+      setHasAutoSearched(true);
+      searchMatricule(codeParam);
+    }
+  }, [searchParams, hasAutoSearched, searchMatricule]);
+
+  // Nettoyer l'URL quand on retourne à l'écran de recherche
+  useEffect(() => {
+    if (matricule === null && searchParams.get('code')) {
+      router.push('/admission-request', { scroll: false });
+    }
+  }, [matricule, searchParams, router]);
+
+  const handleSeachMatricule = async () => {
+    // Mettre à jour l'URL avec le paramètre 'code'
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('code', matriculeInput);
+    router.push(`?${params.toString()}`, { scroll: false });
+
+    // Effectuer la recherche
+    await searchMatricule(matriculeInput);
   };
 
   
@@ -130,16 +162,17 @@ const AdmissionRequest: React.FC = () => {
     }
   };
 
-  
+
   const prevStep = () => {
     if(currentStep === 1) {
+      // Retour à l'écran de recherche (étape 0)
       console.log('Search matricule reset');
-      setMatricule(null);
+      setMatricule(null); // Le useEffect nettoiera l'URL automatiquement
+      setMatriculeInput('');
+      setHasAutoSearched(false);
       setCurrentStep(1);
-    }
-
-
-    if (currentStep > 1) {
+    } else if (currentStep > 1) {
+      // Navigation entre les étapes du formulaire - garder le paramètre 'code'
       setCurrentStep(currentStep - 1);
     }
   };
