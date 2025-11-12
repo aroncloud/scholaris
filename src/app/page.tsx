@@ -690,7 +690,7 @@ const LandingPage: React.FC = () => {
                   <h4 className="text-white font-bold mb-2">
                     Écrivez-nous
                   </h4>
-                  <p className="text-gray-200 text-sm">contact@epfps.cm</p>
+                  <p className="text-gray-200 text-sm">{process.env.NEXT_PUBLIC_SCHOOL_EMAIL}</p>
                   <p className="text-gray-200 text-sm">
                     support@epfps.cm
                   </p>

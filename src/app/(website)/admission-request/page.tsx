@@ -23,6 +23,8 @@ import { ISeachMatricule } from "@/types/requestSubmissionTypes";
 import { getConfig, getCurriculumListSite } from "@/actions/utilitiesActions";
 import { IConfig } from "@/types/utilitiesTypes";
 import { IFactorizedProgram } from "@/types/programTypes";
+import Image from "next/image";
+import { showToast } from "@/components/ui/showToast";
 
 
 const STEPS = [
@@ -121,8 +123,22 @@ const AdmissionRequestContent: React.FC = () => {
         handleInputChange('prenom', result.data.body.first_name || '');
         handleInputChange('dateNaissance', result.data.body.date_of_birth ? new Date(result.data.body.date_of_birth).toISOString().split('T')[0] : '');
         handleInputChange('lieuNaissance', result.data.body.place_of_birth || '');
-        handleInputChange('email', result.data.body.email || '');
+        handleInputChange('formation', result.data.body.cirriculum.program_code || '');
+        handleInputChange('curriculum', result.data.body.cirriculum.curriculum_code || '');
+      } else {
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
+          description: result.code == "application_404" ? "Matricule introuvable. Veuillez vérifier votre saisie ou vous rendre à l'institut si le souci persiste" : 'Matricule introuvable ou erreur lors de la recherche'
+        });
       }
+    } catch (error) {
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: 'Une erreur inattendue est survenue lors de la recherche'
+      });
+      console.error('Erreur de recherche:', error);
     } finally {
       setLoading(false);
     }
@@ -211,7 +227,13 @@ const AdmissionRequestContent: React.FC = () => {
             <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-200 mb-8">
               <div className="flex items-center justify-center gap-4 mb-6">
                 <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                  <span className="text-xs text-gray-500">LOGO</span>
+                  <Image 
+                    src='/images/logo/logoEPFPS.png'
+                    alt="Logo EPFPS"
+                    className="w-auto"
+                    height={100}
+                    width={100}
+                  />
                 </div>
                 <div className="text-center">
                   <h2 className=" font-bold text-[#3b2c6a] mb-1">
@@ -219,7 +241,7 @@ const AdmissionRequestContent: React.FC = () => {
                   </h2>
                   <p className="text-xs text-gray-600">MEIGANGA - CAMEROUN</p>
                   <p className="text-xs text-gray-500">
-                    Tél: +237 XXX XXX XXX | Email: contact@epfps.cm
+                    Tél: {process.env.NEXT_PUBLIC_SCHOOL_PHONE} | Email: {process.env.NEXT_PUBLIC_SCHOOL_EMAIL}
                   </p>
                 </div>
               </div>
@@ -350,9 +372,8 @@ const AdmissionRequestContent: React.FC = () => {
                       onClick={async () => {
                         const success = await handleSubmit(matriculeInput);
                         if (success) {
-                          alert("Votre demande a été soumise avec succès !");
-                          setMatricule(null); 
-                          setCurrentStep(1); 
+                          setMatricule(null);
+                          setCurrentStep(1);
                         }
                       }}
                       disabled={isSubmitting}

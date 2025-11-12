@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import type { CreateApplicantRequest, FormData } from "@/types/requestSubmissionTypes";
 import { submitAdmissionRequest, uploadApplicationDocuments } from "@/actions/requestSubmissionActions";
+import { showToast } from "@/components/ui/showToast";
 
 
 
@@ -130,8 +131,12 @@ export const useAdmissionForm = () => {
         ...prev,
         documents: { ...prev.documents, [documentType]: file },
       }));
+      // Nettoyer l'erreur associée au document quand il est sélectionné
+      if (file && errors[documentType]) {
+        setErrors((prev) => ({ ...prev, [documentType]: "" }));
+      }
     },
-    [],
+    [errors],
   );
 
   // Valide l'étape actuelle
@@ -149,14 +154,16 @@ export const useAdmissionForm = () => {
 
     setIsSubmitting(true);
     try {
-      // console.log("Formulaire soumis :", formData);
-
       // Vérifier que tous les documents sont présents
       if (!formData.documents.cniRecto || !formData.documents.cniVerso ||
           !formData.documents.photo4x4 || !formData.documents.releveNotes ||
           !formData.documents.diplome || !formData.documents.acteNaissance ||
           !formData.documents.pageResultatConcours || !formData.documents.pageNomConcours) {
-        alert("Tous les documents sont requis");
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
+          description: 'Tous les documents sont requis'
+        });
         return false;
       }
 
@@ -174,7 +181,11 @@ export const useAdmissionForm = () => {
       });
 
       if (uploadResult.code !== "success" || !uploadResult.data) {
-        alert(`Erreur lors de l'upload des documents: ${uploadResult.error}`);
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
+          description: uploadResult.error || "Erreur lors de l'upload des documents"
+        });
         return false;
       }
 
@@ -225,9 +236,27 @@ export const useAdmissionForm = () => {
       const result = await submitAdmissionRequest(payload, applicationCode);
       console.log('-->submitAdmissionRequest.result', result);
 
-      return result.code === "success";
+      if (result.code === "success") {
+        showToast({
+          variant: 'success-solid',
+          message: 'Succès',
+          description: 'Votre demande a été soumise avec succès !'
+        });
+        return true;
+      } else {
+        showToast({
+          variant: 'error-solid',
+          message: 'Erreur',
+          description: result.error || "Erreur lors de la soumission de la demande"
+        });
+        return false;
+      }
     } catch (error) {
-      alert("Une erreur est survenue lors de l'envoi.");
+      showToast({
+        variant: 'error-solid',
+        message: 'Erreur',
+        description: "Une erreur est survenue lors de l'envoi"
+      });
       console.error("Erreur de soumission :", error);
       return false;
     } finally {

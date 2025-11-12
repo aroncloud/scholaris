@@ -398,6 +398,13 @@ export const AcademicInfoForm: React.FC<StepFormProps> = ({
 }) => {
   const [selectedProgram, setSelectedProgram] = useState<string>("")
 
+  // Synchroniser selectedProgram avec formData.formation quand il est pré-rempli
+  useEffect(() => {
+    if (formData.formation && formData.formation !== selectedProgram) {
+      setSelectedProgram(formData.formation);
+    }
+  }, [formData.formation, selectedProgram]);
+
   // Récupérer les curriculums pour le programme choisi
   const selectedCurriculums =
     programList.find(p => p.program.program_code === selectedProgram)?.curriculums || []

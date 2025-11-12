@@ -8,6 +8,9 @@ export function actionErrorHandler(error: unknown) {
       response?: {
         data?: {
           message?: string;
+          code?: number,
+          error_code?: string,
+          exit?: string
         };
       };
     }
@@ -23,9 +26,10 @@ export function actionErrorHandler(error: unknown) {
       };
     }
     const err = error as AxiosError;
-    console.log(err.response?.data)
+    console.log('-->actionErrorHandler', err.response?.data)
+    const code = typeof error === 'object' && error !== null && 'response' in error && err.response?.data?.error_code ? err.response!.data!.error_code! : typeof error === 'object' && error !== null && 'response' in error && err.response?.data?.message ? err.response!.data!.message! : "An unexpected error occurred"
     return {
-      code: typeof error === 'object' && error !== null && 'code' in error ? err.code ?? "unknown" : "unknown",
+      code: code,
       error: typeof error === 'object' && error !== null && 'response' in error && err.response?.data?.message
         ? err.response!.data!.message!
         : "An unexpected error occurred",
