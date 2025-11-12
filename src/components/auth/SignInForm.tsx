@@ -72,8 +72,8 @@ export default function SignInForm() {
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-        <h1 className="mb-2 font-semibold text-gray-800 text-title-sm sm:text-title-md">Sign In</h1>
-        <p className="text-sm text-gray-500 mb-5">Enter your email and password to sign in!</p>
+        <h1 className="mb-2 font-semibold text-gray-800 text-title-sm sm:text-title-md">Se connecter</h1>
+        <p className="text-sm text-gray-500 mb-5">Entrez votre mot de passe pour vous connecter.</p>
 
         <form onSubmit={handleSubmit(handleLogin)} className="space-y-6">
           <div>
@@ -82,7 +82,7 @@ export default function SignInForm() {
               name="username"
               control={control}
               rules={{
-                required: "Email is required",
+                required: "Email requise",
                 
               }}
               render={({ field }) => (
@@ -98,11 +98,11 @@ export default function SignInForm() {
                 name="password"
                 control={control}
                 rules={{
-                  required: "Password is required",
+                  required: "Mot de passe requis",
                   minLength: { value: 6, message: "Password must be at least 6 characters" }
                 }}
                 render={({ field }) => (
-                  <Input {...field} type={showPassword ? "text" : "password"} placeholder="Enter your password" error={!!errors.password?.message} />
+                  <Input {...field} type={showPassword ? "text" : "password"} placeholder="Entrez votre mot de passe" error={!!errors.password?.message} />
                 )}
               />
               <span onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer">
@@ -114,19 +114,15 @@ export default function SignInForm() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Checkbox checked={isChecked} onChange={setIsChecked} />
-              <span className="text-theme-sm">Keep me logged in</span>
+              <span className="text-theme-sm">Rester connecté</span>
             </div>
-            <Link href="/reset-password" className="text-brand-500 hover:text-brand-600 text-sm">Forgot password?</Link>
+            <Link href="/reset-password" className="text-brand-500 hover:text-brand-600 text-sm">Mot de passe oublié </Link>
           </div>
 
           {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
 
           <Button className="w-full" size="sm" disabled={isSubmitting}>{isSubmitting ? "Signing in..." : "Sign in"}</Button>
         </form>
-
-        <p className="mt-5 text-sm text-center">
-          Don&apos;t have an account? <Link href="/signup" className="text-brand-500 hover:text-brand-600">Sign Up</Link>
-        </p>
       </div>
     </div>
   );
