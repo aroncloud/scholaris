@@ -92,10 +92,10 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
             <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
                 {/* Header */}
                 <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-                    <DialogTitle className="text-2xl font-bold text-slate-900">
+                    <DialogTitle className="text-left text-2xl font-bold text-slate-900">
                         Examiner la justification
                     </DialogTitle>
-                    <DialogDescription className="text-sm text-slate-500 mt-1">
+                    <DialogDescription className="text-left text-sm text-slate-500 mt-1">
                         Pour l&apos;absence de <span className="font-semibold text-foreground/80">{fullName}</span> au cours de{' '}
                         <span className="font-semibold text-foreground/80">{absence.course_unit_name}</span>
                     </DialogDescription>
@@ -229,8 +229,8 @@ export const DialogReviewJustification: React.FC<DialogReviewJustificationProps>
                 )}
 
                 {/* Footer */}
-                <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-                    <div className="flex items-center space-x-3">
+                <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+                    <div className="flex items-center space-x-3 justify-between">
                         <DialogClose asChild>
                             <Button variant="outline" disabled={isSubmitting} className="sm:w-auto w-full">
                                 Annuler

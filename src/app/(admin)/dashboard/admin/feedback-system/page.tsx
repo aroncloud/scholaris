@@ -129,26 +129,25 @@ export default function FeedbackSystemPage() {
       </PageHeader>
 
       <div>
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="px-6">
-          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="px-2 md:px-6">
+          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 shadow-sm h-auto w-full mt-6 mb-2 grid grid-cols-3 gap-1">
             <TabsTrigger
               value="forms"
-              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30 flex items-center justify-center"
             >
-              <Settings className="w-4 h-4 mr-2" />
-              Configuration
+              <span className="truncate text-center">Configuration</span>
             </TabsTrigger>
             <TabsTrigger
               value="campaigns"
-              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30 flex items-center justify-center"
             >
-              Campagnes
+              <span className="truncate text-center">Campagnes</span>
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30 flex items-center justify-center"
             >
-              Analytics
+              <span className="truncate text-center">Analytics</span>
             </TabsTrigger>
           </TabsList>
 

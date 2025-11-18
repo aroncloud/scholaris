@@ -515,7 +515,7 @@ export async function assignRolesToUser(user_code: string, roleList: string[]) {
     
     const token = session.accessToken;
     
-    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/role`, _payload, {
+    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/roles`, _payload, {
       headers: {
           Authorization: `Bearer ${token}`,
       },
@@ -541,7 +541,7 @@ export async function removeUserRoles (user_code: string, roleList: string[]) {
     
     const token = session.accessToken;
     
-    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/role`, _payload, {
+    const response = await axios.post(`${process.env.AIM_WORKER_ENDPOINT}/api/users/${user_code}/roles`, _payload, {
       headers: {
           Authorization: `Bearer ${token}`,
       },

@@ -244,7 +244,7 @@ export function DialogCampaignDetails({
             >
               Fermer
             </Button>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 justify-between">
               <Button
                 variant="secondary"
                 className="px-6 py-1.5"

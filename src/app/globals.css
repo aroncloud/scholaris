@@ -618,7 +618,7 @@ span.flatpickr-weekday,
   @apply w-1 h-5 ml-0 mr-3 border-none rounded-sm;
 }
 .fc-event {
-  @apply focus:shadow-none;
+  @apply focus:shadow-none bg-transparent border-0!;
 }
 .fc-daygrid-event.fc-event-start {
   @apply ml-3!;

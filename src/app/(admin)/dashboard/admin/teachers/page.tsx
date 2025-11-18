@@ -48,7 +48,7 @@ export default function TeachersPage() {
           </Button>
         </div>
       </PageHeader>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-2 sm:p-4 lg:p-6">
         {/* Stats Cards */}
         {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {statsData.map((stat) => (
@@ -64,7 +64,7 @@ export default function TeachersPage() {
 
         {/* Main Content */}
         <Tabs defaultValue="enseignants" className="space-y-4">
-          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mb-2">
             <TabsTrigger value="enseignants"
               className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
             >

@@ -24,6 +24,7 @@ import { useFactorizedProgramStore } from "@/store/programStore";
 import { Combobox } from "@/components/ui/Combobox";
 import { useEffect } from "react";
 import { Save } from "lucide-react";
+import { DatePicker } from "@/components/DatePicker";
 
 interface IApplicationWithCode extends IUpdateStudentApplication {
   application_code: string;
@@ -52,10 +53,11 @@ export function DialogUpdateEnrollment({
     defaultValues: {
       first_name: "",
       last_name: "",
-      email: "",
+      place_of_birth: "",
+      date_of_birth: "",
       phone_number: "",
       student_number: "",
-      gender: "FEMALE",
+      gender: undefined,
       curriculum_code: "",
     },
   });
@@ -69,7 +71,8 @@ export function DialogUpdateEnrollment({
       reset({
         first_name: application.first_name,
         last_name: application.last_name,
-        email: application.email,
+        place_of_birth: application.place_of_birth,
+        date_of_birth: application.date_of_birth,
         phone_number: application.phone_number,
         student_number: application.student_number,
         gender: application.gender,
@@ -97,14 +100,14 @@ export function DialogUpdateEnrollment({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-          <DialogTitle className="text-2xl font-bold text-slate-900">Modifier l&apos;inscription</DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900">Modifier l&apos;inscription</DialogTitle>
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1">
             Modifiez les informations de l&apos;étudiant ci-dessous.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+          <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
             {/* Section: Informations personnelles */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -184,30 +187,61 @@ export function DialogUpdateEnrollment({
               </div>
             </div>
 
-            {/* Section: Coordonnées */}
+            {/* Section: Lieu et date de naissance */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="font-medium text-gray-600">
-                    Email <span className="text-red-500">*</span>
+                  <Label htmlFor="place_of_birth" className="font-medium text-gray-600">
+                    Lieu de naissance <span className="text-red-500">*</span>
                   </Label>
                   <SInput
-                    id="email"
-                    type="email"
-                    {...register("email", {
-                      required: "Email requis",
-                      pattern: {
-                        value: /^\S+@\S+$/i,
-                        message: "Email invalide"
-                      }
-                    })}
+                    id="place_of_birth"
+                    placeholder="Ville de naissance"
+                    {...register("place_of_birth", { required: "Le lieu de naissance est obligatoire" })}
                     disabled={isSubmitting}
-                    className={errors.email ? "border-red-500 h-9" : "h-9"}
+                    className={errors.place_of_birth ? "border-red-500 h-9" : "h-9"}
                   />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm">{errors.email.message}</p>
+                  {errors.place_of_birth && (
+                    <p className="text-red-500 text-sm">{errors.place_of_birth.message}</p>
                   )}
                 </div>
+                <div className="space-y-1.5">
+                  <Label className="font-medium text-gray-600">
+                    Date de naissance <span className="text-red-500">*</span>
+                  </Label>
+                  <Controller
+                    name="date_of_birth"
+                    control={control}
+                    rules={{ required: "La date de naissance est obligatoire" }}
+                    render={({ field }) => (
+                      <DatePicker
+                        label=""
+                        selected={field.value ? new Date(field.value) : undefined}
+                        onChange={(date) => {
+                          if (date) {
+                            // Format to ISO string (YYYY-MM-DD)
+                            const isoDate = date.toISOString().split('T')[0];
+                            field.onChange(isoDate);
+                          } else {
+                            field.onChange("");
+                          }
+                        }}
+                        maxDate={new Date()}
+                        minDate={new Date(1900, 0, 1)}
+                        disabled={isSubmitting}
+                      />
+                    )}
+                  />
+                  {errors.date_of_birth && (
+                    <p className="text-red-500 text-sm">{errors.date_of_birth.message}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Coordonnées */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="phone_number" className="font-medium text-gray-600">
                     Téléphone
@@ -215,6 +249,7 @@ export function DialogUpdateEnrollment({
                   <SInput
                     id="phone_number"
                     type="tel"
+                    placeholder="+237..."
                     {...register("phone_number")}
                     disabled={isSubmitting}
                     className="h-9"
@@ -252,28 +287,28 @@ export function DialogUpdateEnrollment({
                 </div>
               </div>
             </div>
-          </form>
-        </div>
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              type="button" onClick={handleClose}
-              disabled={isSubmitting}
-            >
-              Annuler
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              variant="info"
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Mise à jour en cours..." : "Mettre à jour"}
-            </Button>
           </div>
-        </DialogFooter>
+          <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+            <div className="flex items-center space-x-3 justify-between">
+              <Button
+                variant="outline"
+                type="button" onClick={handleClose}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                variant="info"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSubmitting ? "Mise à jour en cours..." : "Mettre à jour"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

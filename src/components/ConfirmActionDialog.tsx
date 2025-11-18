@@ -87,8 +87,8 @@ export function ConfirmActionDialog({
               <Icon className={`h-6 w-6 ${config.iconColor}`} />
             </div>
             <div className="flex-1 space-y-2">
-              <DialogTitle className="text-lg">{title}</DialogTitle>
-              <DialogDescription className="text-sm text-gray-600">
+              <DialogTitle className="text-left text-lg">{title}</DialogTitle>
+              <DialogDescription className="text-left text-sm text-gray-600">
                 {description}
               </DialogDescription>
             </div>

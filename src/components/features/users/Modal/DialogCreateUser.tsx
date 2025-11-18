@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { IHireExistingStaff } from "@/types/userType";
-import { User, Briefcase, Lock, ChevronRight, Save } from "lucide-react";
+import { User, Briefcase, Lock, ChevronRight, Save, ChevronLeft } from "lucide-react";
 import { MARITAl_STATUS } from "@/constant";
 import { DatePicker } from "@/components/DatePicker";
 import { useConfigStore } from "@/lib/store/configStore";
@@ -53,7 +53,6 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
     try {
       const success = await onSave(data);
 
-      // Only close and reset if successful
       if (success) {
         reset();
         setCurrentStep(1);
@@ -85,22 +84,22 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
     switch (currentStep) {
       case 1:
         return (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label>Prénom <span className="text-red-500">*</span></Label>
-              <Input {...register("first_name", { required: true })} placeholder="Jean" />
+              <Input {...register("first_name", { required: true })} placeholder="Jean" disabled={isSubmitting} />
               {errors.first_name && <p className="text-xs text-red-500">Prénom requis</p>}
             </div>
 
             <div className="space-y-2">
               <Label>Nom <span className="text-red-500">*</span></Label>
-              <Input {...register("last_name", { required: true })} placeholder="Dupont" />
+              <Input {...register("last_name", { required: true })} placeholder="Dupont" disabled={isSubmitting} />
               {errors.last_name && <p className="text-xs text-red-500">Nom requis</p>}
             </div>
 
             <div className="space-y-2">
               <Label>Genre <span className="text-red-500">*</span></Label>
-              <Select onValueChange={(value) => setValue("gender", value as any)}>
+              <Select onValueChange={(value) => setValue("gender", value as any)} disabled={isSubmitting}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
@@ -120,6 +119,7 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
                 render={({ field }) => (
                   <DatePicker
                     label=""
+                    disabled={isSubmitting} 
                     selected={field.value ? new Date(field.value) : undefined}
                     onChange={(date) => {
                       if (date) {
@@ -136,32 +136,32 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label>Email <span className="text-red-500">*</span></Label>
-              <Input type="email" {...register("email", { required: true })} placeholder="user@efspa.edu" />
+              <Input type="email" {...register("email", { required: true })} placeholder="user@efspa.edu" disabled={isSubmitting} />
               {errors.email && <p className="text-xs text-red-500">Email requis</p>}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label>Email secondaire</Label>
-              <Input type="email" {...register("other_email")} placeholder="autre@email.com" />
+              <Input type="email" {...register("other_email")} placeholder="autre@email.com" disabled={isSubmitting} />
             </div>
 
             <div className="space-y-2">
               <Label>Téléphone <span className="text-red-500">*</span></Label>
-              <Input {...register("phone_number", { required: true })} placeholder="+237 6 77 12 34 00" />
+              <Input {...register("phone_number", { required: true })} placeholder="+237 6 77 12 34 00" disabled={isSubmitting} />
               {errors.phone_number && <p className="text-xs text-red-500">Téléphone requis</p>}
             </div>
 
             <div className="space-y-2">
               <Label>Téléphone secondaire</Label>
-              <Input {...register("other_phone")} placeholder="+237 6 99 88 77 66" />
+              <Input {...register("other_phone")} placeholder="+237 6 99 88 77 66" disabled={isSubmitting} />
             </div>
 
-            <div className="space-y-2 ">
+            <div className="space-y-2">
               <Label>Statut marital</Label>
-              <Select onValueChange={(value) => setValue("marital_status_code", value)}>
-                <SelectTrigger className="w-full ">
+              <Select onValueChange={(value) => setValue("marital_status_code", value)} disabled={isSubmitting}>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
                 <SelectContent className="w-full">
@@ -174,24 +174,23 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
 
             <div className="space-y-2">
               <Label>Lieu de naissance</Label>
-              <Input {...register("place_of_birth")} placeholder="Yaoundé" />
+              <Input {...register("place_of_birth")} placeholder="Yaoundé" disabled={isSubmitting} />
             </div>
-
           </div>
         );
 
       case 2:
         return (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-2 sm:col-span-2">
               <Label>Titre du poste <span className="text-red-500">*</span></Label>
-              <Input {...register("job_title", { required: true })} placeholder="Administrateur système" />
+              <Input {...register("job_title", { required: true })} placeholder="Administrateur système" disabled={isSubmitting} />
               {errors.job_title && <p className="text-xs text-red-500">Titre requis</p>}
             </div>
 
             <div className="space-y-2">
               <Label>Département</Label>
-              <Input {...register("department")} placeholder="Ressources Humaines" />
+              <Input {...register("department")} placeholder="Ressources Humaines" disabled={isSubmitting} />
             </div>
 
             <div className="space-y-2">
@@ -203,6 +202,7 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
                 render={({ field }) => (
                   <DatePicker
                     label=""
+                    disabled={isSubmitting}
                     selected={field.value ? new Date(field.value) : undefined}
                     onChange={(date) => {
                       if (date) {
@@ -220,15 +220,15 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
               {errors.hiring_date && <p className="text-xs text-red-500">{errors.hiring_date.message}</p>}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label>Salaire mensuel (FCFA) <span className="text-red-500">*</span></Label>
-              <Input type="number" {...register("salary", { required: true, valueAsNumber: true })} placeholder="150000" />
+              <Input type="number" {...register("salary", { required: true, valueAsNumber: true })} placeholder="150000" disabled={isSubmitting} />
               {errors.salary && <p className="text-xs text-red-500">Salaire requis</p>}
             </div>
 
             <div className="space-y-2">
               <Label>Numéro CNI</Label>
-              <Input {...register("cni_number")} placeholder="123456789" />
+              <Input {...register("cni_number")} placeholder="123456789" disabled={isSubmitting} />
             </div>
 
             <div className="space-y-2">
@@ -240,6 +240,7 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
                   <DatePicker
                     label=""
                     selected={field.value ? new Date(field.value) : undefined}
+                    disabled={isSubmitting}
                     onChange={(date) => {
                       if (date) {
                         const year = date.getFullYear();
@@ -255,9 +256,9 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label>Lieu de délivrance CNI</Label>
-              <Input {...register("cni_issue_location")} placeholder="Yaoundé" />
+              <Input {...register("cni_issue_location")} placeholder="Yaoundé" disabled={isSubmitting} />
             </div>
 
             <div className="space-y-2">
@@ -273,6 +274,7 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
                     }))}
                     value={field.value || ""}
                     onChange={field.onChange}
+                    disabled={isSubmitting}
                     placeholder="Sélectionner une ethnie"
                     className='py-5'
                   />
@@ -282,15 +284,15 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
 
             <div className="space-y-2">
               <Label>Ville</Label>
-              <Input {...register("city")} placeholder="Yaoundé" />
+              <Input {...register("city")} placeholder="Yaoundé" disabled={isSubmitting} />
             </div>
 
-            <div className="space-y-2 col-span-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label>Adresse de résidence</Label>
-              <Input {...register("address_details")} placeholder="Quartier Bastos" />
+              <Input {...register("address_details")} placeholder="Quartier Bastos" disabled={isSubmitting} />
             </div>
 
-            <div className="space-y-2 col-span-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label>URL Avatar</Label>
               <Input {...register("avatar_url")} placeholder="https://exemple.com/avatar.jpg" />
             </div>
@@ -300,12 +302,12 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
       case 3:
         return (
           <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">Choisissez un mot de passe sécurisé. L&apos;utilisateur pourra le modifier après sa première connexion.</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-blue-800">Choisissez un mot de passe sécurisé. L&apos;utilisateur pourra le modifier après sa première connexion.</p>
             </div>
             <div className="space-y-2">
               <Label>Mot de passe <span className="text-red-500">*</span></Label>
-              <Input type="password" {...register("password_plaintext", { required: true, minLength: 8 })} placeholder="Minimum 8 caractères" />
+              <Input type="password" {...register("password_plaintext", { required: true, minLength: 8 })} placeholder="Minimum 8 caractères" disabled={isSubmitting} />
               {errors.password_plaintext && <p className="text-xs text-red-500">Mot de passe requis (min. 8 caractères)</p>}
             </div>
           </div>
@@ -318,23 +320,20 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
 
   return (
     <Dialog open={open} onOpenChange={handleCancel}>
-      <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-2xl lg:max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
         {/* HEADER */}
-        <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-          <DialogTitle className="text-2xl font-bold text-slate-900">
+        <DialogHeader className="p-4 sm:p-6 border-b border-slate-200 bg-slate-50 shrink-0">
+          <DialogTitle className="text-left text-xl sm:text-2xl font-bold text-slate-900">
             Créer un nouvel utilisateur
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogDescription className="text-left text-xs sm:text-sm text-slate-500 mt-1">
             Étape {currentStep} sur {STEPS.length}
           </DialogDescription>
         </DialogHeader>
 
-
-
-        {/*  MAIN CONTENT WITH SCROLL */}
-        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
+        {/* MAIN CONTENT WITH SCROLL */}
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1">
           <form onSubmit={handleSubmit(onSubmit)}>
-            {/* Keep your existing step form */}
             <div className="py-2">
               {renderStepContent()}
             </div>
@@ -342,15 +341,67 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
         </div>
 
         {/* FOOTER */}
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-center justify-between w-full">
+        <DialogFooter className="p-4 sm:p-6 border-t border-slate-200 bg-slate-50 shrink-0">
+          {/* Version Mobile */}
+          <div className="sm:hidden w-full space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <Button
+                type="button"
+                onClick={() => setCurrentStep(currentStep - 1)}
+                disabled={currentStep === 1}
+                variant="outline"
+                className="flex-1"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
 
-            {/* Left text or nothing */}
+              <div className="flex-1 text-center">
+                <p className="text-xs text-slate-600">
+                  Étape {currentStep}/{STEPS.length}
+                </p>
+              </div>
+
+              {currentStep < STEPS.length ? (
+                <Button
+                  type="button"
+                  onClick={() => setCurrentStep(currentStep + 1)}
+                  disabled={!validateStep()}
+                  variant="outline-info"
+                  className="flex-1"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleSubmit(onSubmit)}
+                  disabled={isSubmitting}
+                  variant="info"
+                  className="flex-1"
+                >
+                  <Save className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isSubmitting}
+              className="w-full"
+            >
+              Annuler
+            </Button>
+          </div>
+
+          {/* Version Desktop */}
+          <div className="hidden sm:flex items-center justify-between w-full">
             <p className="text-sm text-slate-600">
               Étape {currentStep}/{STEPS.length}
             </p>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 justify-between">
               <Button
                 type="button"
                 variant="outline"
@@ -360,21 +411,32 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
                 Annuler
               </Button>
 
+              <Button
+                type="button"
+                onClick={() => setCurrentStep(currentStep - 1)}
+                disabled={currentStep === 1}
+                variant="outline"
+              >
+                <ChevronLeft className="mr-2 w-4 h-4" />
+                Précédent
+              </Button>
+
               {currentStep < STEPS.length ? (
                 <Button
                   type="button"
                   onClick={() => setCurrentStep(currentStep + 1)}
                   disabled={!validateStep()}
-                  className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+                  variant="outline-info"
                 >
                   Suivant
                   <ChevronRight className="ml-2 w-4 h-4" />
                 </Button>
               ) : (
                 <Button
-                  type="submit"
+                  type="button"
+                  onClick={handleSubmit(onSubmit)}
                   disabled={isSubmitting}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+                  variant="info"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {isSubmitting ? "Création..." : "Créer"}
@@ -387,10 +449,3 @@ export function DialogCreateUser({ open, onOpenChange, onSave }: DialogCreateUse
     </Dialog>
   );
 }
-
-
-
-
-
-
-

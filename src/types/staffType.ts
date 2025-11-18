@@ -139,13 +139,15 @@ export interface IInitiateStudentApplication {
 
 
 export interface IUpdateStudentApplication {
-  curriculum_code: string;
   first_name: string;
   last_name: string;
-  email: string;
-  phone_number: string;
-  student_number: string;
-  gender: gender;
+  place_of_birth: string;
+  date_of_birth: string;
+
+  curriculum_code?: string;
+  phone_number?: string;
+  student_number?: string;
+  gender?: gender;
 }
 
 

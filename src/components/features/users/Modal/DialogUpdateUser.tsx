@@ -132,8 +132,8 @@ export function DialogUpdateUser({
         <Dialog open={open} onOpenChange={handleCancel}>
             <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
                 <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-                    <DialogTitle className="text-2xl font-bold text-slate-900 flex items-center gap-2">Mettre à jour l&apos;utilisateur</DialogTitle>
-                    <DialogDescription className="text-sm text-slate-500 mt-1">
+                    <DialogTitle className="text-left text-2xl font-bold text-slate-900 flex items-center gap-2">Mettre à jour l&apos;utilisateur</DialogTitle>
+                    <DialogDescription className="text-left text-sm text-slate-500 mt-1">
                         Modifiez les informations personnelles de {userData?.first_name} {userData?.last_name}
                     </DialogDescription>
                 </DialogHeader>
@@ -477,7 +477,7 @@ export function DialogUpdateUser({
                     </form>
                 </div>
 
-                <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+                <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
                     <Button
                         type="button"
                         variant="outline"
@@ -487,13 +487,13 @@ export function DialogUpdateUser({
                         Annuler
                     </Button>
                     <Button
-                        type="submit"
-                        // variant={'info'}
+                        type="button"
+                        onClick={handleSubmit(handleSubmitForm)}
                         disabled={isSubmitting || loading}
                         className="min-w-[120px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
                     >
                         <Save className="w-4 h-4 mr-2" />
-                        {isSubmitting ? "Mise à jour..." : "Mettre à jour"}
+                        {isSubmitting || loading ? "Mise à jour..." : "Mettre à jour"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

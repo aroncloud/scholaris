@@ -284,7 +284,7 @@ const QualitativeResults = ({ results }: { results: IQualitativeResult[] }) => {
     <div className="space-y-6">
       {/* Search bar */}
       <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 justify-between">
           <div className="flex-1 relative">
             <input
               type="text"
@@ -357,7 +357,7 @@ const QualitativeResults = ({ results }: { results: IQualitativeResult[] }) => {
                           const globalIndex = (page - 1) * answersPerPage + idx + 1
                           return (
                             <div key={idx} className="p-2 bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-lg hover:shadow-md transition-shadow duration-200">
-                              <div className="flex items-center space-x-3">
+                              <div className="flex items-center space-x-3 justify-between">
                                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                   <span className="text-xs font-bold text-blue-600">#{globalIndex}</span>
                                 </div>

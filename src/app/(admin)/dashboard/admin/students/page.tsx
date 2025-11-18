@@ -215,16 +215,16 @@ export default function StudentsPage() {
       >
       </PageHeader>
 
-      <div className="space-y-6 p-2 md:px-6">
+      <div className="space-y-6 p-2 md:px-4">
         <Tabs defaultValue="etudiants" className="space-y-4">
-          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2">
+          <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 flex flex-nowrap space-x-1 shadow-sm h-auto w-full mt-2 mb-2 overflow-x-auto">
             <TabsTrigger value="etudiants"
-              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
             >
               Étudiants actuels ({studentList.length})
             </TabsTrigger>
             <TabsTrigger value="inscriptions"
-              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
+              className="px-6 py-1.5 rounded-lg font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/30"
             >
               Demandes d'inscription ({enrollmentRequests.length})
             </TabsTrigger>
@@ -319,7 +319,8 @@ export default function StudentsPage() {
             curriculum_code: selectedApplication.curriculum_code,
             first_name: selectedApplication.first_name,
             last_name: selectedApplication.last_name,
-            email: selectedApplication.email,
+            place_of_birth: selectedApplication.place_of_birth,
+            date_of_birth: selectedApplication.date_of_birth,
             phone_number: selectedApplication.phone_number,
             student_number: selectedApplication.application_code,
             gender: selectedApplication.gender as "MALE" | "FEMALE"

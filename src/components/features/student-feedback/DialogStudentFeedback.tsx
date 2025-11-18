@@ -94,10 +94,10 @@ export function DialogStudentFeedback({
         <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <DialogTitle className="text-2xl font-bold text-slate-900">
+              <DialogTitle className="text-left text-2xl font-bold text-slate-900">
                 {campaign.campaignTitle}
               </DialogTitle>
-              <DialogDescription className="text-sm text-slate-600 mt-1">
+              <DialogDescription className="text-left text-sm text-slate-600 mt-1">
                 {feedbackForm.title}
               </DialogDescription>
             </div>
@@ -228,7 +228,7 @@ export function DialogStudentFeedback({
                 Précédent
               </Button>
 
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 justify-between">
                 <Button
                   type="button"
                   onClick={handleClose}

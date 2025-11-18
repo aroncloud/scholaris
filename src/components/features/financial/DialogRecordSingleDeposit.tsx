@@ -103,10 +103,10 @@ export default function DialogRecordSingleDeposit({
        <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
         {/* Header */}
          <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-            <DialogTitle className="text-2xl font-bold text-slate-900">
+            <DialogTitle className="text-left text-2xl font-bold text-slate-900">
               Enregistrer un paiement
             </DialogTitle>
-            <DialogDescription className="text-sm text-slate-500 mt-1">Remplissez les informations d&apos;un Paiement</DialogDescription>
+            <DialogDescription className="text-left text-sm text-slate-500 mt-1">Remplissez les informations d&apos;un Paiement</DialogDescription>
           </DialogHeader>
     
 
@@ -274,8 +274,8 @@ export default function DialogRecordSingleDeposit({
         </div>
 
         {/* Footer */}
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-center space-x-3">
+        <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3 justify-between">
             <Button
               type="button"
               variant="outline"

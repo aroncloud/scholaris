@@ -206,14 +206,15 @@ export function DialogCreateSession({
         <Dialog open={open} onOpenChange={handleCancel}>
             <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
                 <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-                    <DialogTitle className="text-2xl font-bold text-slate-900">Créer une nouvelle session</DialogTitle>
-                    <DialogDescription className="text-sm text-slate-500 mt-1">
+                    <DialogTitle className="text-left text-2xl font-bold text-slate-900">Créer une nouvelle session</DialogTitle>
+                    <DialogDescription className="text-left text-sm text-slate-500 mt-1">
                         Remplissez les informations de la session
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
-                    <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+                    <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
+                        <div className="grid grid-cols-2 gap-4">
                         {/* Curriculum */}
                         <div className="space-y-1 col-span-2">
                             <Label>
@@ -420,31 +421,32 @@ export function DialogCreateSession({
                             />
                             {errors.end_time && <p className="text-red-600 text-sm">{errors.end_time.message}</p>}
                         </div>
-                    </form>
-                </div>
-
-                {/* Footer */}
-                <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-                    <div className="flex items-center space-x-3">
-                        <Button
-                            variant="outline"
-                            type="button"
-                            onClick={handleCancel}
-                            disabled={isSubmitting}
-                        >
-                            Annuler
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            variant={"info"}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
-                        >
-                            <Save className="w-4 h-4 mr-2" />
-                            {isSubmitting ? "Création..." : "Créer la session"}
-                        </Button>
+                        </div>
                     </div>
-                </DialogFooter>
+
+                    {/* Footer */}
+                    <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+                        <div className="flex items-center space-x-3 justify-between">
+                            <Button
+                                variant="outline"
+                                type="button"
+                                onClick={handleCancel}
+                                disabled={isSubmitting}
+                            >
+                                Annuler
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                variant={"info"}
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+                            >
+                                <Save className="w-4 h-4 mr-2" />
+                                {isSubmitting ? "Création..." : "Créer la session"}
+                            </Button>
+                        </div>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     );

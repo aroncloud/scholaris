@@ -103,16 +103,16 @@ export function DialogCreateAcademicYearSchedule({
     <Dialog open={open} onOpenChange={handleCancel}>
       <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-          <DialogTitle className="text-2xl font-bold text-slate-900">
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900">
             Créer un Academic Year Schedule
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1">
             Configurez votre formulaire d&apos;un Academic Year Schedule
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+          <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
             {fields.map((field, index) => (
               <div key={field.id} className="space-y-2 border-b pb-2">
                 <Label className="font-semibold mb-7 bg-blue-100 rounded p-2">
@@ -184,28 +184,29 @@ export function DialogCreateAcademicYearSchedule({
                 </div>
               </div>
             ))}
-          </form>
-        </div>
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-center space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
-              Annuler
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Création..." : "Créer"}
-            </Button>
           </div>
-        </DialogFooter>
+
+          <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+            <div className="flex items-center space-x-3 justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSubmitting ? "Création..." : "Créer"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

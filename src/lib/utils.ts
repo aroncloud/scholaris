@@ -264,9 +264,26 @@ export function regroupLocation(params: {
   return { regions: regionsOut };
 }
 
-export const formatTimestamp = (timestamp: number | null) => {
+export const formatTimestamp = (timestamp: number | string | null) => {
     if (!timestamp) return 'Non disponible';
-    return new Date(timestamp * 1000).toLocaleDateString('fr-FR', {
+
+    let date: Date;
+
+    // Si c'est une chaîne de caractères, la parser directement
+    if (typeof timestamp === 'string') {
+      date = new Date(timestamp);
+    }
+    // Si c'est un nombre, assumer que c'est un timestamp Unix en secondes
+    else {
+      date = new Date(timestamp * 1000);
+    }
+
+    // Vérifier si la date est valide
+    if (isNaN(date.getTime())) {
+      return 'Date invalide';
+    }
+
+    return date.toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

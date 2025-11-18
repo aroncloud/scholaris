@@ -43,7 +43,7 @@ const TeacherSessionCard = ({ session, refresh }: Myprops) => {
         >
             <div className="flex-1">
                     
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 justify-between">
                     <Badge className={getStatusColor(session.status_code)}>
                         {session.status_code}
                     </Badge>

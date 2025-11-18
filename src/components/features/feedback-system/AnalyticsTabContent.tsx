@@ -23,7 +23,7 @@ export function AnalyticsTabContent({
       title="Analytics & Insights"
       description="Analysez les tendances et performances"
       actions={
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 justify-between">
           <select className="px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-700 font-medium hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option>Ce mois</option>
             <option>3 derniers mois</option>
@@ -136,7 +136,7 @@ export function AnalyticsTabContent({
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-3 justify-between">
                         <div className="flex-1 max-w-[120px]">
                           <Progress
                             value={participationRate}

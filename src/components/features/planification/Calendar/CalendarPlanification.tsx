@@ -269,19 +269,16 @@ export const renderEventContent = (eventInfo: EventContentArg) => {
 
   return (
     <div
-      className={`event-fc-color fc-event-main ${colorClass} rounded-md text-xs leading-tight`}
+      className={`event-fc-color fc-event-main ${colorClass} rounded-md p-2 h-full flex flex-col`}
     >
-      <ul className="list-disc pl-5 space-y-1 py-2">
-        <li className="font-semibold text-gray-900 break-words whitespace-normal">
-          {eventInfo.event.title}
-        </li>
-        <li className="text-gray-700 capitalize break-words whitespace-normal">
-          {eventInfo.event.extendedProps.teacher}
-        </li>
-        <li className="text-gray-700 break-words whitespace-normal">
-          {eventInfo.event.extendedProps.classroom}
-        </li>
-      </ul>
+      <div className="font-semibold text-gray-900 text-sm leading-tight break-words whitespace-normal px-2 pt-2">
+        {eventInfo.event.title}
+      </div>
+      {eventInfo.event.extendedProps.teacher && (
+        <div className="text-xs text-gray-700 capitalize leading-tight break-words flex items-center px-2 pt-2">
+          <span className="truncate">{eventInfo.event.extendedProps.teacher}</span>
+        </div>
+      )}
     </div>
   );
 };

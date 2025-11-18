@@ -117,77 +117,76 @@ export function DialogCreateCurriculum({
     <Dialog open={open} onOpenChange={handleCancel}>
       <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-          <DialogTitle className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900 flex items-center gap-2">
             <GraduationCap className="h-6 w-6 text-blue-600" />
             Créer un nouveau curriculum
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1">
             Remplissez les informations du curriculum
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="p-6 space-y-5 max-h-[calc(90vh-180px)] overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Code curriculum */}
-                <div className="space-y-1">
-                  <Label htmlFor="curriculum_code" className="text-sm font-semibold text-slate-700">
-                    Code curriculum <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="curriculum_code"
-                    {...register("curriculum_code")}
-                    disabled={isSubmitting}
-                    placeholder="Ex: IDE"
-                    className={errors.curriculum_code ? "border-red-500" : ""}
-                  />
-                  {errors.curriculum_code && (
-                    <p className="text-red-500 text-xs">{errors.curriculum_code.message}</p>
-                  )}
-                </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+          <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Code curriculum */}
+              <div className="space-y-1">
+                <Label htmlFor="curriculum_code" className="text-sm font-semibold text-slate-700">
+                  Code curriculum <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="curriculum_code"
+                  {...register("curriculum_code")}
+                  disabled={isSubmitting}
+                  placeholder="Ex: IDE"
+                  className={errors.curriculum_code ? "border-red-500" : ""}
+                />
+                {errors.curriculum_code && (
+                  <p className="text-red-500 text-xs">{errors.curriculum_code.message}</p>
+                )}
+              </div>
 
-                {/* Niveau d'étude */}
-                <div className="space-y-2">
-                  <Label>Niveau d&apos;étude</Label>
-                  <Controller
-                    name="study_level"
-                    control={control}
-                    render={({ field }) => (
-                      <Combobox
-                        options={educationLevels.map(level => ({
-                          value: level.level_code,
-                          label: level.title
-                        }))}
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        placeholder="Diplome minimal requis"
-                        className='py-5'
-                      />
-                    )}
-                  />
-                  {errors.study_level && (
-                    <p className="text-red-500 text-xs">{errors.study_level.message}</p>
+              {/* Niveau d'étude */}
+              <div className="space-y-2">
+                <Label>Niveau d&apos;étude</Label>
+                <Controller
+                  name="study_level"
+                  control={control}
+                  render={({ field }) => (
+                    <Combobox
+                      options={educationLevels.map(level => ({
+                        value: level.level_code,
+                        label: level.title
+                      }))}
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="Diplome minimal requis"
+                      className='py-5'
+                    />
                   )}
-                </div>
+                />
+                {errors.study_level && (
+                  <p className="text-red-500 text-xs">{errors.study_level.message}</p>
+                )}
+              </div>
 
-                {/* Nom curriculum */}
-                <div className="space-y-1">
-                  <Label htmlFor="curriculum_name" className="text-sm font-semibold text-slate-700">
-                    Nom du curriculum <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="curriculum_name"
-                    {...register("curriculum_name")}
-                    disabled={isSubmitting}
-                    placeholder="Ex: Informatique L1"
-                    className={errors.curriculum_name ? "border-red-500" : ""}
-                  />
-                  {errors.curriculum_name && (
-                    <p className="text-red-500 text-xs">{errors.curriculum_name.message}</p>
-                  )}
-                </div>
-                {/* Statut */}
+              {/* Nom curriculum */}
+              <div className="space-y-1">
+                <Label htmlFor="curriculum_name" className="text-sm font-semibold text-slate-700">
+                  Nom du curriculum <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="curriculum_name"
+                  {...register("curriculum_name")}
+                  disabled={isSubmitting}
+                  placeholder="Ex: Informatique L1"
+                  className={errors.curriculum_name ? "border-red-500" : ""}
+                />
+                {errors.curriculum_name && (
+                  <p className="text-red-500 text-xs">{errors.curriculum_name.message}</p>
+                )}
+              </div>
+              {/* Statut */}
               <div className="space-y-2">
                 <Label>Statut <span className="text-red-500">*</span></Label>
                 <Select onValueChange={(value) => setValue("status_code", value as any)}>
@@ -204,57 +203,54 @@ export function DialogCreateCurriculum({
                   <p className="text-xs text-red-500">Statut requis</p>
                 )}
               </div>
-              </div>
-             
-              {/* Code programme */}
-                <div className="space-y-2 col-span-2">
-                  <Label>Programme</Label>
-                  <Controller
-                    name="program_code"
-                    control={control}
-                    render={({ field }) => (
-                      <Combobox
-                        options={factorizedPrograms.map(item => ({
-                          value: item.program.program_code,
-                          label: item.program.program_name
-                        }))}
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        placeholder="Sélectionnez un programme"
-                        className='py-5'
-                      />
-                    )}
-                  />
-                  {errors.program_code && (
-                    <p className="text-red-500 text-xs">{errors.program_code.message}</p>
-                  )}
-                </div>
-
             </div>
 
-          </form>
-        </div>
-
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-center justify-end w-full space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
-              Annuler
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Création..." : "Créer le curriculum"}
-            </Button>
+            {/* Code programme */}
+            <div className="space-y-2">
+              <Label>Programme</Label>
+              <Controller
+                name="program_code"
+                control={control}
+                render={({ field }) => (
+                  <Combobox
+                    options={factorizedPrograms.map(item => ({
+                      value: item.program.program_code,
+                      label: item.program.program_name
+                    }))}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    placeholder="Sélectionnez un programme"
+                    className='py-5'
+                  />
+                )}
+              />
+              {errors.program_code && (
+                <p className="text-red-500 text-xs">{errors.program_code.message}</p>
+              )}
+            </div>
           </div>
-        </DialogFooter>
+
+          <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+            <div className="flex items-center justify-end w-full space-x-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSubmitting ? "Création..." : "Créer le curriculum"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

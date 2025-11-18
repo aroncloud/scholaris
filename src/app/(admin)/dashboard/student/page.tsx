@@ -315,7 +315,7 @@ const StudentProfileDashboard: React.FC = () => {
         description={`${studentProfile.personal.studentId} • ${studentProfile.academic.program}`}
         status={<Badge size='sm' value={studentProfile.academic.status} label={studentProfile.academic.status} icon={CheckCircle} />}
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 justify-between">
           <Button variant="outline" size="sm">
             <Edit3 className="w-4 h-4 mr-2" />
             Modifier
@@ -413,7 +413,7 @@ const StudentProfileDashboard: React.FC = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 justify-between">
                       <Calendar className="w-5 h-5 text-yellow-600" />
                       <div>
                         <div className="font-medium">Paiement Scolarité</div>
@@ -650,7 +650,7 @@ const StudentProfileDashboard: React.FC = () => {
                   <div className="space-y-3">
                     {studentProfile.financial.transactions.map((transaction) => (
                       <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3 justify-between">
                           <div className={`p-2 rounded-full ${transaction.type === 'PAYMENT' ? 'bg-red-100' : 'bg-green-100'}`}>
                             {transaction.type === 'PAYMENT' ? (
                               <CreditCard className={`w-4 h-4 ${transaction.type === 'PAYMENT' ? 'text-red-600' : 'text-green-600'}`} />

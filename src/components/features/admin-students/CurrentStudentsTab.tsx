@@ -45,25 +45,21 @@ const CurrentStudents = ({
     { key: 'phone_number', label: 'Contact', type: 'COLUMN' as const, dataType: 'string', required: false }
   ];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleSave = async (data: any) => {
-      // console.log('-->handleSave.data', data);
-      // const response = await fetch('/api/import', {
-      //   method: 'POST',
-      //   body: JSON.stringify(data)
-      // });
-      return false;
-    };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSave = async (data: any) => {
+    return false;
+  };
   const columns: TableColumn<IListStudent>[] = [
     {
       key: "first_name",
       label: "Étudiant",
-      priority: 'high',
+      priority: 'medium',
       render: (_, data) => (
         <div className="flex items-center gap-3">
           <Avatar
             fallback={`${data.first_name} ${data.last_name}`}
             variant={"info"}
+            className="hidden md:flex"
           />
           <div>
             <div className="font-semibold text-gray-900">
@@ -75,16 +71,16 @@ const CurrentStudents = ({
       ),
     },
     {
-      key: "formation", label: "Formation", render: (_, row) => (
+      key: "formation", label: "Formation", priority: 'medium', render: (_, row) => (
       <div>
         <div className="font-medium">{row.cirriculum.program_name}</div>
         <div className="text-sm text-muted-foreground">{row.cirriculum.study_level}</div>
       </div>
     )},
-    { key: "status_code", label: "Statut", render: (_, row) => (
+    { key: "status_code", label: "Statut", priority: 'low', render: (_, row) => (
       <Badge size="sm" value={row.status_code} label={row.status_code} />) },
     { key: "financial_status", label: "Financier", render: (_, row) => (<Badge size="sm" value={row.financial_status ?? "N/A"} label={row.financial_status ?? "N/A"}/>) },
-    { key: "actions", label: "Actions", render: (_, row) => (
+    { key: "actions", label: "Actions", priority: 'high', render: (_, row) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
@@ -115,7 +111,7 @@ const CurrentStudents = ({
         title={`Étudiants actuels`}
         description="Liste des étudiants actuellement inscrits"
         actions = {
-          <div className="mt-4 md:mt-0 space-x-3">
+          <div className="mt-4 md:mt-0 space-x-3 space-y-2 w-full">
             <Button
               onClick={() => {
                 setAction("CREATE");
@@ -133,7 +129,7 @@ const CurrentStudents = ({
                 setIsStudentDialogOpen(true);
               }}
               variant="info"
-              className="ml-4"
+              className="w-full sm:w-fit"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nouvel étudiant

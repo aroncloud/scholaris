@@ -190,7 +190,7 @@ export const DialogAssignUEToTeacher: React.FC<DialogAssignUEToTeacherProps> = (
       
       <DialogContent className=" md:min-w-3xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
+          <DialogTitle className="text-left flex items-center space-x-2">
             <BookOpen className="w-5 h-5" />
             <span>Affecter un enseignant à l&apos;UE</span>
           </DialogTitle>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import { Label } from '@/components/ui/label';
@@ -30,7 +31,7 @@ export default function Page() {
     const { selectedAcademicYear } = useAcademicYearStore();
     const [selectedCurriculum, setSelectedCurriculum] = useState<string | undefined>(undefined);
     const [isIplannificationDialogOpen, setIplannificationDialogOpen] = useState(false);
-    const [listEvaluationForCurriculum, setListEvaluationForCurriculum] = useState<IGetEvaluationsForCurriculum[]>();
+    const [listEvaluationForCurriculum, setListEvaluationForCurriculum] = useState<IGetEvaluationsForCurriculum[]>([]);
     const [isLoadingEvaluations, setIsLoadingEvaluations] = useState(false);
     const [scheduleList, setScheduleList] = useState<IGetAcademicYearsSchedulesForCurriculum[]>([]);
     const [filterType, setFilterType] = useState<FilterType>('all');
@@ -339,11 +340,27 @@ export default function Page() {
         return filtered;
     }, [listEvaluationForCurriculum, filterType, filterStatus]);
 
+    // Créer les options de filtre pour les curriculums
+    const curriculumFilterOptions = useMemo(() =>
+        curriculumList.map(curriculum => ({
+            value: curriculum.curriculum_code,
+            label: curriculum.curriculum_name
+        }))
+    , [curriculumList]);
+
+    // Enrichir les évaluations avec le curriculum_code pour le filtrage
+    const enrichedEvaluations = useMemo(() =>
+        filteredEvaluations.map(evaluation => ({
+            ...evaluation,
+            curriculum_code: selectedCurriculum || ''
+        }))
+    , [filteredEvaluations, selectedCurriculum]);
+
     // Grouper les évaluations par trimestre
     const evaluationsBySchedule = useMemo(() => {
-        const grouped: { [scheduleCode: string]: IGetEvaluationsForCurriculum[] } = {};
+        const grouped: { [scheduleCode: string]: any[] } = {};
 
-        filteredEvaluations.forEach(evaluation => {
+        enrichedEvaluations.forEach(evaluation => {
             if (!grouped[evaluation.schedule_code]) {
                 grouped[evaluation.schedule_code] = [];
             }
@@ -351,7 +368,7 @@ export default function Page() {
         });
 
         return grouped;
-    }, [filteredEvaluations]);
+    }, [enrichedEvaluations]);
 
     const handleExport = () => {
         showToast({
@@ -367,8 +384,38 @@ export default function Page() {
             return <LoadingEvaluations />;
         }
 
-        if (listEvaluationForCurriculum && listEvaluationForCurriculum.length === 0) {
+        if (!listEvaluationForCurriculum || listEvaluationForCurriculum.length === 0) {
             return <NoEvaluationsMessage curriculumName={curriculumList.find(c => c.curriculum_code === selectedCurriculum)?.curriculum_name} />;
+        }
+
+        if (scheduleList.length === 0) {
+            return (
+                <Card>
+                    <CardContent>
+                        <div className="flex flex-col items-center justify-center py-12 px-4">
+                            <div className="text-center space-y-6 max-w-xl">
+                                <div className="mx-auto w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center border-4 border-amber-200">
+                                    <AlertCircle className="w-10 h-10 text-amber-500" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-2xl font-bold text-foreground">
+                                        Aucun trimestre/séquence configuré
+                                    </h3>
+                                    <p className="text-muted-foreground">
+                                        Aucune séquence académique n&apos;a été trouvée pour ce curriculum et cette année académique
+                                    </p>
+                                </div>
+                                <Alert className="text-left bg-amber-50 border-amber-200">
+                                    <Info className="h-4 w-4 text-amber-600" />
+                                    <AlertDescription className="text-amber-800">
+                                        Vous devez d&apos;abord configurer les séquences académiques (trimestres/semestres) avant de planifier des évaluations.
+                                    </AlertDescription>
+                                </Alert>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            );
         }
 
         return (
@@ -456,7 +503,7 @@ export default function Page() {
                                 </Button>
                             </div>
                         ) : (
-                            <Tabs defaultValue={scheduleList[0]?.schedule_code} className="w-full">
+                            <Tabs defaultValue={scheduleList[0]?.schedule_code || undefined} className="w-full">
                                 <TabsList className="bg-white rounded-xl border border-slate-200 p-1.5 inline-flex space-x-1 shadow-sm h-auto w-full mt-6 mb-2" style={{ gridTemplateColumns: `repeat(${scheduleList.length}, minmax(0, 1fr))` }}>
                                     {scheduleList.map((schedule) => {
                                         const evaluationCount = evaluationsBySchedule[schedule.schedule_code]?.length || 0;
@@ -519,6 +566,12 @@ export default function Page() {
                                                         paginate={10}
                                                         locale="fr"
                                                         keyField="evaluation_code"
+                                                        filters={[
+                                                            {
+                                                                key: 'curriculum_code',
+                                                                values: curriculumFilterOptions
+                                                            }
+                                                        ]}
                                                     />
                                                 )}
                                             </div>

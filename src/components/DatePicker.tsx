@@ -66,7 +66,7 @@ export function DatePicker({
           <Button
             variant="outline"
             id="date"
-            className="w-full gap justify-start font-normal py-4"
+            className="w-full gap justify-start font-normal py-4 overflow-hidden"
           >
             <CalendarIcon className="mr-2 h-4 w-4 mb-1" />
             {date ? date.toLocaleDateString() : "Sélectionner une date"}

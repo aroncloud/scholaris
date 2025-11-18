@@ -67,7 +67,7 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
         {/* Info Section */}
         <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg p-4 mb-4 border border-slate-100">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 justify-between">
               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Target className="w-4 h-4 text-blue-600" />
               </div>
@@ -77,7 +77,7 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 justify-between">
               <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
                 <Calendar className="w-4 h-4 text-purple-600" />
               </div>
@@ -136,7 +136,7 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
         </div>
 
         {/* Footer metadata */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        {/* <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <p className="text-xs text-slate-400">
             Code:{' '}
             <span className="font-mono font-semibold text-slate-600">
@@ -149,7 +149,7 @@ const FormCard = ({ form, onEdit, onDuplicate, onDelete }: {
               {form.created_by_user_code}
             </span>
           </p>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

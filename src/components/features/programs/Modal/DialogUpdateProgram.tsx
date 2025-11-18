@@ -84,8 +84,8 @@ export default function DialogUpdateProgram({
     <Dialog open={open} onOpenChange={handleCancel}>
       <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-          <DialogTitle className="text-2xl font-bold text-slate-900">Modifier le programme</DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">Mettez à jour les informations du programme</DialogDescription>
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900">Modifier le programme</DialogTitle>
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1">Mettez à jour les informations du programme</DialogDescription>
         </DialogHeader>
 
         <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
@@ -168,8 +168,8 @@ export default function DialogUpdateProgram({
 
         </div>
 
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-center space-x-3">
+        <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3 justify-between">
             <Button
               type="button"
               variant="outline"

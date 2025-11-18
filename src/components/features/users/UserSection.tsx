@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Shield, UserCheck, UserX } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Shield, UserCheck, UserX, Eye, Pencil } from "lucide-react";
 import { getRoleColor, getStatusColor } from "@/lib/utils";
 import { ResponsiveTable, TableColumn } from "@/components/tables/ResponsiveTable";
 import Link from "next/link";
@@ -43,7 +43,6 @@ export default function UserSection({ roles, userData }: MyProps) {
   const {
     handleDeactivateUser,
     handleDeleteUser,
-    handleUpdateUser,
     processing,
     loadingUserData,
     userList,
@@ -60,7 +59,7 @@ export default function UserSection({ roles, userData }: MyProps) {
         showToast({
           variant: "success-solid",
           message: 'Action éffectuée avec succès',
-          description: `${_rolesToAdd.length} rôle(s) ajouté(s) avec succès`,
+          description: `${_rolesToAdd.length} rôle(s) retiré(s) avec succès`,
           position: 'top-center',
         });
       } else {
@@ -101,6 +100,7 @@ export default function UserSection({ roles, userData }: MyProps) {
       setIsUpdatingRoles(true);
       await handleUpdateUserRole(userId, rolesToRemove, rolesToAdd);
       setRoleModal({ user: null, open: false });
+      fetchUserList()
     } catch (error) {
       console.error('Error updating user roles:', error);
     } finally {
@@ -113,7 +113,7 @@ export default function UserSection({ roles, userData }: MyProps) {
       key: "user",
       label: "Utilisateur",
       render: (_, user) => (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 justify-between">
           <Avatar
             fallback={(user.first_name + " " + user.last_name)}
             variant={"info"}
@@ -125,14 +125,14 @@ export default function UserSection({ roles, userData }: MyProps) {
         </div>
         </div>
       ),
-      priority: "low"
+      priority: "medium"
     },
     {
       key: "profiles",
       label: "Rôles",
       render: (_, user) =>
         user.profiles.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap justify-end md:justify-start gap-2">
         {user.profiles.map(role => (
           <Badge key={role.profile_code} size="sm" value={role.role_title} label={role.role_title} />
         ))}
@@ -140,7 +140,7 @@ export default function UserSection({ roles, userData }: MyProps) {
       ) : (
         <div className="text-center">-</div>
       ),
-      priority: "low"
+      priority: "medium"
     },
     {
       key: "status_code",
@@ -166,7 +166,8 @@ export default function UserSection({ roles, userData }: MyProps) {
               href={`/dashboard/admin/users/${user.user_code}`}
               className="flex items-center cursor-pointer"
               >
-                <Edit className="mr-2 h-4 w-4" /> Plus de détail
+                <Eye className="mr-2 h-4 w-4" /> 
+                Détail
               </Link>
             </DropdownMenuItem>
             
@@ -220,6 +221,7 @@ export default function UserSection({ roles, userData }: MyProps) {
         description: 'L\'utilisateur a été désactivé avec succès.',
         position: 'top-center',
       });
+      await fetchUserList()
     } else {
       showToast({
         variant: "error-solid",
@@ -242,6 +244,7 @@ export default function UserSection({ roles, userData }: MyProps) {
         description: 'L\'utilisateur a été supprimé définitivement.',
         position: 'top-center',
       });
+      await fetchUserList()
     } else {
       showToast({
         variant: "error-solid",

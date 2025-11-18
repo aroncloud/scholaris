@@ -118,11 +118,11 @@ export default function DialogEditPlan({
     <Dialog open={open} onOpenChange={handleCancel}>
       <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-white z-10">
-          <DialogTitle className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900 flex items-center gap-2">
             <DollarSign className="h-6 w-6 text-blue-600" />
             Modifier la grille tarifaire
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1">
             {curriculumName || "Modification du plan de paiement"}
           </DialogDescription>
         </DialogHeader>
@@ -185,12 +185,12 @@ export default function DialogEditPlan({
           </div>
         </div>
 
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+        <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
           <div className="flex items-center justify-between w-full">
             <p className="text-sm text-slate-600">
               {plan.installments.length} échéance{plan.installments.length > 1 ? 's' : ''}
             </p>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 justify-between">
               <Button
                 type="button"
                 onClick={handleCancel}

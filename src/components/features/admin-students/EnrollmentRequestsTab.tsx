@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import Badge from '@/components/custom-ui/Badge';
 import {
@@ -30,6 +30,7 @@ import ApplicationImportWizard, { FieldMapping } from "../students/ApplicationIm
 import { importStudentsInBulkJSON } from "@/actions/studentAction";
 import { showToast } from "@/components/ui/showToast";
 import { IImportStudentApplicationInBulkJSON } from "@/types/userType";
+import { useFactorizedProgramStore } from "@/store/programStore";
 
 type MyComponentProps = {
   setSearchTerm: Dispatch<SetStateAction<string>>;
@@ -53,6 +54,17 @@ const EnrollmentRequests = ({
 
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { factorizedPrograms } = useFactorizedProgramStore();
+  const curriculumList = factorizedPrograms.flatMap((fp) => fp.curriculums);
+
+  // Créer les options de filtre pour les curriculums
+  const curriculumFilterOptions = useMemo(() =>
+    curriculumList.map(curriculum => ({
+      value: curriculum.curriculum_code,
+      label: curriculum.curriculum_name
+    }))
+  , [curriculumList]);
+
   const mappingConfig: FieldMapping[] = [
     { key: 'curriculum_code', label: 'Curriculum', type: 'SHEET_NAME' as const, required: true, dataType: "string" },
     { key: 'student_number', label: 'Matricule', type: 'COLUMN' as const, required: true, dataType: "string" },
@@ -69,6 +81,7 @@ const EnrollmentRequests = ({
     {
       key: "last_name",
       label: "Candidat",
+      priority: "medium",
       render: (_, row) => (
         <div>
           <div className="font-medium">
@@ -86,6 +99,7 @@ const EnrollmentRequests = ({
     {
       key: "filiere",
       label: "Formation",
+      priority: "medium",
       render: (_, row) => <div>
         <div className="font-medium">
           {row.cirriculum.curriculum_name}
@@ -98,11 +112,13 @@ const EnrollmentRequests = ({
     {
       key: "datedemande",
       label: "Date demande",
+      priority: "medium",
       render: (_, row) => formatDateToText(row.submitted_at),
     },
     {
       key: "statut",
       label: "Statut",
+      priority: "low",
       render: (_, row) => (
         <div>
           <Badge
@@ -116,6 +132,7 @@ const EnrollmentRequests = ({
     {
       key: "actions",
       label: "Actions",
+      priority: "high",
       render: (_, row) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -217,7 +234,7 @@ const EnrollmentRequests = ({
         title={`Demandes d'inscription`}
         description="Traitement des nouvelles demandes d'inscription"
         actions = {
-          <div className="mt-4 md:mt-0 space-x-3">
+          <div className="mt-4 md:mt-0 space-x-3 space-y-2">
             <Button
               onClick={onCreateEnrollment}
               variant="info"
@@ -247,6 +264,12 @@ const EnrollmentRequests = ({
           }}
           isLoading={loading}
           paginate={15}
+          filters={[
+            {
+              key: 'cirriculum.curriculum_code',
+              values: curriculumFilterOptions
+            }
+          ]}
         />
       </ContentLayout>
 

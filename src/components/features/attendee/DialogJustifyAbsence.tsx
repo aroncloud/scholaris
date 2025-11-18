@@ -108,7 +108,7 @@ export default function DialogJustifyAbsence({
         {/* Header */}
         <div className="bg-slate-50 px-6 py-6 border-b shrink-0">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
+            <DialogTitle className="text-left text-2xl font-bold">
               {isReadOnly ? 'Détails de la justification' : 'Justifier l\'absence'}
             </DialogTitle>
           </DialogHeader>

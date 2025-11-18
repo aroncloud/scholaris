@@ -135,10 +135,10 @@ export function DialogCreateCampaign({
     <Dialog open={open} onOpenChange={handleCancel}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-slate-900">
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900">
             Nouvelle campagne de feedback
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1">
             Planifiez une nouvelle campagne d&apos;évaluation
           </DialogDescription>
         </DialogHeader>

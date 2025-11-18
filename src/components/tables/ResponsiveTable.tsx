@@ -283,7 +283,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
             <div
               key={uuidv4()}
               onClick={() => onRowClick?.(row)}
-              className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-800 cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+              className="bg-white dark:bg-gray-800 rounded-xl px-5 py-3 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-800 cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="space-y-3">
                 {highPriorityColumns.map((col) => (
@@ -298,7 +298,7 @@ export const ResponsiveTable = <T extends Record<string, any>>({
                 ))}
               </div>
               {mediumPriorityColumns.length > 0 && (
-                <div className="border-t border-gray-100 dark:border-gray-700 my-3"></div>
+                <div className="border-t border-gray-100 dark:border-gray-700 mb-3 mt-2"></div>
               )}
               <div className="space-y-2">
                 {mediumPriorityColumns.map((col) => (

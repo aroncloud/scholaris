@@ -77,12 +77,12 @@ export default function DialogManageUserRole({
 
         {/*  HEADER — sticky + border + padding */}
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-          <DialogTitle className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Shield className="h-5 w-5" />
             Gestion des rôles
           </DialogTitle>
 
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1">
             Gérer les rôles associés à l&apos;utilisateur
           </DialogDescription>
         </DialogHeader>
@@ -136,7 +136,7 @@ export default function DialogManageUserRole({
 
             <ScrollArea className="h-64 pr-4">
               <div className="space-y-2">
-                {availableRoles.map(role => {
+                {availableRoles.filter(role => role.role_code !== "STUDENT" && role.role_code !== "TEACHER").map(role => {
                   const isSelected = selectedRoles.includes(role.role_code);
                   const wasInitiallySelected = initialRoles.includes(role.role_code);
 
@@ -209,7 +209,7 @@ export default function DialogManageUserRole({
         </div>
 
         {/*  FOOTER — matches Feedback & CreateUser */}
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
+        <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
           <div className="flex items-center justify-end w-full gap-3">
 
             <Button

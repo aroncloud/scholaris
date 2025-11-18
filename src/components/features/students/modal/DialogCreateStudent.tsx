@@ -82,17 +82,17 @@ export function DialogCreateStudent({
       <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
           {/* --- Titre fixe pour la création --- */}
-          <DialogTitle className="text-2xl font-bold text-slate-900">Créer un nouvel étudiant</DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900 text-left">Créer un nouvel étudiant</DialogTitle>
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1 text-left">
             Remplissez les informations ci-dessous pour créer un nouveau profil étudiant.
           </DialogDescription>
         </DialogHeader>
 
         <div className="p-6 max-h-[calc(95vh-180px)] overflow-y-auto">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
             {/* SECTION: Informations personnelles */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {/* Prénom */}
               <div className="space-y-1">
@@ -163,7 +163,7 @@ export function DialogCreateStudent({
             </div>
 
             {/* SECTION: Coordonnées */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {/* Email */}
               <div className="space-y-1">
@@ -189,7 +189,7 @@ export function DialogCreateStudent({
             </div>
 
             {/* SECTION: Informations académiques */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* SECTION: Sécurité */}
               <div className="space-y-1">
                 <Label htmlFor="password_plaintext" className="font-medium text-gray-700">
@@ -278,8 +278,8 @@ export function DialogCreateStudent({
           </form>
         </div>
 
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-center space-x-3">
+        <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+          <div className="flex items-center space-x-3 justify-end">
             <Button
               variant="outline"
               type="button"
@@ -290,7 +290,8 @@ export function DialogCreateStudent({
             </Button>
             {/* --- Bouton fixe pour la création --- */}
             <Button
-              type="submit"
+              type="button"
+              onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting}
               variant="info"
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"

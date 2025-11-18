@@ -88,14 +88,11 @@ const ApplicantTab = ({ applicants, isDataLoading }: ApplicantTabProps) => {
         title={`Personnel enseignant`}
         description="Gestion du corps professoral"
       >
-        {/* <ResponsiveTable
-            data={filteredTeachers}
-            columns={teacherColumns}
-            paginate={20}
+        <ResponsiveTable
+            columns={[]}
+            data={[]}
             searchKey={["first_name", "last_name", "email"]}
-            isLoading={isDataLoading}
-        /> */}
-        Test
+        />
       </ContentLayout>
 
         {/* Create Application Dialog */}

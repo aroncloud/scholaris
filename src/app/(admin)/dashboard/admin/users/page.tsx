@@ -25,6 +25,7 @@ export default function UsersPage() {
   const pageDescription = "Gérez les utilisateurs, rôles et permissions du système";
 
   const handleSaveUser = async (userData: IHireExistingStaff): Promise<boolean> => {
+    console.log('Saving user data:', userData);
     const result = await handleCreateUser(userData);
 
     if (result.success) {

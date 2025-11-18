@@ -69,7 +69,7 @@ export default function StudentFeedback() {
         Icon={Sparkles}
       >
         <div className="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 justify-between">
             <div className="text-center">
               <p className="text-xs font-medium text-slate-600">En attente</p>
               <p className="text-2xl font-bold text-blue-600">{pendingCampaigns.length}</p>

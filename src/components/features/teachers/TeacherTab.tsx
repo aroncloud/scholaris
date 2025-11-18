@@ -103,84 +103,90 @@ const TeacherTab = ({
     }
 
     const teacherColumns: TableColumn<Teacher>[] = [
-        {
-            key: "teacher",
-            label: "Enseignant",
-            render: (_, t) => (
-            <div>
-                <div className="font-medium">{t.first_name} {t.last_name}</div>
-                <div className="text-sm text-muted-foreground">{t.teacher_number}</div>
-                <div className="text-sm text-muted-foreground">{t.email}</div>
-            </div>
-            ),
-        },
-        {
-            key: "specialty",
-            label: "Spécialité",
-            render: (_, t) => (
-            <div>
-                <div className="font-medium">{t.specialty}</div>
-                <div className="text-sm text-muted-foreground">{t.qualifications}</div>
-            </div>
-            ),
-        },
-        {
-            key: "type_code",
-            label: "Contrat",
-            render: (_, t) => t.type_code ? <Badge size="sm" value={t.type_code} label={t.type_code} /> : "-",
-        },
-        {
-            key: "hiring_date",
-            label: "Date d'embauche",
-            render: (_, t) => formatDateToText(t.hiring_date),
-        },
-        {
-            key: "status_code",
-            label: "Statut",
-            render: (_, t) => <Badge size="sm" value={t.status_code} label={t.status_code} />,
-        },
-        {
-            key: "actions",
-            label: "Actions",
-            render: (_, t) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => {/* Voir dossier */}}>
-                    <Eye className="mr-2 h-4 w-4" /> Voir dossier
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {/* Modifier */}}>
-                    <Edit className="mr-2 h-4 w-4" /> Modifier
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {/* Contrat */}}>
-                    <FileText className="mr-2 h-4 w-4" /> Contrat
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {/* Planning */}}>
-                    <Calendar className="mr-2 h-4 w-4" /> Planning
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {t.status_code === "ACTIVE" ? (
-                    <DropdownMenuItem className="text-red-600" onClick={() => {/* Suspendre */}}>
-                    <Lock className="mr-2 h-4 w-4" /> Suspendre
+            {
+                key: "teacher",
+                label: "Enseignant",
+                render: (_, t) => (
+                <div>
+                    <div className="font-medium">{t.first_name} {t.last_name}</div>
+                    <div className="text-sm text-muted-foreground">{t.teacher_number}</div>
+                    <div className="text-sm text-muted-foreground">{t.email}</div>
+                </div>
+                ),
+                priority: "medium"
+            },
+            {
+                key: "specialty",
+                label: "Spécialité",
+                render: (_, t) => (
+                <div>
+                    <div className="font-medium">{t.specialty}</div>
+                    <div className="text-sm text-muted-foreground">{t.qualifications}</div>
+                </div>
+                ),
+                priority: "medium"
+            },
+            {
+                key: "type_code",
+                label: "Contrat",
+                render: (_, t) => t.type_code ? <Badge size="sm" value={t.type_code} label={t.type_code} /> : "-",
+                priority: "medium"
+            },
+            {
+                key: "hiring_date",
+                label: "Date d'embauche",
+                render: (_, t) => formatDateToText(t.hiring_date),
+                priority: "medium"
+            },
+            {
+                key: "status_code",
+                label: "Statut",
+                render: (_, t) => <Badge size="sm" value={t.status_code} label={t.status_code} />,
+                priority: "low"
+            },
+            {
+                key: "actions",
+                label: "Actions",
+                render: (_, t) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => {/* Voir dossier */}}>
+                        <Eye className="mr-2 h-4 w-4" /> Voir dossier
                     </DropdownMenuItem>
-                ) : (
-                    <DropdownMenuItem className="text-green-600" onClick={() => {/* Réactiver */}}>
-                    <Unlock className="mr-2 h-4 w-4" /> Réactiver
+                    <DropdownMenuItem onClick={() => {/* Modifier */}}>
+                        <Edit className="mr-2 h-4 w-4" /> Modifier
                     </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={() => {/* Supprimer */}}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-            ),
-        },
-    ];
+                    <DropdownMenuItem onClick={() => {/* Contrat */}}>
+                        <FileText className="mr-2 h-4 w-4" /> Contrat
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {/* Planning */}}>
+                        <Calendar className="mr-2 h-4 w-4" /> Planning
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {t.status_code === "ACTIVE" ? (
+                        <DropdownMenuItem className="text-red-600" onClick={() => {/* Suspendre */}}>
+                        <Lock className="mr-2 h-4 w-4" /> Suspendre
+                        </DropdownMenuItem>
+                    ) : (
+                        <DropdownMenuItem className="text-green-600" onClick={() => {/* Réactiver */}}>
+                        <Unlock className="mr-2 h-4 w-4" /> Réactiver
+                        </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={() => {/* Supprimer */}}>
+                        <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+                    </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                ),
+                priority: "high"
+            },
+        ];
 
 
     return (

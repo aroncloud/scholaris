@@ -126,7 +126,7 @@ export default function DialogCreateSubmitJustification({
         {/* Header */}
         <div className="bg-slate-50 px-6 py-6 border-b shrink-0">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
+            <DialogTitle className="text-left text-2xl font-bold">
               Soumettre un justificatif
             </DialogTitle>
           </DialogHeader>

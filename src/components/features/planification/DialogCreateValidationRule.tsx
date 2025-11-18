@@ -80,136 +80,138 @@ export function DialogCreateValidationRule({
     <Dialog open={open} onOpenChange={handleCancel}>
       <DialogContent className="md:min-w-3xl max-h-[95vh] p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-          <DialogTitle className="text-2xl font-bold text-slate-900">Planifier une règle de calcul</DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900">Planifier une règle de calcul</DialogTitle>
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1">
             Définissez les règles de calcul des notes pour valider les matières
             de cette filière.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6 max-h-[calc(95vh-180px)] overflow-y-auto">
-          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+          <div className="p-6 space-y-6 max-h-[calc(95vh-180px)] overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            {/* Filière */}
-            <div className="space-y-1">
-              <Label>Filière</Label>
-              <Input value={curriculum.name} disabled />
-              <input type="hidden" {...register("curriculum_code")} />
-            </div>
+              {/* Filière */}
+              <div className="space-y-1">
+                <Label>Filière</Label>
+                <Input value={curriculum.name} disabled />
+                <input type="hidden" {...register("curriculum_code")} />
+              </div>
 
-            {/* Année académique */}
-            <div className="space-y-1">
-              <Label>Année académique</Label>
-              <Input value={academicYear.name} disabled />
-              <input type="hidden" {...register("academic_year_code")} />
-            </div>
+              {/* Année académique */}
+              <div className="space-y-1">
+                <Label>Année académique</Label>
+                <Input value={academicYear.name} disabled />
+                <input type="hidden" {...register("academic_year_code")} />
+              </div>
 
-            {/* Poids CC */}
-            <div className="space-y-1">
-              <Label>
-                Poids du Contrôle Continu (%){" "}
-                <span className="text-gray-500 text-sm">(ex: 30)</span>
-              </Label>
+              {/* Poids CC */}
+              <div className="space-y-1">
+                <Label>
+                  Poids du Contrôle Continu (%){" "}
+                  <span className="text-gray-500 text-sm">(ex: 30)</span>
+                </Label>
 
-              <Controller
-                control={control}
-                name="formula_json.CONTROLE_CONTINU"
-                rules={{ required: "Champ requis" }}
-                render={({ field }) => (
-                  <Input
-                    type="number"
-                    step="0.01"
-                    disabled={isSubmitting}
-                    value={field.value * 100}
-                    onChange={(e) => field.onChange(Number(e.target.value) / 100)}
-                  />
+                <Controller
+                  control={control}
+                  name="formula_json.CONTROLE_CONTINU"
+                  rules={{ required: "Champ requis" }}
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      step="0.01"
+                      disabled={isSubmitting}
+                      value={field.value * 100}
+                      onChange={(e) => field.onChange(Number(e.target.value) / 100)}
+                    />
+                  )}
+                />
+
+                {errors.formula_json?.CONTROLE_CONTINU && (
+                  <p className="text-red-600 text-sm">
+                    {errors.formula_json.CONTROLE_CONTINU.message}
+                  </p>
                 )}
-              />
+              </div>
 
-              {errors.formula_json?.CONTROLE_CONTINU && (
-                <p className="text-red-600 text-sm">
-                  {errors.formula_json.CONTROLE_CONTINU.message}
-                </p>
-              )}
-            </div>
+              {/* Poids SN */}
+              <div className="space-y-1">
+                <Label>
+                  Poids de l'Examen Séquentiel (%){" "}
+                  <span className="text-gray-500 text-sm">(ex: 70)</span>
+                </Label>
 
-            {/* Poids SN */}
-            <div className="space-y-1">
-              <Label>
-                Poids de l’Examen Séquentiel (%){" "}
-                <span className="text-gray-500 text-sm">(ex: 70)</span>
-              </Label>
+                <Controller
+                  control={control}
+                  name="formula_json.EXAMEN_SEQUENTIEL"
+                  rules={{ required: "Champ requis" }}
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      step="0.01"
+                      disabled={isSubmitting}
+                      value={field.value * 100}
+                      onChange={(e) => field.onChange(Number(e.target.value) / 100)}
+                    />
+                  )}
+                />
 
-              <Controller
-                control={control}
-                name="formula_json.EXAMEN_SEQUENTIEL"
-                rules={{ required: "Champ requis" }}
-                render={({ field }) => (
-                  <Input
-                    type="number"
-                    step="0.01"
-                    disabled={isSubmitting}
-                    value={field.value * 100}
-                    onChange={(e) => field.onChange(Number(e.target.value) / 100)}
-                  />
+                {errors.formula_json?.EXAMEN_SEQUENTIEL && (
+                  <p className="text-red-600 text-sm">
+                    {errors.formula_json.EXAMEN_SEQUENTIEL.message}
+                  </p>
                 )}
-              />
+              </div>
 
-              {errors.formula_json?.EXAMEN_SEQUENTIEL && (
-                <p className="text-red-600 text-sm">
-                  {errors.formula_json.EXAMEN_SEQUENTIEL.message}
-                </p>
-              )}
+              {/* Note minimale */}
+              <div className="space-y-1">
+                <Label>
+                  Note minimale pour valider la matière{" "}
+                  <span className="text-gray-500 text-sm">(ex: 12)</span>
+                </Label>
+
+                <Input
+                  type="number"
+                  step="0.1"
+                  {...register("validation_threshold", {
+                    required: "Champ requis",
+                  })}
+                  disabled={isSubmitting}
+                />
+
+                {errors.validation_threshold && (
+                  <p className="text-red-600 text-sm">
+                    {errors.validation_threshold.message}
+                  </p>
+                )}
+              </div>
+
             </div>
-
-            {/* Note minimale */}
-            <div className="space-y-1">
-              <Label>
-                Note minimale pour valider la matière{" "}
-                <span className="text-gray-500 text-sm">(ex: 12)</span>
-              </Label>
-
-              <Input
-                type="number"
-                step="0.1"
-                {...register("validation_threshold", {
-                  required: "Champ requis",
-                })}
-                disabled={isSubmitting}
-              />
-
-              {errors.validation_threshold && (
-                <p className="text-red-600 text-sm">
-                  {errors.validation_threshold.message}
-                </p>
-              )}
-            </div>
-
-          </form>
-        </div>
-
-        {/* Footer */}
-        <DialogFooter className="p-6 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
-              Annuler
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              variant={'info'}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Enregistrement..." : "Enregistrer la règle"}
-            </Button>
           </div>
-        </DialogFooter>
+
+          {/* Footer */}
+          <DialogFooter className="p-4 md:p-6 border-t border-slate-200 bg-slate-50">
+            <div className="flex items-center space-x-3 justify-between">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                variant={'info'}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSubmitting ? "Enregistrement..." : "Enregistrer la règle"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

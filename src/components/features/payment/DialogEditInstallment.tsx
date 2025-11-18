@@ -141,11 +141,11 @@ export default function DialogEditInstallment({
     <Dialog open={open} onOpenChange={handleCancel}>
       <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 border-b border-slate-200 sticky top-0 bg-white z-10">
-          <DialogTitle className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <DialogTitle className="text-left text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Calendar className="h-6 w-6 text-blue-600" />
             Modifier l&apos;échéance
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogDescription className="text-left text-sm text-slate-500 mt-1">
             Modification d&apos;une échéance de paiement
           </DialogDescription>
         </DialogHeader>
@@ -230,7 +230,7 @@ export default function DialogEditInstallment({
                 </Button>
               )}
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 justify-between">
               <Button
                 type="button"
                 onClick={handleCancel}
