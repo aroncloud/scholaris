@@ -1,14 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client';
 import React from 'react';
-// import HeroImage from '@/assets/images/landingpageimage/group_five_african_college_students_spending_time_together_campus-min.jpg';
-// import MyFie from '@/assets/images/landingpageimage/medium-shot-health-worker-wearing-mask-min.jpg';
-// import StudentsStudying from '@/assets/images/landingpageimage/students-studying-together-medium-shot-min.jpg';
-// import ClassroomImage from '@/assets/images/landingpageimage/close-up-students-learning-class-min.jpg';
-// // import StudyGroupImage from '@/assets/images/landingpageimage/study-group-african-people-min.jpg';
-// import StudentWoman from '@/assets/images/landingpageimage/african_american_woman_wearing_student_backpack_holding_books_smiling-min.jpg';
-// import StudyGroup2 from '@/assets/images/landingpageimage/study-group-african-people (1)-min.jpg';
-// import CollegeStudents from '@/assets/images/landingpageimage/college-students-different-ethnicities-cramming-min.jpg';
 import LandingHeader from '@/components/website/LandingHeader';
 import LandingFooter from '@/components/website/LandingFooter';
 import Link from 'next/link';
@@ -150,13 +142,13 @@ const LandingPage: React.FC = () => {
             <div className="md:flex items-start gap-12">
               <div className="md:w-1/2 mb-8 md:mb-0 opacity-0 animate-slideInFromLeft" style={{ animationDelay: '0.2s' }}>
                 <h2 className="heading-font text-3xl md:text-4xl text-[#3b2c6a] font-bold mb-4 opacity-0 animate-fadeIn" style={{ animationDelay: '0.4s' }}>
-                  À propos de l'EPFPS
+                  À propos de l&apos;EPFPS
                 </h2>
                 <p className="text-gray-600 leading-relaxed mb-6 opacity-0 animate-fadeIn" style={{ animationDelay: '0.6s' }}>
                   École Privée de Formation des Professionnels de Santé de Meiganga
                 </p>
                 <p className="text-gray-600 leading-relaxed opacity-0 animate-fadeIn" style={{ animationDelay: '0.8s' }}>
-                  L'École Privée de Formation des Professionnels de Santé de Meiganga (EPFPS) a été créée en réponse au besoin croissant de professionnels de santé qualifiés dans la région de l'Adamaoua et au Cameroun en général.
+                  L&apos;École Privée de Formation des Professionnels de Santé de Meiganga (EPFPS) a été créée en réponse au besoin croissant de professionnels de santé qualifiés dans la région de l&apos;Adamaoua et au Cameroun en général.
                 </p>
               </div>
               <div className="md:w-1/2 rounded-3xl overflow-hidden shadow-2xl transform opacity-0 scale-90 transition-all duration-800 animate-slideInFromRight" style={{ animationDelay: '0.3s' }}>
@@ -206,7 +198,7 @@ const LandingPage: React.FC = () => {
                     Infirmier Principal
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">
-                    Former des professionnels capables de prodiguer des soins complets, de gérer des situations d'urgence et de promouvoir la santé communautaire.
+                    Former des professionnels capables de prodiguer des soins complets, de gérer des situations d&apos;urgence et de promouvoir la santé communautaire.
                   </p>
                   <Link
                     href="/admission-request"
@@ -301,7 +293,7 @@ const LandingPage: React.FC = () => {
                     Sage-Femme
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">
-                    Former des sages-femmes pour l'accompagnement des femmes pendant la grossesse, l'accouchement et la période post-natale.
+                    Former des sages-femmes pour l&apos;accompagnement des femmes pendant la grossesse, l&apos;accouchement et la période post-natale.
                   </p>
                   <Link
                     href="/admission-request"
@@ -387,7 +379,7 @@ const LandingPage: React.FC = () => {
                   ))}
                 </div>
                 <blockquote className="text-gray-700 mb-6 leading-relaxed italic">
-                  "L'EPFPS m'a donné les compétences pratiques et la confiance nécessaires pour débuter ma carrière. Le soutien des enseignants est exceptionnel."
+                  "L&apos;EPFPS m&apos;a donné les compétences pratiques et la confiance nécessaires pour débuter ma carrière. Le soutien des enseignants est exceptionnel."
                 </blockquote>
                 <div className="flex items-center gap-3">
                   <Image
@@ -418,7 +410,7 @@ const LandingPage: React.FC = () => {
                   ))}
                 </div>
                 <blockquote className="text-gray-700 mb-6 leading-relaxed italic">
-                  "Les stages pratiques en hôpital m'ont préparé aux réalités du métier. C'est une formation complète qui fait toute la différence."
+                  "Les stages pratiques en hôpital m&apos;ont préparé aux réalités du métier. C'est une formation complète qui fait toute la différence."
                 </blockquote>
                 <div className="flex items-center gap-3">
                   <Image
@@ -449,7 +441,7 @@ const LandingPage: React.FC = () => {
                   ))}
                 </div>
                 <blockquote className="text-gray-700 mb-6 leading-relaxed italic">
-                  "J'ai choisi l'EPFPS pour la qualité de son enseignement et la reconnaissance de ses diplômes. Je suis fière d'y avoir étudié."
+                  "J&apos;ai choisi l&apos;EPFPS pour la qualité de son enseignement et la reconnaissance de ses diplômes. Je suis fière d&apos;y avoir étudié."
                 </blockquote>
                 <div className="flex items-center gap-3">
                   <Image
@@ -475,7 +467,7 @@ const LandingPage: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
               <div className="text-center mb-8">
                 <h3 className="heading-font text-2xl md:text-3xl font-bold text-[#3b2c6a] mb-4">
-                  Taux de satisfaction et d'insertion professionnelle
+                  Taux de satisfaction et d&apos;insertion professionnelle
                 </h3>
                 <p className="text-gray-600">
                   Quelques chiffres clés qui témoignent de notre engagement envers la réussite de nos étudiants.
@@ -501,7 +493,7 @@ const LandingPage: React.FC = () => {
                     Qualité de la formation
                   </h4>
                   <p className="text-sm text-gray-600">
-                    Pourcentage d'étudiants satisfaits de la qualité de notre enseignement.
+                    Pourcentage d&apos;étudiants satisfaits de la qualité de notre enseignement.
                   </p>
                 </div>
                 <div className="text-center p-4">
@@ -512,7 +504,7 @@ const LandingPage: React.FC = () => {
                     Taux d'emploi
                   </h4>
                   <p className="text-sm text-gray-600">
-                    Pourcentage de diplômés qui trouvent un emploi dans les 6 mois après l'obtention de leur diplôme.
+                    Pourcentage de diplômés qui trouvent un emploi dans les 6 mois après l&apos;obtention de leur diplôme.
                   </p>
                 </div>
                 <div className="text-center p-4">
@@ -523,7 +515,7 @@ const LandingPage: React.FC = () => {
                     Soutien aux étudiants
                   </h4>
                   <p className="text-sm text-gray-600">
-                    Pourcentage d'étudiants satisfaits du soutien administratif et académique.
+                    Pourcentage d&apos;étudiants satisfaits du soutien administratif et académique.
                   </p>
                 </div>
               </div>
@@ -542,10 +534,10 @@ const LandingPage: React.FC = () => {
                 </span>
               </div>
               <h2 className="heading-font text-3xl md:text-5xl font-bold mb-4">
-                L'EPFPS en Chiffres
+                L&apos;EPFPS en Chiffres
               </h2>
               <p className="text-gray-200">
-                Nos chiffres parlent d'eux-mêmes et témoignent de l'impact de notre établissement.
+                Nos chiffres parlent d&apos;eux-mêmes et témoignent de l&apos;impact de notre établissement.
               </p>
             </div>
 
@@ -573,7 +565,7 @@ const LandingPage: React.FC = () => {
                   95%
                 </span>
                 <p className="text-lg font-semibold mt-3">Taux de réussite</p>
-                <p className="text-sm text-gray-300">Aux examens d'État.</p>
+                <p className="text-sm text-gray-300">Aux examens d&apos;État.</p>
               </div>
               {/* Statistique 4 */}
               <div className="text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl hover:bg-white/20 transition-all duration-300">
@@ -581,7 +573,7 @@ const LandingPage: React.FC = () => {
                   15+
                 </span>
                 <p className="text-lg font-semibold mt-3">Professeurs Certifiés</p>
-                <p className="text-sm text-gray-300">Une équipe d'experts à votre service.</p>
+                <p className="text-sm text-gray-300">Une équipe d&apos;experts à votre service.</p>
               </div>
             </div>
           </div>
@@ -596,7 +588,7 @@ const LandingPage: React.FC = () => {
               </span>
             </div>
             <h2 className="heading-font text-3xl md:text-5xl font-bold mb-4">
-              Prêt à rejoindre l'EPFPS ?
+              Prêt à rejoindre l&apos;EPFPS ?
             </h2>
             <p className="text-gray-200 max-w-2xl mx-auto mb-12">
               Nous sommes impatients de vous accueillir. Contactez-nous pour en savoir plus sur nos formations et le processus d'admission.
@@ -661,7 +653,7 @@ const LandingPage: React.FC = () => {
                     Venez nous rencontrer
                   </h4>
                   <p className="text-gray-200 text-sm">
-                    BP 15 Meiganga, Région de l'Adamaoua, Cameroun
+                    BP 15 Meiganga, Région de l&apos;Adamaoua, Cameroun
                   </p>
                   <p className="text-gray-200 text-sm">
                     (Carrefour Abattoir, à 50m de la station MRS)
